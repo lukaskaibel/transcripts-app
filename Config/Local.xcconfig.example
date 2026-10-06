@@ -1,0 +1,8 @@
+// Copy this file to Local.xcconfig (same folder) and fill in your Apple Developer team to sign
+// builds with your own certificate. Local.xcconfig is ignored by git.
+
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
+CODE_SIGN_IDENTITY = Apple Development
+
+// Use your own identifier if you want your build to keep its data separate from an official one.
+// PRODUCT_BUNDLE_IDENTIFIER = com.example.Transcripts

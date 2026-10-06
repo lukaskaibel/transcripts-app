@@ -1,0 +1,263 @@
+import Foundation
+
+/// Host-side runtime tables for Chatterbox: T3 embedding / positional tables
+/// (`tables/tables.safetensors`) and a precomputed voice
+/// (`tables/voice-<name>.safetensors`), both exported by mobius
+/// `models/tts/chatterbox/coreml/export-tables.py`.
+struct ChatterboxTables: Sendable {
+
+    /// Row-major `[rows, cols]` fp32 matrix backing an embedding lookup.
+    struct Table: Sendable {
+        let rows: Int
+        let cols: Int
+        let values: [Float]
+
+        func row(_ index: Int) -> ArraySlice<Float> {
+            let base = index * cols
+            return values[base..<(base + cols)]
+        }
+    }
+
+    struct Voice: Sendable {
+        /// T3 conditioning embeds (condLength × hidden), exaggeration baked in.
+        let condEmb: Table
+        /// S3Gen reference: prompt speech tokens (25 Hz).
+        let promptTokens: [Int32]
+        /// S3Gen reference mel (frames × 80).
+        let promptFeat: Table
+        /// CAMPPlus x-vector (192).
+        let embedding: [Float]
+    }
+
+    /// Nano/Turbo tables: embedding lookups only — GPT2's positional table
+    /// (`wpe`) is applied inside the CoreML graphs, so it is not exported.
+    struct Nano: Sendable {
+        let textEmb: Table
+        let speechEmb: Table
+    }
+
+    let textEmb: Table
+    let speechEmb: Table
+    let textPos: Table
+    let speechPos: Table
+
+    static func load(tablesURL: URL) throws -> ChatterboxTables {
+        let tensors = try SafetensorsFile(url: tablesURL)
+        return ChatterboxTables(
+            textEmb: try tensors.table("text_emb"),
+            speechEmb: try tensors.table("speech_emb"),
+            textPos: try tensors.table("text_pos_emb"),
+            speechPos: try tensors.table("speech_pos_emb"))
+    }
+
+    static func loadNano(tablesURL: URL) throws -> Nano {
+        let tensors = try SafetensorsFile(url: tablesURL)
+        return Nano(
+            textEmb: try tensors.table("text_emb"),
+            speechEmb: try tensors.table("speech_emb"))
+    }
+
+    /// Dimension guards for the Multilingual bundle: every later table
+    /// lookup / prompt-feat copy is an unchecked pointer operation into
+    /// fixed-size buffers, so a structurally valid but wrong-shape file
+    /// must fail here, not overflow (or trap) at synthesis time.
+    static func validate(_ tables: ChatterboxTables, voice: Voice) throws {
+        let hidden = ChatterboxConstants.hiddenSize
+        guard tables.textEmb.cols == hidden, tables.speechEmb.cols == hidden,
+            tables.textPos.cols == hidden, tables.speechPos.cols == hidden,
+            tables.textEmb.rows >= ChatterboxConstants.textVocabSize,
+            tables.speechEmb.rows >= ChatterboxConstants.outputVocabSize,
+            // Reachable positions: text rows up to the prefill window,
+            // speech rows up to the decode context (step + 1 ≤ maxContext).
+            tables.textPos.rows >= ChatterboxConstants.prefillLength,
+            tables.speechPos.rows >= ChatterboxConstants.maxContext
+        else {
+            throw ChatterboxError.malformedAsset("tables dimensions mismatch")
+        }
+        try validateVoice(
+            voice, hidden: hidden, melBucket: ChatterboxConstants.melFrameBucket)
+    }
+
+    /// Dimension guards for the Nano bundle (no positional tables — GPT2's
+    /// `wpe` is applied in-graph).
+    static func validate(_ tables: Nano, voice: Voice) throws {
+        let hidden = ChatterboxNanoConstants.hiddenSize
+        guard tables.textEmb.cols == hidden, tables.speechEmb.cols == hidden,
+            tables.textEmb.rows >= ChatterboxNanoConstants.textVocabSize,
+            tables.speechEmb.rows >= ChatterboxNanoConstants.outputVocabSize
+        else {
+            throw ChatterboxError.malformedAsset("tables dimensions mismatch")
+        }
+        try validateVoice(
+            voice, hidden: hidden, melBucket: ChatterboxNanoConstants.melFrameBucket)
+    }
+
+    /// Voice conditioning guards shared by both variants. The prompt mel is
+    /// copied wholesale into a `[1, melBucket, 80]` buffer, so its row
+    /// count must match the prompt tokens (2 mel frames per 25 Hz token)
+    /// and fit the bucket.
+    private static func validateVoice(_ voice: Voice, hidden: Int, melBucket: Int) throws {
+        guard voice.condEmb.cols == hidden,
+            voice.promptFeat.cols == 80,
+            voice.promptFeat.rows == 2 * voice.promptTokens.count,
+            voice.promptFeat.rows <= melBucket,
+            voice.embedding.count == 192
+        else {
+            throw ChatterboxError.malformedAsset("voice dimensions mismatch")
+        }
+    }
+
+    static func loadVoice(voiceURL: URL) throws -> Voice {
+        let tensors = try SafetensorsFile(url: voiceURL)
+        let condEmb = try tensors.table("t3_cond_emb")
+        let promptFeat = try tensors.table("prompt_feat")
+        let promptTokens = try tensors.int32Values("prompt_token")
+        let embedding = try tensors.table("embedding")
+        return Voice(
+            condEmb: condEmb,
+            promptTokens: promptTokens,
+            promptFeat: promptFeat,
+            embedding: embedding.values)
+    }
+}
+
+/// Minimal safetensors reader (F32 / F16 / I32), sufficient for the
+/// Chatterbox table exports.
+private struct SafetensorsFile {
+    struct Entry {
+        let dtype: String
+        let shape: [Int]
+        let range: Range<Int>
+    }
+
+    let data: Data
+    let entries: [String: Entry]
+    let dataStart: Int
+
+    init(url: URL) throws {
+        let data = try Data(contentsOf: url)
+        guard data.count >= 8 else {
+            throw ChatterboxError.malformedAsset("\(url.lastPathComponent): truncated header")
+        }
+        let headerLen = data.withUnsafeBytes { raw in
+            raw.loadUnaligned(fromByteOffset: 0, as: UInt64.self).littleEndian
+        }
+        // Checked arithmetic throughout: a corrupt header must throw, never
+        // trap (Int overflow, reversed ranges) or read out of bounds.
+        guard let headerLenInt = Int(exactly: headerLen), headerLenInt <= data.count - 8,
+            let header = try JSONSerialization.jsonObject(
+                with: data.subdata(in: 8..<(8 + headerLenInt))) as? [String: Any]
+        else {
+            throw ChatterboxError.malformedAsset("\(url.lastPathComponent): bad JSON header")
+        }
+        let headerEnd = 8 + headerLenInt
+        let payloadSize = data.count - headerEnd
+
+        var entries = [String: Entry]()
+        for (name, value) in header where name != "__metadata__" {
+            guard let obj = value as? [String: Any],
+                let dtype = obj["dtype"] as? String,
+                let shape = obj["shape"] as? [Int],
+                shape.allSatisfy({ $0 >= 0 }),
+                let offsets = obj["data_offsets"] as? [Int], offsets.count == 2,
+                offsets[0] >= 0, offsets[0] <= offsets[1], offsets[1] <= payloadSize
+            else {
+                throw ChatterboxError.malformedAsset("\(url.lastPathComponent): entry \(name)")
+            }
+            entries[name] = Entry(dtype: dtype, shape: shape, range: offsets[0]..<offsets[1])
+        }
+        self.data = data
+        self.entries = entries
+        self.dataStart = headerEnd
+    }
+
+    private func entry(_ name: String) throws -> Entry {
+        guard let entry = entries[name] else {
+            throw ChatterboxError.malformedAsset("missing tensor '\(name)'")
+        }
+        return entry
+    }
+
+    /// Read a tensor as a 2-D fp32 table (leading singleton dims collapsed).
+    func table(_ name: String) throws -> ChatterboxTables.Table {
+        let entry = try entry(name)
+        let dims = entry.shape.drop { $0 == 1 }
+        let cols = dims.last ?? 1
+        // Overflow-checked products: a header like shape [Int.max, 2] passes
+        // the non-negative check but must throw here, not trap.
+        var rows = 1
+        for dim in dims.dropLast() {
+            let (product, overflow) = rows.multipliedReportingOverflow(by: dim)
+            guard !overflow else {
+                throw ChatterboxError.malformedAsset("tensor '\(name)': shape overflow")
+            }
+            rows = product
+        }
+        let (expected, overflow) = rows.multipliedReportingOverflow(by: cols)
+        guard !overflow else {
+            throw ChatterboxError.malformedAsset("tensor '\(name)': shape overflow")
+        }
+        let values = try floatValues(name)
+        guard values.count == expected else {
+            throw ChatterboxError.malformedAsset("tensor '\(name)' shape/data mismatch")
+        }
+        return ChatterboxTables.Table(rows: rows, cols: cols, values: values)
+    }
+
+    func floatValues(_ name: String) throws -> [Float] {
+        let entry = try entry(name)
+        let bytes = data.subdata(
+            in: (dataStart + entry.range.lowerBound)..<(dataStart + entry.range.upperBound))
+        let elementSize = entry.dtype == "F32" ? 4 : 2
+        guard bytes.count % elementSize == 0 else {
+            throw ChatterboxError.malformedAsset(
+                "tensor '\(name)': \(bytes.count) bytes not \(elementSize)-aligned")
+        }
+        switch entry.dtype {
+        case "F32":
+            let count = bytes.count / 4
+            var out = [Float](repeating: 0, count: count)
+            bytes.withUnsafeBytes { raw in
+                out.withUnsafeMutableBufferPointer { dst in
+                    dst.baseAddress!.update(
+                        from: raw.bindMemory(to: Float.self).baseAddress!, count: count)
+                }
+            }
+            return out
+        case "F16":
+            let count = bytes.count / 2
+            var out = [Float](repeating: 0, count: count)
+            bytes.withUnsafeBytes { raw in
+                let src = raw.bindMemory(to: UInt16.self).baseAddress!
+                out.withUnsafeMutableBufferPointer { dst in
+                    Float16Conversion.toFloat32(src: src, dst: dst.baseAddress!, count: count)
+                }
+            }
+            return out
+        default:
+            throw ChatterboxError.malformedAsset("tensor '\(name)': unsupported dtype \(entry.dtype)")
+        }
+    }
+
+    func int32Values(_ name: String) throws -> [Int32] {
+        let entry = try entry(name)
+        guard entry.dtype == "I32" else {
+            throw ChatterboxError.malformedAsset("tensor '\(name)': expected I32, got \(entry.dtype)")
+        }
+        let bytes = data.subdata(
+            in: (dataStart + entry.range.lowerBound)..<(dataStart + entry.range.upperBound))
+        guard bytes.count % 4 == 0 else {
+            throw ChatterboxError.malformedAsset(
+                "tensor '\(name)': \(bytes.count) bytes not 4-aligned")
+        }
+        let count = bytes.count / 4
+        var out = [Int32](repeating: 0, count: count)
+        bytes.withUnsafeBytes { raw in
+            out.withUnsafeMutableBufferPointer { dst in
+                dst.baseAddress!.update(
+                    from: raw.bindMemory(to: Int32.self).baseAddress!, count: count)
+            }
+        }
+        return out
+    }
+}

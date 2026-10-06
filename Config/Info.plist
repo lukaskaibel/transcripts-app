@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Transcripts nimmt deine Stimme in Meetings auf und transkribiert sie auf diesem Mac.</string>
+	<key>NSAudioCaptureUsageDescription</key>
+	<string>Transcripts nimmt den Ton deiner Calls auf, um die anderen Teilnehmer auf diesem Mac zu transkribieren.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Transcripts benennt Meetings nach deinen Terminen, kennt die Teilnehmer und erinnert dich ans Aufnehmen.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Transcripts benennt Meetings nach deinen Terminen, kennt die Teilnehmer und erinnert dich ans Aufnehmen.</string>
+</dict>
+</plist>

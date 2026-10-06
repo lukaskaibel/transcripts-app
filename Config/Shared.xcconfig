@@ -1,0 +1,15 @@
+// Settings shared by every build. Personal settings (your signing team) go in Local.xcconfig,
+// which is not checked in; copy Local.xcconfig.example to get started.
+
+MARKETING_VERSION = 1.0.0
+CURRENT_PROJECT_VERSION = 1
+
+PRODUCT_BUNDLE_IDENTIFIER = com.lukaskbl.Transcripts
+
+// Without a team the app is signed to run on this Mac only. macOS remembers granted permissions
+// (microphone, system audio, calendar) per signature, so a stable team signature avoids being asked
+// again after every build.
+DEVELOPMENT_TEAM =
+CODE_SIGN_IDENTITY = -
+
+#include? "Local.xcconfig"

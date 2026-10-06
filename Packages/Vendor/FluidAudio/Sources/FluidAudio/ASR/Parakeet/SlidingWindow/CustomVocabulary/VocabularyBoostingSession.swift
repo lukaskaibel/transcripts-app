@@ -1,0 +1,173 @@
+import Foundation
+
+/// Vocabulary-boosting pipeline shared by the ASR engines: CTC keyword
+/// spotting over the audio plus constrained rescoring of the transcript.
+///
+/// The CTC pass runs a separate CTC model (e.g. parakeet-ctc-110m) on the raw
+/// audio, so the session is independent of which primary model produced the
+/// transcript — any engine that can supply its transcript, token timings, and
+/// the audio behind them can use it (SlidingWindow TDT, Unified batch,
+/// Unified streaming).
+public struct VocabularyBoostingSession: Sendable {
+    private let logger = AppLogger(category: "VocabBoosting")
+
+    public let vocabulary: CustomVocabularyContext
+    let spotter: CtcKeywordSpotter
+    let rescorer: VocabularyRescorer
+    let vocabSizeConfig: ContextBiasingConstants.VocabSizeConfig
+
+    /// Recommended rescorer config for engines whose output text is
+    /// inverse-text-normalized (parakeet-unified writes "11.4 billion" and
+    /// "35.3%"). ITN packs a multi-second spoken number into one or two
+    /// written words, so short word spans cover long acoustic stretches and
+    /// become eligible for the spotter-anchored rescue pass at garbage
+    /// spotter scores ('yen, down by 35.3%' → term at sim 0.20). The #702
+    /// similarity floors close exactly that hole; spelled-out engines
+    /// (SlidingWindow TDT) keep `.default`, where the rescue recovers brand
+    /// names the model mangles past the similarity gate.
+    public static let itnDefaultConfig = VocabularyRescorer.Config(
+        spotterRescueMinSimilarity: 0.30,
+        spotterRescueMultiWordMinSimilarity: 0.50
+    )
+
+    /// Create a session from a tokenized vocabulary and pre-loaded CTC models.
+    ///
+    /// - Parameters:
+    ///   - vocabulary: Custom vocabulary context with terms to detect. Terms
+    ///     without `ctcTokenIds` are tokenized here with the CTC tokenizer
+    ///     shipped alongside `ctcModels` (#851); pre-tokenized terms (e.g. via
+    ///     `CustomVocabularyContext.loadWithCtcTokens(from:ctcVariant:)`) are
+    ///     used as-is.
+    ///   - ctcModels: Pre-loaded CTC models for keyword spotting
+    ///   - config: Optional rescorer configuration (default: `.default`)
+    /// - Throws: Error if the CTC tokenizer cannot be loaded for untokenized
+    ///   terms, or if rescorer initialization fails
+    public init(
+        vocabulary: CustomVocabularyContext,
+        ctcModels: CtcModels,
+        config: VocabularyRescorer.Config? = nil
+    ) async throws {
+        let ctcModelDir = CtcModels.defaultCacheDirectory(for: ctcModels.variant)
+
+        // Terms built in code arrive without CTC token IDs, and every consumer
+        // (spotter, rescorer) skips such terms without a word — the documented
+        // `CustomVocabularyContext(terms: [CustomVocabularyTerm(text:)])` path
+        // was a silent no-op on every engine (#851). Tokenize them here.
+        var vocabulary = vocabulary
+        let needsTokens = vocabulary.terms.contains { ($0.ctcTokenIds ?? []).isEmpty }
+        if needsTokens {
+            let tokenizer = try await CtcTokenizer.load(from: ctcModelDir)
+            let result = vocabulary.tokenizingMissingCtcTokens(using: tokenizer.encode)
+            vocabulary = result.context
+            logger.info("Tokenized \(result.tokenized) vocabulary term(s) with the CTC tokenizer")
+            for text in result.dropped {
+                logger.warning("Vocabulary term '\(text)' produced no CTC tokens; dropped")
+            }
+        }
+        if vocabulary.terms.isEmpty {
+            logger.warning("Vocabulary boosting configured with no usable terms; rescoring will be a no-op")
+        }
+        self.vocabulary = vocabulary
+
+        let blankId = ctcModels.vocabulary.count
+        let spotter = CtcKeywordSpotter(models: ctcModels, blankId: blankId)
+        self.spotter = spotter
+
+        self.vocabSizeConfig = ContextBiasingConstants.rescorerConfig(
+            forVocabSize: vocabulary.terms.count)
+
+        self.rescorer = try await VocabularyRescorer.create(
+            spotter: spotter,
+            vocabulary: vocabulary,
+            config: config ?? .default,
+            ctcModelDirectory: ctcModelDir
+        )
+    }
+
+    /// Rescore a transcript against CTC acoustic evidence from its audio.
+    ///
+    /// `tokenTimings` must be on the same clock as `audioSamples`: time zero
+    /// is the first sample. Callers rescoring a window or segment out of a
+    /// longer stream pass segment-local timings with the segment's audio.
+    ///
+    /// - Returns: The rescore output when a replacement was applied **or** the
+    ///   spotter detected at least one vocabulary term (`detectedTerms`); the
+    ///   text is the caller's own when nothing was replaced. Nil when there is
+    ///   nothing to report, and on CTC inference failure, which is logged and
+    ///   absorbed — boosting must never break transcription.
+    public func rescore(
+        text: String,
+        tokenTimings: [TokenTiming],
+        audioSamples: [Float]
+    ) async -> VocabularyRescorer.RescoreOutput? {
+        guard !tokenTimings.isEmpty, !audioSamples.isEmpty else { return nil }
+
+        do {
+            let spotResult = try await spotter.spotKeywordsWithLogProbs(
+                audioSamples: audioSamples,
+                customVocabulary: vocabulary,
+                minScore: nil
+            )
+
+            let logProbs = spotResult.logProbs
+            guard !logProbs.isEmpty else {
+                logger.debug("Vocabulary rescoring skipped: no log probs from CTC")
+                return nil
+            }
+
+            // Vocabulary-size-aware thresholds, respecting the caller-specified
+            // threshold when stricter.
+            let minSimilarity = max(vocabSizeConfig.minSimilarity, vocabulary.minSimilarity)
+
+            let rescoreOutput = rescorer.ctcTokenRescore(
+                transcript: text,
+                tokenTimings: tokenTimings,
+                logProbs: logProbs,
+                frameDuration: spotResult.frameDuration,
+                cbw: vocabSizeConfig.cbw,
+                marginSeconds: 0.5,
+                minSimilarity: minSimilarity
+            )
+
+            let detectedTerms = Self.detectedTermTexts(spotResult.detections)
+            guard rescoreOutput.wasModified || !detectedTerms.isEmpty else { return nil }
+
+            if rescoreOutput.wasModified {
+                logger.info(
+                    "Vocabulary rescoring applied \(rescoreOutput.replacements.count) replacement(s)"
+                )
+                for replacement in rescoreOutput.replacements where replacement.shouldReplace {
+                    logger.debug(
+                        "  '\(replacement.originalWord)' → '\(replacement.replacementWord ?? "")'"
+                    )
+                }
+            }
+            // The rescorer rebuilds its text from word timings (single spaces,
+            // timing-backed words only). Only hand that back when it actually
+            // changed something; otherwise the caller keeps its own text.
+            return VocabularyRescorer.RescoreOutput(
+                text: rescoreOutput.wasModified ? rescoreOutput.text : text,
+                replacements: rescoreOutput.replacements,
+                wasModified: rescoreOutput.wasModified,
+                detectedTerms: detectedTerms
+            )
+        } catch {
+            logger.warning("Vocabulary rescoring failed: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    /// Canonical texts of the spotter's detections, in time order, without
+    /// repeats. Pure, for testability.
+    static func detectedTermTexts(_ detections: [CtcKeywordSpotter.KeywordDetection]) -> [String] {
+        var seen = Set<String>()
+        var texts: [String] = []
+        for detection in detections.sorted(by: { $0.startTime < $1.startTime }) {
+            let text = detection.term.text
+            if seen.insert(text.lowercased()).inserted {
+                texts.append(text)
+            }
+        }
+        return texts
+    }
+}
