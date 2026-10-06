@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="Design/icon.png" width="128" height="128" alt="Transcripts app icon">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="Design/icon-dark.png">
+    <img src="Design/icon.png" width="128" height="128" alt="Transcripts app icon: a speech bubble with two lines of transcript in front of a waveform">
+  </picture>
 </p>
 
 <h1 align="center">Transcripts</h1>
@@ -128,7 +131,8 @@ cd Packages/TranscriptsKit && swift build && .build/debug/transcripts-cli models
 faster than real time), `confirm` and `summarize`; see the top of `Sources/transcripts-cli/main.swift`.
 `Tools/make-test-meeting.py` builds German test meetings with known speakers and a `truth.json`, and
 `Tools/screenshots/run.sh` drives the app in demo mode and has it render its windows to PNGs (also with a locked
-screen).
+screen). The app icon is an Icon Composer document drawn by `Tools/make-icon.swift`; `Tools/render-icons.sh` renders
+it for this page.
 
 Results on a MacBook Pro with M4 Pro and 24 GB, with synthetic test meetings (one natural German voice, shifted in
 pitch per person, which makes the voices harder to tell apart than real people):
@@ -163,7 +167,7 @@ Packages/TranscriptsKit/      Everything else, as a Swift package
   Tests/TranscriptsKitTests/
 Packages/Vendor/FluidAudio/   FluidAudio, vendored (see below)
 Config/                       Build settings, Info.plist, entitlements
-Tools/                        Icon, test meetings, screenshot tour
+Tools/                        App icon, test meetings, screenshot tour
 Design/                       Icon and screenshots for this page
 ```
 

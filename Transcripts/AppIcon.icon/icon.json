@@ -1,0 +1,92 @@
+{
+  "fill-specializations" : [
+    {
+      "value" : {
+        "linear-gradient" : [
+          "srgb:0.56863,0.59608,0.96471,1.00000",
+          "srgb:0.29804,0.32941,0.77647,1.00000"
+        ],
+        "orientation" : {
+          "start" : {
+            "x" : 0.5,
+            "y" : 0
+          },
+          "stop" : {
+            "x" : 0.5,
+            "y" : 1
+          }
+        }
+      }
+    },
+    {
+      "appearance" : "dark",
+      "value" : {
+        "linear-gradient" : [
+          "srgb:0.16471,0.17647,0.20784,1.00000",
+          "srgb:0.05882,0.06275,0.07451,1.00000"
+        ],
+        "orientation" : {
+          "start" : {
+            "x" : 0.5,
+            "y" : 0
+          },
+          "stop" : {
+            "x" : 0.5,
+            "y" : 1
+          }
+        }
+      }
+    }
+  ],
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "glass" : true,
+          "image-name" : "bubble.png",
+          "name" : "bubble"
+        }
+      ],
+      "name" : "Bubble",
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.59999999999999998
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.40000000000000002
+      }
+    },
+    {
+      "layers" : [
+        {
+          "glass" : false,
+          "image-name-specializations" : [
+            {
+              "value" : "waveform-light.png"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "waveform-dark.png"
+            }
+          ],
+          "name" : "waveform"
+        }
+      ],
+      "name" : "Voice",
+      "shadow" : {
+        "kind" : "none",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : [
+      "macOS"
+    ]
+  }
+}

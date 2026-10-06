@@ -12,14 +12,16 @@ struct OnboardingView: View {
             Color.clear.frame(height: 36)
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    Image(systemName: "waveform")
-                        .font(.system(size: 26, weight: .medium))
-                        .foregroundStyle(Theme.accent)
-                        .frame(width: 52, height: 52)
-                        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.selectionFill))
+                    // As the system draws it, with the glass; `NSApp.applicationIconImage` is only a placeholder
+                    // for icons made in Icon Composer. Its own margin is a tenth of the size on each side.
+                    Image(nsImage: NSWorkspace.shared.icon(forFile: Bundle.main.bundlePath))
+                        .resizable()
+                        .frame(width: 72, height: 72)
+                        .padding(-7)
+                        .accessibilityHidden(true)
                     Text("Willkommen bei Transcripts")
                         .font(.system(size: 24, weight: .semibold))
-                        .padding(.top, 18)
+                        .padding(.top, 16)
                     Text("Meetings werden auf diesem Mac transkribiert. Die Stimmen der anderen erkennt die App mit der Zeit wieder. Ein paar Dinge braucht sie dafür:")
                         .foregroundStyle(Theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)

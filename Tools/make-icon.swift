@@ -1,81 +1,140 @@
+// Draws the app icon as an Icon Composer document: a speech bubble with two lines of transcript, each with its
+// speaker's colour, in front of the waveform of a voice. Violet in the light appearance, dark in the dark one;
+// the system adds the glass, and makes the tinted and clear versions from the same layers.
+//   swift Tools/make-icon.swift
+// Then Tools/render-icons.sh renders it into the PNGs the README uses.
 import AppKit
+import SwiftUI
 
-// Draws the app icon: a dark rounded square with a waveform in the app's accent colour.
-//   swift Tools/make-icon.swift Transcripts/Assets.xcassets/AppIcon.appiconset
-let output = URL(fileURLWithPath: CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : ".")
+let canvas: CGFloat = 1024
 
-func render(size: Int) -> Data {
-    // A bitmap of exactly `size` pixels; drawing into an NSImage would follow the screen's scale.
-    let context = CGContext(
-        data: nil, width: size, height: size, bitsPerComponent: 8, bytesPerRow: 0,
-        space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-    )!
-    let scale = CGFloat(size) / 1024
-    context.scaleBy(x: scale, y: scale)
+func color(_ hex: UInt32, _ alpha: CGFloat = 1) -> CGColor {
+    CGColor(srgbRed: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255, blue: CGFloat(hex & 0xFF) / 255, alpha: alpha)
+}
 
-    // Apple's icon grid: an 824 pt square with a 185 pt corner radius, centred, with a soft shadow.
-    let body = CGRect(x: 100, y: 100, width: 824, height: 824)
-    let shape = CGPath(roundedRect: body, cornerWidth: 185, cornerHeight: 185, transform: nil)
-    context.saveGState()
-    context.setShadow(offset: CGSize(width: 0, height: -10), blur: 28, color: NSColor.black.withAlphaComponent(0.3).cgColor)
-    context.addPath(shape)
-    context.setFillColor(NSColor(srgbRed: 0.09, green: 0.094, blue: 0.106, alpha: 1).cgColor)
+/// The colour as Icon Composer writes it.
+func iconColor(_ hex: UInt32, _ alpha: CGFloat = 1) -> String {
+    let parts = [(hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF].map { String(format: "%.5f", CGFloat($0) / 255) }
+    return "srgb:" + parts.joined(separator: ",") + String(format: ",%.5f", alpha)
+}
+
+func squircle(_ rect: CGRect, _ radius: CGFloat) -> CGPath {
+    Path(roundedRect: rect, cornerRadius: radius, style: .continuous).cgPath
+}
+
+func fill(_ context: CGContext, _ rect: CGRect, radius: CGFloat, _ fill: CGColor) {
+    context.addPath(squircle(rect, radius))
+    context.setFillColor(fill)
     context.fillPath()
-    context.restoreGState()
+}
 
-    // A gentle light from the top.
-    context.saveGState()
-    context.addPath(shape)
-    context.clip()
-    let gradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: [
-        NSColor(srgbRed: 0.17, green: 0.18, blue: 0.21, alpha: 1).cgColor,
-        NSColor(srgbRed: 0.075, green: 0.078, blue: 0.09, alpha: 1).cgColor,
-    ] as CFArray, locations: [0, 1])!
-    context.drawLinearGradient(gradient, start: CGPoint(x: 512, y: 924), end: CGPoint(x: 512, y: 100), options: [])
-    context.setStrokeColor(NSColor.white.withAlphaComponent(0.08).cgColor)
-    context.setLineWidth(6)
-    context.addPath(CGPath(roundedRect: body.insetBy(dx: 3, dy: 3), cornerWidth: 182, cornerHeight: 182, transform: nil))
-    context.strokePath()
-    context.restoreGState()
-
-    // The waveform: seven rounded bars, the middle ones tallest.
-    let heights: [CGFloat] = [150, 270, 420, 520, 380, 250, 140]
-    let barWidth: CGFloat = 56
-    let gap: CGFloat = 34
-    let total = CGFloat(heights.count) * barWidth + CGFloat(heights.count - 1) * gap
-    var x = 512 - total / 2
-    let accent = NSColor(srgbRed: 0.561, green: 0.588, blue: 0.949, alpha: 1)
-    let accentLight = NSColor(srgbRed: 0.72, green: 0.74, blue: 1, alpha: 1)
-    for (index, height) in heights.enumerated() {
-        let rect = CGRect(x: x, y: 512 - height / 2, width: barWidth, height: height)
-        let bar = CGPath(roundedRect: rect, cornerWidth: barWidth / 2, cornerHeight: barWidth / 2, transform: nil)
-        context.saveGState()
-        context.addPath(bar)
-        context.clip()
-        let barGradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: [accentLight.cgColor, accent.cgColor] as CFArray, locations: [0, 1])!
-        context.drawLinearGradient(barGradient, start: CGPoint(x: x, y: rect.maxY), end: CGPoint(x: x, y: rect.minY), options: [])
-        context.restoreGState()
-        if index == 3 {
-            // A small red dot above the tallest bar: recording.
-            context.setFillColor(NSColor(srgbRed: 0.92, green: 0.42, blue: 0.42, alpha: 1).cgColor)
-            context.fillEllipse(in: CGRect(x: x + barWidth / 2 - 30, y: rect.maxY + 34, width: 60, height: 60))
-        }
-        x += barWidth + gap
-    }
-
-    let rep = NSBitmapImageRep(cgImage: context.makeImage()!)
+/// A transparent 1024 px layer. Origin is top-left.
+func layer(_ draw: (CGContext) -> Void) -> Data {
+    let rep = NSBitmapImageRep(
+        bitmapDataPlanes: nil, pixelsWide: Int(canvas), pixelsHigh: Int(canvas), bitsPerSample: 8, samplesPerPixel: 4,
+        hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+    )!
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+    let context = NSGraphicsContext.current!.cgContext
+    context.translateBy(x: 0, y: canvas)
+    context.scaleBy(x: 1, y: -1)
+    draw(context)
+    NSGraphicsContext.restoreGraphicsState()
     return rep.representation(using: .png, properties: [:])!
 }
 
-let sizes: [(points: Int, scale: Int)] = [(16, 1), (16, 2), (32, 1), (32, 2), (128, 1), (128, 2), (256, 1), (256, 2), (512, 1), (512, 2)]
-var images: [[String: String]] = []
-for (points, scale) in sizes {
-    let pixels = points * scale
-    let name = "icon_\(points)x\(points)\(scale == 2 ? "@2x" : "").png"
-    try! render(size: pixels).write(to: output.appendingPathComponent(name))
-    images.append(["filename": name, "idiom": "mac", "scale": "\(scale)x", "size": "\(points)x\(points)"])
+/// The voice behind the bubble: a spoken phrase, loudest in the middle, fading out towards the edges.
+func waveform(_ tint: CGColor) -> Data {
+    let heights: [CGFloat] = [0.16, 0.30, 0.22, 0.48, 0.70, 0.42, 0.86, 1.00, 0.64, 0.80, 0.52, 0.34, 0.58, 0.26, 0.14]
+    let width: CGFloat = 38
+    let gap: CGFloat = 26
+    let tallest: CGFloat = 780
+    return layer { context in
+        let middle = CGFloat(heights.count - 1) / 2
+        var x = (canvas - CGFloat(heights.count) * width - CGFloat(heights.count - 1) * gap) / 2
+        for (index, height) in heights.enumerated() {
+            let bar = max(width, height * tallest)
+            let distance = abs(CGFloat(index) - middle) / middle
+            fill(context, CGRect(x: x, y: 512 - bar / 2, width: width, height: bar), radius: width / 2,
+                 tint.copy(alpha: tint.alpha * (1 - 0.5 * distance * distance))!)
+            x += width + gap
+        }
+    }
 }
-let contents: [String: Any] = ["images": images, "info": ["author": "xcode", "version": 1]]
-let json = try! JSONSerialization.data(withJSONObject: contents, options: [.prettyPrinted, .sortedKeys])
-try! json.write(to: output.appendingPathComponent("Contents.json"))
-print("Wrote \(sizes.count) icon sizes to \(output.path)")
+
+/// The transcript: a bubble turned a little, its tail growing out of the lower left corner, with two lines,
+/// each after the dot of the person who said it.
+func bubble() -> Data {
+    layer { context in
+        context.translateBy(x: 524, y: 470)
+        context.rotate(by: -8 * .pi / 180)
+        let rect = CGRect(x: -300, y: -200, width: 600, height: 400)
+        let tail = CGMutablePath()
+        tail.move(to: CGPoint(x: rect.minX, y: rect.maxY - 150))
+        tail.addLine(to: CGPoint(x: rect.minX, y: rect.maxY - 30))
+        tail.addCurve(to: CGPoint(x: rect.minX - 12, y: rect.maxY + 80),
+                      control1: CGPoint(x: rect.minX, y: rect.maxY + 18), control2: CGPoint(x: rect.minX - 3, y: rect.maxY + 58))
+        tail.addCurve(to: CGPoint(x: rect.minX + 146, y: rect.maxY),
+                      control1: CGPoint(x: rect.minX + 38, y: rect.maxY + 64), control2: CGPoint(x: rect.minX + 92, y: rect.maxY + 10))
+        tail.addLine(to: CGPoint(x: rect.minX + 146, y: rect.maxY - 150))
+        tail.closeSubpath()
+        let gradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: [color(0xFFFFFF), color(0xEEF0FF)] as CFArray, locations: nil)!
+        for shape in [squircle(rect, 92), tail] {
+            context.saveGState()
+            context.addPath(shape)
+            context.clip()
+            context.drawLinearGradient(gradient, start: CGPoint(x: 0, y: rect.minY), end: CGPoint(x: 0, y: rect.maxY + 80), options: [])
+            context.restoreGState()
+        }
+
+        let lines: [(speaker: UInt32, width: CGFloat, ink: CGFloat)] = [(0x5AB0D8, 330, 0.88), (0xE5A84B, 220, 0.40)]
+        let dot: CGFloat = 42
+        for (index, line) in lines.enumerated() {
+            let y = rect.minY + 128 + CGFloat(index) * 144
+            context.setFillColor(color(line.speaker))
+            context.fillEllipse(in: CGRect(x: rect.minX + 70, y: y - dot, width: dot * 2, height: dot * 2))
+            fill(context, CGRect(x: rect.minX + 70 + dot * 2 + 34, y: y - 20, width: line.width, height: 40), radius: 20, color(0x3A41B0, line.ink))
+        }
+    }
+}
+
+func gradientFill(_ top: UInt32, _ bottom: UInt32) -> [String: Any] {
+    [
+        "linear-gradient": [iconColor(top), iconColor(bottom)],
+        "orientation": ["start": ["x": 0.5, "y": 0], "stop": ["x": 0.5, "y": 1]],
+    ]
+}
+
+let icon = URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("Transcripts/AppIcon.icon")
+let json: [String: Any] = [
+    "fill-specializations": [
+        ["value": gradientFill(0x9198F6, 0x4C54C6)],
+        ["appearance": "dark", "value": gradientFill(0x2A2D35, 0x0F1013)],
+    ],
+    "groups": [
+        [
+            "name": "Bubble",
+            "layers": [["name": "bubble", "image-name": "bubble.png", "glass": true]],
+            "shadow": ["kind": "layer-color", "opacity": 0.6],
+            "translucency": ["enabled": false, "value": 0.4],
+        ],
+        [
+            "name": "Voice",
+            "layers": [[
+                "name": "waveform",
+                "image-name-specializations": [["value": "waveform-light.png"], ["appearance": "dark", "value": "waveform-dark.png"]],
+                "glass": false,
+            ]],
+            "shadow": ["kind": "none", "opacity": 0.5],
+            "translucency": ["enabled": false, "value": 0.5],
+        ],
+    ],
+    "supported-platforms": ["squares": ["macOS"]],
+]
+try FileManager.default.createDirectory(at: icon.appendingPathComponent("Assets"), withIntermediateDirectories: true)
+try JSONSerialization.data(withJSONObject: json, options: [.prettyPrinted, .sortedKeys]).write(to: icon.appendingPathComponent("icon.json"))
+try bubble().write(to: icon.appendingPathComponent("Assets/bubble.png"))
+try waveform(color(0xFFFFFF, 0.30)).write(to: icon.appendingPathComponent("Assets/waveform-light.png"))
+try waveform(color(0x8F96F2, 0.30)).write(to: icon.appendingPathComponent("Assets/waveform-dark.png"))
+print("Wrote \(icon.lastPathComponent)")
