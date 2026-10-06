@@ -19,6 +19,8 @@ let package = Package(
                 .product(name: "FluidAudio", package: "FluidAudio"),
                 .product(name: "GRDB", package: "GRDB.swift"),
             ],
+            // The app icons offered in Settings, rendered by Tools/render-icons.sh.
+            resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .executableTarget(

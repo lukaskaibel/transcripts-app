@@ -37,6 +37,41 @@ public struct SettingsView: View {
 
 // MARK: - General
 
+/// One of the app icons to choose from, with a ring when it's the current one.
+struct AppIconButton: View {
+    var choice: AppIconChoice
+    var selected: Bool
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Group {
+                    if let image = choice.image {
+                        Image(nsImage: image).resizable().interpolation(.high)
+                    } else {
+                        Color.gray.opacity(0.2)
+                    }
+                }
+                .frame(width: 52, height: 52)
+                .padding(3)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(selected ? Color.accentColor : .clear, lineWidth: 2)
+                )
+                Text(choice.title)
+                    .font(.caption)
+                    .foregroundStyle(selected ? .primary : .secondary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(choice.title)
+        .accessibilityLabel("App-Icon \(choice.title)")
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
 struct GeneralSettings: View {
     @Environment(AppModel.self) private var model
     @State private var name = ""
@@ -54,6 +89,20 @@ struct GeneralSettings: View {
                     ForEach(Appearance.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
+                LabeledContent("App-Icon") {
+                    VStack(alignment: .trailing, spacing: 8) {
+                        HStack(spacing: 10) {
+                            ForEach(AppIconChoice.allCases) { choice in
+                                AppIconButton(choice: choice, selected: settings.appIcon == choice) { model.setAppIcon(choice) }
+                            }
+                        }
+                        Text("„Automatisch“ passt sich an wie die Icons von macOS: hell, dunkel, getönt oder klar. Die anderen zeigt das Dock, solange die App läuft.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.trailing)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
                 Toggle("Beim Anmelden starten", isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
                 Toggle("Ohne offenes Fenster nur in der Menüleiste", isOn: $settings.hideDockIcon)
             }

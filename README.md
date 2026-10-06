@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="Design/icon-dark.png">
-    <img src="Design/icon.png" width="128" height="128" alt="Transcripts app icon: a speech bubble with two lines of transcript in front of a waveform">
+    <img src="Design/icon.png" width="128" height="128" alt="Transcripts app icon: an indigo speech bubble with a waveform in it">
   </picture>
 </p>
 
@@ -48,7 +48,8 @@
   playback from any line, markers and notes set during the recording, Markdown export, and import of audio or
   video files (voice memos, Zoom recordings, a meeting recorded in a room).
 - **Stays out of the way.** A menu bar item and a small floating recorder; the live window when you want to read
-  along.
+  along. Four app icons to choose from in Settings: automatic (light or dark with the system, tinted or clear like
+  macOS's own icons), light, dark and indigo.
 
 Audio, transcripts and voices never leave the Mac. Only the transcript text goes to the summary service you pick,
 and with Ollama not even that.
@@ -131,8 +132,8 @@ cd Packages/TranscriptsKit && swift build && .build/debug/transcripts-cli models
 faster than real time), `confirm` and `summarize`; see the top of `Sources/transcripts-cli/main.swift`.
 `Tools/make-test-meeting.py` builds German test meetings with known speakers and a `truth.json`, and
 `Tools/screenshots/run.sh` drives the app in demo mode and has it render its windows to PNGs (also with a locked
-screen). The app icon is an Icon Composer document drawn by `Tools/make-icon.swift`; `Tools/render-icons.sh` renders
-it for this page.
+screen). The app icons are Icon Composer documents drawn by `Tools/make-icon.swift`; `Tools/render-icons.sh` renders
+them for Settings and this page.
 
 Results on a MacBook Pro with M4 Pro and 24 GB, with synthetic test meetings (one natural German voice, shifted in
 pitch per person, which makes the voices harder to tell apart than real people):

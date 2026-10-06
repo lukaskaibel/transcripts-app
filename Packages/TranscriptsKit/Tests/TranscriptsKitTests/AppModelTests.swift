@@ -165,6 +165,18 @@ import Testing
         #expect(session.voices["S3"]?.name == "Paula Schmidt")
     }
 
+    @Test func everyAppIconHasItsPictureAndTheChoiceIsKept() throws {
+        for choice in AppIconChoice.allCases {
+            let image = try #require(choice.image, "no picture for \(choice)")
+            #expect(image.size.width > 0)
+        }
+        let defaults = UserDefaults(suiteName: "TranscriptsTests-\(UUID().uuidString)")!
+        let settings = AppSettings(defaults: defaults)
+        #expect(settings.appIcon == .automatic)
+        settings.appIcon = .indigo
+        #expect(AppSettings(defaults: defaults).appIcon == .indigo)
+    }
+
     @Test func peopleCanBeRenamedButMeIsNeverDeleted() throws {
         let (model, database) = try makeModel()
         let me = try database.mePerson(defaultName: "Lukas Kaibel")

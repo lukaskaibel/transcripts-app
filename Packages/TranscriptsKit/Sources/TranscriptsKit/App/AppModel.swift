@@ -152,6 +152,7 @@ public final class AppModel {
 
     /// Everything that may ask the system for something; called once the first window is up.
     public func launch() {
+        settings.appIcon.apply()
         floatingRecorder = FloatingRecorderController(model: self)
         DebugRemote.startIfRequested(model: self)
         refreshPermissions()
@@ -280,9 +281,20 @@ public final class AppModel {
 
     /// Opens the main window and brings the app to the front.
     public func openMainWindow() {
-        NSApp.setActivationPolicy(.regular)
+        showInDock()
         NSApp.activate()
         request(.main)
+    }
+
+    /// Puts the app in the Dock, wearing the chosen icon (the Dock forgets it while the app is hidden from it).
+    public func showInDock() {
+        NSApp.setActivationPolicy(.regular)
+        settings.appIcon.apply()
+    }
+
+    public func setAppIcon(_ choice: AppIconChoice) {
+        settings.appIcon = choice
+        choice.apply()
     }
 
     // MARK: Speech models

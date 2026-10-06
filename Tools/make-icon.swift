@@ -1,8 +1,10 @@
-// Draws the app icon as an Icon Composer document: a speech bubble with two lines of transcript, each with its
-// speaker's colour, in front of the waveform of a voice. Violet in the light appearance, dark in the dark one;
-// the system adds the glass, and makes the tinted and clear versions from the same layers.
+// Draws the app icons as Icon Composer documents, in the manner of Apple's own: one upright glyph, a speech
+// bubble with a voice in it, on a plain ground.
+//   Transcripts/AppIcon.icon      the app's icon: an indigo bubble on white, or on black in the dark appearance;
+//                                 the system makes the tinted and clear versions from the same layers
+//   Design/AppIcon-Indigo.icon    a white bubble on indigo, offered in Settings
 //   swift Tools/make-icon.swift
-// Then Tools/render-icons.sh renders it into the PNGs the README uses.
+// Then Tools/render-icons.sh renders them into the pictures the app and the README use.
 import AppKit
 import SwiftUI
 
@@ -22,10 +24,32 @@ func squircle(_ rect: CGRect, _ radius: CGFloat) -> CGPath {
     Path(roundedRect: rect, cornerRadius: radius, style: .continuous).cgPath
 }
 
-func fill(_ context: CGContext, _ rect: CGRect, radius: CGFloat, _ fill: CGColor) {
-    context.addPath(squircle(rect, radius))
-    context.setFillColor(fill)
-    context.fillPath()
+/// A top-to-bottom gradient between two colours.
+struct Shade {
+    var top: UInt32
+    var bottom: UInt32
+
+    var gradient: CGGradient {
+        CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: [color(top), color(bottom)] as CFArray, locations: nil)!
+    }
+
+    var iconFill: [String: Any] {
+        [
+            "linear-gradient": [iconColor(top), iconColor(bottom)],
+            "orientation": ["start": ["x": 0.5, "y": 0], "stop": ["x": 0.5, "y": 1]],
+        ]
+    }
+}
+
+/// Fills each shape with the same gradient, running from `top` to `bottom` (in canvas points).
+func fill(_ context: CGContext, _ shapes: [CGPath], _ shade: Shade, from top: CGFloat, to bottom: CGFloat) {
+    for shape in shapes {
+        context.saveGState()
+        context.addPath(shape)
+        context.clip()
+        context.drawLinearGradient(shade.gradient, start: CGPoint(x: 0, y: top), end: CGPoint(x: 0, y: bottom), options: [])
+        context.restoreGState()
+    }
 }
 
 /// A transparent 1024 px layer. Origin is top-left.
@@ -44,97 +68,106 @@ func layer(_ draw: (CGContext) -> Void) -> Data {
     return rep.representation(using: .png, properties: [:])!
 }
 
-/// The voice behind the bubble: a spoken phrase, loudest in the middle, fading out towards the edges.
-func waveform(_ tint: CGColor) -> Data {
-    let heights: [CGFloat] = [0.16, 0.30, 0.22, 0.48, 0.70, 0.42, 0.86, 1.00, 0.64, 0.80, 0.52, 0.34, 0.58, 0.26, 0.14]
-    let width: CGFloat = 38
-    let gap: CGFloat = 26
-    let tallest: CGFloat = 780
+let body = CGRect(x: 172, y: 220, width: 680, height: 500)
+
+/// The bubble. Its left edge runs on into the tail, which flares out at the lower left and curves back into the
+/// lower edge. Body and tail are filled one after the other: as one path, their windings would cut a hole.
+func bubble(_ shade: Shade) -> Data {
+    let tail = CGMutablePath()
+    tail.move(to: CGPoint(x: body.minX + 4, y: body.maxY - 170))
+    tail.addCurve(to: CGPoint(x: body.minX - 34, y: body.maxY + 54),
+                  control1: CGPoint(x: body.minX + 2, y: body.maxY - 60), control2: CGPoint(x: body.minX - 6, y: body.maxY + 16))
+    tail.addCurve(to: CGPoint(x: body.minX + 200, y: body.maxY - 2),
+                  control1: CGPoint(x: body.minX + 42, y: body.maxY + 62), control2: CGPoint(x: body.minX + 128, y: body.maxY + 30))
+    tail.addLine(to: CGPoint(x: body.minX + 200, y: body.maxY - 170))
+    tail.closeSubpath()
     return layer { context in
-        let middle = CGFloat(heights.count - 1) / 2
-        var x = (canvas - CGFloat(heights.count) * width - CGFloat(heights.count - 1) * gap) / 2
-        for (index, height) in heights.enumerated() {
-            let bar = max(width, height * tallest)
-            let distance = abs(CGFloat(index) - middle) / middle
-            fill(context, CGRect(x: x, y: 512 - bar / 2, width: width, height: bar), radius: width / 2,
-                 tint.copy(alpha: tint.alpha * (1 - 0.5 * distance * distance))!)
-            x += width + gap
+        fill(context, [squircle(body, 190), tail], shade, from: body.minY, to: body.maxY + 54)
+    }
+}
+
+/// The voice in the bubble: seven rounded bars, loudest in the middle.
+func voice(_ shade: Shade) -> Data {
+    let heights: [CGFloat] = [0.32, 0.62, 1.00, 0.72, 0.90, 0.50, 0.28]
+    let width: CGFloat = 48
+    let gap: CGFloat = 30
+    let tallest: CGFloat = 300
+    var x = body.midX - (CGFloat(heights.count) * width + CGFloat(heights.count - 1) * gap) / 2
+    var bars: [CGPath] = []
+    for height in heights {
+        bars.append(squircle(CGRect(x: x, y: body.midY - height * tallest / 2, width: width, height: height * tallest), width / 2))
+        x += width + gap
+    }
+    return layer { context in
+        fill(context, bars, shade, from: body.midY - tallest / 2, to: body.midY + tallest / 2)
+    }
+}
+
+/// An image, or one per appearance.
+enum LayerImage {
+    case one(String)
+    case lightAndDark(String, String)
+
+    var json: [String: Any] {
+        switch self {
+        case .one(let name): ["image-name": name]
+        case .lightAndDark(let light, let dark): ["image-name-specializations": [["value": light], ["appearance": "dark", "value": dark]]]
         }
     }
 }
 
-/// The transcript: a bubble turned a little, its tail growing out of the lower left corner, with two lines,
-/// each after the dot of the person who said it.
-func bubble() -> Data {
-    layer { context in
-        context.translateBy(x: 524, y: 470)
-        context.rotate(by: -8 * .pi / 180)
-        let rect = CGRect(x: -300, y: -200, width: 600, height: 400)
-        let tail = CGMutablePath()
-        tail.move(to: CGPoint(x: rect.minX, y: rect.maxY - 150))
-        tail.addLine(to: CGPoint(x: rect.minX, y: rect.maxY - 30))
-        tail.addCurve(to: CGPoint(x: rect.minX - 12, y: rect.maxY + 80),
-                      control1: CGPoint(x: rect.minX, y: rect.maxY + 18), control2: CGPoint(x: rect.minX - 3, y: rect.maxY + 58))
-        tail.addCurve(to: CGPoint(x: rect.minX + 146, y: rect.maxY),
-                      control1: CGPoint(x: rect.minX + 38, y: rect.maxY + 64), control2: CGPoint(x: rect.minX + 92, y: rect.maxY + 10))
-        tail.addLine(to: CGPoint(x: rect.minX + 146, y: rect.maxY - 150))
-        tail.closeSubpath()
-        let gradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: [color(0xFFFFFF), color(0xEEF0FF)] as CFArray, locations: nil)!
-        for shape in [squircle(rect, 92), tail] {
-            context.saveGState()
-            context.addPath(shape)
-            context.clip()
-            context.drawLinearGradient(gradient, start: CGPoint(x: 0, y: rect.minY), end: CGPoint(x: 0, y: rect.maxY + 80), options: [])
-            context.restoreGState()
-        }
-
-        let lines: [(speaker: UInt32, width: CGFloat, ink: CGFloat)] = [(0x5AB0D8, 330, 0.88), (0xE5A84B, 220, 0.40)]
-        let dot: CGFloat = 42
-        for (index, line) in lines.enumerated() {
-            let y = rect.minY + 128 + CGFloat(index) * 144
-            context.setFillColor(color(line.speaker))
-            context.fillEllipse(in: CGRect(x: rect.minX + 70, y: y - dot, width: dot * 2, height: dot * 2))
-            fill(context, CGRect(x: rect.minX + 70 + dot * 2 + 34, y: y - 20, width: line.width, height: 40), radius: 20, color(0x3A41B0, line.ink))
-        }
-    }
-}
-
-func gradientFill(_ top: UInt32, _ bottom: UInt32) -> [String: Any] {
-    [
-        "linear-gradient": [iconColor(top), iconColor(bottom)],
-        "orientation": ["start": ["x": 0.5, "y": 0], "stop": ["x": 0.5, "y": 1]],
+/// Writes a document: the voice in front (crisp, only lightly shadowed), the glass bubble behind it.
+func document(at url: URL, ground: Shade, darkGround: Shade?, bubble bubbleImage: LayerImage, bubbleTranslucency: Double?, voice voiceImage: LayerImage, images: [String: Data]) throws {
+    var fills: [[String: Any]] = [["value": ground.iconFill]]
+    if let darkGround { fills.append(["appearance": "dark", "value": darkGround.iconFill]) }
+    let json: [String: Any] = [
+        "fill-specializations": fills,
+        "groups": [
+            [
+                "name": "Voice",
+                "layers": [["name": "voice", "glass": false].merging(voiceImage.json) { $1 }],
+                "shadow": ["kind": "layer-color", "opacity": 0.35],
+                "translucency": ["enabled": false, "value": 0.5],
+            ],
+            [
+                "name": "Bubble",
+                "layers": [["name": "bubble", "glass": true].merging(bubbleImage.json) { $1 }],
+                "shadow": ["kind": "layer-color", "opacity": 0.5],
+                "translucency": ["enabled": bubbleTranslucency != nil, "value": bubbleTranslucency ?? 0.5],
+            ],
+        ],
+        "supported-platforms": ["squares": ["macOS"]],
     ]
+    // Start from an empty document, so images of an earlier design don't linger.
+    try? FileManager.default.removeItem(at: url)
+    try FileManager.default.createDirectory(at: url.appendingPathComponent("Assets"), withIntermediateDirectories: true)
+    try JSONSerialization.data(withJSONObject: json, options: [.prettyPrinted, .sortedKeys]).write(to: url.appendingPathComponent("icon.json"))
+    for (name, data) in images {
+        try data.write(to: url.appendingPathComponent("Assets/\(name)"))
+    }
 }
 
-let icon = URL(fileURLWithPath: FileManager.default.currentDirectoryPath).appendingPathComponent("Transcripts/AppIcon.icon")
-let json: [String: Any] = [
-    "fill-specializations": [
-        ["value": gradientFill(0x9198F6, 0x4C54C6)],
-        ["appearance": "dark", "value": gradientFill(0x2A2D35, 0x0F1013)],
-    ],
-    "groups": [
-        [
-            "name": "Bubble",
-            "layers": [["name": "bubble", "image-name": "bubble.png", "glass": true]],
-            "shadow": ["kind": "layer-color", "opacity": 0.6],
-            "translucency": ["enabled": false, "value": 0.4],
-        ],
-        [
-            "name": "Voice",
-            "layers": [[
-                "name": "waveform",
-                "image-name-specializations": [["value": "waveform-light.png"], ["appearance": "dark", "value": "waveform-dark.png"]],
-                "glass": false,
-            ]],
-            "shadow": ["kind": "none", "opacity": 0.5],
-            "translucency": ["enabled": false, "value": 0.5],
-        ],
-    ],
-    "supported-platforms": ["squares": ["macOS"]],
-]
-try FileManager.default.createDirectory(at: icon.appendingPathComponent("Assets"), withIntermediateDirectories: true)
-try JSONSerialization.data(withJSONObject: json, options: [.prettyPrinted, .sortedKeys]).write(to: icon.appendingPathComponent("icon.json"))
-try bubble().write(to: icon.appendingPathComponent("Assets/bubble.png"))
-try waveform(color(0xFFFFFF, 0.30)).write(to: icon.appendingPathComponent("Assets/waveform-light.png"))
-try waveform(color(0x8F96F2, 0.30)).write(to: icon.appendingPathComponent("Assets/waveform-dark.png"))
-print("Wrote \(icon.lastPathComponent)")
+let root = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+let indigo = Shade(top: 0x7C83FF, bottom: 0x4338CA)
+let white = Shade(top: 0xFFFFFF, bottom: 0xE9EAFB)
+
+try document(
+    at: root.appendingPathComponent("Transcripts/AppIcon.icon"),
+    ground: Shade(top: 0xFFFFFF, bottom: 0xECEDF2), darkGround: Shade(top: 0x2C2C30, bottom: 0x0B0B0D),
+    bubble: .lightAndDark("bubble-light.png", "bubble-dark.png"), bubbleTranslucency: nil,
+    voice: .one("voice.png"),
+    images: [
+        "bubble-light.png": bubble(indigo),
+        // A touch brighter on black, so the bubble doesn't sink into the dark ground.
+        "bubble-dark.png": bubble(Shade(top: 0x8A90FF, bottom: 0x4C42D6)),
+        "voice.png": voice(Shade(top: 0xFFFFFF, bottom: 0xE4E5FF)),
+    ]
+)
+try document(
+    at: root.appendingPathComponent("Design/AppIcon-Indigo.icon"),
+    ground: indigo, darkGround: nil,
+    bubble: .one("bubble.png"), bubbleTranslucency: 0.25,
+    voice: .one("voice.png"),
+    images: ["bubble.png": bubble(white), "voice.png": voice(indigo)]
+)
+print("Wrote AppIcon.icon and AppIcon-Indigo.icon")

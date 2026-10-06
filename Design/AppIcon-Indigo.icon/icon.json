@@ -3,27 +3,8 @@
     {
       "value" : {
         "linear-gradient" : [
-          "srgb:1.00000,1.00000,1.00000,1.00000",
-          "srgb:0.92549,0.92941,0.94902,1.00000"
-        ],
-        "orientation" : {
-          "start" : {
-            "x" : 0.5,
-            "y" : 0
-          },
-          "stop" : {
-            "x" : 0.5,
-            "y" : 1
-          }
-        }
-      }
-    },
-    {
-      "appearance" : "dark",
-      "value" : {
-        "linear-gradient" : [
-          "srgb:0.17255,0.17255,0.18824,1.00000",
-          "srgb:0.04314,0.04314,0.05098,1.00000"
+          "srgb:0.48627,0.51373,1.00000,1.00000",
+          "srgb:0.26275,0.21961,0.79216,1.00000"
         ],
         "orientation" : {
           "start" : {
@@ -61,15 +42,7 @@
       "layers" : [
         {
           "glass" : true,
-          "image-name-specializations" : [
-            {
-              "value" : "bubble-light.png"
-            },
-            {
-              "appearance" : "dark",
-              "value" : "bubble-dark.png"
-            }
-          ],
+          "image-name" : "bubble.png",
           "name" : "bubble"
         }
       ],
@@ -79,8 +52,8 @@
         "opacity" : 0.5
       },
       "translucency" : {
-        "enabled" : false,
-        "value" : 0.5
+        "enabled" : true,
+        "value" : 0.25
       }
     }
   ],

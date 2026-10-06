@@ -102,7 +102,7 @@ struct WindowRequestHandler: View {
             .frame(width: 0, height: 0)
             .onChange(of: model.windowRequestCount) {
                 guard let request = model.windowRequest else { return }
-                NSApp.setActivationPolicy(.regular)
+                model.showInDock()
                 NSApp.activate()
                 switch request {
                 case .main: openWindow(id: "main")
