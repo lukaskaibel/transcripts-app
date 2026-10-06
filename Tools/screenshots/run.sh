@@ -15,7 +15,8 @@ if [ -z "$SKIP_BUILD" ]; then
     -derivedDataPath build/DerivedData build -quiet 2>&1 | grep -E "error:" | grep -v "produced no further output" || true
 fi
 
-pkill -f "$app/Contents/MacOS/Transcripts" 2>/dev/null || true
+# Only an earlier demo run; a copy of the app someone is using stays open.
+pkill -f "$app/Contents/MacOS/Transcripts -demo YES" 2>/dev/null || true
 sleep 0.5
 cmd=build/screens/cmd
 : > "$cmd"

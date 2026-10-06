@@ -47,6 +47,11 @@ struct LiveSessionView: View {
         VStack(spacing: 0) {
             header
             Rectangle().fill(Theme.rowSeparator).frame(height: 1)
+            if let problem = session.microphoneProblem {
+                warning(problem.message, settings: "Privacy_Microphone")
+            } else if session.systemAudioSeemsBlocked {
+                warning("Vom Call kommt nichts an. Erlaube Transcripts unter Datenschutz & Sicherheit → Bildschirm- & Systemaudioaufnahme.", settings: "Privacy_ScreenCapture")
+            }
             HStack(spacing: 0) {
                 LiveTranscriptView(session: session)
                 Rectangle().fill(Theme.rowSeparator).frame(width: 1)
@@ -54,6 +59,20 @@ struct LiveSessionView: View {
                     .frame(width: 360)
             }
         }
+    }
+
+    private func warning(_ text: String, settings pane: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Theme.warning)
+            Text(text).font(.small).foregroundStyle(Theme.textBody)
+            Spacer(minLength: 8)
+            Button("Einstellungen öffnen") { model.openPrivacySettings(pane) }
+                .buttonStyle(SecondaryButtonStyle())
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 9)
+        .background(Theme.warning.opacity(0.1))
+        .overlay(alignment: .bottom) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
     }
 
     private var header: some View {

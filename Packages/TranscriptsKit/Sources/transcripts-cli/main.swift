@@ -230,6 +230,7 @@ case "record":
     let lines = session.lines
     let voices = session.voices
     print("Stopped after \(seconds(since: started)); live lines: \(lines.count), voices: \(voices.count)")
+    print("Microphone problem: \(session.microphoneProblem.map { "\($0)" } ?? "none"), call audio blocked: \(session.systemAudioSeemsBlocked)")
     for line in lines {
         print(String(format: "  live [%6.2f] %@: %@", line.start, session.displayName(for: line.speakerKey), line.text))
     }

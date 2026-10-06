@@ -58,6 +58,28 @@ public struct LiveVoice: Equatable, Sendable {
     public var speech: Double
 }
 
+/// Something wrong with the microphone during a recording.
+public enum MicrophoneProblem: Equatable, Sendable {
+    /// Samples arrive, but every one is exactly zero: macOS hands out silence, usually for lack of permission.
+    case silent
+    /// Nothing arrives at all, not even after restarting the capture.
+    case noSignal
+
+    public var message: String {
+        switch self {
+        case .silent: "Vom Mikrofon kommt nur Stille. Ist es stummgeschaltet? Sonst prüfe unter Datenschutz & Sicherheit → Mikrofon, ob Transcripts erlaubt ist."
+        case .noSignal: "Das Mikrofon liefert nichts. Prüfe das Eingabegerät in den Einstellungen unter Aufnahme."
+        }
+    }
+
+    public var shortMessage: String {
+        switch self {
+        case .silent: "Mikrofon stumm oder ohne Zugriff"
+        case .noSignal: "Mikrofon liefert nichts"
+        }
+    }
+}
+
 /// A moment flagged during the recording.
 public struct LiveMarker: Identifiable, Equatable, Sendable {
     public var id: Int64
@@ -93,6 +115,7 @@ public final class RecordingSession {
     public private(set) var currentSpeakerKey: String?
     /// True when the call audio has stayed silent although other apps were playing sound.
     public private(set) var systemAudioSeemsBlocked = false
+    public private(set) var microphoneProblem: MicrophoneProblem?
     public private(set) var errorMessage: String?
     public let capturesSystemAudio: Bool
 
@@ -114,13 +137,11 @@ public final class RecordingSession {
 
     public struct Configuration: Sendable {
         public var microphoneUID: String?
-        public var echoCancellation: Bool
         public var captureSystemAudio: Bool
         public var thresholds: VoiceThresholds
 
-        public init(microphoneUID: String? = nil, echoCancellation: Bool = false, captureSystemAudio: Bool = true, thresholds: VoiceThresholds = .standard) {
+        public init(microphoneUID: String? = nil, captureSystemAudio: Bool = true, thresholds: VoiceThresholds = .standard) {
             self.microphoneUID = microphoneUID
-            self.echoCancellation = echoCancellation
             self.captureSystemAudio = captureSystemAudio
             self.thresholds = thresholds
         }
@@ -146,7 +167,6 @@ public final class RecordingSession {
         } else {
             let capture = MicrophoneCapture()
             capture.deviceUID = configuration.microphoneUID
-            capture.voiceProcessing = configuration.echoCancellation
             microphone = capture
             system = SystemAudioCapture()
         }
@@ -164,8 +184,8 @@ public final class RecordingSession {
                 Task { @MainActor in self?.handle(event) }
             }
             transcribers[channel] = transcriber
-            let onLevel: @Sendable (Float) -> Void = { [weak self] level in
-                Task { @MainActor in self?.setLevel(level, for: channel) }
+            let onLevel: @Sendable (Float, Bool) -> Void = { [weak self] level, silent in
+                Task { @MainActor in self?.setLevel(level, silent: silent, for: channel) }
             }
             channelTasks.append(Task.detached(priority: .userInitiated) { [clock] in
                 await Self.pump(stream, channel: channel, writer: writer, transcriber: transcriber, clock: clock, level: onLevel)
@@ -177,6 +197,7 @@ public final class RecordingSession {
         system.onSamples = { samples in continuations[.system]?.yield(samples) }
 
         clock.start()
+        lastMicrophoneSignal = Date()
         do {
             try microphone.start()
         } catch {
@@ -205,6 +226,8 @@ public final class RecordingSession {
     public func resume() {
         guard state == .paused else { return }
         clock.resume()
+        lastMicrophoneSignal = Date()
+        microphoneZerosSince = nil
         state = .recording
     }
 
@@ -242,10 +265,12 @@ public final class RecordingSession {
         writer: AudioFileWriter,
         transcriber: LiveTranscriber,
         clock: RecordingClock,
-        level: @escaping @Sendable (Float) -> Void
+        level: @escaping @Sendable (_ level: Float, _ silent: Bool) -> Void
     ) async {
         var lastLevel = Date.distantPast
         var peak: Float = 0
+        // Exact zeros, not just quiet: what macOS delivers to an app it doesn't let listen.
+        var onlyZeros = true
         for await chunk in stream {
             if clock.isPaused { continue }
             var samples = chunk
@@ -258,15 +283,17 @@ public final class RecordingSession {
             }
             try? writer.write(samples)
             peak = max(peak, SpeechAudio.meterLevel(chunk))
+            if onlyZeros, SpeechAudio.rms(chunk) > 0 { onlyZeros = false }
             if Date().timeIntervalSince(lastLevel) > 0.08 {
-                level(peak)
+                level(peak, onlyZeros)
                 peak = 0
+                onlyZeros = true
                 lastLevel = Date()
             }
             await transcriber.feed(samples)
         }
         writer.close()
-        level(0)
+        level(0, false)
     }
 
     private func startTimer() {
@@ -275,6 +302,7 @@ public final class RecordingSession {
                 try? await Task.sleep(for: .milliseconds(250))
                 guard let self else { return }
                 self.elapsed = self.clock.elapsed
+                self.checkMicrophone()
                 self.checkSystemAudio()
             }
         }
@@ -296,10 +324,34 @@ public final class RecordingSession {
         systemAudioSeemsBlocked = silentSystemSeconds >= 20
     }
 
-    private func setLevel(_ level: Float, for channel: Channel) {
+    private var lastMicrophoneSignal = Date()
+    private var microphoneZerosSince: Date?
+
+    /// Silence for a few seconds is a pause in talking; exact zeros, or nothing at all, is a broken microphone.
+    private func checkMicrophone() {
+        guard state == .recording else { return }
+        let now = Date()
+        if now.timeIntervalSince(lastMicrophoneSignal) > 5 {
+            microphoneProblem = .noSignal
+        } else if let since = microphoneZerosSince, now.timeIntervalSince(since) > 4 {
+            microphoneProblem = .silent
+        } else {
+            microphoneProblem = nil
+        }
+    }
+
+    private func setLevel(_ level: Float, silent: Bool, for channel: Channel) {
         switch channel {
-        case .microphone: microphoneLevel = level
-        case .system: systemLevel = level
+        case .microphone:
+            microphoneLevel = level
+            lastMicrophoneSignal = Date()
+            if silent {
+                if microphoneZerosSince == nil { microphoneZerosSince = Date() }
+            } else {
+                microphoneZerosSince = nil
+            }
+        case .system:
+            systemLevel = level
         }
     }
 
@@ -525,6 +577,11 @@ public final class RecordingSession {
 }
 
 extension RecordingSession {
+    /// For the demo mode's screenshots of the warnings.
+    func showMicrophoneProblem(_ problem: MicrophoneProblem?) {
+        microphoneProblem = problem
+    }
+
     /// Fills the session with a made-up conversation, for the demo mode's screenshots.
     func loadDemoLines() {
         state = .recording

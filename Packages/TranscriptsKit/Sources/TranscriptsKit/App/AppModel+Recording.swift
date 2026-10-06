@@ -50,7 +50,6 @@ extension AppModel {
         }
         let session = RecordingSession(meeting: meeting, database: database, engine: engine, configuration: .init(
             microphoneUID: settings.microphoneUID,
-            echoCancellation: settings.echoCancellation,
             captureSystemAudio: settings.captureSystemAudio,
             thresholds: settings.voiceStrictness.thresholds
         ))

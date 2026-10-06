@@ -81,7 +81,6 @@ public final class AppSettings {
         ollamaURL = defaults.string(forKey: Keys.ollamaURL) ?? OllamaProvider.defaultURL.absoluteString
         transcriptionModel = TranscriptionModel(rawValue: defaults.string(forKey: Keys.transcriptionModel) ?? "") ?? .ultra
         microphoneUID = defaults.string(forKey: Keys.microphoneUID)
-        echoCancellation = defaults.bool(forKey: Keys.echoCancellation)
         captureSystemAudio = defaults.object(forKey: Keys.captureSystemAudio) as? Bool ?? true
         floatingRecorder = defaults.object(forKey: Keys.floatingRecorder) as? Bool ?? true
         openLiveWindow = defaults.object(forKey: Keys.openLiveWindow) as? Bool ?? false
@@ -110,7 +109,6 @@ public final class AppSettings {
         static let ollamaURL = "ollamaURL"
         static let transcriptionModel = "transcriptionModel"
         static let microphoneUID = "microphoneUID"
-        static let echoCancellation = "echoCancellation"
         static let captureSystemAudio = "captureSystemAudio"
         static let floatingRecorder = "floatingRecorder"
         static let openLiveWindow = "openLiveWindow"
@@ -141,7 +139,6 @@ public final class AppSettings {
     public var ollamaURL: String { didSet { defaults.set(ollamaURL, forKey: Keys.ollamaURL) } }
     public var transcriptionModel: TranscriptionModel { didSet { defaults.set(transcriptionModel.rawValue, forKey: Keys.transcriptionModel) } }
     public var microphoneUID: String? { didSet { defaults.set(microphoneUID, forKey: Keys.microphoneUID) } }
-    public var echoCancellation: Bool { didSet { defaults.set(echoCancellation, forKey: Keys.echoCancellation) } }
     public var captureSystemAudio: Bool { didSet { defaults.set(captureSystemAudio, forKey: Keys.captureSystemAudio) } }
     public var floatingRecorder: Bool { didSet { defaults.set(floatingRecorder, forKey: Keys.floatingRecorder) } }
     public var openLiveWindow: Bool { didSet { defaults.set(openLiveWindow, forKey: Keys.openLiveWindow) } }

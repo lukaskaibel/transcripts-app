@@ -199,11 +199,7 @@ struct RecordingSettings: View {
                     }
                 }
                 Toggle("Ton des Calls aufnehmen", isOn: $settings.captureSystemAudio)
-                Text("Nimmt alles auf, was der Mac abspielt, getrennt von deinem Mikrofon. So weiß die App sicher, was du gesagt hast und was die anderen.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Toggle("Echo-Unterdrückung", isOn: $settings.echoCancellation)
-                Text("Nur nötig, wenn der Call über Lautsprecher statt Kopfhörer läuft. Doppelte Zeilen filtert die App ohnehin heraus.")
+                Text("Nimmt alles auf, was der Mac abspielt, getrennt von deinem Mikrofon. So weiß die App sicher, was du gesagt hast und was die anderen. Läuft der Call über die Lautsprecher, landet er auch im Mikrofon; diese doppelten Zeilen lässt die App weg.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

@@ -18,6 +18,7 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
     private var procID: AudioDeviceIOProcID?
     private var resampler: StreamingResampler?
     private var format: AVAudioFormat?
+    private var bufferList: UnsafeMutableAudioBufferListPointer?
     private var outputListener: AudioObjectPropertyListenerBlock?
     private var running = false
 
@@ -55,7 +56,8 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
             throw AudioError.unsupportedFormat("Systemaudio")
         }
         self.format = format
-        resampler = try StreamingResampler(from: format)
+        let converter = try StreamingResampler(from: format)
+        resampler = converter
 
         let outputUID = CoreAudioHelpers.uid(of: CoreAudioHelpers.defaultOutputDevice) ?? ""
         var aggregate: [String: Any] = [
@@ -81,8 +83,20 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
         }
         aggregateID = device
 
+        // The aggregate lists the input streams of its sub-device first, then the tap's. The speakers have none,
+        // except when some app uses voice processing, which gives them an echo reference stream: so take the
+        // tap's buffers from the end, never the first ones.
+        let tapBuffers = format.isInterleaved ? 1 : Int(format.channelCount)
+        let list = AudioBufferList.allocate(maximumBuffers: tapBuffers)
+        bufferList = list
         status = AudioDeviceCreateIOProcIDWithBlock(&procID, device, queue) { [weak self] _, input, _, _, _ in
-            self?.receive(input)
+            guard let tap = Self.tapBuffers(UnsafeMutableAudioBufferListPointer(UnsafeMutablePointer(mutating: input)), count: tapBuffers) else { return }
+            for (index, buffer) in tap.enumerated() {
+                list[index] = buffer
+            }
+            guard let buffer = AVAudioPCMBuffer(pcmFormat: format, bufferListNoCopy: list.unsafePointer, deallocator: nil) else { return }
+            let samples = converter.convert(buffer)
+            if !samples.isEmpty { self?.onSamples?(samples) }
         }
         guard status == noErr, let procID else {
             destroyTap()
@@ -95,11 +109,10 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
         }
     }
 
-    private func receive(_ input: UnsafePointer<AudioBufferList>) {
-        guard let format, let resampler,
-              let buffer = AVAudioPCMBuffer(pcmFormat: format, bufferListNoCopy: input, deallocator: nil) else { return }
-        let samples = resampler.convert(buffer)
-        if !samples.isEmpty { onSamples?(samples) }
+    /// The tap's buffers in the aggregate's input: the last `count`, after any streams of the sub-device.
+    static func tapBuffers(_ input: UnsafeMutableAudioBufferListPointer, count: Int) -> [AudioBuffer]? {
+        guard count > 0, input.count >= count else { return nil }
+        return Array(input.suffix(count))
     }
 
     private func destroyTap() {
@@ -118,6 +131,11 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
         tapID = AudioObjectID(kAudioObjectUnknown)
         resampler = nil
         format = nil
+        // Freed on the IO queue, after any buffer still waiting there.
+        if let bufferList {
+            queue.async { free(bufferList.unsafeMutablePointer) }
+        }
+        bufferList = nil
     }
 
     /// Headphones plugged in or AirPods connected: rebuild the tap on the new output device.

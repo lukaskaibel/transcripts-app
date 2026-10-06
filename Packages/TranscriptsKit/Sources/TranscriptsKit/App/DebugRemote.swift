@@ -90,6 +90,8 @@ final class DebugRemote {
         case "floating":
             model.startDemoRecording()
             model.floatingRecorder?.show()
+        case "micproblem":
+            model.recording?.showMicrophoneProblem(argument == "silent" ? .silent : (argument == "nosignal" ? .noSignal : nil))
         case "stoplive":
             model.stopDemoRecording()
         case "menubar":
@@ -133,7 +135,7 @@ final class DebugRemote {
         case "main": window = NSApp.windows.first { $0.identifier?.rawValue == "main" || $0.title == "Transcripts" && $0.styleMask.contains(.titled) && $0.frame.width > 800 }
         case "live": window = NSApp.windows.first { $0.identifier?.rawValue == "live" || $0.title == "Aufnahme" }
         case "settings": window = NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true || $0.identifier?.rawValue.contains("settings") == true || $0.title.contains("Allgemein") || $0.title.contains("KI") || $0.title.contains("Aufnahme") && $0.frame.width < 800 || $0.title.contains("Transkription") || $0.title.contains("Stimmen") }
-        case "floating": window = NSApp.windows.first { $0 is NSPanel && $0.frame.width == 420 }
+        case "floating": window = NSApp.windows.first { $0 is NSPanel && $0.frame.width == FloatingRecorderController.size.width }
         default: window = NSApp.windows.first { $0.title == name }
         }
         guard let window, let view = window.contentView else {

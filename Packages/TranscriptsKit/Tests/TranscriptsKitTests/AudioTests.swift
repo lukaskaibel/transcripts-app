@@ -109,3 +109,22 @@ private func temporaryFolder() throws -> URL {
         #expect(!AudioArchiver.hasAudio(meetingId: meetingId))
     }
 }
+
+@Suite struct SystemAudioTests {
+    @Test func theTapsBuffersAreTheLastOnes() {
+        // With voice processing on somewhere, the speakers bring a 6-channel echo reference stream into the
+        // aggregate, ahead of the tap's stereo stream.
+        let list = AudioBufferList.allocate(maximumBuffers: 2)
+        defer { free(list.unsafeMutablePointer) }
+        list[0] = AudioBuffer(mNumberChannels: 6, mDataByteSize: 6 * 4 * 512, mData: nil)
+        list[1] = AudioBuffer(mNumberChannels: 2, mDataByteSize: 2 * 4 * 512, mData: nil)
+        #expect(SystemAudioCapture.tapBuffers(list, count: 1)?.map(\.mNumberChannels) == [2])
+        #expect(SystemAudioCapture.tapBuffers(list, count: 2)?.map(\.mNumberChannels) == [6, 2])
+        #expect(SystemAudioCapture.tapBuffers(list, count: 3) == nil)
+
+        let alone = AudioBufferList.allocate(maximumBuffers: 1)
+        defer { free(alone.unsafeMutablePointer) }
+        alone[0] = AudioBuffer(mNumberChannels: 2, mDataByteSize: 2 * 4 * 512, mData: nil)
+        #expect(SystemAudioCapture.tapBuffers(alone, count: 1)?.map(\.mNumberChannels) == [2])
+    }
+}
