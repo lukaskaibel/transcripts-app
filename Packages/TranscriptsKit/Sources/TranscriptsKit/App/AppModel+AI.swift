@@ -153,6 +153,8 @@ extension AppModel {
                 try database.update(meetingId: meetingId) { $0.title = outcome.title }
             }
             applyNameHints(outcome.speakerNames, in: detail)
+            githubSuggestions = githubSuggestions.filter { !$0.key.hasPrefix(meetingId + "|") }
+            Task { await offerIssues(afterSummaryOf: meetingId) }
         } catch {
             showToast(String(localized: "Zusammenfassung fehlgeschlagen"), error.localizedDescription, isError: true)
         }
@@ -186,6 +188,11 @@ extension AppModel {
 
     public func toggleActionItem(_ item: ActionItem) {
         guard let id = item.id else { return }
+        // A task on GitHub is checked off there too.
+        if item.issue != nil, settings.githubLogin != nil {
+            setLinkedDone(item, done: !item.done)
+            return
+        }
         try? database.setActionItem(id, done: !item.done)
     }
 }

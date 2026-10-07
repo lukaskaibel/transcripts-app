@@ -325,6 +325,9 @@ struct PersonSheet: View {
                             .foregroundStyle(Theme.textSecondary)
                             .padding(.top, 8)
 
+                        PersonGitHubRow(person: stats.person)
+                            .padding(.top, 14)
+
                         VoiceProfileSection(person: stats.person)
                             .padding(.top, 20)
 
@@ -422,5 +425,73 @@ struct PersonSheet: View {
         parts.append(String(localized: "\(stats.voiceSamples) Stimmproben", comment: "plural: voice samples of a person"))
         if let email = stats.person.email { parts.append(email) }
         return parts.joined(separator: " · ")
+    }
+}
+
+/// Who a person is on GitHub, for assigning their tasks: linked, guessed from the name, or chosen here.
+struct PersonGitHubRow: View {
+    @Environment(AppModel.self) private var model
+    let person: Person
+    @State private var picking = false
+
+    private var guess: GitHubUser? {
+        guard person.github == nil, !person.isMe else { return nil }
+        return IssueMatching.user(named: person.name, among: model.knownGitHubUsers)
+    }
+
+    var body: some View {
+        if person.github != nil || model.settings.githubLogin != nil {
+            HStack(spacing: 10) {
+                HStack(spacing: 5) {
+                    GitHubMark(size: 12)
+                    Text("GitHub")
+                }
+                .font(.small)
+                .foregroundStyle(Theme.textSecondary)
+                .frame(width: 80, alignment: .leading)
+                if let user = person.github {
+                    HStack(spacing: 6) {
+                        GitHubAvatar(user: user, size: 16)
+                        Text(user.login)
+                    }
+                    .padding(.leading, 4)
+                    .padding(.trailing, 9)
+                    .frame(height: 24)
+                    .overlay(Capsule().stroke(Theme.chipBorder, lineWidth: 1))
+                    if person.isMe {
+                        Text("Dein Konto").font(.small).foregroundStyle(Theme.textTertiary)
+                    }
+                } else if let guess {
+                    Text("Vermutlich \(guess.login)").foregroundStyle(Theme.textBody)
+                    Button("Bestätigen") { model.setGitHub(guess, for: person) }
+                        .buttonStyle(SecondaryButtonStyle())
+                } else {
+                    Text("Nicht verknüpft").foregroundStyle(Theme.textTertiary)
+                }
+                Spacer(minLength: 8)
+                if !person.isMe {
+                    Button(person.github == nil ? "Konto wählen …" : "Ändern") { picking = true }
+                        .buttonStyle(PlainPressStyle())
+                        .font(.small)
+                        .foregroundStyle(Theme.accent)
+                        .dropdown(isPresented: $picking) { close in
+                            PickerList(
+                                placeholder: String(localized: "GitHub-Konto suchen …"),
+                                items: (person.github == nil ? [] : [PickerItem(id: "", title: String(localized: "Nicht verknüpft", comment: "a person without a GitHub account"), icon: AnyView(Image(systemName: "person.crop.circle.badge.xmark").foregroundStyle(Theme.textTertiary)))])
+                                    + model.knownGitHubUsers.map { user in
+                                        PickerItem(id: user.id, title: user.login, subtitle: user.name, selected: user.id == person.github?.id, icon: AnyView(GitHubAvatar(user: user, size: 18)))
+                                    },
+                                width: 300,
+                                footer: model.knownGitHubUsers.isEmpty ? String(localized: "Noch keine Konten geladen – einmal „Nach GitHub“ öffnen", comment: "Nach GitHub is the button above a meeting's tasks") : nil,
+                                onPick: { id in model.setGitHub(model.knownGitHubUsers.first { $0.id == id }, for: person) },
+                                onClose: close
+                            )
+                        }
+                }
+            }
+            .font(.ui)
+            .frame(minHeight: 26)
+            .task { await model.loadKnownGitHubAccounts() }
+        }
     }
 }

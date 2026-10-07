@@ -6,6 +6,24 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Action items into GitHub.** *Send to GitHub* above a meeting's action items (or ⇧⌘G) turns them into issues, in a
+  popover like a new issue in Issues for GitHub: project and repository on top, and per task status, assignees and
+  labels, each from a search field that has the keyboard at once (S, A, L, Z for the place, Space, Return, ⌘Return).
+  The app remembers where a calendar series, a meeting title or a group of people sent their tasks and proposes it
+  next time, finds people's GitHub accounts by their names (and lets you set one on the person), links a task to an
+  issue that is already open instead of creating it twice, and has the summary's model pick labels from the
+  repository's own and leave out tasks that aren't work for it. Linked tasks show their issue's number and status,
+  are checked off when the issue is closed and close it when checked off. After a summary, a notification offers to
+  create the tasks in their remembered place. Settings › GitHub lists what the app remembered. Signs in through the
+  GitHub CLI like Issues for GitHub, or with a code on github.com when the build has an OAuth client ID. Public
+  repositories never get context or quotes from the transcript.
+
+### Fixed
+
+- Escape in a dropdown no longer also leaves the meeting behind it.
+
 ## [0.1.0] - 2026-10-07
 
 The first version: everything below is new.

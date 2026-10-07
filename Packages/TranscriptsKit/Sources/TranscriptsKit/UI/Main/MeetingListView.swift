@@ -169,6 +169,8 @@ struct MeetingMenuItems: View {
         .disabled(!ready || !model.summaryProviderReady || model.isSummarizing(meetingId))
         Button("Neu transkribieren", systemImage: "arrow.clockwise") { model.reprocess(meetingId) }
             .disabled(row?.meeting.status == .recording || model.processingMeetingId == meetingId)
+        Button("Aufgaben nach GitHub …", systemImage: "arrow.up.forward.app") { model.requestComposer(for: meetingId) }
+            .disabled(!ready || row?.hasSummary != true)
         Divider()
         Button("Als Markdown kopieren", systemImage: "doc.on.doc") {
             if let detail = try? model.database.detail(of: meetingId) {

@@ -31,7 +31,7 @@ enum DemoData {
         }
 
         // The meeting from the mockups, fully processed.
-        let sync = Meeting(id: "m-sync", title: t.syncTitle, startedAt: at(0, 10), duration: 42 * 60, status: .ready, source: "Zoom", language: t.language,
+        let sync = Meeting(id: "m-sync", title: t.syncTitle, startedAt: at(0, 10), duration: 42 * 60, status: .ready, source: "Zoom", language: t.language, calendarEventId: "e-weekly-sync",
                            attendees: [Attendee(name: "Anna Berger", email: "anna@example.com"), Attendee(name: "Thomas Klein", email: "thomas@example.com"), Attendee(name: "Miriam Okafor", email: "miriam@example.com"), Attendee(name: "Jonas Weber", email: "jonas@example.com")],
                            progress: 1, transcriptionModel: "Parakeet Ultra")
         let syncLines = zip(Self.syncTiming, t.syncLines).map { ($0.0, $0.1, $0.2, $1) }
@@ -63,6 +63,22 @@ enum DemoData {
             }
         )
         _ = try? database.addMarker(Marker(meetingId: sync.id, time: 1205, text: t.marker))
+
+        // Where earlier meetings' tasks went on GitHub, so the app has something to suggest.
+        let web = GitHubTarget(repository: DemoGitHubService.webApp, project: DemoGitHubService.webProject)
+        let pdf = GitHubTarget(repository: DemoGitHubService.pdf, project: DemoGitHubService.webProject)
+        let support = GitHubTarget(repoId: DemoGitHubService.support.id, repo: DemoGitHubService.support.nameWithOwner, isPrivate: true, projectId: "P-support", projectTitle: "Support")
+        let group = [anna.id, miriam.id, thomas.id].sorted()
+        try? database.writer.write { db in
+            var routes = [
+                GitHubRoute(kind: .series, key: "e-weekly-sync", label: t.syncTitle, target: web, count: 3, lastUsedAt: at(-7, 10, 45)),
+                GitHubRoute(kind: .title, key: TargetSuggester.normalizedTitle(t.syncTitle), label: t.syncTitle, target: web, count: 3, lastUsedAt: at(-7, 10, 45)),
+                GitHubRoute(kind: .people, key: group.joined(separator: ","), label: TargetSuggester.names([anna.name, thomas.name, miriam.name]), members: group, target: web, count: 4, lastUsedAt: at(-5, 9, 50)),
+                GitHubRoute(kind: .people, key: [anna.id, thomas.id].sorted().joined(separator: ","), label: TargetSuggester.names([thomas.name, anna.name]), members: [anna.id, thomas.id].sorted(), target: pdf, count: 1, lastUsedAt: at(-8, 14)),
+                GitHubRoute(kind: .title, key: TargetSuggester.normalizedTitle(t.titles[6]), label: t.titles[6], target: support, count: 2, lastUsedAt: at(-6, 15, 40)),
+            ]
+            for index in routes.indices { try routes[index].insert(db) }
+        }
 
         // More meetings for the list.
         let others: [(String, String, Date, Double, [MeetingSpeaker.Assignment], [Person?], Bool)] = [
@@ -283,6 +299,35 @@ enum DemoData {
             UpcomingMeeting(eventId: "e-hoffmann", title: t.upcoming[1], start: hoffmann, end: hoffmann.addingTimeInterval(1800),
                             attendees: [Attendee(name: "Daniel Hoffmann")], joinURL: URL(string: "https://teams.microsoft.com/l/meetup-join/demo"), app: "Microsoft Teams"),
         ]
+    }
+}
+
+extension DemoData {
+    /// What the language model would propose for the sample tasks (by their place in the weekly's list).
+    static func issueSuggestions(for tasks: [ActionItem], labels: [GitHubLabel]) -> [IssueSuggestion] {
+        let has = Set(labels.map(\.name))
+        let german = AppLanguage.current == .german
+        return tasks.enumerated().map { index, task in
+            func pick(_ names: [String]) -> [String] { names.filter(has.contains) }
+            switch task.position {
+            case 0:
+                return IssueSuggestion(index: index, labels: pick(["bug", "pdf-export"]),
+                                       context: german ? "Beim Export langer Dokumente bricht das Tabellen-Rendering ab. Das muss vor Release 2.4 behoben sein, das deshalb auf den 14. Oktober verschoben wird." : "Table rendering breaks when long documents are exported. It has to be fixed before release 2.4, which moves to October 14 for it.",
+                                       quote: german ? "Es liegt am Rendering der Tabellen, nicht am Export selbst." : "It's the table rendering, not the export itself.", quoteSpeaker: "Lukas Kaibel", quoteTime: "02:41")
+            case 1:
+                return IssueSuggestion(index: index, labels: pick(["enhancement", "onboarding"]),
+                                       context: german ? "Fast jeder Dritte bricht das Onboarding im zweiten Schritt ab. Die Firmendaten werden optional und erst später abgefragt." : "Almost one in three people drop off at the second onboarding step. Company details become optional and are asked for later.",
+                                       quote: german ? "Ich mach bis Mittwoch einen Entwurf dafür." : "I'll have a draft ready by Wednesday.", quoteSpeaker: "Miriam Okafor", quoteTime: "15:07")
+            case 2:
+                return IssueSuggestion(index: index, include: false, reason: german ? "Eher kein Repo-Thema" : "Not really repo work")
+            case 3:
+                return IssueSuggestion(index: index, labels: pick(["qa"]),
+                                       context: german ? "Nach der Verschiebung auf den 14. Oktober bleibt Puffer für die Qualitätssicherung." : "Moving to October 14 leaves some buffer for QA.",
+                                       quote: german ? "Dann bleibt noch Puffer für QA." : "That still leaves some buffer for QA.", quoteSpeaker: "Thomas Klein", quoteTime: "03:12")
+            default:
+                return IssueSuggestion(index: index)
+            }
+        }
     }
 }
 

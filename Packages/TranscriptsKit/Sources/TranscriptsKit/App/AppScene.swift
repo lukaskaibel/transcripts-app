@@ -33,7 +33,13 @@ public struct TranscriptsScene: Scene {
             if let appearance = arguments.string(forKey: "demo.appearance").flatMap(Appearance.init(rawValue:)) {
                 settings.appearance = appearance
             }
-            let model = AppModel(database: database, settings: settings, secrets: MemorySecretStore(["anthropic": "sk-ant-demo-key-0000"]), isDemo: true)
+            // `-demo.github signedout` starts without GitHub; `-demo.github live` reads the real GitHub through
+            // the GitHub CLI (for checking the queries on real projects), everything else is made up.
+            let githubMode = arguments.string(forKey: "demo.github")
+            settings.githubLogin = githubMode == "signedout" ? nil : (githubMode == "live" ? .githubCLI : .token)
+            let secrets = MemorySecretStore(["anthropic": "sk-ant-demo-key-0000"])
+            let github: GitHubService? = githubMode == "live" ? LiveGitHubService(tokens: GitHubTokenStore(secrets: secrets, method: .githubCLI)) : nil
+            let model = AppModel(database: database, settings: settings, secrets: secrets, isDemo: true, github: github)
             model.loadDemoState()
             return model
         }
@@ -159,6 +165,11 @@ struct AppCommands: Commands {
             Divider()
             Button("Audiodatei importieren …") { importFiles() }
                 .keyboardShortcut("i", modifiers: .command)
+            Button("Aufgaben nach GitHub …") {
+                if let id = model.selectedMeetingId { model.requestComposer(for: id) }
+            }
+            .keyboardShortcut("g", modifiers: [.command, .shift])
+            .disabled(model.selectedMeetingId == nil || model.section != .meetings)
         }
         CommandMenu("Gehe zu") {
             Button("Suchen …") { model.overlay = model.overlay == .palette ? nil : .palette }

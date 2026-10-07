@@ -6,3 +6,7 @@ CODE_SIGN_IDENTITY = Apple Development
 
 // Use your own identifier if you want your build to keep its data separate from an official one.
 // PRODUCT_BUNDLE_IDENTIFIER = com.example.Transcripts
+
+// Client ID of a GitHub OAuth app (github.com › Settings › Developer settings › OAuth Apps, with "Device Flow"
+// turned on) for "Im Browser anmelden". Without it, Transcripts signs in to GitHub through the GitHub CLI.
+// GITHUB_CLIENT_ID = Ov23li0123456789abcd

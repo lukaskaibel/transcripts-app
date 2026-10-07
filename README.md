@@ -45,7 +45,8 @@
 Meeting assistants usually join your call as a bot or upload the recording to a server. This one does neither. It
 records the call and your microphone on your Mac, transcribes both there, and learns the voices of the people you
 talk to, so the transcript says who said what. Audio, transcripts and voices never leave the Mac; only the transcript
-text goes to the summary service you choose, and with a local model not even that.
+text goes to the summary service you choose, and with a local model not even that. Action items you send to GitHub
+yourself take their title, labels and due day along, and in private repositories a line of context with a quote.
 
 ## A quick tour
 
@@ -87,6 +88,22 @@ with names after a few seconds, a live summary if you like, and markers with a n
   <img alt="The live window with the running transcript and a marker, the menu bar menu during a recording, and the floating recorder" src="Design/screenshots/recording-light.webp">
 </picture>
 
+### Action items into GitHub
+
+*Send to GitHub* turns a meeting's action items into issues, in a popover that works like a new issue in
+[Issues for GitHub](https://github.com/lukaskaibel/issues-for-github): the project and repository on top, and for each
+task its status, assignees and labels, each picked from a search field that has the keyboard at once (S, A, L, then
+⌘Return). The app remembers where a calendar series, a meeting title or a group of people sent their tasks and
+proposes that place next time; it finds people's GitHub accounts by their names, and links a task to the issue that is
+already open instead of creating it twice. The summary's model picks labels from the repository's own and leaves out
+tasks that aren't work for it. Back in the meeting, each task shows its issue's number and status, is checked off when
+the issue is closed, and closes the issue when you check it off.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="Design/screenshots/github-dark.webp">
+  <img alt="A meeting's action items on their way to GitHub: the remembered project and repository, status, labels and assignee per task, one task left out and one linked to the issue that already exists" src="Design/screenshots/github-light.webp">
+</picture>
+
 ### In your language
 
 The interface speaks English, German, French, Spanish, Italian, Portuguese, Dutch, Polish, Russian and Ukrainian:
@@ -114,6 +131,9 @@ the languages its speech recognition transcribes best. It follows macOS, or the 
 - **Summarises, if you want.** Overview, decisions, action items and open questions from Anthropic, OpenAI, Google or
   a local model in Ollama, automatically after each meeting or on request, plus an optional live summary while
   recording. In the meeting's language or one you choose. API keys stay in the Keychain.
+- **Sends action items to GitHub.** As issues in the project and repository the meeting's series or people used
+  before, with status, assignees and labels, linked instead of duplicated, and kept in step: closed there, checked
+  off here. Signs in through the GitHub CLI, like Issues for GitHub.
 - **Keeps an archive you can search.** Meetings grouped by day, full-text search through every transcript, playback
   from any line, Markdown export, and import of audio or video files (voice memos, Zoom recordings, a meeting recorded
   in a room).
@@ -190,6 +210,10 @@ open Transcripts.xcodeproj
    the speech models once (about 700 MB, to `~/Library/Application Support/FluidAudio/Models`). macOS asks for
    *system audio recording* the first time you record.
 4. For summaries, open Settings › AI and enter an API key, or point it at Ollama.
+5. For GitHub, click *Send to GitHub* above a meeting's action items, or open Settings › GitHub. Transcripts uses the login
+   of the GitHub CLI (`gh auth login`; scopes `repo`, `project` and `read:org`), as Issues for GitHub does. To sign in
+   on github.com with a code instead, set `GITHUB_CLIENT_ID` in `Config/Local.xcconfig` to a GitHub OAuth app with the
+   device flow turned on.
 
 Tip: set the notification style for Transcripts to *Persistent* in System Settings › Notifications, so the "… is
 starting. Start recording?" reminder stays until you click it.
@@ -213,6 +237,8 @@ interface is German. Add `-AppleLanguages "(fr)"` to see it in another language.
 | Space | Play or pause the recording |
 | ⌘I | Import an audio or video file |
 | 1–9, Return, M, X, → | In *Who Is This?*: pick a name, the most likely one, you, nobody in particular, skip |
+| ⇧⌘G | Send the meeting's action items to GitHub |
+| ↑↓, Space, S, A, L, Z, Return, ⌘Return | In *Send to GitHub*: move between the tasks, include one or not, its status, assignees, labels, where they go, edit the title, create |
 
 ## Testing
 
@@ -284,6 +310,8 @@ Data lives in `~/Library/Application Support/Transcripts` (the database and the 
 processing; keep them forever, for 30 days, or not at all). API keys are in the Keychain.
 
 ## Good to know
+
+- Issues in public repositories never get context or quotes from the transcript, only title, labels and due day.
 
 - The speaker names in the live window are provisional; similar voices can share a name until the pass after the
   meeting sorts them out.

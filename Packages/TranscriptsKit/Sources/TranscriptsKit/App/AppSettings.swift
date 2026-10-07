@@ -103,6 +103,10 @@ public final class AppSettings {
         learnVoices = defaults.object(forKey: Keys.learnVoices) as? Bool ?? true
         audioRetention = AudioRetention(rawValue: defaults.string(forKey: Keys.audioRetention) ?? "") ?? .forever
         hideDockIcon = defaults.object(forKey: Keys.hideDockIcon) as? Bool ?? true
+        githubLogin = GitHubLoginMethod(rawValue: defaults.string(forKey: Keys.githubLogin) ?? "")
+        githubSuggestLabels = defaults.object(forKey: Keys.githubSuggestLabels) as? Bool ?? true
+        githubIncludeContext = defaults.object(forKey: Keys.githubIncludeContext) as? Bool ?? true
+        githubAskAfterSummary = defaults.object(forKey: Keys.githubAskAfterSummary) as? Bool ?? true
         if let data = defaults.data(forKey: Keys.models), let models = try? JSONDecoder().decode([String: String].self, from: data) {
             summaryModels = models
         } else {
@@ -133,6 +137,10 @@ public final class AppSettings {
         static let hideDockIcon = "hideDockIcon"
         static let models = "summaryModels"
         static let callTracksChecked = "callTracksChecked"
+        static let githubLogin = "githubLogin"
+        static let githubSuggestLabels = "githubSuggestLabels"
+        static let githubIncludeContext = "githubIncludeContext"
+        static let githubAskAfterSummary = "githubAskAfterSummary"
     }
 
     public var onboardingDone: Bool { didSet { defaults.set(onboardingDone, forKey: Keys.onboardingDone) } }
@@ -164,6 +172,14 @@ public final class AppSettings {
     public var audioRetention: AudioRetention { didSet { defaults.set(audioRetention.rawValue, forKey: Keys.audioRetention) } }
     /// Without an open window the app lives only in the menu bar.
     public var hideDockIcon: Bool { didSet { defaults.set(hideDockIcon, forKey: Keys.hideDockIcon) } }
+    /// How the app signs in to GitHub; nil until connected.
+    public var githubLogin: GitHubLoginMethod? { didSet { defaults.set(githubLogin?.rawValue, forKey: Keys.githubLogin) } }
+    /// Let the summary's language model pick labels and write a short description for new issues.
+    public var githubSuggestLabels: Bool { didSet { defaults.set(githubSuggestLabels, forKey: Keys.githubSuggestLabels) } }
+    /// New issues get context and a quote from the transcript (never in public repositories).
+    public var githubIncludeContext: Bool { didSet { defaults.set(githubIncludeContext, forKey: Keys.githubIncludeContext) } }
+    /// After a summary, offer to create the tasks in their remembered place with a notification.
+    public var githubAskAfterSummary: Bool { didSet { defaults.set(githubAskAfterSummary, forKey: Keys.githubAskAfterSummary) } }
 
     /// The recordings made before the call track was read at the device's rate were checked and repaired
     /// (see `CallTrackRepair`). Not observed: only the one-time maintenance reads it.

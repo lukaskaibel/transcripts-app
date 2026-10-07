@@ -264,13 +264,16 @@ public struct Person: Codable, Hashable, Identifiable, Sendable, FetchableRecord
     /// The user of this Mac. Their voice comes from the microphone.
     public var isMe: Bool
     public var createdAt: Date
+    /// Their GitHub account, for assigning issues: chosen by the user or learned from an assignment.
+    public var github: GitHubUser?
 
-    public init(id: String = UUID().uuidString, name: String, email: String? = nil, isMe: Bool = false, createdAt: Date = Date()) {
+    public init(id: String = UUID().uuidString, name: String, email: String? = nil, isMe: Bool = false, createdAt: Date = Date(), github: GitHubUser? = nil) {
         self.id = id
         self.name = name
         self.email = email
         self.isMe = isMe
         self.createdAt = createdAt
+        self.github = github
     }
 
     public var initials: String {
@@ -344,8 +347,10 @@ public struct ActionItem: Codable, Hashable, Identifiable, Sendable, FetchableRe
     public var due: String?
     public var done: Bool
     public var position: Int
+    /// The GitHub issue the task became, or was linked to.
+    public var issue: LinkedIssue?
 
-    public init(id: Int64? = nil, meetingId: String, text: String, owner: String? = nil, due: String? = nil, done: Bool = false, position: Int = 0) {
+    public init(id: Int64? = nil, meetingId: String, text: String, owner: String? = nil, due: String? = nil, done: Bool = false, position: Int = 0, issue: LinkedIssue? = nil) {
         self.id = id
         self.meetingId = meetingId
         self.text = text
@@ -353,6 +358,7 @@ public struct ActionItem: Codable, Hashable, Identifiable, Sendable, FetchableRe
         self.due = due
         self.done = done
         self.position = position
+        self.issue = issue
     }
 
     public mutating func didInsert(_ inserted: InsertionSuccess) {

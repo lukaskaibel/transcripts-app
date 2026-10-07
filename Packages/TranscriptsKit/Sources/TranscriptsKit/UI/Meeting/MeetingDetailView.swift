@@ -44,7 +44,8 @@ struct MeetingDetailView: View {
             }
         }
         .onKeyPress(.escape) {
-            guard model.overlay == nil else { return .ignored }
+            // SwiftUI hands this view key presses meant for an open dropdown too; Escape belongs to the dropdown.
+            guard model.overlay == nil, !Dropdown.isOpen else { return .ignored }
             model.selectedMeetingId = nil
             return .handled
         }

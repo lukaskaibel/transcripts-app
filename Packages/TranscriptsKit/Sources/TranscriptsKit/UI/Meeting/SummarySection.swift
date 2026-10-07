@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct SummarySection: View {
@@ -92,15 +93,10 @@ struct SummarySection: View {
                 BulletList(items: summary.decisions)
             }
             if !detail.actionItems.isEmpty {
-                HStack(spacing: 8) {
-                    subheading("Aufgaben")
-                    Text("\(detail.actionItems.filter(\.done).count) von \(detail.actionItems.count)")
-                        .font(.small)
-                        .foregroundStyle(Theme.textTertiary)
-                        .padding(.top, 20)
-                }
-                ActionItemList(items: detail.actionItems, people: Array(detail.people.values) + model.people)
-                    .padding(.top, 8)
+                TasksHeader(detail: detail)
+                    .padding(.top, 14)
+                ActionItemList(detail: detail, items: detail.actionItems, people: Array(detail.people.values) + model.people)
+                    .padding(.top, 4)
             }
             if !summary.openQuestions.isEmpty {
                 subheading("Offene Fragen")
@@ -189,53 +185,180 @@ struct BulletList: View {
     }
 }
 
+/// "Aufgaben 1 von 4" and the button that sends them to GitHub.
+struct TasksHeader: View {
+    @Environment(AppModel.self) private var model
+    let detail: MeetingDetail
+    @State private var open = false
+    @State private var width: CGFloat = 640
+
+    private var unsent: Int { detail.actionItems.filter { $0.issue == nil && !$0.done }.count }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("Aufgaben").font(.smallSemibold).foregroundStyle(Theme.textSecondary)
+            Text("\(detail.actionItems.filter(\.done).count) von \(detail.actionItems.count)")
+                .font(.small)
+                .foregroundStyle(Theme.textTertiary)
+            Spacer(minLength: 8)
+            if unsent > 0 || open {
+                Button {
+                    open.toggle()
+                } label: {
+                    HStack(spacing: 6) {
+                        GitHubMark(size: 13)
+                        Text("Nach GitHub")
+                    }
+                    .font(.small)
+                    .foregroundStyle(Theme.textBody)
+                    .padding(.horizontal, 9)
+                    .frame(height: 26)
+                    .hoverFill(active: open, fill: Theme.controlActive)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainPressStyle())
+                .help("Offene Aufgaben als GitHub-Issues anlegen (⇧⌘G)")
+                .accessibilityIdentifier("github.open")
+                .debugFrame("github.open")
+            } else if detail.actionItems.contains(where: { $0.issue != nil }) {
+                HStack(spacing: 5) {
+                    GitHubMark(size: 12)
+                    Text("Alle auf GitHub")
+                }
+                .font(.small)
+                .foregroundStyle(Theme.textTertiary)
+            }
+        }
+        .frame(height: 28)
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+        .dropdown(isPresented: $open) { close in
+            GitHubPopover(meetingId: detail.meeting.id, only: nil, width: max(620, width + 8), close: close)
+        }
+        .onChange(of: model.composerRequestCount, initial: true) {
+            guard model.composerRequest == detail.meeting.id, model.composerRequestItem == nil else { return }
+            model.consumeComposerRequest()
+            // Give the window a moment to come up after a notification.
+            Task {
+                try? await Task.sleep(for: .milliseconds(350))
+                open = true
+            }
+        }
+    }
+}
+
 struct ActionItemList: View {
     @Environment(AppModel.self) private var model
+    let detail: MeetingDetail
     let items: [ActionItem]
     let people: [Person]
 
     var body: some View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                HStack(spacing: 12) {
-                    Button {
-                        model.toggleActionItem(item)
-                    } label: {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                .fill(item.done ? Theme.accent : .clear)
-                            RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                .stroke(item.done ? Theme.accent : Theme.textTertiary, lineWidth: 1.5)
-                            if item.done {
-                                Image(systemName: "checkmark").font(.system(size: 8, weight: .bold)).foregroundStyle(Theme.onColor)
-                            }
-                        }
-                        .frame(width: 14, height: 14)
+                ActionItemRow(detail: detail, item: item, people: people)
+                    .overlay(alignment: .top) {
+                        if index > 0 { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
                     }
-                    .buttonStyle(PlainPressStyle())
-                    .accessibilityLabel(item.done ? "Als offen markieren" : "Als erledigt markieren")
-                    Text(item.text)
-                        .strikethrough(item.done, color: Theme.textTertiary)
-                        .foregroundStyle(item.done ? Theme.textTertiary : Theme.text)
-                        .lineLimit(2)
-                        .textSelection(.enabled)
-                    Spacer(minLength: 8)
-                    if let due = item.due {
-                        Text(due).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1)
-                    }
-                    if let owner = item.owner {
-                        Avatar(kind: kind(for: owner), size: 18)
-                            .help(owner)
-                    }
-                }
-                .padding(.horizontal, 14)
-                .frame(minHeight: 38)
-                .overlay(alignment: .top) {
-                    if index > 0 { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
-                }
             }
         }
         .cardStyle()
+        .task(id: detail.meeting.id) {
+            await model.refreshLinkedIssues(of: detail.meeting.id)
+        }
+    }
+}
+
+struct ActionItemRow: View {
+    @Environment(AppModel.self) private var model
+    let detail: MeetingDetail
+    let item: ActionItem
+    let people: [Person]
+    @State private var hovering = false
+    @State private var open = false
+    @State private var width: CGFloat = 640
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button {
+                model.toggleActionItem(item)
+            } label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .fill(item.done ? Theme.accent : .clear)
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .stroke(item.done ? Theme.accent : Theme.textTertiary, lineWidth: 1.5)
+                    if item.done {
+                        Image(systemName: "checkmark").font(.system(size: 8, weight: .bold)).foregroundStyle(Theme.onColor)
+                    }
+                }
+                .frame(width: 14, height: 14)
+            }
+            .buttonStyle(PlainPressStyle())
+            .accessibilityLabel(item.done ? "Als offen markieren" : "Als erledigt markieren")
+            .help(item.issue == nil ? "" : (item.done ? "Als offen markieren – öffnet das Issue wieder" : "Als erledigt markieren – schließt das Issue auf GitHub") as LocalizedStringKey)
+            .accessibilityIdentifier("task.\(item.id ?? 0).done")
+            .debugFrame("task.\(item.id ?? 0).done")
+            Text(item.text)
+                .strikethrough(item.done, color: Theme.textTertiary)
+                .foregroundStyle(item.done ? Theme.textTertiary : Theme.text)
+                .lineLimit(2)
+                .textSelection(.enabled)
+            Spacer(minLength: 8)
+            if let issue = item.issue {
+                IssuePill(issue: issue)
+            } else if !item.done {
+                Button {
+                    open = true
+                } label: {
+                    GitHubMark(size: 13)
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(width: 22, height: 22)
+                        .background(RoundedRectangle(cornerRadius: 5, style: .continuous).fill(open ? Theme.partHover : .clear))
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainPressStyle())
+                .opacity(hovering || open ? 1 : 0)
+                .help("Diese Aufgabe nach GitHub …")
+                .accessibilityIdentifier("task.\(item.id ?? 0).github")
+                .debugFrame("task.\(item.id ?? 0).github")
+            }
+            if let due = item.due {
+                Text(due).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1)
+            }
+            if let owner = item.owner {
+                Avatar(kind: kind(for: owner), size: 18)
+                    .help(owner)
+            }
+        }
+        .padding(.horizontal, 14)
+        .frame(minHeight: 38)
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+        .dropdown(isPresented: $open) { close in
+            GitHubPopover(meetingId: item.meetingId, only: item.id, width: max(620, width + 8), close: close)
+        }
+        .onChange(of: model.composerRequestCount) {
+            guard model.composerRequest == item.meetingId, let id = item.id, model.composerRequestItem == id else { return }
+            model.consumeComposerRequest()
+            Task {
+                try? await Task.sleep(for: .milliseconds(350))
+                open = true
+            }
+        }
+        .contextMenu {
+            if let issue = item.issue {
+                Button("Auf GitHub öffnen", systemImage: "arrow.up.right.square") { model.openIssue(issue) }
+                Button("Link kopieren", systemImage: "link") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(issue.url, forType: .string)
+                }
+                Divider()
+                Button("Verknüpfung mit \(issue.reference) lösen", systemImage: "xmark.circle") { model.unlinkIssue(item) }
+            } else if !item.done {
+                Button("Nach GitHub …", systemImage: "arrow.up.forward.app") { open = true }
+            }
+        }
     }
 
     private func kind(for owner: String) -> Avatar.Kind {

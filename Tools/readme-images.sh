@@ -31,7 +31,9 @@ scenes() {
   print -l "appearance $theme" "wait 1.5" \
     "select m-sync" "wait 2" "snapframe main meeting-$theme" \
     "section people" "wait 3" "snapframe main people-$theme" \
-    "naming" "wait 2.5" "snapframe main naming-$theme" "closeoverlay" "wait 1"
+    "naming" "wait 2.5" "snapframe main naming-$theme" "closeoverlay" "wait 1" \
+    "section meetings" "select m-sync" "wait 1.5" "clickid github.open" "wait 3" "snapframe main github-$theme" "wait 1.5" \
+    "clickid github.close" "wait 1"
 }
 
 echo "English, light and dark…"

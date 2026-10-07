@@ -24,6 +24,15 @@ public struct SettingsView: View {
             VoiceSettings()
                 .tabItem { Label("Stimmen", systemImage: "person.2") }
                 .tag(AppModel.SettingsTab.voices)
+            GitHubSettings()
+                .tabItem {
+                    Label {
+                        Text("GitHub")
+                    } icon: {
+                        if let mark = GitHubMark.image(size: 17) { Image(nsImage: mark) } else { Image(systemName: "arrow.up.forward.app") }
+                    }
+                }
+                .tag(AppModel.SettingsTab.github)
         }
         .frame(width: 600)
         .onAppear(perform: followRequest)
@@ -547,6 +556,181 @@ struct VoiceSettings: View {
             }
         } message: {
             Text("Die Personen und ihre Zuordnungen bleiben, aber die App erkennt niemanden mehr an der Stimme, bis sie neu gelernt hat.")
+        }
+    }
+}
+
+// MARK: - GitHub
+
+struct GitHubSettings: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        @Bindable var settings = model.settings
+        Form {
+            Section {
+                account
+            } footer: {
+                Text("Transcripts legt Issues mit denselben Rechten an wie Issues for GitHub: Issues und Projekte deiner Repositories und Organisationen.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Neue Issues") {
+                Toggle(isOn: $settings.githubSuggestLabels) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Labels vorschlagen")
+                        Text("Das Modell der Zusammenfassung wählt passende Labels aus denen, die es im Repository schon gibt, schreibt eine kurze Beschreibung und lässt Aufgaben weg, die nicht ins Repository gehören.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Toggle(isOn: $settings.githubIncludeContext) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Kontext aus dem Transkript")
+                        Text("Zwei Sätze Beschreibung und ein Zitat mit Zeitstempel. Bei öffentlichen Repositories nie.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Toggle(isOn: $settings.githubAskAfterSummary) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Nach der Zusammenfassung fragen")
+                        Text("Eine Mitteilung mit „Anlegen“, sobald die Aufgaben eines Meetings bereitstehen, dessen Ziel die App sich gemerkt hat.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            Section {
+                if model.githubRoutes.isEmpty {
+                    Text("Noch nichts gemerkt. Sobald du Aufgaben nach GitHub schickst, merkt sich die App das Ziel für die Kalenderserie, den Titel und die Runde.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(RouteGroup.groups(model.githubRoutes)) { group in
+                        RouteRow(group: group)
+                    }
+                }
+            } header: {
+                Text("Gemerkte Ziele")
+            } footer: {
+                if !model.githubRoutes.isEmpty {
+                    Text("Lernt bei jedem Anlegen dazu. Serien kommen aus dem Kalender, Runden aus den erkannten Stimmen.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .fixedSize(horizontal: false, vertical: true)
+        .task { await model.refreshGitHubCatalog() }
+    }
+
+    @ViewBuilder
+    private var account: some View {
+        if let user = model.githubConnection.user {
+            HStack(spacing: 10) {
+                GitHubAvatar(user: user, size: 28)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(user.name.map { "\($0) (\(user.login))" } ?? user.login)
+                    Text(model.settings.githubLogin == .githubCLI ? "Angemeldet über die GitHub-CLI, wie Issues for GitHub" : "Angemeldet auf github.com")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button("Abmelden") { model.signOutGitHub() }
+            }
+        } else if let code = model.githubDeviceCode {
+            HStack(spacing: 10) {
+                Text(code.userCode).font(.system(.title3, design: .monospaced)).textSelection(.enabled)
+                Text("Code kopiert – auf github.com einfügen").font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                ProgressView().controlSize(.small)
+                Button("Abbrechen") { model.cancelGitHubDeviceFlow() }
+            }
+        } else {
+            HStack(spacing: 10) {
+                GitHubMark(size: 22)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Nicht verbunden")
+                    if case .failed(let message) = model.githubConnection {
+                        Text(message).font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
+                    } else if case .connecting = model.githubConnection {
+                        Text("Verbinde …").font(.caption).foregroundStyle(.secondary)
+                    } else {
+                        Text("Aufgaben direkt als Issues anlegen").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Spacer()
+                if model.githubDeviceFlowAvailable {
+                    Button("Im Browser anmelden") { model.startGitHubDeviceFlow() }
+                }
+                if model.githubCLIAvailable {
+                    Button("GitHub-CLI verwenden") { Task { await model.connectGitHubCLI() } }
+                        .keyboardShortcut(.defaultAction)
+                }
+            }
+        }
+    }
+}
+
+/// A calendar series and its title remember the same thing; the settings show them as one.
+struct RouteGroup: Identifiable {
+    var routes: [GitHubRoute]
+    var id: String { routes.compactMap(\.id).map(String.init).joined(separator: "-") }
+    /// The one that names the kind: the series when there is one.
+    var main: GitHubRoute { routes.first { $0.kind == .series } ?? routes[0] }
+
+    static func groups(_ routes: [GitHubRoute]) -> [RouteGroup] {
+        var result: [RouteGroup] = []
+        for route in routes {
+            if route.kind != .people,
+               let index = result.firstIndex(where: { $0.main.kind != .people && $0.main.label == route.label && $0.main.targetKey == route.targetKey }) {
+                result[index].routes.append(route)
+            } else {
+                result.append(RouteGroup(routes: [route]))
+            }
+        }
+        return result
+    }
+}
+
+/// One remembered target, with the button to forget it.
+private struct RouteRow: View {
+    @Environment(AppModel.self) private var model
+    let group: RouteGroup
+    private var route: GitHubRoute { group.main }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: route.kind == .people ? "person.2" : (route.kind == .series ? "calendar" : "text.quote"))
+                .foregroundStyle(.secondary)
+                .frame(width: 18)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(route.label).lineLimit(1)
+                Text(kind).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 8)
+            TargetLabel(target: route.target)
+                .foregroundStyle(.primary)
+            Text("\(group.routes.map(\.count).max() ?? route.count)×").font(.caption).monospacedDigit().foregroundStyle(.secondary).frame(minWidth: 22, alignment: .trailing)
+            Button {
+                for route in group.routes { model.forgetRoute(route) }
+            } label: {
+                Image(systemName: "xmark").font(.system(size: 10, weight: .semibold))
+            }
+            .buttonStyle(.borderless)
+            .help("Vergessen")
+        }
+    }
+
+    private var kind: String {
+        switch route.kind {
+        case .series: String(localized: "Kalenderserie", comment: "a remembered GitHub target: for the meetings of a recurring calendar event")
+        case .title: String(localized: "Gleicher Titel", comment: "a remembered GitHub target: for meetings with this title")
+        case .people: String(localized: "Gleiche Runde", comment: "a remembered GitHub target: for meetings with these people")
         }
     }
 }

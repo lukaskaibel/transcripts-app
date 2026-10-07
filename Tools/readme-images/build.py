@@ -28,6 +28,7 @@ for theme in ["light", "dark"]:
     webp(place(window(capture(f"meeting-{theme}")), theme, (160, 130), 2000), f"meeting-{theme}")
     webp(place(window(capture(f"people-{theme}")), theme, (130, 110), 1800), f"people-{theme}")
     webp(place(window(capture(f"naming-{theme}")), theme, (130, 110), 1800), f"naming-{theme}")
+    webp(place(window(capture(f"github-{theme}")), theme, (130, 110), 1800), f"github-{theme}")
 
     # While recording: the live window, with the floating recorder and the menu bar item beside it.
     live = window(capture(f"live-{theme}"))

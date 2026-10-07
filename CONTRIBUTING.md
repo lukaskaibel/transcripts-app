@@ -23,8 +23,9 @@ Every pull request is reviewed and merged by the maintainer; nothing lands on `m
 
 ## What to keep in mind
 
-- **Nothing leaves the Mac** except the transcript text that goes to the summary service the user picked. No
-  analytics, no uploads, no servers of our own.
+- **Nothing leaves the Mac** except the transcript text that goes to the summary service the user picked, and the
+  issues the user sends to GitHub themselves (never with transcript quotes for a public repository). No analytics,
+  no uploads, no servers of our own.
 - **Only what the user confirms defines a voice.** Automatic names and moved lines may refine a voice but never start
   one, and a correction must be able to undo what followed from a mistake. `Speakers/VoiceProfile.swift` and
   `Speakers/VoiceRecheck.swift` explain how.
