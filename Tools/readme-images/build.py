@@ -5,7 +5,6 @@
 import os
 import sys
 
-import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -42,15 +41,12 @@ for theme in ["light", "dark"]:
     items = [(live, (px, py)), (menubar, (side, py)), (floating, (side, py + menubar.height + gap))]
     webp(layout(items, (width, height), theme, 1800), f"recording-{theme}")
 
-# One meeting in three languages, split on a slant.
-languages = [place(window(capture(f"meeting-light-{language}")), "light", (130, 110), 1800) for language in ["de", "fr", "uk"]]
-w, h = languages[0].size
-ys, xs = np.mgrid[0:h, 0:w]
-picture = languages[2].copy()
-for image, edge in [(languages[1], 0.67), (languages[0], 0.37)]:
-    mask = np.clip(w * (edge - 0.16 * ys / h) - xs + 0.5, 0, 1)
-    picture.paste(image, (0, 0), Image.fromarray((mask * 255).astype(np.uint8), "L"))
-webp(picture, "languages")
+# One meeting in three languages, as three windows on top of each other.
+windows = [scaled(window(capture(f"meeting-light-{language}")), 0.5) for language in ["de", "fr", "uk"]]
+step, px, py = (300, 150), 120, 100
+size = (px * 2 + windows[0].width + step[0] * 2, py * 2 + windows[0].height + step[1] * 2)
+items = [(image, (px + step[0] * index, py + step[1] * index)) for index, image in enumerate(windows)]
+webp(layout(items, size, "light", 1800), "languages")
 
 print("Social preview")
 S = 2  # drawn at 2x, saved at 1280 x 640

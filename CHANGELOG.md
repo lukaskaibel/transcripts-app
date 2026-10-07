@@ -41,7 +41,7 @@ The first version: everything below is new.
   "Hai or Julian?", also in the summary.
 - **Corrections carry through.** Only what you confirm defines a voice. After every confirmation or correction, every
   voice you haven't settled is judged again, so an early mistake doesn't steer later meetings. Lines that sound
-  clearly like someone else move there, marked, with *Keep* and *Undo*.
+  clearly like someone else move there, marked, with *Keep* and *Move Back*.
 - **"Who is this?"** after a meeting: one voice after another, the sample playing, its likely names first; a number
   key or Return names it.
 - **Names from the conversation.** Introductions ("I'm Paula"), thanks ("thanks, Jonas"), answers and handovers by

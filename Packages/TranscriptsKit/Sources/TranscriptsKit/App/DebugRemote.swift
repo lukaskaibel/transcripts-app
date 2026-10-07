@@ -158,15 +158,52 @@ final class DebugRemote {
             return
         }
         let view = frame ? content.superview ?? content : content
+
         // Give SwiftUI a moment to settle after the last change.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [output] in
             view.layoutSubtreeIfNeeded()
-            guard let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
+            // Always at 2x, whichever screen the window is on.
+            let size = view.bounds.size
+            guard let rep = NSBitmapImageRep(
+                bitmapDataPlanes: nil, pixelsWide: Int(size.width * 2), pixelsHigh: Int(size.height * 2), bitsPerSample: 8,
+                samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+            ) else { return }
+            rep.size = size
             view.cacheDisplay(in: view.bounds, to: rep)
+            if frame { Self.colourWindowButtons(of: window, in: view, on: rep) }
             if let data = rep.representation(using: .png, properties: [:]) {
                 try? data.write(to: output.appendingPathComponent("\(file).png"))
             }
         }
+    }
+}
+
+extension DebugRemote {
+    /// The title bar's buttons in the colours of an active window: macOS draws them grey while the app isn't in front,
+    /// which it often isn't while the screenshots are taken.
+    static func colourWindowButtons(of window: NSWindow, in view: NSView, on rep: NSBitmapImageRep) {
+        let buttons: [(NSWindow.ButtonType, NSColor)] = [
+            (.closeButton, NSColor(red: 1.0, green: 0.37, blue: 0.34, alpha: 1)),
+            (.miniaturizeButton, NSColor(red: 1.0, green: 0.74, blue: 0.18, alpha: 1)),
+            (.zoomButton, NSColor(red: 0.16, green: 0.78, blue: 0.25, alpha: 1)),
+        ]
+        guard let context = NSGraphicsContext(bitmapImageRep: rep) else { return }
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = context
+        for (type, colour) in buttons {
+            guard let button = window.standardWindowButton(type), !button.isHidden else { continue }
+            var rect = button.convert(button.bounds, to: view)
+            if view.isFlipped { rect.origin.y = view.bounds.height - rect.maxY }
+            let side = min(rect.width, rect.height)
+            let circle = NSRect(x: rect.midX - side / 2, y: rect.midY - side / 2, width: side, height: side)
+            colour.setFill()
+            NSBezierPath(ovalIn: circle).fill()
+            colour.blended(withFraction: 0.25, of: .black)?.setStroke()
+            let ring = NSBezierPath(ovalIn: circle.insetBy(dx: 0.25, dy: 0.25))
+            ring.lineWidth = 0.5
+            ring.stroke()
+        }
+        NSGraphicsContext.restoreGraphicsState()
     }
 }
 
