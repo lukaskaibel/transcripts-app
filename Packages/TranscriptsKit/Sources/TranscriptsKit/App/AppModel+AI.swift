@@ -128,11 +128,11 @@ extension AppModel {
     public func generateSummary(_ meetingId: String) async {
         guard !summarizing.contains(meetingId) else { return }
         guard let (provider, model) = summaryProvider() else {
-            showToast("Kein KI-Modell eingerichtet", "Hinterlege in den Einstellungen unter KI einen API-Key oder verbinde Ollama.", isError: true)
+            showToast(String(localized: "Kein KI-Modell eingerichtet"), String(localized: "Hinterlege in den Einstellungen unter KI einen API-Key oder verbinde Ollama."), isError: true)
             return
         }
         guard let detail = try? database.detail(of: meetingId), !detail.segments.isEmpty else {
-            showToast("Nichts zusammenzufassen", "Dieses Meeting hat noch kein Transkript.")
+            showToast(String(localized: "Nichts zusammenzufassen"), String(localized: "Dieses Meeting hat noch kein Transkript."))
             return
         }
         summarizing.insert(meetingId)
@@ -154,7 +154,7 @@ extension AppModel {
             }
             applyNameHints(outcome.speakerNames, in: detail)
         } catch {
-            showToast("Zusammenfassung fehlgeschlagen", error.localizedDescription, isError: true)
+            showToast(String(localized: "Zusammenfassung fehlgeschlagen"), error.localizedDescription, isError: true)
         }
     }
 

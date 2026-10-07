@@ -11,19 +11,19 @@ extension AppModel {
             return
         }
         if isDemo {
-            showToast("Demo", "Im Demo-Modus wird nicht aufgenommen.")
+            showToast(String(localized: "Demo"), String(localized: "Im Demo-Modus wird nicht aufgenommen."))
             return
         }
         switch MicrophoneCapture.permission {
         case .notDetermined:
             guard await MicrophoneCapture.requestPermission() else {
                 refreshPermissions()
-                showToast("Kein Zugriff aufs Mikrofon", "Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit › Mikrofon.", isError: true)
+                showToast(String(localized: "Kein Zugriff aufs Mikrofon"), String(localized: "Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit › Mikrofon."), isError: true)
                 return
             }
             refreshPermissions()
         case .denied, .restricted:
-            showToast("Kein Zugriff aufs Mikrofon", "Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit › Mikrofon.", isError: true)
+            showToast(String(localized: "Kein Zugriff aufs Mikrofon"), String(localized: "Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit › Mikrofon."), isError: true)
             openPrivacySettings("Privacy_Microphone")
             return
         default:
@@ -33,7 +33,7 @@ extension AppModel {
         let now = Date()
         let calendarMeeting = event ?? calendar.meeting(around: now)
         let meeting = Meeting(
-            title: calendarMeeting?.title ?? "Meeting \(TimeFormat.time(now))",
+            title: calendarMeeting?.title ?? String(localized: "Meeting \(TimeFormat.time(now))", comment: "title of a recording without a calendar event; the time it started"),
             startedAt: now,
             status: .recording,
             origin: .recording,
@@ -45,7 +45,7 @@ extension AppModel {
             try database.save(meeting)
             _ = try database.mePerson(defaultName: Self.defaultMyName)
         } catch {
-            showToast("Aufnahme konnte nicht starten", error.localizedDescription, isError: true)
+            showToast(String(localized: "Aufnahme konnte nicht starten"), error.localizedDescription, isError: true)
             return
         }
         let session = RecordingSession(meeting: meeting, database: database, engine: engine, configuration: .init(
@@ -58,12 +58,12 @@ extension AppModel {
         } catch {
             try? database.deleteMeeting(meeting.id)
             try? FileManager.default.removeItem(at: AppPaths.folder(for: meeting.id))
-            showToast("Aufnahme konnte nicht starten", error.localizedDescription, isError: true)
+            showToast(String(localized: "Aufnahme konnte nicht starten"), error.localizedDescription, isError: true)
             return
         }
         recording = session
         if let message = session.errorMessage {
-            showToast("Systemaudio wird nicht aufgenommen", message, isError: true)
+            showToast(String(localized: "Systemaudio wird nicht aufgenommen"), message, isError: true)
         }
         if engineState != .ready { prepareEngine() }
         if settings.floatingRecorder { floatingRecorder?.show() }

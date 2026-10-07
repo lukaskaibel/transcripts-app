@@ -6,9 +6,9 @@ public enum Appearance: String, CaseIterable, Identifiable, Sendable {
     public var id: String { rawValue }
     public var title: String {
         switch self {
-        case .system: "Automatisch"
-        case .light: "Hell"
-        case .dark: "Dunkel"
+        case .system: String(localized: "Automatisch")
+        case .light: String(localized: "Hell", comment: "appearance: light")
+        case .dark: String(localized: "Dunkel", comment: "appearance: dark")
         }
     }
 }
@@ -18,16 +18,16 @@ public enum VoiceStrictness: String, CaseIterable, Identifiable, Sendable {
     public var id: String { rawValue }
     public var title: String {
         switch self {
-        case .strict: "Vorsichtig"
-        case .standard: "Ausgewogen"
-        case .relaxed: "Großzügig"
+        case .strict: String(localized: "Vorsichtig", comment: "how readily voices are matched to people: cautious")
+        case .standard: String(localized: "Ausgewogen", comment: "how readily voices are matched to people: balanced")
+        case .relaxed: String(localized: "Großzügig", comment: "how readily voices are matched to people: generous")
         }
     }
     public var detail: String {
         switch self {
-        case .strict: "Ordnet Stimmen nur bei sehr hoher Sicherheit selbst zu."
-        case .standard: "Empfohlen für die meisten Meetings."
-        case .relaxed: "Schlägt öfter vor, irrt sich aber auch öfter."
+        case .strict: String(localized: "Ordnet Stimmen nur bei sehr hoher Sicherheit selbst zu.")
+        case .standard: String(localized: "Empfohlen für die meisten Meetings.")
+        case .relaxed: String(localized: "Schlägt öfter vor, irrt sich aber auch öfter.")
         }
     }
     public var thresholds: VoiceThresholds {
@@ -44,9 +44,9 @@ public enum AudioRetention: String, CaseIterable, Identifiable, Sendable {
     public var id: String { rawValue }
     public var title: String {
         switch self {
-        case .forever: "Immer behalten"
-        case .month: "30 Tage behalten"
-        case .never: "Nach dem Transkribieren löschen"
+        case .forever: String(localized: "Immer behalten", comment: "what happens to a meeting's audio recording")
+        case .month: String(localized: "30 Tage behalten", comment: "what happens to a meeting's audio recording")
+        case .never: String(localized: "Nach dem Transkribieren löschen")
         }
     }
 }

@@ -42,7 +42,7 @@ extension AppModel {
                 startedAt: created,
                 status: .processing,
                 origin: .importedFile,
-                processingStep: "Wird importiert"
+                processingStep: String(localized: "Wird importiert")
             )
             do {
                 try FileManager.default.createDirectory(at: AppPaths.folder(for: meeting.id), withIntermediateDirectories: true)
@@ -58,7 +58,7 @@ extension AppModel {
                     enqueueProcessing(meeting.id)
                 }
             } catch {
-                showToast("„\(url.lastPathComponent)“ ließ sich nicht importieren", error.localizedDescription, isError: true)
+                showToast(String(localized: "\(Strings.quote(url.lastPathComponent)) ließ sich nicht importieren", comment: "toast: a file name in quotes"), error.localizedDescription, isError: true)
             }
         }
         if let first = urls.first, let row = rows.first(where: { $0.meeting.title == first.deletingPathExtension().lastPathComponent }) {
@@ -83,7 +83,7 @@ extension AppModel {
         } catch {
             try? database.update(meetingId: meetingId) { meeting in
                 meeting.status = .failed
-                meeting.errorMessage = "Die Datei enthält kein lesbares Audio."
+                meeting.errorMessage = String(localized: "Die Datei enthält kein lesbares Audio.")
             }
         }
     }
@@ -96,27 +96,27 @@ extension AppModel {
         if let source = detail.meeting.source { meta += " · \(source)" }
         lines.append(meta)
         let names = detail.speakers.map { $0.isMe ? myName : detail.textName(for: $0.key) }
-        if !names.isEmpty { lines.append("Teilnehmer: " + names.joined(separator: ", ")) }
+        if !names.isEmpty { lines.append(String(localized: "Teilnehmer: \(names.joined(separator: ", "))")) }
         if let summary = detail.summary {
-            lines += ["", "## Zusammenfassung", "", summary.overview]
+            lines += ["", "## " + String(localized: "Zusammenfassung"), "", summary.overview]
             if !summary.decisions.isEmpty {
-                lines += ["", "### Entscheidungen", ""] + summary.decisions.map { "- \($0)" }
+                lines += ["", "### " + String(localized: "Entscheidungen"), ""] + summary.decisions.map { "- \($0)" }
             }
             if !detail.actionItems.isEmpty {
-                lines += ["", "### Aufgaben", ""] + detail.actionItems.map { item in
+                lines += ["", "### " + String(localized: "Aufgaben"), ""] + detail.actionItems.map { item in
                     let extra = [item.owner, item.due].compactMap { $0 }.joined(separator: ", ")
                     return "- [\(item.done ? "x" : " ")] \(item.text)\(extra.isEmpty ? "" : " (\(extra))")"
                 }
             }
             if !summary.openQuestions.isEmpty {
-                lines += ["", "### Offene Fragen", ""] + summary.openQuestions.map { "- \($0)" }
+                lines += ["", "### " + String(localized: "Offene Fragen"), ""] + summary.openQuestions.map { "- \($0)" }
             }
         }
         if !detail.markers.isEmpty {
-            lines += ["", "## Markierungen", ""] + detail.markers.map { "- \(TimeFormat.clock($0.time)) \($0.text.isEmpty ? "Markierung" : $0.text)" }
+            lines += ["", "## " + String(localized: "Markierungen", comment: "markers set during a recording"), ""] + detail.markers.map { "- \(TimeFormat.clock($0.time)) \($0.text.isEmpty ? String(localized: "Markierung", comment: "a marker set during a recording, without a text") : $0.text)" }
         }
         if !detail.segments.isEmpty {
-            lines += ["", "## Transkript", ""]
+            lines += ["", "## " + String(localized: "Transkript"), ""]
             for segment in detail.segments {
                 let name = segment.speakerKey == MeetingSpeaker.meKey ? myName : detail.textName(for: segment.speakerKey)
                 lines.append("**\(name)** (\(TimeFormat.clock(segment.start))): \(segment.text)")
@@ -129,21 +129,21 @@ extension AppModel {
     public func summaryText(for detail: MeetingDetail) -> String {
         guard let summary = detail.summary else { return "" }
         var lines = [summary.overview]
-        if !summary.decisions.isEmpty { lines += ["", "Entscheidungen:"] + summary.decisions.map { "• \($0)" } }
+        if !summary.decisions.isEmpty { lines += ["", String(localized: "Entscheidungen:")] + summary.decisions.map { "• \($0)" } }
         if !detail.actionItems.isEmpty {
-            lines += ["", "Aufgaben:"] + detail.actionItems.map { item in
+            lines += ["", String(localized: "Aufgaben:")] + detail.actionItems.map { item in
                 let extra = [item.owner, item.due].compactMap { $0 }.joined(separator: ", ")
                 return "• \(item.text)\(extra.isEmpty ? "" : " (\(extra))")"
             }
         }
-        if !summary.openQuestions.isEmpty { lines += ["", "Offene Fragen:"] + summary.openQuestions.map { "• \($0)" } }
+        if !summary.openQuestions.isEmpty { lines += ["", String(localized: "Offene Fragen:")] + summary.openQuestions.map { "• \($0)" } }
         return lines.joined(separator: "\n")
     }
 
     public func copyToClipboard(_ text: String, what: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
-        showToast("\(what) kopiert")
+        showToast(String(localized: "\(what) kopiert", comment: "toast; the argument is what was copied: Meeting or Zusammenfassung"))
     }
 
     public func exportMarkdown(_ detail: MeetingDetail) {
@@ -155,14 +155,14 @@ extension AppModel {
         do {
             try markdown(for: detail).write(to: url, atomically: true, encoding: .utf8)
         } catch {
-            showToast("Export fehlgeschlagen", error.localizedDescription, isError: true)
+            showToast(String(localized: "Export fehlgeschlagen"), error.localizedDescription, isError: true)
         }
     }
 
     public func revealAudio(_ meetingId: String) {
         let folder = AppPaths.folder(for: meetingId)
         guard FileManager.default.fileExists(atPath: folder.path) else {
-            showToast("Keine Aufnahme vorhanden")
+            showToast(String(localized: "Keine Aufnahme vorhanden"))
             return
         }
         NSWorkspace.shared.activateFileViewerSelecting([folder])

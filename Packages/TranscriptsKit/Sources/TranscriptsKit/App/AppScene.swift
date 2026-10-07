@@ -42,7 +42,7 @@ public struct TranscriptsScene: Scene {
         } catch {
             Log.app.fault("Opening the database failed: \(error.localizedDescription)")
             let model = AppModel(database: (try? AppDatabase.inMemory())!, settings: AppSettings())
-            model.showToast("Die Datenbank ließ sich nicht öffnen", error.localizedDescription, isError: true)
+            model.showToast(String(localized: "Die Datenbank ließ sich nicht öffnen"), error.localizedDescription, isError: true)
             return model
         }
     }
@@ -179,7 +179,7 @@ struct AppCommands: Commands {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = AppModel.importableTypes
         panel.allowsMultipleSelection = true
-        panel.message = "Wähle Aufnahmen, die transkribiert werden sollen."
+        panel.message = String(localized: "Wähle Aufnahmen, die transkribiert werden sollen.")
         guard panel.runModal() == .OK else { return }
         model.importAudio(panel.urls)
     }

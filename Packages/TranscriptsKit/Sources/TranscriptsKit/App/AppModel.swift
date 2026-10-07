@@ -40,11 +40,11 @@ public final class AppModel {
         public var id: String { rawValue }
         public var title: String {
             switch self {
-            case .general: "Allgemein"
-            case .recording: "Aufnahme"
-            case .transcription: "Transkription"
-            case .ai: "KI"
-            case .voices: "Stimmen"
+            case .general: String(localized: "Allgemein")
+            case .recording: String(localized: "Aufnahme", comment: "settings tab: recording")
+            case .transcription: String(localized: "Transkription")
+            case .ai: String(localized: "KI")
+            case .voices: String(localized: "Stimmen", comment: "settings tab: people's voices")
             }
         }
         public var systemImage: String {
@@ -79,7 +79,7 @@ public final class AppModel {
 
         public var title: String {
             switch self {
-            case .nameVoices: "Wer ist das?"
+            case .nameVoices: String(localized: "Wer ist das?")
             }
         }
     }
@@ -249,7 +249,7 @@ public final class AppModel {
 
     public static var defaultMyName: String {
         let full = NSFullUserName().trimmingCharacters(in: .whitespaces)
-        return full.isEmpty ? "Ich" : full
+        return full.isEmpty ? String(localized: "Ich", comment: "the user's own name when macOS knows none") : full
     }
 
     public func person(_ id: String?) -> Person? {
@@ -422,7 +422,7 @@ public final class AppModel {
         do {
             if enabled { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
         } catch {
-            showToast("Autostart ließ sich nicht ändern", error.localizedDescription, isError: true)
+            showToast(String(localized: "Autostart ließ sich nicht ändern"), error.localizedDescription, isError: true)
         }
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
@@ -467,7 +467,7 @@ public final class AppModel {
         do {
             try await processor.process(meetingId: meetingId, options: options)
         } catch {
-            showToast("Meeting konnte nicht verarbeitet werden", error.localizedDescription, isError: true)
+            showToast(String(localized: "Meeting konnte nicht verarbeitet werden"), error.localizedDescription, isError: true)
             return
         }
         await finishAudio(of: meetingId)
@@ -505,7 +505,7 @@ public final class AppModel {
             } else {
                 try? database.update(meetingId: meeting.id) { meeting in
                     meeting.status = .failed
-                    meeting.errorMessage = "Die Aufnahme wurde unterbrochen, bevor Audio gespeichert war."
+                    meeting.errorMessage = String(localized: "Die Aufnahme wurde unterbrochen, bevor Audio gespeichert war.")
                 }
             }
         }
@@ -521,13 +521,13 @@ public final class AppModel {
 
     public func reprocess(_ meetingId: String) {
         guard AudioArchiver.hasAudio(meetingId: meetingId) else {
-            showToast("Keine Aufnahme mehr vorhanden", "Das Audio dieses Meetings wurde gelöscht.", isError: true)
+            showToast(String(localized: "Keine Aufnahme mehr vorhanden"), String(localized: "Das Audio dieses Meetings wurde gelöscht."), isError: true)
             return
         }
         try? database.update(meetingId: meetingId) { meeting in
             meeting.status = .processing
             meeting.progress = 0
-            meeting.processingStep = "Wartet"
+            meeting.processingStep = String(localized: "Wartet", comment: "processing step: waiting in line to be transcribed")
         }
         enqueueProcessing(meetingId)
     }

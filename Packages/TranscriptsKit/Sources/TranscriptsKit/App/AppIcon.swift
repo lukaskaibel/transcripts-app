@@ -9,10 +9,10 @@ public enum AppIconChoice: String, CaseIterable, Identifiable, Sendable {
 
     public var title: String {
         switch self {
-        case .automatic: "Automatisch"
-        case .light: "Hell"
-        case .dark: "Dunkel"
-        case .indigo: "Indigo"
+        case .automatic: String(localized: "Automatisch")
+        case .light: String(localized: "Hell", comment: "app icon: light")
+        case .dark: String(localized: "Dunkel", comment: "app icon: dark")
+        case .indigo: String(localized: "Indigo", comment: "app icon color")
         }
     }
 

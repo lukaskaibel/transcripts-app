@@ -35,7 +35,7 @@ extension AppModel {
         do {
             try database.assign(speaker, to: personId)
         } catch {
-            showToast("Zuordnung fehlgeschlagen", error.localizedDescription, isError: true)
+            showToast(String(localized: "Zuordnung fehlgeschlagen"), error.localizedDescription, isError: true)
             return
         }
         refreshVoices()
@@ -47,7 +47,7 @@ extension AppModel {
             let person = try database.person(named: name, email: email)
             assign(speaker, to: person.id)
         } catch {
-            showToast("Person konnte nicht angelegt werden", error.localizedDescription, isError: true)
+            showToast(String(localized: "Person konnte nicht angelegt werden"), error.localizedDescription, isError: true)
         }
     }
 
@@ -122,8 +122,8 @@ extension AppModel {
             let open = self.voicesToName().filter { $0.speaker.meetingId == meetingId }.count
             guard open > 0, let title = self.row(for: meetingId)?.meeting.title else { return }
             self.showToast(
-                open == 1 ? "Eine Stimme ohne Namen" : "\(open) Stimmen ohne Namen",
-                "„\(title)“ ist fertig.",
+                String(localized: "\(open) Stimmen ohne Namen", comment: "plural: toast after a meeting was processed; voices not yet linked to a person"),
+                String(localized: "\(Strings.quote(title)) ist fertig.", comment: "toast: a meeting title in quotes"),
                 action: .nameVoices(meetingId: meetingId)
             )
         }
@@ -151,7 +151,7 @@ extension AppModel {
         do {
             try database.moveLines(segmentIds, in: meetingId, toPerson: personId)
         } catch {
-            showToast("Zuordnung fehlgeschlagen", error.localizedDescription, isError: true)
+            showToast(String(localized: "Zuordnung fehlgeschlagen"), error.localizedDescription, isError: true)
             return
         }
         refreshVoices()
@@ -168,7 +168,7 @@ extension AppModel {
         do {
             try database.moveLinesToNewVoice(segmentIds, in: meetingId)
         } catch {
-            showToast("Trennen fehlgeschlagen", error.localizedDescription, isError: true)
+            showToast(String(localized: "Trennen fehlgeschlagen", comment: "toast: making some lines a voice of their own failed"), error.localizedDescription, isError: true)
             return
         }
         refreshVoices()
@@ -189,7 +189,7 @@ extension AppModel {
             }
             try database.moveVoiceprints(samples.filter { $0.source == .legacy }.map(\.id), to: personId)
         } catch {
-            showToast("Verschieben fehlgeschlagen", error.localizedDescription, isError: true)
+            showToast(String(localized: "Verschieben fehlgeschlagen"), error.localizedDescription, isError: true)
             return
         }
         refreshVoices()
@@ -223,9 +223,9 @@ extension AppModel {
         guard source.id != target.id, !source.isMe else { return }
         do {
             try database.mergePerson(source.id, into: target.id)
-            showToast("Zusammengeführt", "\(source.name) ist jetzt \(target.name).")
+            showToast(String(localized: "Zusammengeführt", comment: "toast: two people were merged into one"), String(localized: "\(source.name) ist jetzt \(target.name)."))
         } catch {
-            showToast("Zusammenführen fehlgeschlagen", error.localizedDescription, isError: true)
+            showToast(String(localized: "Zusammenführen fehlgeschlagen"), error.localizedDescription, isError: true)
         }
         refreshVoices()
     }
@@ -301,8 +301,8 @@ extension AppModel {
                     await MainActor.run {
                         guard let model = relay.model else { return }
                         model.showToast(
-                            repaired.count == 1 ? "Eine Aufnahme wird repariert" : "\(repaired.count) Aufnahmen werden repariert",
-                            "Die Gesprächspartner waren zu schnell und doppelt zu hören. Die Meetings werden neu verarbeitet."
+                            String(localized: "\(repaired.count) Aufnahmen werden repariert", comment: "plural: toast; recordings whose call track is being repaired"),
+                            String(localized: "Die Gesprächspartner waren zu schnell und doppelt zu hören. Die Meetings werden neu verarbeitet.")
                         )
                         for id in repaired { model.reprocess(id) }
                     }
