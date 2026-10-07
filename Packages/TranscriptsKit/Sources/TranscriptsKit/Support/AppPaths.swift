@@ -116,6 +116,7 @@ public enum Strings {
         // A reason can be several, joined by " · " (a name that was said, and the voice).
         stored.components(separatedBy: " · ").map { part in
             if part == SpeakerIdentifier.conversationReason { return String(localized: "Aus dem Gesprächsverlauf") }
+            if part == SpeakerIdentifier.calendarReason { return String(localized: "Einziger weiterer Teilnehmer im Kalender") }
             if let meetings = SpeakerIdentifier.meetings(inVoiceReason: part) {
                 return String(localized: "Stimme ähnlich wie in \(meetings) früheren Meetings", comment: "plural: why a voice is suggested")
             }
@@ -129,9 +130,14 @@ public enum Strings {
         return (locale.quotationBeginDelimiter ?? "“") + text + (locale.quotationEndDelimiter ?? "”")
     }
 
-    /// „…“ in a stored text with the quotation marks of the interface's language.
+    /// „…“ in a stored text with the quotation marks of the interface's language, and the label of who said it
+    /// ("Sprecher 2: „…“") in that language too.
     static func quoted(_ text: String) -> String {
         guard let open = text.firstIndex(of: "„"), let close = text.lastIndex(of: "“"), open < close else { return text }
+        if let colon = text.range(of: ": „"), colon.lowerBound < open || colon.upperBound == text.index(after: open) {
+            let speaker = String(text[..<colon.lowerBound])
+            if speaker != label(speaker) { return label(speaker) + ": " + quoted(String(text[text.index(colon.lowerBound, offsetBy: 2)...])) }
+        }
         let locale = AppLocale.current
         let begin = locale.quotationBeginDelimiter ?? "“", end = locale.quotationEndDelimiter ?? "”"
         return String(text[..<open]) + begin + text[text.index(after: open)..<close] + end + text[text.index(after: close)...]
