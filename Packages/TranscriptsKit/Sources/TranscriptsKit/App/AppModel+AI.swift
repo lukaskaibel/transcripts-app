@@ -168,8 +168,10 @@ extension AppModel {
         let identifier = SpeakerIdentifier(library: VoiceLibrary(), people: people, attendees: detail.meeting.attendees, thresholds: settings.voiceStrictness.thresholds) { $0 }
         for hint in hints {
             // The model may quote the whole name the transcript gave ("Sprecher 2 (vielleicht Hai oder Julian)").
+            // The transcript shows labels in the interface's language ("Speaker 2"); they are stored as "Sprecher 2".
             let quoted = hint.speakerLabel.lowercased()
-            guard var speaker = detail.speakers.first(where: { quoted == $0.label.lowercased() || quoted.hasPrefix($0.label.lowercased() + " (") }),
+            let matches = { (label: String) in quoted == label.lowercased() || quoted.hasPrefix(label.lowercased() + " (") }
+            guard var speaker = detail.speakers.first(where: { matches($0.label) || matches($0.displayLabel) }),
                   speaker.assignment == .unknown else { continue }
             speaker.assignment = .suggested
             if let person = identifier.person(named: hint.name) {
@@ -177,7 +179,7 @@ extension AppModel {
             } else {
                 speaker.suggestedName = identifier.attendee(named: hint.name)?.name ?? hint.name
             }
-            speaker.suggestionReason = hint.evidence.isEmpty ? "Aus dem Gesprächsverlauf" : "„\(hint.evidence)“"
+            speaker.suggestionReason = hint.evidence.isEmpty ? SpeakerIdentifier.conversationReason : "„\(hint.evidence)“"
             try? database.save(speaker)
         }
     }

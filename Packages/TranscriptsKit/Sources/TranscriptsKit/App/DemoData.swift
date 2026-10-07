@@ -53,7 +53,7 @@ enum DemoData {
         ]
         let jonasInAnna: Set<Int> = [11, 12]
         let syncSpeakers = [
-            MeetingSpeaker(meetingId: sync.id, key: "me", label: Strings.me, personId: me.id, assignment: .confirmed, confidence: 1, talkTime: 610, channel: .microphone),
+            MeetingSpeaker(meetingId: sync.id, key: "me", label: Strings.meLabel, personId: me.id, assignment: .confirmed, confidence: 1, talkTime: 610, channel: .microphone),
             MeetingSpeaker(meetingId: sync.id, key: "S1", label: Strings.speakerLabel(1), personId: anna.id, assignment: .automatic, confidence: 0.86, talkTime: 790, embedding: jitter(voices[anna.id]!, 0.1).embeddingData, sampleStart: 0, sampleEnd: 12, channel: .system),
             MeetingSpeaker(meetingId: sync.id, key: "S2", label: Strings.speakerLabel(2), personId: thomas.id, assignment: .automatic, confidence: 0.81, talkTime: 530, embedding: jitter(voices[thomas.id]!, 0.1).embeddingData, sampleStart: 16, sampleEnd: 28, channel: .system),
             MeetingSpeaker(meetingId: sync.id, key: "S3", label: Strings.speakerLabel(3), personId: miriam.id, assignment: .confirmed, confidence: 1, talkTime: 400, embedding: jitter(voices[miriam.id]!, 0.1).embeddingData, sampleStart: 860, sampleEnd: 872, channel: .system),
@@ -96,7 +96,7 @@ enum DemoData {
         ]
         for (id, title, start, duration, assignments, persons, summarized) in others {
             let meeting = Meeting(id: id, title: title, startedAt: start, duration: duration, status: .ready, source: "Zoom", language: "de", progress: 1, transcriptionModel: "Parakeet Ultra")
-            var speakers = [MeetingSpeaker(meetingId: id, key: "me", label: Strings.me, personId: me.id, assignment: .confirmed, confidence: 1, talkTime: duration * 0.25, channel: .microphone)]
+            var speakers = [MeetingSpeaker(meetingId: id, key: "me", label: Strings.meLabel, personId: me.id, assignment: .confirmed, confidence: 1, talkTime: duration * 0.25, channel: .microphone)]
             var lines: [(String, Double, Double, String)] = [("me", 4, 10, "Hallo zusammen, schön dass es geklappt hat.")]
             var lineVoices: [String: [Float]] = ["me": voices[me.id]!]
             for (index, assignment) in assignments.enumerated() {

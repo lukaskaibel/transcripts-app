@@ -165,7 +165,7 @@ public struct MeetingDetail: Equatable, Sendable {
         if let personId = speaker.personId, let person = people[personId] { return person.name }
         if speaker.isMe { return Strings.me }
         if let guess = guessText(for: speaker) { return "\(guess)?" }
-        return speaker.label
+        return Strings.label(speaker.label)
     }
 
     /// The name for a summary or an export: like `displayName`, but a guess is spelled out so a reader (or a
@@ -174,7 +174,7 @@ public struct MeetingDetail: Equatable, Sendable {
         guard let speaker = speaker(for: key), speaker.personId == nil, !speaker.isMe, let guess = guessText(for: speaker) else {
             return displayName(for: key)
         }
-        return "\(speaker.label) (vielleicht \(guess))"
+        return String(localized: "\(Strings.label(speaker.label)) (vielleicht \(guess))")
     }
 
     /// The people a speaker may be, known to this detail.

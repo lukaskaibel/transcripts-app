@@ -176,7 +176,7 @@ import Testing
             Segment(meetingId: "a", speakerKey: "me", channel: .microphone, start: 65, end: 70, text: "Ich übernehme die Interviews."),
         ], speakers: [
             MeetingSpeaker(meetingId: "a", key: "S1", label: "Sprecher 1", personId: anna.id, assignment: .confirmed, talkTime: 4),
-            MeetingSpeaker(meetingId: "a", key: "me", label: Strings.me, talkTime: 5, channel: .microphone),
+            MeetingSpeaker(meetingId: "a", key: "me", label: Strings.meLabel, talkTime: 5, channel: .microphone),
         ])
         try database.save(summary: MeetingSummary(meetingId: "a", overview: "Das Release wird verschoben.", decisions: ["Release am 14. Oktober"],
                                                   openQuestions: ["Wer informiert die Kunden?"], model: "m", provider: "p"),

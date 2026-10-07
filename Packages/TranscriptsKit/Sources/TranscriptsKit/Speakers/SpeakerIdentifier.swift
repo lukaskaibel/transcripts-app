@@ -149,7 +149,7 @@ public struct SpeakerIdentifier {
         case .introduction:
             return "„\(clue.quote)“"
         case .assistant:
-            return clue.quote.isEmpty ? "Aus dem Gesprächsverlauf" : "„\(clue.quote)“"
+            return clue.quote.isEmpty ? Self.conversationReason : "„\(clue.quote)“"
         case .askedBefore, .answeredAfter:
             return "\(nameOfKey(clue.quoteSpeakerKey)): „\(clue.quote)“"
         }
@@ -163,7 +163,17 @@ public struct SpeakerIdentifier {
         match.meetings == 1 ? "\(voiceReasonPrefix) einem früheren Meeting" : "\(voiceReasonPrefix) \(match.meetings) früheren Meetings"
     }
 
+    // Reasons are stored in German and shown in the interface's language by `Strings.reason(_:)`.
     static let voiceReasonPrefix = "Stimme ähnlich wie in"
+    static let conversationReason = "Aus dem Gesprächsverlauf"
+
+    /// 2 for "Stimme ähnlich wie in 2 früheren Meetings", 1 for "… einem früheren Meeting".
+    static func meetings(inVoiceReason reason: String) -> Int? {
+        guard reason.hasPrefix(voiceReasonPrefix) else { return nil }
+        let rest = reason.dropFirst(voiceReasonPrefix.count).trimmingCharacters(in: .whitespaces)
+        if rest.hasPrefix("einem") { return 1 }
+        return rest.split(separator: " ").first.flatMap { Int($0) }
+    }
 
     /// Whether a suggestion rests on the voice alone (rather than on a name that was said).
     static func isVoiceReason(_ reason: String?) -> Bool {

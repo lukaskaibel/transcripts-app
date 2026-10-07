@@ -112,7 +112,7 @@ struct Inspector: View {
             fact("Datum", TimeFormat.shortDate(detail.meeting.startedAt))
             fact("Dauer", TimeFormat.duration(detail.meeting.duration))
             if let source = detail.meeting.source { fact("Quelle", source) }
-            if let language = detail.meeting.language, let name = Locale(identifier: "de_DE").localizedString(forLanguageCode: language) {
+            if let language = detail.meeting.language, let name = AppLocale.current.localizedString(forLanguageCode: language) {
                 fact("Sprache", name)
             }
             if !detail.meeting.attendees.isEmpty {

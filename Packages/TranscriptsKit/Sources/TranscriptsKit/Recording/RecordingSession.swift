@@ -486,7 +486,7 @@ public final class RecordingSession {
             return
         }
         let isMe = key == MeetingSpeaker.meKey
-        let label = isMe ? Strings.me : Strings.speakerLabel(voices.values.filter { $0.key != MeetingSpeaker.meKey }.count + 1)
+        let label = isMe ? Strings.meLabel : Strings.speakerLabel(voices.values.filter { $0.key != MeetingSpeaker.meKey }.count + 1)
         var voice = LiveVoice(key: key, label: label, personId: nil, name: nil, suggestedName: nil, speech: speech)
         if isMe, let me = people.values.first(where: \.isMe) {
             voice.personId = me.id
@@ -618,7 +618,7 @@ extension RecordingSession {
         microphoneLevel = 0.12
         systemLevel = 0.64
         voices = [
-            MeetingSpeaker.meKey: LiveVoice(key: MeetingSpeaker.meKey, label: Strings.me, personId: "p-me", name: nil, suggestedName: nil, speech: 40),
+            MeetingSpeaker.meKey: LiveVoice(key: MeetingSpeaker.meKey, label: Strings.meLabel, personId: "p-me", name: nil, suggestedName: nil, speech: 40),
             "S1": LiveVoice(key: "S1", label: Strings.speakerLabel(1), personId: "p-anna", name: "Anna Berger", suggestedName: nil, speech: 90),
             "S2": LiveVoice(key: "S2", label: Strings.speakerLabel(2), personId: "p-thomas", name: "Thomas Klein", suggestedName: nil, speech: 70),
             "S3": LiveVoice(key: "S3", label: Strings.speakerLabel(3), personId: "p-jonas", name: "Jonas Weber", suggestedName: nil, speech: 20),

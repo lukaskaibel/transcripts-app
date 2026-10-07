@@ -52,15 +52,27 @@ public enum AudioRetention: String, CaseIterable, Identifiable, Sendable {
 }
 
 public enum SummaryLanguage: String, CaseIterable, Identifiable, Sendable {
-    case meeting, german, english
+    case meeting, german, english, french, spanish, italian, portuguese, dutch, polish, russian, ukrainian
     public var id: String { rawValue }
-    public var title: String {
+
+    /// The language every summary is written in, or nil for the language of each meeting.
+    public var language: AppLanguage? {
         switch self {
-        case .meeting: "Wie das Meeting"
-        case .german: "Deutsch"
-        case .english: "Englisch"
+        case .meeting: nil
+        case .german: .german
+        case .english: .english
+        case .french: .french
+        case .spanish: .spanish
+        case .italian: .italian
+        case .portuguese: .portuguese
+        case .dutch: .dutch
+        case .polish: .polish
+        case .russian: .russian
+        case .ukrainian: .ukrainian
         }
     }
+
+    public var title: String { language?.nativeName ?? String(localized: "Wie das Meeting") }
 }
 
 /// The user's preferences, kept in UserDefaults.

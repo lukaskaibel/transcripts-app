@@ -78,17 +78,59 @@ public enum AppPaths {
     }
 }
 
-/// Words the app uses in several places. The interface is German.
+/// Words the app uses in several places.
+///
+/// Some are stored with a meeting (a voice's label, the reason for a suggestion) and compared in code, so they are
+/// stored in German, the language the app's texts are written in, and shown in the interface's language through
+/// `label(_:)` and `reason(_:)`.
 public enum Strings {
-    public static let me = "Du"
-    public static let untitledMeeting = "Meeting"
+    /// How the user is called in their own meetings.
+    public static var me: String { String(localized: "Du") }
+    /// The label the user's own voice is stored with.
+    public static let meLabel = "Du"
 
+    /// The label a voice without a name is stored with ("Sprecher 2"); `label(_:)` shows it.
     public static func speakerLabel(_ number: Int) -> String { "Sprecher \(number)" }
 
-    /// "Hai", "Hai oder Julian", "Hai, Julian oder Sven".
+    /// A stored label in the interface's language: "Sprecher 2" becomes "Speaker 2", "Du" becomes "You".
+    public static func label(_ stored: String) -> String {
+        if stored == meLabel { return me }
+        if let number = number(inLabel: stored) { return String(localized: "Sprecher \(number)") }
+        return stored
+    }
+
+    /// 2 for "Sprecher 2".
+    public static func number(inLabel label: String) -> Int? {
+        guard label.hasPrefix("Sprecher ") else { return nil }
+        return Int(label.dropFirst("Sprecher ".count))
+    }
+
+    /// "Hai", "Hai oder Julian", "Hai, Julian oder Sven", in the interface's language.
     public static func alternatives(_ names: [String]) -> String {
-        guard let last = names.last else { return "" }
-        guard names.count > 1 else { return last }
-        return names.dropLast().joined(separator: ", ") + " oder " + last
+        names.formatted(.list(type: .or).locale(AppLocale.current))
+    }
+
+    /// A stored reason for a suggestion in the interface's language: "Stimme ähnlich wie in 2 früheren Meetings"
+    /// becomes "Voice like in 2 earlier meetings", and a quote gets the language's quotation marks.
+    public static func reason(_ stored: String) -> String {
+        if stored == SpeakerIdentifier.conversationReason { return String(localized: "Aus dem Gesprächsverlauf") }
+        if let meetings = SpeakerIdentifier.meetings(inVoiceReason: stored) {
+            return String(localized: "Stimme ähnlich wie in \(meetings) früheren Meetings")
+        }
+        return quoted(stored)
+    }
+
+    /// `text` in the quotation marks of the interface's language: „…“, “…”, « … ».
+    public static func quote(_ text: String) -> String {
+        let locale = AppLocale.current
+        return (locale.quotationBeginDelimiter ?? "“") + text + (locale.quotationEndDelimiter ?? "”")
+    }
+
+    /// „…“ in a stored text with the quotation marks of the interface's language.
+    static func quoted(_ text: String) -> String {
+        guard let open = text.firstIndex(of: "„"), let close = text.lastIndex(of: "“"), open < close else { return text }
+        let locale = AppLocale.current
+        let begin = locale.quotationBeginDelimiter ?? "“", end = locale.quotationEndDelimiter ?? "”"
+        return String(text[..<open]) + begin + text[text.index(after: open)..<close] + end + text[text.index(after: close)...]
     }
 }

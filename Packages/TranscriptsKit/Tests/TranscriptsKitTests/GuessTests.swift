@@ -120,7 +120,7 @@ private func line(of base: [Float], alike: Float = 0.85, seed: Int) -> [Float] {
         segments += (0..<6).map { Segment(meetingId: "a", speakerKey: "S1", channel: .system, start: 100 + Double($0) * 10, end: 108 + Double($0) * 10, text: "Andere \($0)", embedding: line(of: other, seed: 30 + $0).embeddingData) }
         segments += (0..<3).map { Segment(meetingId: "a", speakerKey: "S1", channel: .system, start: 200 + Double($0) * 10, end: 206 + Double($0) * 10, text: "Ich im Call \($0)", embedding: line(of: mine, seed: 50 + $0).embeddingData) }
         try database.replaceTranscript(meetingId: "a", segments: segments, speakers: [
-            MeetingSpeaker(meetingId: "a", key: "me", label: Strings.me, personId: "me", assignment: .confirmed, channel: .microphone),
+            MeetingSpeaker(meetingId: "a", key: "me", label: Strings.meLabel, personId: "me", assignment: .confirmed, channel: .microphone),
             MeetingSpeaker(meetingId: "a", key: "S1", label: "Sprecher 1"),
         ])
         #expect(try VoiceRecheck.strayMoves(database: database, library: VoiceLibrary(samples: try database.voiceSamples()), thresholds: .standard).isEmpty)

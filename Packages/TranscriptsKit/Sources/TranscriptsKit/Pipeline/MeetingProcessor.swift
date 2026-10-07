@@ -209,7 +209,7 @@ public final class MeetingProcessor: @unchecked Sendable {
         var speakers: [MeetingSpeaker] = []
         if lines.contains(where: { $0.speakerKey == MeetingSpeaker.meKey }) {
             speakers.append(MeetingSpeaker(
-                meetingId: meetingId, key: MeetingSpeaker.meKey, label: Strings.me, personId: me.id,
+                meetingId: meetingId, key: MeetingSpeaker.meKey, label: Strings.meLabel, personId: me.id,
                 assignment: userFoundByVoice ? .automatic : .confirmed,
                 confidence: 1, talkTime: talk[MeetingSpeaker.meKey] ?? 0, embedding: voiceOf[MeetingSpeaker.meKey]?.embeddingData,
                 sampleStart: samples[MeetingSpeaker.meKey]?.0, sampleEnd: samples[MeetingSpeaker.meKey]?.1, channel: .microphone

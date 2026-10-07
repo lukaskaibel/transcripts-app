@@ -78,11 +78,13 @@ public enum Summarizer {
     ]
 
     static func systemPrompt(myName: String, language: SummaryLanguage) -> String {
-        """
+        let first = Strings.label(Strings.speakerLabel(1)), second = Strings.label(Strings.speakerLabel(2))
+        let guess = String(localized: "\(second) (vielleicht \(Strings.alternatives(["Hai", "Julian"])))")
+        return """
         You summarize meetings for the person who recorded them, \(myName). You get a transcript with timestamps \
-        and speaker names; voices whose name is unknown are labelled "Sprecher 1", "Sprecher 2" and so on. When the \
-        app has a guess, it follows in brackets ("Sprecher 2 (vielleicht Hai oder Julian)"): use the conversation \
-        to decide, and if it stays open, name the candidates rather than picking one.
+        and speaker names; voices whose name is unknown are labelled "\(first)", "\(second)" and so on. When the \
+        app has a guess, it follows in brackets ("\(guess)"): use the conversation to decide, and if it stays open, \
+        name the candidates rather than picking one.
 
         Write every field in the language the meeting was held in (a German meeting gets a German summary). Be brief \
         and factual and stay with what was said: no assumptions, no advice, no filler. Use the names from the \
@@ -94,11 +96,8 @@ public enum Summarizer {
     }
 
     static func languageRule(_ language: SummaryLanguage) -> String {
-        switch language {
-        case .meeting: ""
-        case .german: "\n\nWrite all fields in German, whatever language the meeting was held in."
-        case .english: "\n\nWrite all fields in English, whatever language the meeting was held in."
-        }
+        guard let chosen = language.language else { return "" }
+        return "\n\nWrite all fields in \(chosen.englishName), whatever language the meeting was held in."
     }
 
     /// The transcript as the model reads it, with real names wherever they are known.
@@ -110,19 +109,19 @@ public enum Summarizer {
     }
 
     static func header(_ detail: MeetingDetail) -> String {
-        var lines = ["Meeting: \(detail.meeting.title)", "Datum: \(TimeFormat.meetingLine(start: detail.meeting.startedAt, duration: detail.meeting.duration))"]
+        var lines = ["Meeting: \(detail.meeting.title)", "Date: \(TimeFormat.meetingLine(start: detail.meeting.startedAt, duration: detail.meeting.duration))"]
         if !detail.meeting.attendees.isEmpty {
-            lines.append("Eingeladen laut Kalender: " + detail.meeting.attendees.map(\.name).joined(separator: ", "))
+            lines.append("Invited according to the calendar: " + detail.meeting.attendees.map(\.name).joined(separator: ", "))
         }
         return lines.joined(separator: "\n")
     }
 
     public static func summarize(_ detail: MeetingDetail, myName: String, language: SummaryLanguage = .meeting, provider: LLMProvider, model: String) async throws -> SummaryOutcome {
         let transcript = transcriptText(detail, myName: myName)
-        guard !transcript.isEmpty else { throw LLMError.badResponse("Das Transkript ist leer.") }
+        guard !transcript.isEmpty else { throw LLMError.badResponse(String(localized: "Das Transkript ist leer.")) }
         let budget = max(provider.contextCharacters - 6_000, 8_000)
         if transcript.count <= budget {
-            let prompt = "\(header(detail))\n\nTranskript:\n\(transcript)"
+            let prompt = "\(header(detail))\n\nTranscript:\n\(transcript)"
             return try await request(prompt, myName: myName, language: language, provider: provider, model: model)
         }
 
@@ -130,15 +129,15 @@ public enum Summarizer {
         let parts = chunks(transcript, size: budget)
         var partials: [String] = []
         for (index, part) in parts.enumerated() {
-            let prompt = "\(header(detail))\n\nTeil \(index + 1) von \(parts.count) des Transkripts:\n\(part)"
+            let prompt = "\(header(detail))\n\nPart \(index + 1) of \(parts.count) of the transcript:\n\(part)"
             let outcome = try await request(prompt, myName: myName, language: language, provider: provider, model: model)
             partials.append(encode(outcome))
         }
         let prompt = """
         \(header(detail))
 
-        Das sind Zusammenfassungen aufeinanderfolgender Teile desselben Meetings als JSON. Fasse sie zu einer \
-        einzigen Zusammenfassung zusammen, ohne Wiederholungen:
+        These are summaries of consecutive parts of the same meeting, as JSON. Merge them into a single summary, \
+        without repeating anything:
 
         \(partials.joined(separator: "\n\n"))
         """
@@ -169,7 +168,7 @@ public enum Summarizer {
             guard let label = optional(item["speaker"]), let name = optional(item["name"]) else { return nil }
             return SpeakerNameHint(speakerLabel: label, name: name, evidence: optional(item["evidence"]) ?? "")
         }
-        guard let overview = optional(json["overview"]) else { throw LLMError.badResponse("Die Zusammenfassung fehlt.") }
+        guard let overview = optional(json["overview"]) else { throw LLMError.badResponse(String(localized: "Die Zusammenfassung fehlt.")) }
         return SummaryOutcome(
             title: optional(json["title"]) ?? "",
             overview: overview,
@@ -217,7 +216,7 @@ public enum Summarizer {
         discussed (at most six short points), the tasks mentioned so far, and the questions that are still open. \
         Write in the meeting's language, in short phrases. Answer with a single JSON object that follows the schema.\(languageRule(language))
         """
-        let answer = try await provider.complete(LLMRequest(system: system, prompt: "Transkript bisher:\n\(text)", schema: liveSchema, maxOutputTokens: 4_000), model: model)
+        let answer = try await provider.complete(LLMRequest(system: system, prompt: "Transcript so far:\n\(text)", schema: liveSchema, maxOutputTokens: 4_000), model: model)
         let json = try JSONExtraction.object(from: answer)
         func strings(_ key: String) -> [String] {
             (json[key]?.array ?? []).compactMap { $0.string ?? $0["text"]?.string }.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }

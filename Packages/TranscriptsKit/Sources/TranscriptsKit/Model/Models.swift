@@ -175,7 +175,7 @@ public struct MeetingSpeaker: Codable, Hashable, Identifiable, Sendable, Fetchab
     public var id: String { "\(meetingId)/\(key)" }
     public var meetingId: String
     public var key: String
-    /// "Sprecher 2" — the label used while nobody is assigned.
+    /// "Sprecher 2" — the label used while nobody is assigned. Stored in German; `displayLabel` shows it.
     public var label: String
     public var personId: String?
     public var assignment: Assignment
@@ -245,6 +245,12 @@ public struct MeetingSpeaker: Codable, Hashable, Identifiable, Sendable, Fetchab
         for id in candidatePersonIds where !result.contains(id) && !rejectedPersonIds.contains(id) { result.append(id) }
         return Array(result.prefix(3))
     }
+
+    /// The label in the interface's language ("Speaker 2").
+    public var displayLabel: String { Strings.label(label) }
+
+    /// The reason for the suggestion in the interface's language.
+    public var displayReason: String? { suggestionReason.map(Strings.reason) }
 }
 
 // MARK: - People and voices

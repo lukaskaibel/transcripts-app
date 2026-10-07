@@ -280,7 +280,7 @@ private func sample(_ person: String, _ embedding: [Float], seconds: Double = 8,
             ],
             speakers: [
                 MeetingSpeaker(meetingId: "m", key: "S1", label: "Sprecher 1", assignment: .unknown, rejectedPersonIds: ["jonas"]),
-                MeetingSpeaker(meetingId: "m", key: "me", label: Strings.me, personId: "me", assignment: .confirmed, channel: .microphone),
+                MeetingSpeaker(meetingId: "m", key: "me", label: Strings.meLabel, personId: "me", assignment: .confirmed, channel: .microphone),
                 MeetingSpeaker(meetingId: "m", key: "S2", label: "Sprecher 2", personId: "hai", assignment: .confirmed, channel: .microphone),
             ],
             people: [:], summary: nil, actionItems: [], markers: []

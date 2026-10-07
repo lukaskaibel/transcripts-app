@@ -10,7 +10,7 @@ import Testing
             Segment(meetingId: id, speakerKey: line.0, channel: line.0 == "me" ? .microphone : .system, start: Double(index * 5), end: Double(index * 5 + 4), text: line.1)
         }
         let keys = Set(lines.map(\.0))
-        let speakers = keys.sorted().map { MeetingSpeaker(meetingId: id, key: $0, label: $0 == "me" ? Strings.me : "Sprecher \($0.dropFirst())", talkTime: 8, channel: $0 == "me" ? .microphone : .system) }
+        let speakers = keys.sorted().map { MeetingSpeaker(meetingId: id, key: $0, label: $0 == "me" ? Strings.meLabel : "Sprecher \($0.dropFirst())", talkTime: 8, channel: $0 == "me" ? .microphone : .system) }
         try database.replaceTranscript(meetingId: id, segments: segments, speakers: speakers)
     }
 
@@ -101,7 +101,7 @@ import Testing
             MeetingSpeaker(meetingId: "m1", key: "S1", label: "Sprecher 1", personId: "anna", assignment: .confirmed),
             MeetingSpeaker(meetingId: "m1", key: "S2", label: "Sprecher 2", assignment: .unknown),
             MeetingSpeaker(meetingId: "m1", key: "S3", label: "Sprecher 3", personId: "anna", assignment: .automatic),
-            MeetingSpeaker(meetingId: "m1", key: "me", label: Strings.me, personId: "me", assignment: .confirmed, channel: .microphone),
+            MeetingSpeaker(meetingId: "m1", key: "me", label: Strings.meLabel, personId: "me", assignment: .confirmed, channel: .microphone),
         ])
         // An old averaged sample stands in only where its meeting has no lines of that person.
         try database.save(Voiceprint(personId: "anna", embedding: voice, meetingId: "m1", duration: 30))
