@@ -115,6 +115,10 @@ final class DebugRemote {
         case "snapwindow":
             let names = argument.split(separator: " ").map(String.init)
             if names.count == 2 { snapshot(window: names[0], name: names[1]) }
+        case "snapframe":
+            // The whole window with its title bar and buttons, for the README.
+            let names = argument.split(separator: " ").map(String.init)
+            if names.count == 2 { snapshot(window: names[0], name: names[1], frame: true) }
         case "windows":
             log(NSApp.windows.map { "\($0.title) | \($0.identifier?.rawValue ?? "-") | \($0.frame) | visible=\($0.isVisible)" }.joined(separator: "\n"))
         case "quit":
@@ -139,7 +143,7 @@ final class DebugRemote {
     }
 
     /// Renders a window's content into a PNG, without touching the screen.
-    private func snapshot(window name: String, name file: String) {
+    private func snapshot(window name: String, name file: String, frame: Bool = false) {
         let window: NSWindow?
         switch name {
         case "main": window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("main") == true || $0.title == "Transcripts" && $0.styleMask.contains(.titled) && $0.frame.width > 800 }
@@ -149,10 +153,11 @@ final class DebugRemote {
         case "sheet": window = NSApp.windows.first { $0.isSheet && $0.isVisible }
         default: window = NSApp.windows.first { $0.title == name }
         }
-        guard let window, let view = window.contentView else {
+        guard let window, let content = window.contentView else {
             log("snap: no window \(name)")
             return
         }
+        let view = frame ? content.superview ?? content : content
         // Give SwiftUI a moment to settle after the last change.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [output] in
             view.layoutSubtreeIfNeeded()
