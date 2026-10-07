@@ -38,7 +38,7 @@ struct PeopleView: View {
             .overlay(alignment: .bottom) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
 
             if model.peopleStats.isEmpty && model.reviews.isEmpty {
-                EmptyState(systemImage: "person.2", title: "Noch niemand bekannt", message: "Nach dem ersten Meeting erscheinen hier die Stimmen. Benenne sie einmal, dann erkennt die App sie in künftigen Meetings wieder.")
+                EmptyState(systemImage: "person.2", title: String(localized: "Noch niemand bekannt"), message: String(localized: "Nach dem ersten Meeting erscheinen hier die Stimmen. Benenne sie einmal, dann erkennt die App sie in künftigen Meetings wieder."))
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -140,7 +140,7 @@ struct ReviewRow: View {
             } label: {
                 VStack(alignment: .leading, spacing: 1) {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(review.speaker.label).font(.uiSemibold)
+                        Text(review.speaker.displayLabel).font(.uiSemibold)
                         Text("\(TimeFormat.duration(review.speaker.talkTime)) Sprache")
                             .font(.small)
                             .foregroundStyle(Theme.textTertiary)
@@ -160,7 +160,7 @@ struct ReviewRow: View {
                 // Not sure between a few: one button each.
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.right").font(.system(size: 11)).foregroundStyle(Theme.textTertiary)
-                    Text("vermutlich").font(.small).foregroundStyle(Theme.textTertiary)
+                    Text(String(localized: "vermutlich", comment: "before buttons with the people an unknown voice probably is")).font(.small).foregroundStyle(Theme.textTertiary)
                     ForEach(guesses) { person in
                         Button(person.name) { model.assign(review.speaker, to: person.id) }
                             .buttonStyle(SecondaryButtonStyle())
@@ -175,7 +175,7 @@ struct ReviewRow: View {
                     Avatar(kind: .person(name: name), size: 20)
                     VStack(alignment: .leading, spacing: 1) {
                         Text(name).font(.uiMedium).lineLimit(1)
-                        if let reason = review.speaker.suggestionReason ?? (guesses.isEmpty ? nil : "Stimme ähnlich") {
+                        if let reason = review.speaker.displayReason ?? (guesses.isEmpty ? nil : String(localized: "Stimme ähnlich", comment: "reason under a suggested name: the voice sounds like this person's")) {
                             Text(reason).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1)
                         }
                     }
@@ -217,7 +217,7 @@ struct ReviewRow: View {
         review.speaker.guesses.compactMap { model.person($0) }
     }
 
-    private func otherMenu(_ title: String) -> some View {
+    private func otherMenu(_ title: LocalizedStringKey) -> some View {
         Menu {
             if let detail = detailForMenu {
                 SpeakerMenuItems(detail: detail, speaker: review.speaker)
@@ -268,7 +268,7 @@ struct PersonRow: View {
                 Spacer(minLength: 8)
                 HStack(spacing: 8) {
                     VoiceQualityBars(quality: stats.voiceQuality)
-                    Text(["Kein Profil", "schwach", "mittel", "gut"][max(0, min(stats.voiceQuality, 3))])
+                    Text([String(localized: "Kein Profil"), String(localized: "schwach", comment: "voice profile quality"), String(localized: "mittel", comment: "voice profile quality"), String(localized: "gut", comment: "voice profile quality")][max(0, min(stats.voiceQuality, 3))])
                         .font(.small)
                         .foregroundStyle(Theme.textTertiary)
                 }
@@ -417,9 +417,9 @@ struct PersonSheet: View {
 
     private func summary(_ stats: PersonStats) -> String {
         var parts: [String] = []
-        parts.append(stats.meetings == 1 ? "1 Meeting" : "\(stats.meetings) Meetings")
-        if stats.talkTime > 0 { parts.append("\(TimeFormat.duration(stats.talkTime)) gesprochen") }
-        parts.append(stats.voiceSamples == 1 ? "1 Stimmprobe" : "\(stats.voiceSamples) Stimmproben")
+        parts.append(String(localized: "\(stats.meetings) Meetings", comment: "plural: meetings"))
+        if stats.talkTime > 0 { parts.append(String(localized: "\(TimeFormat.duration(stats.talkTime)) gesprochen", comment: "how long a person spoke, e.g. 42 min")) }
+        parts.append(String(localized: "\(stats.voiceSamples) Stimmproben", comment: "plural: voice samples of a person"))
         if let email = stats.person.email { parts.append(email) }
         return parts.joined(separator: " · ")
     }

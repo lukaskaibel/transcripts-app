@@ -241,9 +241,9 @@ struct VoicesOverview: View {
                 if dot.isOutlier { Text("Ausreißer").font(.tiny).foregroundStyle(Theme.warning) }
             }
             if let hoveredText {
-                Text("„\(hoveredText)“").font(.small).foregroundStyle(Theme.textBody).lineLimit(3)
+                Text(Strings.quote(hoveredText)).font(.small).foregroundStyle(Theme.textBody).lineLimit(3)
             }
-            Text([meetingTitle(dot.meetingId), "Klicken zum Anhören"].compactMap { $0 }.joined(separator: " · "))
+            Text([meetingTitle(dot.meetingId), String(localized: "Klicken zum Anhören")].compactMap { $0 }.joined(separator: " · "))
                 .font(.tiny)
                 .foregroundStyle(Theme.textTertiary)
                 .lineLimit(1)
@@ -259,7 +259,7 @@ struct VoicesOverview: View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(spacing: 6) {
                 Circle().strokeBorder(Theme.textSecondary, style: StrokeStyle(lineWidth: 1.2, dash: [2, 1.5])).frame(width: 9, height: 9)
-                Text("\(unknown.label) · ohne Namen").font(.smallSemibold)
+                Text("\(Strings.label(unknown.label)) · ohne Namen").font(.smallSemibold)
             }
             Text("\(unknown.meetingTitle)").font(.small).foregroundStyle(Theme.textBody).lineLimit(2)
             Text("Klicken: Wer ist das?").font(.tiny).foregroundStyle(Theme.textTertiary)
@@ -405,7 +405,7 @@ struct VoiceMapLayout: Sendable {
                 .map(\.element)
             for (number, group) in voices.enumerated() {
                 let name = names[personId]?.name ?? ""
-                groupTitles["\(personId)#\(group.id)"] = number == 0 ? name : "\(name) · Stimme \(number + 1)"
+                groupTitles["\(personId)#\(group.id)"] = number == 0 ? name : String(localized: "\(name) · Stimme \(number + 1)", comment: "a person's second, third, … voice on the voice map")
             }
         }
         let unknownStart = vectors.count

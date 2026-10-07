@@ -131,7 +131,7 @@ struct NameVoicesPanel: View {
                     .monospacedDigit()
                     .foregroundStyle(Theme.textTertiary)
             }
-            IconButton(systemName: "xmark", label: "Schließen (esc)", size: 22) { close() }
+            IconButton(systemName: "xmark", label: String(localized: "Schließen (esc)"), size: 22) { close() }
         }
         .padding(.horizontal, 18)
         .frame(height: 50)
@@ -151,14 +151,14 @@ struct NameVoicesPanel: View {
                 .help("Stimmprobe anhören (Leertaste)")
                 .disabled(item.speaker.sampleStart == nil || !AudioArchiver.hasAudio(meetingId: item.meeting.id))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("\(item.speaker.label) · \(TimeFormat.duration(item.speaker.talkTime)) Sprache")
+                    Text("\(item.speaker.displayLabel) · \(TimeFormat.duration(item.speaker.talkTime)) Sprache")
                         .font(.uiSemibold)
                     Text("\(item.meeting.title) · \(TimeFormat.compactDay(item.meeting.startedAt))")
                         .font(.small)
                         .foregroundStyle(Theme.textTertiary)
                         .lineLimit(1)
                     ForEach(item.quotes, id: \.self) { quote in
-                        Text("„\(quote)“")
+                        Text(Strings.quote(quote))
                             .font(.small)
                             .foregroundStyle(Theme.textSecondary)
                             .lineLimit(2)
@@ -171,9 +171,9 @@ struct NameVoicesPanel: View {
             VStack(alignment: .leading, spacing: 2) {
                 ForEach(Array(item.choices.prefix(9).enumerated()), id: \.element.id) { index, choice in
                     if index == 0 && choice.isGuess {
-                        sectionTitle(item.choices.filter(\.isGuess).count > 1 ? "Vermutlich einer von ihnen" : "Vermutlich")
+                        sectionTitle(item.choices.filter(\.isGuess).count > 1 ? String(localized: "Vermutlich einer von ihnen") : String(localized: "Vermutlich", comment: "section title over the person a voice probably is"))
                     } else if !choice.isGuess && (index == 0 || item.choices[index - 1].isGuess) {
-                        sectionTitle("Andere")
+                        sectionTitle(String(localized: "Andere", comment: "section title over the other people a voice could be"))
                     }
                     ChoiceRow(number: index + 1, choice: choice, highlighted: index == 0) { choose(choice) }
                 }
@@ -271,7 +271,7 @@ struct NameVoicesPanel: View {
             .padding(.bottom, 2)
     }
 
-    private func footerButton(_ title: String, key: String, action: @escaping () -> Void) -> some View {
+    private func footerButton(_ title: LocalizedStringKey, key: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Text(title)
@@ -368,27 +368,27 @@ struct NameVoicesPanel: View {
         } ?? [:]
         func voiceDetail(_ personId: String) -> String? {
             guard let value = similarity[personId] else { return nil }
-            return value >= 0.72 ? "klingt sehr ähnlich" : (value >= 0.55 ? "klingt ähnlich" : "klingt etwas ähnlich")
+            return value >= 0.72 ? String(localized: "klingt sehr ähnlich", comment: "how much an unknown voice sounds like this person") : (value >= 0.55 ? String(localized: "klingt ähnlich", comment: "how much an unknown voice sounds like this person") : String(localized: "klingt etwas ähnlich", comment: "how much an unknown voice sounds like this person"))
         }
         for personId in speaker.guesses {
             guard let person = model.person(personId) ?? detail.people[personId], !listed.contains(person.id) else { continue }
             listed.insert(person.id)
-            let reason = personId == speaker.suggestedPersonId && !SpeakerIdentifier.isVoiceReason(speaker.suggestionReason) ? speaker.suggestionReason : voiceDetail(personId)
+            let reason = personId == speaker.suggestedPersonId && !SpeakerIdentifier.isVoiceReason(speaker.suggestionReason) ? speaker.displayReason : voiceDetail(personId)
             result.append(Choice(kind: .person(person), detail: reason, isGuess: true))
         }
         if speaker.suggestedPersonId == nil, let name = speaker.suggestedName {
             let attendee = detail.meeting.attendees.first { $0.name == name }
-            result.append(Choice(kind: .newPerson(name: name, email: attendee?.email), detail: speaker.suggestionReason.map { "neu · \($0)" } ?? "neu", isGuess: true))
+            result.append(Choice(kind: .newPerson(name: name, email: attendee?.email), detail: speaker.displayReason.map { String(localized: "neu · \($0)", comment: "a person not known yet, then why the app suggests them") } ?? String(localized: "neu", comment: "a person not known yet"), isGuess: true))
             listed.insert("new:\(name)")
         }
         for attendee in detail.meeting.attendees {
             if let person = model.people.first(where: { !$0.isMe && (($0.email != nil && $0.email?.lowercased() == attendee.email?.lowercased()) || $0.name == attendee.name) }) {
                 guard !listed.contains(person.id) else { continue }
                 listed.insert(person.id)
-                result.append(Choice(kind: .person(person), detail: "eingeladen", isGuess: false))
+                result.append(Choice(kind: .person(person), detail: String(localized: "eingeladen", comment: "the person was invited to the meeting"), isGuess: false))
             } else if !listed.contains("new:\(attendee.name)") {
                 listed.insert("new:\(attendee.name)")
-                result.append(Choice(kind: .newPerson(name: attendee.name, email: attendee.email), detail: "eingeladen · neu", isGuess: false))
+                result.append(Choice(kind: .newPerson(name: attendee.name, email: attendee.email), detail: String(localized: "eingeladen · neu", comment: "the person was invited to the meeting and is not known yet"), isGuess: false))
             }
         }
         for person in model.people where !person.isMe && !listed.contains(person.id) {

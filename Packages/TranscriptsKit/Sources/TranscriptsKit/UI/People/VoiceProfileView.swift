@@ -13,7 +13,7 @@ struct VoiceProfileSection: View {
                 Text("Stimmprofil").font(.smallSemibold).foregroundStyle(Theme.textSecondary)
                 Spacer()
                 if let profile, profile.hasVoice {
-                    Text(profile.meetingCount == 0 ? TimeFormat.duration(profile.speech) : "\(profile.meetingCount == 1 ? "1 Meeting" : "\(profile.meetingCount) Meetings") · \(TimeFormat.duration(profile.speech))")
+                    Text(profile.meetingCount == 0 ? TimeFormat.duration(profile.speech) : "\(String(localized: "\(profile.meetingCount) Meetings", comment: "plural: meetings")) · \(TimeFormat.duration(profile.speech))")
                         .font(.small)
                         .foregroundStyle(Theme.textTertiary)
                 }
@@ -52,11 +52,11 @@ struct VoiceProfileSection: View {
     }
 
     private func name(of groupId: Int) -> String {
-        guard let profile, let group = profile.groups.first(where: { $0.id == groupId }) else { return "Stimme" }
-        guard group.isTrusted else { return "Ausreißer" }
+        guard let profile, let group = profile.groups.first(where: { $0.id == groupId }) else { return String(localized: "Stimme") }
+        guard group.isTrusted else { return String(localized: "Ausreißer") }
         let trusted = profile.groups.filter(\.isTrusted)
-        guard trusted.count > 1, let index = trusted.firstIndex(where: { $0.id == groupId }) else { return "Stimme" }
-        return "Stimme \(index + 1)"
+        guard trusted.count > 1, let index = trusted.firstIndex(where: { $0.id == groupId }) else { return String(localized: "Stimme") }
+        return String(localized: "Stimme \(index + 1)", comment: "one of several voices the app hears under one person's name, numbered")
     }
 
     private func color(for groupId: Int) -> Color {
@@ -178,7 +178,7 @@ private struct VoiceGroupRow: View {
                 HStack(spacing: 6) {
                     Text(title).font(.uiMedium)
                     if let soundsLike {
-                        Text("klingt wie \(soundsLike.isMe ? "dir" : soundsLike.name)").font(.tiny).foregroundStyle(Theme.warning)
+                        Text(soundsLike.isMe ? "klingt wie dir" : "klingt wie \(soundsLike.name)").font(.tiny).foregroundStyle(Theme.warning)
                     } else if !group.isTrusted {
                         Text("passt nicht zum Rest").font(.tiny).foregroundStyle(Theme.warning)
                     }
@@ -187,7 +187,7 @@ private struct VoiceGroupRow: View {
             }
             Spacer(minLength: 6)
             if let soundsLike {
-                Button("Zu \(soundsLike.isMe ? "dir" : soundsLike.firstName)") { model.move(group, of: profile, to: soundsLike.id) }
+                Button(soundsLike.isMe ? String(localized: "Zu dir", comment: "button: give these lines to you") : String(localized: "Zu \(soundsLike.firstName)", comment: "button: give these lines to this person")) { model.move(group, of: profile, to: soundsLike.id) }
                     .buttonStyle(PlainPressStyle())
                     .font(.small.weight(.medium))
                     .foregroundStyle(Theme.accent)
@@ -197,7 +197,7 @@ private struct VoiceGroupRow: View {
                 PersonChoices(excluding: profile.personId) { personId in
                     model.move(group, of: profile, to: personId)
                 } newPerson: {
-                    if let name = NamePrompt.ask(title: "Wem gehört diese Stimme?", message: "Die Zeilen dieser Gruppe werden in allen Meetings dieser Person zugeordnet.") {
+                    if let name = NamePrompt.ask(title: String(localized: "Wem gehört diese Stimme?"), message: String(localized: "Die Zeilen dieser Gruppe werden in allen Meetings dieser Person zugeordnet.")) {
                         model.move(group, of: profile, toNewPersonNamed: name)
                     }
                 }
@@ -221,10 +221,10 @@ private struct VoiceGroupRow: View {
     }
 
     private var detail: String {
-        var parts = [lines.count == 1 ? "1 Zeile" : "\(lines.count) Zeilen", TimeFormat.duration(group.speech + group.recognizedSpeech)]
-        if !group.meetings.isEmpty { parts.append(group.meetings.count == 1 ? "1 Meeting" : "\(group.meetings.count) Meetings") }
-        if group.recognizedSpeech > 0 { parts.append("\(TimeFormat.duration(group.recognizedSpeech)) davon erkannt") }
-        if let last = group.lastHeard { parts.append("zuletzt \(TimeFormat.compactDay(last))") }
+        var parts = [String(localized: "\(lines.count) Zeilen", comment: "plural: lines of a voice"), TimeFormat.duration(group.speech + group.recognizedSpeech)]
+        if !group.meetings.isEmpty { parts.append(String(localized: "\(group.meetings.count) Meetings", comment: "plural: meetings")) }
+        if group.recognizedSpeech > 0 { parts.append(String(localized: "\(TimeFormat.duration(group.recognizedSpeech)) davon erkannt", comment: "how much of this speech the app recognized by itself, e.g. 12 min")) }
+        if let last = group.lastHeard { parts.append(String(localized: "zuletzt \(TimeFormat.compactDay(last))", comment: "last heard on a day: today, yesterday, a weekday or a date")) }
         return parts.joined(separator: " · ")
     }
 }
@@ -268,7 +268,7 @@ private struct OutlierRows: View {
             .disabled(groups.isEmpty)
             if open {
                 ForEach(groups.prefix(30)) { group in
-                    VoiceGroupRow(profile: profile, group: group, title: group.members.count == 1 ? "Einzelne Zeile" : "\(group.members.count) Zeilen", color: Theme.warning)
+                    VoiceGroupRow(profile: profile, group: group, title: group.members.count == 1 ? String(localized: "Einzelne Zeile") : String(localized: "\(group.members.count) Zeilen", comment: "plural: lines of a voice"), color: Theme.warning)
                         .padding(.leading, 16)
                 }
                 if groups.count > 30 {
@@ -279,12 +279,12 @@ private struct OutlierRows: View {
     }
 
     private var summary: String {
-        var text = lineCount == 1 ? "1 Zeile passt zu keiner Stimme und zählt nicht" : "\(lineCount) Zeilen passen zu keiner Stimme und zählen nicht"
+        var text = String(localized: "\(lineCount) Zeilen passen zu keiner Stimme und zählen nicht", comment: "plural: lines that fit none of a person's voices")
         let threshold = model.settings.voiceStrictness.thresholds.suggestion
         let matching = groups.filter { group in
             (model.voiceLibrary.rank(group.centroid, excluding: [profile.personId]).first?.similarity ?? 0) >= threshold
         }.count
-        if matching > 0 { text += " · \(matching) klingen wie jemand anderes" }
+        if matching > 0 { text += " · " + String(localized: "\(matching) klingen wie jemand anderes", comment: "plural: groups of lines that sound like someone else") }
         return text
     }
 }
@@ -300,7 +300,7 @@ private struct IgnoredRow: View {
             Circle().strokeBorder(Theme.textTertiary, lineWidth: 1.2).frame(width: 8, height: 8)
             VStack(alignment: .leading, spacing: 1) {
                 Text("Nicht verwendet").font(.uiMedium)
-                Text(profile.ignored.count == 1 ? "1 Zeile" : "\(profile.ignored.count) Zeilen").font(.small).foregroundStyle(Theme.textTertiary)
+                Text(String(localized: "\(profile.ignored.count) Zeilen", comment: "plural: lines of a voice")).font(.small).foregroundStyle(Theme.textTertiary)
             }
             Spacer(minLength: 6)
             Button("Wieder verwenden") {
@@ -417,10 +417,10 @@ enum NamePrompt {
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = message
-        alert.addButton(withTitle: "Speichern")
-        alert.addButton(withTitle: "Abbrechen")
+        alert.addButton(withTitle: String(localized: "Speichern"))
+        alert.addButton(withTitle: String(localized: "Abbrechen"))
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 240, height: 24))
-        field.placeholderString = "Name"
+        field.placeholderString = String(localized: "Name")
         field.stringValue = initial
         alert.accessoryView = field
         alert.window.initialFirstResponder = field

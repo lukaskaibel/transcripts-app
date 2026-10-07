@@ -127,7 +127,7 @@ struct OnboardingView: View {
         try? model.database.save(me)
     }
 
-    private func step(title: String, detail: String, state: Bool?, action: (String, () -> Void)?, settingsPane: String?, info: String? = nil) -> some View {
+    private func step(title: LocalizedStringKey, detail: LocalizedStringKey, state: Bool?, action: (LocalizedStringKey, () -> Void)?, settingsPane: String?, info: LocalizedStringKey? = nil) -> some View {
         HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.uiMedium)
@@ -163,7 +163,7 @@ struct OnboardingView: View {
                 if case .preparing(let step, let fraction) = model.engineState {
                     HStack(spacing: 8) {
                         ThinBar(fraction: fraction).frame(width: 180)
-                        Text("\(step) · \(Int(fraction * 100)) %").font(.tiny).foregroundStyle(Theme.textTertiary)
+                        Text(verbatim: "\(step) · \(fraction.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current)))").font(.tiny).foregroundStyle(Theme.textTertiary)
                     }
                     .padding(.top, 6)
                 }
