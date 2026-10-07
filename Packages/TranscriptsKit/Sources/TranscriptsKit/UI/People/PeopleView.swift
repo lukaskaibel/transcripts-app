@@ -5,6 +5,9 @@ import SwiftUI
 struct PeopleView: View {
     @Environment(AppModel.self) private var model
     @State private var selected: PersonStats?
+    @AppStorage("showVoiceMap") private var showsMap = true
+    /// The person hovered in the list, whose voice stands out on the map.
+    @State private var highlighted: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -12,6 +15,23 @@ struct PeopleView: View {
                 Text("Personen").font(.uiSemibold)
                 Text("\(model.peopleStats.count)").foregroundStyle(Theme.textTertiary)
                 Spacer()
+                Button {
+                    withAnimation(Theme.spring) { showsMap.toggle() }
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: "circle.hexagongrid").font(.system(size: 11))
+                        Text("Stimmenkarte")
+                    }
+                    .font(.small)
+                    .foregroundStyle(showsMap ? Theme.accent : Theme.textSecondary)
+                    .padding(.horizontal, 9)
+                    .frame(height: 24)
+                    .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(showsMap ? Theme.selectionFill : Theme.control))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainPressStyle())
+                .help(showsMap ? "Stimmenkarte ausblenden" : "Stimmenkarte zeigen: alle Stimmen auf einen Blick")
+                .disabled(model.peopleStats.isEmpty)
             }
             .padding(.horizontal, 18)
             .frame(height: Theme.headerHeight)
@@ -22,6 +42,11 @@ struct PeopleView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
+                        if showsMap {
+                            VoicesOverview(highlighted: highlighted)
+                                .padding(.bottom, 14)
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
                         if !model.reviews.isEmpty {
                             HStack(spacing: 8) {
                                 Circle().fill(Theme.warning).frame(width: 7, height: 7)
@@ -44,7 +69,10 @@ struct PeopleView: View {
                         }
                         knownHeader.padding(.top, model.reviews.isEmpty ? 0 : 14)
                         ForEach(model.peopleStats) { stats in
-                            PersonRow(stats: stats) { selected = stats }
+                            PersonRow(stats: stats, mapColor: showsMap && stats.voiceSamples > 0 ? VoicesOverview.color(for: stats.person.id, among: model.people) : nil) { selected = stats }
+                                .onHover { inside in
+                                    if inside { highlighted = stats.person.id } else if highlighted == stats.person.id { highlighted = nil }
+                                }
                         }
                     }
                     .padding(10)
@@ -218,6 +246,8 @@ struct ReviewRow: View {
 
 struct PersonRow: View {
     let stats: PersonStats
+    /// The person's colour on the voice map, while the map is shown.
+    var mapColor: Color?
     let open: () -> Void
     @State private var hovering = false
 
@@ -226,6 +256,9 @@ struct PersonRow: View {
             HStack(spacing: 12) {
                 Avatar(kind: stats.person.isMe ? .me(name: stats.person.name) : .person(name: stats.person.name), size: 22)
                 Text(stats.person.name).font(.uiMedium).foregroundStyle(Theme.text).lineLimit(1)
+                if let mapColor {
+                    Circle().fill(mapColor).frame(width: 7, height: 7).help("Farbe auf der Stimmenkarte")
+                }
                 if stats.person.isMe {
                     Chip {
                         Image(systemName: "mic").font(.system(size: 9))

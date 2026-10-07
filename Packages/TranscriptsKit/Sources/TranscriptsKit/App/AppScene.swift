@@ -13,10 +13,17 @@ public struct TranscriptsScene: Scene {
     static func makeModel() -> AppModel {
         let arguments = UserDefaults.standard
         if arguments.bool(forKey: "demo") {
-            // Nothing the demo does may touch real recordings.
-            AppPaths.overrideRoot = FileManager.default.temporaryDirectory.appendingPathComponent("Transcripts-Demo", isDirectory: true)
-            let database = (try? AppDatabase.inMemory())!
-            DemoData.seed(database)
+            // Nothing the demo does may touch real recordings. With `-demo.data <folder>` it shows a copy of
+            // an app folder instead of the made-up meetings (for checking the interface on real voices).
+            let copy = arguments.string(forKey: "demo.data").map { URL(fileURLWithPath: $0, isDirectory: true) }
+            AppPaths.overrideRoot = copy ?? FileManager.default.temporaryDirectory.appendingPathComponent("Transcripts-Demo", isDirectory: true)
+            let database: AppDatabase
+            if let copy, let opened = try? AppDatabase.openShared(at: copy) {
+                database = opened
+            } else {
+                database = (try? AppDatabase.inMemory())!
+                DemoData.seed(database)
+            }
             let defaults = UserDefaults(suiteName: "Transcripts.demo") ?? .standard
             defaults.removePersistentDomain(forName: "Transcripts.demo")
             let settings = AppSettings(defaults: defaults)
