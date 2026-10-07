@@ -627,15 +627,33 @@ extension RecordingSession {
         func line(_ id: String, _ key: String, _ start: Double, _ end: Double, _ text: String) -> LiveLine {
             LiveLine(id: id, speakerKey: key, channel: key == MeetingSpeaker.meKey ? .microphone : .system, start: start, end: end, text: text, isPartial: false)
         }
-        lines = [
-            line("1", "S1", 598, 606, "Dann zum Sprint-Ziel: Release 2.4 stabil bekommen. Mehr nehmen wir uns diesmal nicht vor."),
-            line("2", "S2", 621, 628, "Dann sollten wir das Import-Ticket rausnehmen. Das ist zu groß für zwei Wochen."),
-            line("3", MeetingSpeaker.meKey, 640, 646, "Einverstanden. Ich nehme den PDF-Export, das hängt ja sowieso an mir."),
-            line("4", "S3", 675, 681, "Ich kann bei QA unterstützen, wenn Thomas mir die Testfälle schickt."),
-            line("5", "S4", 708, 714, "Hallo zusammen, sorry für die Verspätung – hier ist Paula aus dem Support."),
+        let german = AppLanguage.current == .german
+        let texts = german ? [
+            "Dann zum Sprint-Ziel: Release 2.4 stabil bekommen. Mehr nehmen wir uns diesmal nicht vor.",
+            "Dann sollten wir das Import-Ticket rausnehmen. Das ist zu groß für zwei Wochen.",
+            "Einverstanden. Ich nehme den PDF-Export, das hängt ja sowieso an mir.",
+            "Ich kann bei QA unterstützen, wenn Thomas mir die Testfälle schickt.",
+            "Hallo zusammen, sorry für die Verspätung – hier ist Paula aus dem Support.",
+            "Willkommen, Paula. Wir sind gerade beim Sprint-Ziel und haben das Import-Ticket …",
+            "Budget für Testgeräte klären",
+        ] : [
+            "Next, the sprint goal: get release 2.4 stable. That's all we're taking on this time.",
+            "Then we should drop the import ticket. It's too big for two weeks.",
+            "Agreed. I'll take the PDF export, that one's on me anyway.",
+            "I can help with QA if Thomas sends me the test cases.",
+            "Hi everyone, sorry I'm late – this is Paula from support.",
+            "Welcome, Paula. We're on the sprint goal and just took the import ticket …",
+            "Sort out the budget for test devices",
         ]
-        partials = [.system: LiveLine(id: "partial-system", speakerKey: "S2", channel: .system, start: 740, end: 740, text: "Willkommen, Paula. Wir sind gerade beim Sprint-Ziel und haben das Import-Ticket …", isPartial: true)]
-        markers = [LiveMarker(id: 1, time: 662, text: "Budget für Testgeräte klären")]
+        lines = [
+            line("1", "S1", 598, 606, texts[0]),
+            line("2", "S2", 621, 628, texts[1]),
+            line("3", MeetingSpeaker.meKey, 640, 646, texts[2]),
+            line("4", "S3", 675, 681, texts[3]),
+            line("5", "S4", 708, 714, texts[4]),
+        ]
+        partials = [.system: LiveLine(id: "partial-system", speakerKey: "S2", channel: .system, start: 740, end: 740, text: texts[5], isPartial: true)]
+        markers = [LiveMarker(id: 1, time: 662, text: texts[6])]
         currentSpeakerKey = "S2"
     }
 }

@@ -172,7 +172,7 @@ struct MeetingMenuItems: View {
         Divider()
         Button("Als Markdown kopieren", systemImage: "doc.on.doc") {
             if let detail = try? model.database.detail(of: meetingId) {
-                model.copyToClipboard(model.markdown(for: detail), what: String(localized: "Meeting"))
+                model.copyToClipboard(model.markdown(for: detail), toast: String(localized: "Meeting kopiert", comment: "toast: the whole meeting was copied as Markdown"))
             }
         }
         .disabled(!ready)

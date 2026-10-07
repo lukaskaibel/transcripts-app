@@ -140,10 +140,11 @@ extension AppModel {
         return lines.joined(separator: "\n")
     }
 
-    public func copyToClipboard(_ text: String, what: String) {
+    /// Puts `text` on the clipboard and says so with `toast` ("Zusammenfassung kopiert").
+    public func copyToClipboard(_ text: String, toast: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
-        showToast(String(localized: "\(what) kopiert", comment: "toast; the argument is what was copied: Meeting or Zusammenfassung"))
+        showToast(toast)
     }
 
     public func exportMarkdown(_ detail: MeetingDetail) {

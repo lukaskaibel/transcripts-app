@@ -6,7 +6,7 @@
 set -e
 cd "$(dirname "$0")/../.."
 work=build/localization
-rm -rf "$work/strings"
+# The compiler writes a file per source it compiles; the files of sources it skips (unchanged) stay valid.
 mkdir -p "$work/strings"
 # A build of its own, so every file is compiled (and nothing of the normal build is touched).
 swift build --package-path Packages/TranscriptsKit --build-path "$work/build" --target TranscriptsKit \

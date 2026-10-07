@@ -1,0 +1,5416 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "  %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "  %lld"
+          }
+        }
+      }
+    },
+    "%@ (vielleicht %@)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (vielleicht %@)"
+          }
+        }
+      }
+    },
+    "%@ antwortet mit Fehler %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ antwortet mit Fehler %lld"
+          }
+        }
+      }
+    },
+    "%@ antwortet mit Fehler %lld: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ antwortet mit Fehler %lld: %@"
+          }
+        }
+      }
+    },
+    "%@ beginnt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ beginnt"
+          }
+        }
+      }
+    },
+    "%@ beginnt gleich" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ beginnt gleich"
+          }
+        }
+      }
+    },
+    "%@ bietet keine passenden Modelle an." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ bietet keine passenden Modelle an."
+          }
+        }
+      }
+    },
+    "%@ davon erkannt" : {
+      "extractionState" : "manual",
+      "comment" : "how much of this speech the app recognized by itself, e.g. 12 min",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ davon erkannt"
+          }
+        }
+      }
+    },
+    "%@ gesprochen" : {
+      "extractionState" : "manual",
+      "comment" : "how long a person spoke, e.g. 42 min",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gesprochen"
+          }
+        }
+      }
+    },
+    "%@ hat den API-Key abgelehnt. Prüfe ihn in den Einstellungen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ hat den API-Key abgelehnt. Prüfe ihn in den Einstellungen."
+          }
+        }
+      }
+    },
+    "%@ ist fertig." : {
+      "extractionState" : "manual",
+      "comment" : "toast: a meeting title in quotes",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ist fertig."
+          }
+        }
+      }
+    },
+    "%@ ist gerade überlastet. Versuch es gleich noch einmal." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ist gerade überlastet. Versuch es gleich noch einmal."
+          }
+        }
+      }
+    },
+    "%@ ist jetzt %@." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ist jetzt %@."
+          }
+        }
+      }
+    },
+    "%@ ist nicht erreichbar: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ist nicht erreichbar: %@"
+          }
+        }
+      }
+    },
+    "%@ ist vermutlich" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ist vermutlich"
+          }
+        }
+      }
+    },
+    "%@ ließ sich nicht importieren" : {
+      "extractionState" : "manual",
+      "comment" : "toast: a file name in quotes",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ließ sich nicht importieren"
+          }
+        }
+      }
+    },
+    "%@ läuft" : {
+      "extractionState" : "manual",
+      "comment" : "notification title: the meeting has started and is still going on",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ läuft"
+          }
+        }
+      }
+    },
+    "%@ löschen?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ löschen?"
+          }
+        }
+      }
+    },
+    "%@ meldet zu viele Anfragen. Versuch es gleich noch einmal." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ meldet zu viele Anfragen. Versuch es gleich noch einmal."
+          }
+        }
+      }
+    },
+    "%@ nutzt das Mikrofon nicht mehr, die Aufnahme läuft aber noch." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ nutzt das Mikrofon nicht mehr, die Aufnahme läuft aber noch."
+          }
+        }
+      }
+    },
+    "%@ nutzt gerade das Mikrofon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ nutzt gerade das Mikrofon"
+          }
+        }
+      }
+    },
+    "%@ nutzt gerade das Mikrofon. Aufnehmen?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ nutzt gerade das Mikrofon. Aufnehmen?"
+          }
+        }
+      }
+    },
+    "%@ Sprache" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Sprache"
+          }
+        }
+      }
+    },
+    "%@ und %@ klingen deutlich verschieden. Wenn das zwei Personen sind, gib eine davon an die richtige weiter." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ und %@ klingen deutlich verschieden. Wenn das zwei Personen sind, gib eine davon an die richtige weiter."
+          }
+        }
+      }
+    },
+    "%@ und die Stimmerkennung, etwa 700 MB. Einmal laden, danach läuft alles offline." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ und die Stimmerkennung, etwa 700 MB. Einmal laden, danach läuft alles offline."
+          }
+        }
+      }
+    },
+    "%@ wird geladen" : {
+      "extractionState" : "manual",
+      "comment" : "%@ is the part being loaded, e.g. Spracherkennung",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ wird geladen"
+          }
+        }
+      }
+    },
+    "%@ zuordnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ zuordnen"
+          }
+        }
+      }
+    },
+    "%@ · %@ Sprache" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@ Sprache"
+          }
+        }
+      }
+    },
+    "%@ · %lld %%" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld %%"
+          }
+        }
+      }
+    },
+    "%@ · ohne Namen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · ohne Namen"
+          }
+        }
+      }
+    },
+    "%@ · Stimme %lld" : {
+      "extractionState" : "manual",
+      "comment" : "a person's second, third, … voice on the voice map",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Stimme %lld"
+          }
+        }
+      }
+    },
+    "%@ öffnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ öffnen"
+          }
+        }
+      }
+    },
+    "%lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
+    },
+    "%lld / %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld / %lld"
+          }
+        }
+      }
+    },
+    "%lld Aufnahmen werden repariert" : {
+      "extractionState" : "manual",
+      "comment" : "plural: toast; recordings whose call track is being repaired",
+      "localizations" : {}
+    },
+    "%lld h" : {
+      "extractionState" : "manual",
+      "comment" : "hours, short",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h"
+          }
+        }
+      }
+    },
+    "%lld h %lld min" : {
+      "extractionState" : "manual",
+      "comment" : "hours and minutes, short",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld h %lld min"
+          }
+        }
+      }
+    },
+    "%lld klingen wie jemand anderes" : {
+      "extractionState" : "manual",
+      "comment" : "plural: groups of lines that sound like someone else",
+      "localizations" : {}
+    },
+    "%lld Meetings" : {
+      "extractionState" : "manual",
+      "comment" : "plural: meetings",
+      "localizations" : {}
+    },
+    "%lld min" : {
+      "extractionState" : "manual",
+      "comment" : "minutes, short",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
+          }
+        }
+      }
+    },
+    "%lld s" : {
+      "extractionState" : "manual",
+      "comment" : "seconds, short",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld s"
+          }
+        }
+      }
+    },
+    "%lld Stimmen" : {
+      "extractionState" : "manual",
+      "comment" : "plural: voices of a person",
+      "localizations" : {}
+    },
+    "%lld Stimmen offen" : {
+      "extractionState" : "manual",
+      "comment" : "plural: voices in a meeting still waiting for a name",
+      "localizations" : {}
+    },
+    "%lld Stimmen ohne Namen" : {
+      "extractionState" : "manual",
+      "comment" : "plural: voices in a meeting nobody has named yet",
+      "localizations" : {}
+    },
+    "%lld Stimmen warten auf dich" : {
+      "extractionState" : "manual",
+      "comment" : "plural: voices waiting for the user to name them",
+      "localizations" : {}
+    },
+    "%lld Stimmproben" : {
+      "extractionState" : "manual",
+      "comment" : "plural: voice samples of a person",
+      "localizations" : {}
+    },
+    "%lld von %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld von %lld"
+          }
+        }
+      }
+    },
+    "%lld Zeilen" : {
+      "extractionState" : "manual",
+      "comment" : "plural: lines of a voice",
+      "localizations" : {}
+    },
+    "%lld Zeilen passen zu keiner Stimme und zählen nicht" : {
+      "extractionState" : "manual",
+      "comment" : "plural: lines that fit none of a person's voices",
+      "localizations" : {}
+    },
+    "%lld Zeilen von der App hierher verschoben" : {
+      "extractionState" : "manual",
+      "comment" : "plural: lines the app moved to this speaker",
+      "localizations" : {}
+    },
+    "+%lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld"
+          }
+        }
+      }
+    },
+    "1 Minute vorher" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Minute vorher"
+          }
+        }
+      }
+    },
+    "15 Sekunden vor" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 Sekunden vor"
+          }
+        }
+      }
+    },
+    "15 Sekunden zurück" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 Sekunden zurück"
+          }
+        }
+      }
+    },
+    "2 Minuten vorher" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 Minuten vorher"
+          }
+        }
+      }
+    },
+    "30 Tage behalten" : {
+      "extractionState" : "manual",
+      "comment" : "what happens to a meeting's audio recording",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 Tage behalten"
+          }
+        }
+      }
+    },
+    "5 Minuten vorher" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 Minuten vorher"
+          }
+        }
+      }
+    },
+    "Ab hier abspielen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ab hier abspielen"
+          }
+        }
+      }
+    },
+    "Abbrechen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbrechen"
+          }
+        }
+      }
+    },
+    "Abspielen (Leertaste)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abspielen (Leertaste)"
+          }
+        }
+      }
+    },
+    "Alle durchgehen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle durchgehen"
+          }
+        }
+      }
+    },
+    "Alle Meetings öffnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Meetings öffnen"
+          }
+        }
+      }
+    },
+    "Alle Stimmen haben einen Namen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Stimmen haben einen Namen."
+          }
+        }
+      }
+    },
+    "Alle Stimmen vergessen …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Stimmen vergessen …"
+          }
+        }
+      }
+    },
+    "Alle Stimmen vergessen?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Stimmen vergessen?"
+          }
+        }
+      }
+    },
+    "Allgemein" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allgemein"
+          }
+        }
+      }
+    },
+    "Als eigene Stimme abtrennen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als eigene Stimme abtrennen"
+          }
+        }
+      }
+    },
+    "Als erledigt markieren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als erledigt markieren"
+          }
+        }
+      }
+    },
+    "Als Markdown kopieren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als Markdown kopieren"
+          }
+        }
+      }
+    },
+    "Als Markdown sichern …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als Markdown sichern …"
+          }
+        }
+      }
+    },
+    "Als offen markieren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als offen markieren"
+          }
+        }
+      }
+    },
+    "Als „%@“ speichern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als „%@“ speichern"
+          }
+        }
+      }
+    },
+    "Am genauesten, empfohlen · ca. 650 MB" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Am genauesten, empfohlen · ca. 650 MB"
+          }
+        }
+      }
+    },
+    "An der Stimme erkannt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An der Stimme erkannt"
+          }
+        }
+      }
+    },
+    "Anbieter" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anbieter"
+          }
+        }
+      }
+    },
+    "Andere" : {
+      "extractionState" : "manual",
+      "comment" : "section title over the other people a voice could be",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Andere"
+          }
+        }
+      }
+    },
+    "Andere Person" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Andere Person"
+          }
+        }
+      }
+    },
+    "Anhören" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anhören"
+          }
+        }
+      }
+    },
+    "Anhören und benennen, dann erkennt die App sie wieder." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anhören und benennen, dann erkennt die App sie wieder."
+          }
+        }
+      }
+    },
+    "Anstehend" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anstehend"
+          }
+        }
+      }
+    },
+    "Anstehende Termine aus deinem Kalender erscheinen hier." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anstehende Termine aus deinem Kalender erscheinen hier."
+          }
+        }
+      }
+    },
+    "API-Keys liegen im macOS-Schlüsselbund. Für eine Zusammenfassung geht nur der Text des Transkripts an den Anbieter – mit Ollama verlässt nichts deinen Mac." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API-Keys liegen im macOS-Schlüsselbund. Für eine Zusammenfassung geht nur der Text des Transkripts an den Anbieter – mit Ollama verlässt nichts deinen Mac."
+          }
+        }
+      }
+    },
+    "App-Icon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App-Icon"
+          }
+        }
+      }
+    },
+    "App-Icon %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App-Icon %@"
+          }
+        }
+      }
+    },
+    "Audio wird gelesen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio wird gelesen"
+          }
+        }
+      }
+    },
+    "Audiodatei hier ablegen zum Transkribieren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodatei hier ablegen zum Transkribieren"
+          }
+        }
+      }
+    },
+    "Audiodatei importieren …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiodatei importieren …"
+          }
+        }
+      }
+    },
+    "Auf deinem Mikrofon klingen %lld Stimmen" : {
+      "extractionState" : "manual",
+      "comment" : "plural: different voices on the user's microphone",
+      "localizations" : {}
+    },
+    "Aufgaben" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufgaben"
+          }
+        }
+      }
+    },
+    "Aufgaben:" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufgaben:"
+          }
+        }
+      }
+    },
+    "Aufnahme" : {
+      "extractionState" : "manual",
+      "comment" : "settings tab: recording",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme"
+          }
+        }
+      }
+    },
+    "Aufnahme beenden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme beenden"
+          }
+        }
+      }
+    },
+    "Aufnahme beenden (⌘R)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme beenden (⌘R)"
+          }
+        }
+      }
+    },
+    "Aufnahme im Finder zeigen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme im Finder zeigen"
+          }
+        }
+      }
+    },
+    "Aufnahme jetzt starten?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme jetzt starten?"
+          }
+        }
+      }
+    },
+    "Aufnahme konnte nicht starten" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme konnte nicht starten"
+          }
+        }
+      }
+    },
+    "Aufnahme läuft" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme läuft"
+          }
+        }
+      }
+    },
+    "Aufnahme starten" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme starten"
+          }
+        }
+      }
+    },
+    "Aufnahme starten?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme starten?"
+          }
+        }
+      }
+    },
+    "Aufnahmen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahmen"
+          }
+        }
+      }
+    },
+    "Aufnehmen" : {
+      "extractionState" : "manual",
+      "comment" : "notification button: start recording",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnehmen"
+          }
+        }
+      }
+    },
+    "Aus dem Gesprächsverlauf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus dem Gesprächsverlauf"
+          }
+        }
+      }
+    },
+    "Aus · im Meeting per Klick auf „Erstellen“." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus · im Meeting per Klick auf „Erstellen“."
+          }
+        }
+      }
+    },
+    "Aus. Eingeschaltet fasst das Modell das Gespräch alle anderthalb Minuten zusammen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus. Eingeschaltet fasst das Modell das Gespräch alle anderthalb Minuten zusammen."
+          }
+        }
+      }
+    },
+    "Ausgewogen" : {
+      "extractionState" : "manual",
+      "comment" : "how readily voices are matched to people: balanced",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewogen"
+          }
+        }
+      }
+    },
+    "Ausreißer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausreißer"
+          }
+        }
+      }
+    },
+    "Automatisch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch"
+          }
+        }
+      }
+    },
+    "Automatisch zuordnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch zuordnen"
+          }
+        }
+      }
+    },
+    "Automatisch zusammenfassen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch zusammenfassen"
+          }
+        }
+      }
+    },
+    "Autostart ließ sich nicht ändern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autostart ließ sich nicht ändern"
+          }
+        }
+      }
+    },
+    "Beenden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beenden"
+          }
+        }
+      }
+    },
+    "Befehle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Befehle"
+          }
+        }
+      }
+    },
+    "Beim Anmelden starten" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim Anmelden starten"
+          }
+        }
+      }
+    },
+    "Beim ersten Aufnehmen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim ersten Aufnehmen"
+          }
+        }
+      }
+    },
+    "Beim Start eines Meetings erinnern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim Start eines Meetings erinnern"
+          }
+        }
+      }
+    },
+    "Beitreten" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beitreten"
+          }
+        }
+      }
+    },
+    "Bekannt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekannt"
+          }
+        }
+      }
+    },
+    "Belegt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belegt"
+          }
+        }
+      }
+    },
+    "Benennt Meetings, kennt die Teilnehmer und erinnert dich ans Aufnehmen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benennt Meetings, kennt die Teilnehmer und erinnert dich ans Aufnehmen."
+          }
+        }
+      }
+    },
+    "Bereit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit"
+          }
+        }
+      }
+    },
+    "Bereit · alles lokal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit · alles lokal"
+          }
+        }
+      }
+    },
+    "Bestätigen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bestätigen"
+          }
+        }
+      }
+    },
+    "Call beendet?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Call beendet?"
+          }
+        }
+      }
+    },
+    "Calls ohne Kalendereintrag erkennen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calls ohne Kalendereintrag erkennen"
+          }
+        }
+      }
+    },
+    "Das Audio dieses Meetings wurde gelöscht." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Audio dieses Meetings wurde gelöscht."
+          }
+        }
+      }
+    },
+    "Das Aufnehmen des Systemaudios ist fehlgeschlagen (Fehler %d)." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Aufnehmen des Systemaudios ist fehlgeschlagen (Fehler %d)."
+          }
+        }
+      }
+    },
+    "Das bin ich" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das bin ich"
+          }
+        }
+      }
+    },
+    "Das Einrichten der Systemaudio-Aufnahme ist fehlgeschlagen (Fehler %d)." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Einrichten der Systemaudio-Aufnahme ist fehlgeschlagen (Fehler %d)."
+          }
+        }
+      }
+    },
+    "Das Live-Transkript ist ein Entwurf. Nach dem Meeting wird alles noch einmal genauer transkribiert." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Live-Transkript ist ein Entwurf. Nach dem Meeting wird alles noch einmal genauer transkribiert."
+          }
+        }
+      }
+    },
+    "Das Mikrofon liefert nichts. Prüfe das Eingabegerät in den Einstellungen unter Aufnahme." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Mikrofon liefert nichts. Prüfe das Eingabegerät in den Einstellungen unter Aufnahme."
+          }
+        }
+      }
+    },
+    "Das Modell hat die Anfrage abgelehnt (%@)." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Modell hat die Anfrage abgelehnt (%@)."
+          }
+        }
+      }
+    },
+    "Das Modell hat die Anfrage abgelehnt." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Modell hat die Anfrage abgelehnt."
+          }
+        }
+      }
+    },
+    "Das Starten der Systemaudio-Aufnahme ist fehlgeschlagen (Fehler %d)." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Starten der Systemaudio-Aufnahme ist fehlgeschlagen (Fehler %d)."
+          }
+        }
+      }
+    },
+    "Das Transkript erscheint, sobald die Verarbeitung fertig ist." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Transkript erscheint, sobald die Verarbeitung fertig ist."
+          }
+        }
+      }
+    },
+    "Das Transkript ist leer." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Transkript ist leer."
+          }
+        }
+      }
+    },
+    "Das Transkript unten ist vorläufig." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Transkript unten ist vorläufig."
+          }
+        }
+      }
+    },
+    "Datei importieren …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datei importieren …"
+          }
+        }
+      }
+    },
+    "Datum" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datum"
+          }
+        }
+      }
+    },
+    "Dauer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dauer"
+          }
+        }
+      }
+    },
+    "Dein Name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Name"
+          }
+        }
+      }
+    },
+    "Deine Spur wird transkribiert" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Spur wird transkribiert"
+          }
+        }
+      }
+    },
+    "Deine Stimme lernt die App aus deinem Mikrofon, sobald du in einem Meeting gesprochen hast." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Stimme lernt die App aus deinem Mikrofon, sobald du in einem Meeting gesprochen hast."
+          }
+        }
+      }
+    },
+    "Demo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demo"
+          }
+        }
+      }
+    },
+    "Der API-Key konnte nicht im Schlüsselbund gespeichert werden (%d)." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der API-Key konnte nicht im Schlüsselbund gespeichert werden (%d)."
+          }
+        }
+      }
+    },
+    "Der bewährte Vorgänger · ca. 480 MB" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der bewährte Vorgänger · ca. 480 MB"
+          }
+        }
+      }
+    },
+    "Die Antwort des Modells war unbrauchbar: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Antwort des Modells war unbrauchbar: %@"
+          }
+        }
+      }
+    },
+    "Die Antwort war zu lang und wurde abgeschnitten." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Antwort war zu lang und wurde abgeschnitten."
+          }
+        }
+      }
+    },
+    "Die App erkennt die Stimmen jetzt auch in anderen Meetings und sortiert dort nach." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App erkennt die Stimmen jetzt auch in anderen Meetings und sortiert dort nach."
+          }
+        }
+      }
+    },
+    "Die App lernt nicht mehr aus dem, was diese Person gesagt hat; die Zuordnungen in Meetings bleiben." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App lernt nicht mehr aus dem, was diese Person gesagt hat; die Zuordnungen in Meetings bleiben."
+          }
+        }
+      }
+    },
+    "Die Aufnahme enthält kein Audio." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Aufnahme enthält kein Audio."
+          }
+        }
+      }
+    },
+    "Die Aufnahme wurde unterbrochen, bevor Audio gespeichert war." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Aufnahme wurde unterbrochen, bevor Audio gespeichert war."
+          }
+        }
+      }
+    },
+    "Die Datei enthält kein lesbares Audio." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei enthält kein lesbares Audio."
+          }
+        }
+      }
+    },
+    "Die Datenbank ließ sich nicht öffnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datenbank ließ sich nicht öffnen"
+          }
+        }
+      }
+    },
+    "Die Gesprächspartner waren zu schnell und doppelt zu hören. Die Meetings werden neu verarbeitet." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Gesprächspartner waren zu schnell und doppelt zu hören. Die Meetings werden neu verarbeitet."
+          }
+        }
+      }
+    },
+    "Die Personen und ihre Zuordnungen bleiben, aber die App erkennt niemanden mehr an der Stimme, bis sie neu gelernt hat." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Personen und ihre Zuordnungen bleiben, aber die App erkennt niemanden mehr an der Stimme, bis sie neu gelernt hat."
+          }
+        }
+      }
+    },
+    "Die Spracherkennung wird geladen …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Spracherkennung wird geladen …"
+          }
+        }
+      }
+    },
+    "Die Sprachmodelle sind noch nicht geladen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Sprachmodelle sind noch nicht geladen."
+          }
+        }
+      }
+    },
+    "Die Stimme wird gemerkt und in künftigen Meetings wiedererkannt." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Stimme wird gemerkt und in künftigen Meetings wiedererkannt."
+          }
+        }
+      }
+    },
+    "Die Stimme wird vergessen. In den Meetings wird die Person wieder zu einer unbekannten Stimme." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Stimme wird vergessen. In den Meetings wird die Person wieder zu einer unbekannten Stimme."
+          }
+        }
+      }
+    },
+    "Die Zeilen dieser Gruppe werden in allen Meetings dieser Person zugeordnet." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zeilen dieser Gruppe werden in allen Meetings dieser Person zugeordnet."
+          }
+        }
+      }
+    },
+    "Die Zusammenfassung fehlt." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zusammenfassung fehlt."
+          }
+        }
+      }
+    },
+    "Diese Stimme nicht mehr vorschlagen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Stimme nicht mehr vorschlagen"
+          }
+        }
+      }
+    },
+    "Diese Zeilen %@ zuordnen, in jedem Meeting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Zeilen %@ zuordnen, in jedem Meeting"
+          }
+        }
+      }
+    },
+    "Diese Zeilen jemandem zuordnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Zeilen jemandem zuordnen"
+          }
+        }
+      }
+    },
+    "Diese Zeilen werden der Person zugeordnet und ihre Stimme gemerkt." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Zeilen werden der Person zugeordnet und ihre Stimme gemerkt."
+          }
+        }
+      }
+    },
+    "Dieses Audioformat wird nicht unterstützt (%@)." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Audioformat wird nicht unterstützt (%@)."
+          }
+        }
+      }
+    },
+    "Dieses Meeting hat noch kein Transkript." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Meeting hat noch kein Transkript."
+          }
+        }
+      }
+    },
+    "Doppelklicken zum Umbenennen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doppelklicken zum Umbenennen"
+          }
+        }
+      }
+    },
+    "Du" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du"
+          }
+        }
+      }
+    },
+    "Du (Mikrofon)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du (Mikrofon)"
+          }
+        }
+      }
+    },
+    "Dunkel" : {
+      "extractionState" : "manual",
+      "comment" : "appearance: dark",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dunkel"
+          }
+        }
+      }
+    },
+    "Echo wird entfernt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Echo wird entfernt"
+          }
+        }
+      }
+    },
+    "Eindeutig erkannte Stimmen verfeinern, was die App über eine Person weiß, damit sie sich mit der Zeit verändern darf. Sie zählen nur, wo sie zu einer bestätigten Stimme passen. Bestätigte Zuordnungen lernt die App immer." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eindeutig erkannte Stimmen verfeinern, was die App über eine Person weiß, damit sie sich mit der Zeit verändern darf. Sie zählen nur, wo sie zu einer bestätigten Stimme passen. Bestätigte Zuordnungen lernt die App immer."
+          }
+        }
+      }
+    },
+    "Eine Stimme nach der anderen anhören und benennen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Stimme nach der anderen anhören und benennen"
+          }
+        }
+      }
+    },
+    "Eingeladen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eingeladen"
+          }
+        }
+      }
+    },
+    "eingeladen" : {
+      "extractionState" : "manual",
+      "comment" : "the person was invited to the meeting",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eingeladen"
+          }
+        }
+      }
+    },
+    "eingeladen · neu" : {
+      "extractionState" : "manual",
+      "comment" : "the person was invited to the meeting and is not known yet",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eingeladen · neu"
+          }
+        }
+      }
+    },
+    "Einrichten …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einrichten …"
+          }
+        }
+      }
+    },
+    "Einstellungen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen"
+          }
+        }
+      }
+    },
+    "Einstellungen (⌘,)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen (⌘,)"
+          }
+        }
+      }
+    },
+    "Einstellungen öffnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen öffnen"
+          }
+        }
+      }
+    },
+    "Einzelne Zeile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einzelne Zeile"
+          }
+        }
+      }
+    },
+    "Einziger weiterer Teilnehmer im Kalender" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einziger weiterer Teilnehmer im Kalender"
+          }
+        }
+      }
+    },
+    "Empfohlen für die meisten Meetings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empfohlen für die meisten Meetings."
+          }
+        }
+      }
+    },
+    "Entfernen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entfernen"
+          }
+        }
+      }
+    },
+    "Entscheidungen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entscheidungen"
+          }
+        }
+      }
+    },
+    "Entscheidungen:" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entscheidungen:"
+          }
+        }
+      }
+    },
+    "Erinnerung" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erinnerung"
+          }
+        }
+      }
+    },
+    "Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit › Mikrofon." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit › Mikrofon."
+          }
+        }
+      }
+    },
+    "Erlauben" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlauben"
+          }
+        }
+      }
+    },
+    "Erlaubt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlaubt"
+          }
+        }
+      }
+    },
+    "Erneut laden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut laden"
+          }
+        }
+      }
+    },
+    "Erneut versuchen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut versuchen"
+          }
+        }
+      }
+    },
+    "Erscheint, sobald genug gesagt wurde." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erscheint, sobald genug gesagt wurde."
+          }
+        }
+      }
+    },
+    "Erscheinungsbild" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erscheinungsbild"
+          }
+        }
+      }
+    },
+    "Erstellen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erstellen"
+          }
+        }
+      }
+    },
+    "Es ist kein Mikrofon verfügbar." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es ist kein Mikrofon verfügbar."
+          }
+        }
+      }
+    },
+    "Export fehlgeschlagen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Exportieren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportieren"
+          }
+        }
+      }
+    },
+    "Exportieren …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportieren …"
+          }
+        }
+      }
+    },
+    "Farbe auf der Stimmenkarte" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Farbe auf der Stimmenkarte"
+          }
+        }
+      }
+    },
+    "Fehler bei der Verarbeitung" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehler bei der Verarbeitung"
+          }
+        }
+      }
+    },
+    "Fertig" : {
+      "extractionState" : "manual",
+      "comment" : "processing step: everything is done",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fertig"
+          }
+        }
+      }
+    },
+    "Fortsetzen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortsetzen"
+          }
+        }
+      }
+    },
+    "Für %@ ist noch kein API-Key hinterlegt." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für %@ ist noch kein API-Key hinterlegt."
+          }
+        }
+      }
+    },
+    "Für deine eigene Stimme." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für deine eigene Stimme."
+          }
+        }
+      }
+    },
+    "Für die Stimmen im Call. macOS fragt beim ersten Aufnehmen, ob die App den Ton des Macs aufnehmen darf." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für die Stimmen im Call. macOS fragt beim ersten Aufnehmen, ob die App den Ton des Macs aufnehmen darf."
+          }
+        }
+      }
+    },
+    "Für doppelte Einträge derselben Person" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für doppelte Einträge derselben Person"
+          }
+        }
+      }
+    },
+    "Für eine laufende Zusammenfassung brauchst du ein KI-Modell. Richte es in den Einstellungen unter KI ein." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für eine laufende Zusammenfassung brauchst du ein KI-Modell. Richte es in den Einstellungen unter KI ein."
+          }
+        }
+      }
+    },
+    "Für Zusammenfassungen ein KI-Modell einrichten" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für Zusammenfassungen ein KI-Modell einrichten"
+          }
+        }
+      }
+    },
+    "Für „Meeting beginnt – Aufnehmen?“. Stelle in den Systemeinstellungen den Stil „Hinweise“ ein, dann bleibt die Mitteilung stehen, bis du klickst." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für „Meeting beginnt – Aufnehmen?“. Stelle in den Systemeinstellungen den Stil „Hinweise“ ein, dann bleibt die Mitteilung stehen, bis du klickst."
+          }
+        }
+      }
+    },
+    "Gehe zu" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gehe zu"
+          }
+        }
+      }
+    },
+    "Gehört jemand anderem, oder nicht verwenden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gehört jemand anderem, oder nicht verwenden"
+          }
+        }
+      }
+    },
+    "Gehört zu" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gehört zu"
+          }
+        }
+      }
+    },
+    "Geladen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geladen"
+          }
+        }
+      }
+    },
+    "Gesprächspartner werden transkribiert" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesprächspartner werden transkribiert"
+          }
+        }
+      }
+    },
+    "Gestern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestern"
+          }
+        }
+      }
+    },
+    "Großzügig" : {
+      "extractionState" : "manual",
+      "comment" : "how readily voices are matched to people: generous",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Großzügig"
+          }
+        }
+      }
+    },
+    "gut" : {
+      "extractionState" : "manual",
+      "comment" : "voice profile quality",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gut"
+          }
+        }
+      }
+    },
+    "Gutes Stimmprofil" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gutes Stimmprofil"
+          }
+        }
+      }
+    },
+    "Hell" : {
+      "extractionState" : "manual",
+      "comment" : "appearance: light",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hell"
+          }
+        }
+      }
+    },
+    "Herunterladen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herunterladen"
+          }
+        }
+      }
+    },
+    "Heute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute"
+          }
+        }
+      }
+    },
+    "Hier abspielen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hier abspielen"
+          }
+        }
+      }
+    },
+    "Hinterlege in den Einstellungen unter KI einen API-Key oder verbinde Ollama." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinterlege in den Einstellungen unter KI einen API-Key oder verbinde Ollama."
+          }
+        }
+      }
+    },
+    "http://localhost:11434" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "http://localhost:11434"
+          }
+        }
+      }
+    },
+    "Ich" : {
+      "extractionState" : "manual",
+      "comment" : "the user's name until they set one",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ich"
+          }
+        }
+      }
+    },
+    "Ignorieren" : {
+      "extractionState" : "manual",
+      "comment" : "notification button: ignore the detected meeting",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorieren"
+          }
+        }
+      }
+    },
+    "Im Demo-Modus wird nicht aufgenommen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Demo-Modus wird nicht aufgenommen."
+          }
+        }
+      }
+    },
+    "Im Finder zeigen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Finder zeigen"
+          }
+        }
+      }
+    },
+    "Im Transkript" : {
+      "extractionState" : "manual",
+      "comment" : "command palette section: lines found in transcripts",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Transkript"
+          }
+        }
+      }
+    },
+    "Im Transkript suchen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Transkript suchen"
+          }
+        }
+      }
+    },
+    "Im Transkript suchen (⌘F)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Transkript suchen (⌘F)"
+          }
+        }
+      }
+    },
+    "Immer behalten" : {
+      "extractionState" : "manual",
+      "comment" : "what happens to a meeting's audio recording",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Immer behalten"
+          }
+        }
+      }
+    },
+    "Importiert" : {
+      "extractionState" : "manual",
+      "comment" : "the meeting comes from an imported audio file",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importiert"
+          }
+        }
+      }
+    },
+    "in %lld Min." : {
+      "extractionState" : "manual",
+      "comment" : "a meeting starts in so many minutes",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "in %lld Min."
+          }
+        }
+      }
+    },
+    "in %lld Std." : {
+      "extractionState" : "manual",
+      "comment" : "a meeting starts in so many hours",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "in %lld Std."
+          }
+        }
+      }
+    },
+    "In den Systemeinstellungen erlauben" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In den Systemeinstellungen erlauben"
+          }
+        }
+      }
+    },
+    "In dieser Aufnahme wurde nicht gesprochen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In dieser Aufnahme wurde nicht gesprochen."
+          }
+        }
+      }
+    },
+    "Indigo" : {
+      "extractionState" : "manual",
+      "comment" : "app icon color",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indigo"
+          }
+        }
+      }
+    },
+    "Jeder Punkt ist eine Zeile; was ähnlich klingt, liegt nah beieinander." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeder Punkt ist eine Zeile; was ähnlich klingt, liegt nah beieinander."
+          }
+        }
+      }
+    },
+    "jetzt" : {
+      "extractionState" : "manual",
+      "comment" : "a meeting starts now",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jetzt"
+          }
+        }
+      }
+    },
+    "Kalender" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalender"
+          }
+        }
+      }
+    },
+    "Karte der Stimmproben" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte der Stimmproben"
+          }
+        }
+      }
+    },
+    "Kein JSON gefunden" : {
+      "extractionState" : "manual",
+      "comment" : "why a language model's answer was unusable",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein JSON gefunden"
+          }
+        }
+      }
+    },
+    "Kein KI-Modell eingerichtet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein KI-Modell eingerichtet"
+          }
+        }
+      }
+    },
+    "Kein Meeting in Sicht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Meeting in Sicht"
+          }
+        }
+      }
+    },
+    "Kein Name im Gespräch gefallen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Name im Gespräch gefallen"
+          }
+        }
+      }
+    },
+    "Kein Profil" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Profil"
+          }
+        }
+      }
+    },
+    "Kein Stimmprofil" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Stimmprofil"
+          }
+        }
+      }
+    },
+    "Kein Transkript." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Transkript."
+          }
+        }
+      }
+    },
+    "Kein Zugriff auf das Mikrofon. Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Zugriff auf das Mikrofon. Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit."
+          }
+        }
+      }
+    },
+    "Kein Zugriff aufs Mikrofon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Zugriff aufs Mikrofon"
+          }
+        }
+      }
+    },
+    "Keine Antwort" : {
+      "extractionState" : "manual",
+      "comment" : "why a language model's answer was unusable",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Antwort"
+          }
+        }
+      }
+    },
+    "Keine Aufnahme mehr vorhanden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Aufnahme mehr vorhanden"
+          }
+        }
+      }
+    },
+    "Keine Aufnahme vorhanden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Aufnahme vorhanden"
+          }
+        }
+      }
+    },
+    "Keine HTTP-Antwort" : {
+      "extractionState" : "manual",
+      "comment" : "why a language model's answer was unusable",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine HTTP-Antwort"
+          }
+        }
+      }
+    },
+    "Keine Stimme wartet auf einen Namen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Stimme wartet auf einen Namen."
+          }
+        }
+      }
+    },
+    "Keiner" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keiner"
+          }
+        }
+      }
+    },
+    "Keiner davon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keiner davon"
+          }
+        }
+      }
+    },
+    "Key hinzufügen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Key hinzufügen"
+          }
+        }
+      }
+    },
+    "KI" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KI"
+          }
+        }
+      }
+    },
+    "Kleiner, etwas ungenauer · ca. 220 MB" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kleiner, etwas ungenauer · ca. 220 MB"
+          }
+        }
+      }
+    },
+    "Klicken zum Anhören" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klicken zum Anhören"
+          }
+        }
+      }
+    },
+    "Klicken, um die Stimme zuzuordnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klicken, um die Stimme zuzuordnen"
+          }
+        }
+      }
+    },
+    "Klicken: Wer ist das?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klicken: Wer ist das?"
+          }
+        }
+      }
+    },
+    "klingt etwas ähnlich" : {
+      "extractionState" : "manual",
+      "comment" : "how much an unknown voice sounds like this person",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "klingt etwas ähnlich"
+          }
+        }
+      }
+    },
+    "Klingt nach %lld Stimmen" : {
+      "extractionState" : "manual",
+      "comment" : "plural: one speaker's lines sound like this many voices",
+      "localizations" : {}
+    },
+    "klingt sehr ähnlich" : {
+      "extractionState" : "manual",
+      "comment" : "how much an unknown voice sounds like this person",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "klingt sehr ähnlich"
+          }
+        }
+      }
+    },
+    "klingt wie %@" : {
+      "extractionState" : "manual",
+      "comment" : "these lines sound like this person",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "klingt wie %@"
+          }
+        }
+      }
+    },
+    "klingt wie dir" : {
+      "extractionState" : "manual",
+      "comment" : "these lines sound like the user",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "klingt wie dir"
+          }
+        }
+      }
+    },
+    "klingt ähnlich" : {
+      "extractionState" : "manual",
+      "comment" : "how much an unknown voice sounds like this person",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "klingt ähnlich"
+          }
+        }
+      }
+    },
+    "Kopieren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopieren"
+          }
+        }
+      }
+    },
+    "Laden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laden"
+          }
+        }
+      }
+    },
+    "Leere Antwort" : {
+      "extractionState" : "manual",
+      "comment" : "why a language model's answer was unusable",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leere Antwort"
+          }
+        }
+      }
+    },
+    "Letztes Meeting öffnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letztes Meeting öffnen"
+          }
+        }
+      }
+    },
+    "Live-Fenster" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live-Fenster"
+          }
+        }
+      }
+    },
+    "Live-Fenster öffnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live-Fenster öffnen"
+          }
+        }
+      }
+    },
+    "Live-Transkript" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live-Transkript"
+          }
+        }
+      }
+    },
+    "Live-Zusammenfassung" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live-Zusammenfassung"
+          }
+        }
+      }
+    },
+    "Live-Zusammenfassung ein- oder ausschalten" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live-Zusammenfassung ein- oder ausschalten"
+          }
+        }
+      }
+    },
+    "Lokal transkribiert · %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lokal transkribiert · %@"
+          }
+        }
+      }
+    },
+    "Lokale Modelle, ganz ohne Internet. Lange Meetings werden in Teilen zusammengefasst." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lokale Modelle, ganz ohne Internet. Lange Meetings werden in Teilen zusammengefasst."
+          }
+        }
+      }
+    },
+    "Los geht’s" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los geht’s"
+          }
+        }
+      }
+    },
+    "läuft" : {
+      "extractionState" : "manual",
+      "comment" : "in place of a meeting's duration: it is being recorded right now",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "läuft"
+          }
+        }
+      }
+    },
+    "Läuft · seit %@" : {
+      "extractionState" : "manual",
+      "comment" : "a calendar meeting is running, since this time of day",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Läuft · seit %@"
+          }
+        }
+      }
+    },
+    "Löschen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen"
+          }
+        }
+      }
+    },
+    "Löschen …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen …"
+          }
+        }
+      }
+    },
+    "Markiert" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markiert"
+          }
+        }
+      }
+    },
+    "Markierung" : {
+      "extractionState" : "manual",
+      "comment" : "a marker set during a recording, without a text",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markierung"
+          }
+        }
+      }
+    },
+    "Markierung setzen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markierung setzen"
+          }
+        }
+      }
+    },
+    "Markierungen" : {
+      "extractionState" : "manual",
+      "comment" : "markers set during a recording",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markierungen"
+          }
+        }
+      }
+    },
+    "Meeting" : {
+      "extractionState" : "manual",
+      "comment" : "title of a calendar event that has none",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting"
+          }
+        }
+      }
+    },
+    "Meeting %@" : {
+      "extractionState" : "manual",
+      "comment" : "title of a recording without a calendar event; the time it started",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting %@"
+          }
+        }
+      }
+    },
+    "Meeting erkannt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting erkannt"
+          }
+        }
+      }
+    },
+    "Meeting konnte nicht verarbeitet werden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting konnte nicht verarbeitet werden"
+          }
+        }
+      }
+    },
+    "Meeting kopiert" : {
+      "extractionState" : "manual",
+      "comment" : "toast: the whole meeting was copied as Markdown",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting kopiert"
+          }
+        }
+      }
+    },
+    "Meeting öffnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting öffnen"
+          }
+        }
+      }
+    },
+    "Meetings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meetings"
+          }
+        }
+      }
+    },
+    "Meetings werden auf diesem Mac transkribiert. Die Stimmen der anderen erkennt die App mit der Zeit wieder. Ein paar Dinge braucht sie dafür:" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meetings werden auf diesem Mac transkribiert. Die Stimmen der anderen erkennt die App mit der Zeit wieder. Ein paar Dinge braucht sie dafür:"
+          }
+        }
+      }
+    },
+    "Mehr" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr"
+          }
+        }
+      }
+    },
+    "Meldet sich, wenn Zoom, Teams, Meet im Browser & Co. das Mikrofon benutzen, und wenn der Call vorbei ist, die Aufnahme aber noch läuft." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meldet sich, wenn Zoom, Teams, Meet im Browser & Co. das Mikrofon benutzen, und wenn der Call vorbei ist, die Aufnahme aber noch läuft."
+          }
+        }
+      }
+    },
+    "Mikrofon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon"
+          }
+        }
+      }
+    },
+    "Mikrofon liefert nichts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon liefert nichts"
+          }
+        }
+      }
+    },
+    "Mikrofon stumm oder ohne Zugriff" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon stumm oder ohne Zugriff"
+          }
+        }
+      }
+    },
+    "Mitteilungen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitteilungen"
+          }
+        }
+      }
+    },
+    "mittel" : {
+      "extractionState" : "manual",
+      "comment" : "voice profile quality",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mittel"
+          }
+        }
+      }
+    },
+    "Mittleres Stimmprofil" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mittleres Stimmprofil"
+          }
+        }
+      }
+    },
+    "Modell" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modell"
+          }
+        }
+      }
+    },
+    "Modelle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelle"
+          }
+        }
+      }
+    },
+    "Modelle fehlen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelle fehlen"
+          }
+        }
+      }
+    },
+    "Modelle noch nicht geladen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelle noch nicht geladen"
+          }
+        }
+      }
+    },
+    "Modelle werden geladen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelle werden geladen"
+          }
+        }
+      }
+    },
+    "Modelle werden geladen · %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelle werden geladen · %@"
+          }
+        }
+      }
+    },
+    "Modelle werden geladen …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelle werden geladen …"
+          }
+        }
+      }
+    },
+    "Morgen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgen"
+          }
+        }
+      }
+    },
+    "Nach dem ersten Meeting erscheinen hier die Stimmen. Benenne sie einmal, dann erkennt die App sie in künftigen Meetings wieder." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach dem ersten Meeting erscheinen hier die Stimmen. Benenne sie einmal, dann erkennt die App sie in künftigen Meetings wieder."
+          }
+        }
+      }
+    },
+    "Nach dem Transkribieren löschen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach dem Transkribieren löschen"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        }
+      }
+    },
+    "Namen vergeben" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Namen vergeben"
+          }
+        }
+      }
+    },
+    "neu" : {
+      "extractionState" : "manual",
+      "comment" : "a person not known yet",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "neu"
+          }
+        }
+      }
+    },
+    "Neu erstellen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neu erstellen"
+          }
+        }
+      }
+    },
+    "Neu transkribieren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neu transkribieren"
+          }
+        }
+      }
+    },
+    "neu · %@" : {
+      "extractionState" : "manual",
+      "comment" : "a person not known yet, then why the app suggests them",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "neu · %@"
+          }
+        }
+      }
+    },
+    "Neue Person …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Person …"
+          }
+        }
+      }
+    },
+    "Nicht für die Stimme verwenden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht für die Stimme verwenden"
+          }
+        }
+      }
+    },
+    "Nicht verbunden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht verbunden"
+          }
+        }
+      }
+    },
+    "Nicht verwenden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht verwenden"
+          }
+        }
+      }
+    },
+    "Nicht verwendet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht verwendet"
+          }
+        }
+      }
+    },
+    "Nichts gefunden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nichts gefunden"
+          }
+        }
+      }
+    },
+    "Nichts zusammenzufassen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nichts zusammenzufassen"
+          }
+        }
+      }
+    },
+    "Niemand Bestimmtes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niemand Bestimmtes"
+          }
+        }
+      }
+    },
+    "Nimmt alles auf, was der Mac abspielt, getrennt von deinem Mikrofon. So weiß die App sicher, was du gesagt hast und was die anderen. Läuft der Call über die Lautsprecher, landet er auch im Mikrofon; diese doppelten Zeilen lässt die App weg." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nimmt alles auf, was der Mac abspielt, getrennt von deinem Mikrofon. So weiß die App sicher, was du gesagt hast und was die anderen. Läuft der Call über die Lautsprecher, landet er auch im Mikrofon; diese doppelten Zeilen lässt die App weg."
+          }
+        }
+      }
+    },
+    "Noch keine Meetings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Meetings"
+          }
+        }
+      }
+    },
+    "Noch keine Stimme. Ordne %@ in einem Meeting zu, dann erkennt die App die Stimme wieder." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Stimme. Ordne %@ in einem Meeting zu, dann erkennt die App die Stimme wieder."
+          }
+        }
+      }
+    },
+    "Noch keine Zusammenfassung" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Zusammenfassung"
+          }
+        }
+      }
+    },
+    "Noch keinem Meeting zugeordnet." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keinem Meeting zugeordnet."
+          }
+        }
+      }
+    },
+    "Noch niemand bekannt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch niemand bekannt"
+          }
+        }
+      }
+    },
+    "Notiz oder Markierung …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notiz oder Markierung …"
+          }
+        }
+      }
+    },
+    "Nächstes Meeting (⌘↓)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nächstes Meeting (⌘↓)"
+          }
+        }
+      }
+    },
+    "Offene Fragen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offene Fragen"
+          }
+        }
+      }
+    },
+    "Offene Fragen:" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offene Fragen:"
+          }
+        }
+      }
+    },
+    "ohne Namen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ohne Namen"
+          }
+        }
+      }
+    },
+    "Ohne offenes Fenster nur in der Menüleiste" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne offenes Fenster nur in der Menüleiste"
+          }
+        }
+      }
+    },
+    "Ollama" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ollama"
+          }
+        }
+      }
+    },
+    "Ordnet Stimmen nur bei sehr hoher Sicherheit selbst zu." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordnet Stimmen nur bei sehr hoher Sicherheit selbst zu."
+          }
+        }
+      }
+    },
+    "Parakeet läuft auf der Neural Engine dieses Macs und versteht 25 europäische Sprachen, auch gemischt. Nichts davon geht ins Internet." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet läuft auf der Neural Engine dieses Macs und versteht 25 europäische Sprachen, auch gemischt. Nichts davon geht ins Internet."
+          }
+        }
+      }
+    },
+    "Passt" : {
+      "extractionState" : "manual",
+      "comment" : "keep the lines the app moved to this speaker",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passt"
+          }
+        }
+      }
+    },
+    "passt nicht zum Rest" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "passt nicht zum Rest"
+          }
+        }
+      }
+    },
+    "Pause" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
+          }
+        }
+      }
+    },
+    "Pause (Leertaste)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause (Leertaste)"
+          }
+        }
+      }
+    },
+    "Pause / Fortsetzen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause / Fortsetzen"
+          }
+        }
+      }
+    },
+    "Pausieren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausieren"
+          }
+        }
+      }
+    },
+    "Pausiert" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausiert"
+          }
+        }
+      }
+    },
+    "Pegel von Mikrofon und Call" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pegel von Mikrofon und Call"
+          }
+        }
+      }
+    },
+    "Person" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Person"
+          }
+        }
+      }
+    },
+    "Person konnte nicht angelegt werden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Person konnte nicht angelegt werden"
+          }
+        }
+      }
+    },
+    "Personen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personen"
+          }
+        }
+      }
+    },
+    "Prüfe …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfe …"
+          }
+        }
+      }
+    },
+    "Prüfen und speichern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfen und speichern"
+          }
+        }
+      }
+    },
+    "Quelle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelle"
+          }
+        }
+      }
+    },
+    "Return oder %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Return oder %lld"
+          }
+        }
+      }
+    },
+    "Richte zuerst in den Einstellungen ein KI-Modell ein" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Richte zuerst in den Einstellungen ein KI-Modell ein"
+          }
+        }
+      }
+    },
+    "Schließen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schließen"
+          }
+        }
+      }
+    },
+    "Schließen (esc)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schließen (esc)"
+          }
+        }
+      }
+    },
+    "Schlägt öfter vor, irrt sich aber auch öfter." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlägt öfter vor, irrt sich aber auch öfter."
+          }
+        }
+      }
+    },
+    "schwach" : {
+      "extractionState" : "manual",
+      "comment" : "voice profile quality",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "schwach"
+          }
+        }
+      }
+    },
+    "Schwaches Stimmprofil" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwaches Stimmprofil"
+          }
+        }
+      }
+    },
+    "Schwebende Leiste anzeigen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwebende Leiste anzeigen"
+          }
+        }
+      }
+    },
+    "seit %lld Min." : {
+      "extractionState" : "manual",
+      "comment" : "a meeting has been running for so many minutes",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "seit %lld Min."
+          }
+        }
+      }
+    },
+    "seit %lld Std." : {
+      "extractionState" : "manual",
+      "comment" : "a meeting has been running for so many hours",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "seit %lld Std."
+          }
+        }
+      }
+    },
+    "Sicher erkannte Stimmen dazulernen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicher erkannte Stimmen dazulernen"
+          }
+        }
+      }
+    },
+    "Sichern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sichern"
+          }
+        }
+      }
+    },
+    "So heißt du in Transkripten und Zusammenfassungen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So heißt du in Transkripten und Zusammenfassungen."
+          }
+        }
+      }
+    },
+    "Sobald ein Transkript fertig ist." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobald ein Transkript fertig ist."
+          }
+        }
+      }
+    },
+    "Sobald jemand eine Stimme hat, zeigt die Karte, wie die Stimmen zueinander liegen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobald jemand eine Stimme hat, zeigt die Karte, wie die Stimmen zueinander liegen."
+          }
+        }
+      }
+    },
+    "Sobald jemand spricht, erscheint hier das Live-Transkript." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobald jemand spricht, erscheint hier das Live-Transkript."
+          }
+        }
+      }
+    },
+    "Speicher" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speicher"
+          }
+        }
+      }
+    },
+    "Speichern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speichern"
+          }
+        }
+      }
+    },
+    "Sprache" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprache"
+          }
+        }
+      }
+    },
+    "Sprache wird gesucht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprache wird gesucht"
+          }
+        }
+      }
+    },
+    "Spracherkennung" : {
+      "extractionState" : "manual",
+      "comment" : "step while preparing: the speech-to-text model",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spracherkennung"
+          }
+        }
+      }
+    },
+    "Spracherkennung und Stimmerkennung laufen auf diesem Mac." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spracherkennung und Stimmerkennung laufen auf diesem Mac."
+          }
+        }
+      }
+    },
+    "Spracherkennung wird geladen …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spracherkennung wird geladen …"
+          }
+        }
+      }
+    },
+    "Sprachmodelle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprachmodelle"
+          }
+        }
+      }
+    },
+    "Sprecher" : {
+      "extractionState" : "manual",
+      "comment" : "heading over the list of the meeting's speakers (plural)",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprecher"
+          }
+        }
+      }
+    },
+    "Sprecher %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprecher %lld"
+          }
+        }
+      }
+    },
+    "Sprechertrennung" : {
+      "extractionState" : "manual",
+      "comment" : "step while preparing: the model that tells apart who speaks when",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprechertrennung"
+          }
+        }
+      }
+    },
+    "Sprechzeit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprechzeit"
+          }
+        }
+      }
+    },
+    "spricht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "spricht"
+          }
+        }
+      }
+    },
+    "Später" : {
+      "extractionState" : "manual",
+      "comment" : "notification button: remind me later",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Später"
+          }
+        }
+      }
+    },
+    "Starte eine Aufnahme mit ⌘R oder über die Menüleiste. Du kannst auch eine Audiodatei hierher ziehen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starte eine Aufnahme mit ⌘R oder über die Menüleiste. Du kannst auch eine Audiodatei hierher ziehen."
+          }
+        }
+      }
+    },
+    "Status" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
+          }
+        }
+      }
+    },
+    "Stell den Stil auf „Hinweise“, damit eine Erinnerung stehen bleibt, bis du „Aufnehmen“ klickst." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stell den Stil auf „Hinweise“, damit eine Erinnerung stehen bleibt, bis du „Aufnehmen“ klickst."
+          }
+        }
+      }
+    },
+    "Stimmbibliothek" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmbibliothek"
+          }
+        }
+      }
+    },
+    "Stimme" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimme"
+          }
+        }
+      }
+    },
+    "Stimme %lld" : {
+      "extractionState" : "manual",
+      "comment" : "one of several voices the app hears under one person's name, numbered",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimme %lld"
+          }
+        }
+      }
+    },
+    "Stimme vergessen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimme vergessen"
+          }
+        }
+      }
+    },
+    "Stimme ähnlich" : {
+      "extractionState" : "manual",
+      "comment" : "reason under a suggested name: the voice sounds like this person's",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimme ähnlich"
+          }
+        }
+      }
+    },
+    "Stimme ähnlich wie in %lld früheren Meetings" : {
+      "extractionState" : "manual",
+      "comment" : "plural: why a voice is suggested",
+      "localizations" : {}
+    },
+    "Stimmen" : {
+      "extractionState" : "manual",
+      "comment" : "settings tab: people's voices",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmen"
+          }
+        }
+      }
+    },
+    "Stimmen werden erkannt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmen werden erkannt"
+          }
+        }
+      }
+    },
+    "Stimmen werden getrennt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmen werden getrennt"
+          }
+        }
+      }
+    },
+    "Stimmenkarte" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmenkarte"
+          }
+        }
+      }
+    },
+    "Stimmenkarte ausblenden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmenkarte ausblenden"
+          }
+        }
+      }
+    },
+    "Stimmenkarte zeigen: alle Stimmen auf einen Blick" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmenkarte zeigen: alle Stimmen auf einen Blick"
+          }
+        }
+      }
+    },
+    "Stimmerkennung" : {
+      "extractionState" : "manual",
+      "comment" : "step while preparing: the model that recognises voices",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmerkennung"
+          }
+        }
+      }
+    },
+    "Stimmprobe anhören" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmprobe anhören"
+          }
+        }
+      }
+    },
+    "Stimmprobe anhören (Leertaste)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmprobe anhören (Leertaste)"
+          }
+        }
+      }
+    },
+    "Stimmproben" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmproben"
+          }
+        }
+      }
+    },
+    "Stimmprofil" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stimmprofil"
+          }
+        }
+      }
+    },
+    "Suche in Meetings und Transkripten, oder ein Befehl …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche in Meetings und Transkripten, oder ein Befehl …"
+          }
+        }
+      }
+    },
+    "Suche schließen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche schließen"
+          }
+        }
+      }
+    },
+    "Suchen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suchen"
+          }
+        }
+      }
+    },
+    "Suchen …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suchen …"
+          }
+        }
+      }
+    },
+    "Systemaudio" : {
+      "extractionState" : "manual",
+      "comment" : "the sound other apps play, as opposed to the microphone",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemaudio"
+          }
+        }
+      }
+    },
+    "Systemaudio wird nicht aufgenommen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemaudio wird nicht aufgenommen"
+          }
+        }
+      }
+    },
+    "Systemeinstellungen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemeinstellungen"
+          }
+        }
+      }
+    },
+    "Systemstandard%@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemstandard%@"
+          }
+        }
+      }
+    },
+    "Taste %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taste %lld"
+          }
+        }
+      }
+    },
+    "Teilnehmer: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teilnehmer: %@"
+          }
+        }
+      }
+    },
+    "Ton des Calls aufnehmen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton des Calls aufnehmen"
+          }
+        }
+      }
+    },
+    "Transcripts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts"
+          }
+        }
+      }
+    },
+    "Transkript" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transkript"
+          }
+        }
+      }
+    },
+    "Transkript, Zusammenfassung und Aufnahme werden gelöscht." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transkript, Zusammenfassung und Aufnahme werden gelöscht."
+          }
+        }
+      }
+    },
+    "Transkripte und Zusammenfassungen bleiben immer erhalten; mit der Aufnahme kannst du Stellen nachhören und neu transkribieren." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transkripte und Zusammenfassungen bleiben immer erhalten; mit der Aufnahme kannst du Stellen nachhören und neu transkribieren."
+          }
+        }
+      }
+    },
+    "Transkription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transkription"
+          }
+        }
+      }
+    },
+    "Trennen fehlgeschlagen" : {
+      "extractionState" : "manual",
+      "comment" : "toast: making some lines a voice of their own failed",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trennen fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "und %lld weitere" : {
+      "extractionState" : "manual",
+      "comment" : "plural: more attendees than the list shows",
+      "localizations" : {}
+    },
+    "Ungültiges JSON" : {
+      "extractionState" : "manual",
+      "comment" : "why a language model's answer was unusable",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungültiges JSON"
+          }
+        }
+      }
+    },
+    "Verarbeitung fehlgeschlagen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verarbeitung fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Verbinden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbinden"
+          }
+        }
+      }
+    },
+    "Verbunden · %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbunden · %@"
+          }
+        }
+      }
+    },
+    "Vergessen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergessen"
+          }
+        }
+      }
+    },
+    "Vermutlich" : {
+      "extractionState" : "manual",
+      "comment" : "section title over the person a voice probably is",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vermutlich"
+          }
+        }
+      }
+    },
+    "vermutlich" : {
+      "extractionState" : "manual",
+      "comment" : "before buttons with the people an unknown voice probably is",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vermutlich"
+          }
+        }
+      }
+    },
+    "Vermutlich einer von ihnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vermutlich einer von ihnen"
+          }
+        }
+      }
+    },
+    "Verschieben fehlgeschlagen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verschieben fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Vom Mikrofon kommt nur Stille. Ist es stummgeschaltet? Sonst prüfe unter Datenschutz & Sicherheit → Mikrofon, ob Transcripts erlaubt ist." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vom Mikrofon kommt nur Stille. Ist es stummgeschaltet? Sonst prüfe unter Datenschutz & Sicherheit → Mikrofon, ob Transcripts erlaubt ist."
+          }
+        }
+      }
+    },
+    "Von der App hierher verschoben, weil es so klingt. Rechts unter „Sprecher“ lässt es sich zurücknehmen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Von der App hierher verschoben, weil es so klingt. Rechts unter „Sprecher“ lässt es sich zurücknehmen."
+          }
+        }
+      }
+    },
+    "Vorher bei %@ · %@" : {
+      "extractionState" : "manual",
+      "comment" : "the speakers the lines were with before, then a quote of the longest line",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorher bei %@ · %@"
+          }
+        }
+      }
+    },
+    "Vorheriges Meeting (⌘↑)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorheriges Meeting (⌘↑)"
+          }
+        }
+      }
+    },
+    "Vorschlag verwerfen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschlag verwerfen"
+          }
+        }
+      }
+    },
+    "Vorsichtig" : {
+      "extractionState" : "manual",
+      "comment" : "how readily voices are matched to people: cautious",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorsichtig"
+          }
+        }
+      }
+    },
+    "Warte auf Sprache …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warte auf Sprache …"
+          }
+        }
+      }
+    },
+    "Wartet" : {
+      "extractionState" : "manual",
+      "comment" : "processing step: waiting in line to be transcribed",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wartet"
+          }
+        }
+      }
+    },
+    "Weitere …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weitere …"
+          }
+        }
+      }
+    },
+    "Wem gehört diese Stimme?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wem gehört diese Stimme?"
+          }
+        }
+      }
+    },
+    "Wer ist %@?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wer ist %@?"
+          }
+        }
+      }
+    },
+    "Wer ist das?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wer ist das?"
+          }
+        }
+      }
+    },
+    "Wie das Meeting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie das Meeting"
+          }
+        }
+      }
+    },
+    "Wie das System" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie das System"
+          }
+        }
+      }
+    },
+    "Wieder verwenden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wieder verwenden"
+          }
+        }
+      }
+    },
+    "Wiedergabe schließen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiedergabe schließen"
+          }
+        }
+      }
+    },
+    "Willkommen bei Transcripts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Willkommen bei Transcripts"
+          }
+        }
+      }
+    },
+    "Wird geprüft …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird geprüft …"
+          }
+        }
+      }
+    },
+    "Wird gespeichert" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird gespeichert"
+          }
+        }
+      }
+    },
+    "Wird importiert" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird importiert"
+          }
+        }
+      }
+    },
+    "Wird mit %@ zusammengefasst …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird mit %@ zusammengefasst …"
+          }
+        }
+      }
+    },
+    "Wird mit dem Modell zusammengefasst …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird mit dem Modell zusammengefasst …"
+          }
+        }
+      }
+    },
+    "Wird transkribiert" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird transkribiert"
+          }
+        }
+      }
+    },
+    "Wird verarbeitet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird verarbeitet"
+          }
+        }
+      }
+    },
+    "Wird verarbeitet · %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird verarbeitet · %@"
+          }
+        }
+      }
+    },
+    "Wo bekomme ich einen Key?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wo bekomme ich einen Key?"
+          }
+        }
+      }
+    },
+    "Wähle Aufnahmen, die transkribiert werden sollen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle Aufnahmen, die transkribiert werden sollen."
+          }
+        }
+      }
+    },
+    "Während der Aufnahme" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während der Aufnahme"
+          }
+        }
+      }
+    },
+    "Ziehen zum Verschieben, Doppelklick öffnet das Live-Fenster" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziehen zum Verschieben, Doppelklick öffnet das Live-Fenster"
+          }
+        }
+      }
+    },
+    "Zu %@" : {
+      "extractionState" : "manual",
+      "comment" : "button: give these lines to this person",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu %@"
+          }
+        }
+      }
+    },
+    "Zu bestätigen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu bestätigen"
+          }
+        }
+      }
+    },
+    "Zu dir" : {
+      "extractionState" : "manual",
+      "comment" : "button: give these lines to you",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu dir"
+          }
+        }
+      }
+    },
+    "Zuletzt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zuletzt"
+          }
+        }
+      }
+    },
+    "zuletzt %@" : {
+      "extractionState" : "manual",
+      "comment" : "last heard on a day: today, yesterday, a weekday or a date",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zuletzt %@"
+          }
+        }
+      }
+    },
+    "Zum Beginn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Beginn"
+          }
+        }
+      }
+    },
+    "Zuordnung entfernen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zuordnung entfernen"
+          }
+        }
+      }
+    },
+    "Zuordnung fehlgeschlagen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zuordnung fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Zurück" : {
+      "extractionState" : "manual",
+      "comment" : "move the lines back to the speaker they came from",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurück"
+          }
+        }
+      }
+    },
+    "Zurück zu den Meetings (Esc)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurück zu den Meetings (Esc)"
+          }
+        }
+      }
+    },
+    "Zusammenfassung" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenfassung"
+          }
+        }
+      }
+    },
+    "Zusammenfassung erstellen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenfassung erstellen"
+          }
+        }
+      }
+    },
+    "Zusammenfassung fehlgeschlagen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenfassung fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Zusammenfassung kopieren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenfassung kopieren"
+          }
+        }
+      }
+    },
+    "Zusammenfassung kopiert" : {
+      "extractionState" : "manual",
+      "comment" : "toast",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenfassung kopiert"
+          }
+        }
+      }
+    },
+    "Zusammenfassungen richtest du später in den Einstellungen unter KI ein." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenfassungen richtest du später in den Einstellungen unter KI ein."
+          }
+        }
+      }
+    },
+    "Zusammenführen fehlgeschlagen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenführen fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Zusammenführen …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenführen …"
+          }
+        }
+      }
+    },
+    "Zusammengeführt" : {
+      "extractionState" : "manual",
+      "comment" : "toast: two people were merged into one",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammengeführt"
+          }
+        }
+      }
+    },
+    "Ändern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ändern"
+          }
+        }
+      }
+    },
+    "Öffnen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnen"
+          }
+        }
+      }
+    },
+    "Überspringen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überspringen"
+          }
+        }
+      }
+    },
+    "„%@“ löschen?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%@“ löschen?"
+          }
+        }
+      }
+    },
+    "„Automatisch“ passt sich an wie die Icons von macOS: hell, dunkel, getönt oder klar. Die anderen zeigt das Dock, solange die App läuft." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Automatisch“ passt sich an wie die Icons von macOS: hell, dunkel, getönt oder klar. Die anderen zeigt das Dock, solange die App läuft."
+          }
+        }
+      }
+    },
+    "⌘R" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⌘R"
+          }
+        }
+      }
+    },
+    "⏎ setzt eine Markierung an der aktuellen Stelle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏎ setzt eine Markierung an der aktuellen Stelle"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

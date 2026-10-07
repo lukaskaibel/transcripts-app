@@ -76,7 +76,7 @@ struct SummarySection: View {
                 }
                 .disabled(!model.summaryProviderReady)
                 IconButton(systemName: "doc.on.doc", label: String(localized: "Kopieren")) {
-                    model.copyToClipboard(model.summaryText(for: detail), what: String(localized: "Zusammenfassung"))
+                    model.copyToClipboard(model.summaryText(for: detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
                 }
             }))
             Text(summary.overview)

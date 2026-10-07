@@ -83,11 +83,11 @@ struct MeetingDetailView: View {
             }
             Menu {
                 Button("Als Markdown kopieren", systemImage: "doc.on.doc") {
-                    model.copyToClipboard(model.markdown(for: detail), what: String(localized: "Meeting"))
+                    model.copyToClipboard(model.markdown(for: detail), toast: String(localized: "Meeting kopiert", comment: "toast: the whole meeting was copied as Markdown"))
                 }
                 if detail.summary != nil {
                     Button("Zusammenfassung kopieren", systemImage: "text.quote") {
-                        model.copyToClipboard(model.summaryText(for: detail), what: String(localized: "Zusammenfassung"))
+                        model.copyToClipboard(model.summaryText(for: detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
                     }
                 }
                 Button("Als Markdown sichern …", systemImage: "square.and.arrow.down") { model.exportMarkdown(detail) }

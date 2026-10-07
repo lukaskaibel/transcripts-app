@@ -142,8 +142,8 @@ final class DebugRemote {
     private func snapshot(window name: String, name file: String) {
         let window: NSWindow?
         switch name {
-        case "main": window = NSApp.windows.first { $0.identifier?.rawValue == "main" || $0.title == "Transcripts" && $0.styleMask.contains(.titled) && $0.frame.width > 800 }
-        case "live": window = NSApp.windows.first { $0.identifier?.rawValue == "live" || $0.title == "Aufnahme" }
+        case "main": window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("main") == true || $0.title == "Transcripts" && $0.styleMask.contains(.titled) && $0.frame.width > 800 }
+        case "live": window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("live") == true || $0.title == "Aufnahme" }
         case "settings": window = NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true || $0.identifier?.rawValue.contains("settings") == true || $0.title.contains("Allgemein") || $0.title.contains("KI") || $0.title.contains("Aufnahme") && $0.frame.width < 800 || $0.title.contains("Transkription") || $0.title.contains("Stimmen") }
         case "floating": window = NSApp.windows.first { $0 is NSPanel && $0.frame.width == FloatingRecorderController.size.width }
         case "sheet": window = NSApp.windows.first { $0.isSheet && $0.isVisible }

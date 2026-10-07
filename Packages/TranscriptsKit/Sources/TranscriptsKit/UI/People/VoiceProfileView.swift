@@ -127,7 +127,8 @@ struct VoiceMap: View {
         }
         .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Theme.groupHeader))
         .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.rowSeparator, lineWidth: 1))
-        .accessibilityLabel("Karte der Stimmproben: \(profile.samples.count) Zeilen in \(profile.groups.filter(\.isTrusted).count) Stimmen")
+        .accessibilityLabel(String(localized: "Karte der Stimmproben") + ": " + String(localized: "\(profile.samples.count) Zeilen", comment: "plural: lines of a voice")
+            + ", " + String(localized: "\(profile.groups.filter(\.isTrusted).count) Stimmen", comment: "plural: voices of a person"))
     }
 }
 
