@@ -62,7 +62,7 @@ def sync(folder):
         lines = open(source, encoding="utf-8").read().split("\n")
         for item in data.get("tables", {}).get("Localizable", []):
             key = item["key"]
-            if not re.search(r"[A-Za-zÄÖÜäöüß]", key):
+            if not re.search(r"[A-Za-zÄÖÜäöüß]", SPECIFIER.sub("", key)):
                 continue  # "%@ · %@", "%lld": nothing to translate
             line = item["location"]["startingLine"]
             entry = found.setdefault(key, {"comment": "", "locations": []})
@@ -86,6 +86,8 @@ def sync(folder):
         localizations = entry.setdefault("localizations", {})
         if not is_plural(entry):
             localizations[SOURCE] = unit(key)
+    for key in [key for key in strings if not re.search(r"[A-Za-zÄÖÜäöüß]", SPECIFIER.sub("", key))]:
+        del strings[key]
     stale = [key for key in strings if key not in found]
     for key in stale:
         strings[key]["extractionState"] = "stale"

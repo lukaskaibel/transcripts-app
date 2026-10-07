@@ -1,17 +1,6 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    "  %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "  %lld"
-          }
-        }
-      }
-    },
     "%@ (vielleicht %@)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -315,17 +304,6 @@
         }
       }
     },
-    "%@ · %lld %%" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · %lld %%"
-          }
-        }
-      }
-    },
     "%@ · ohne Namen" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -360,32 +338,29 @@
         }
       }
     },
-    "%lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld"
-          }
-        }
-      }
-    },
-    "%lld / %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld / %lld"
-          }
-        }
-      }
-    },
     "%lld Aufnahmen werden repariert" : {
       "extractionState" : "manual",
       "comment" : "plural: toast; recordings whose call track is being repaired",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Eine Aufnahme wird repariert"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Aufnahmen werden repariert"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld h" : {
       "extractionState" : "manual",
@@ -414,12 +389,50 @@
     "%lld klingen wie jemand anderes" : {
       "extractionState" : "manual",
       "comment" : "plural: groups of lines that sound like someone else",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld klingt wie jemand anderes"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld klingen wie jemand anderes"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld Meetings" : {
       "extractionState" : "manual",
       "comment" : "plural: meetings",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Meeting"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Meetings"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld min" : {
       "extractionState" : "manual",
@@ -429,6 +442,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld min"
+          }
+        }
+      }
+    },
+    "%lld Modelle" : {
+      "extractionState" : "manual",
+      "comment" : "plural: language models found in Ollama",
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Modell"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Modelle"
+                }
+              }
+            }
           }
         }
       }
@@ -448,27 +485,122 @@
     "%lld Stimmen" : {
       "extractionState" : "manual",
       "comment" : "plural: voices of a person",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Stimme"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Stimmen"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld Stimmen offen" : {
       "extractionState" : "manual",
       "comment" : "plural: voices in a meeting still waiting for a name",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Stimme offen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Stimmen offen"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld Stimmen ohne Namen" : {
       "extractionState" : "manual",
       "comment" : "plural: voices in a meeting nobody has named yet",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Eine Stimme ohne Namen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Stimmen ohne Namen"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld Stimmen warten auf dich" : {
       "extractionState" : "manual",
       "comment" : "plural: voices waiting for the user to name them",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Eine Stimme wartet auf dich"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Stimmen warten auf dich"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld Stimmproben" : {
       "extractionState" : "manual",
       "comment" : "plural: voice samples of a person",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Stimmprobe"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Stimmproben"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld von %lld" : {
       "extractionState" : "manual",
@@ -484,25 +616,71 @@
     "%lld Zeilen" : {
       "extractionState" : "manual",
       "comment" : "plural: lines of a voice",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Zeile"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Zeilen"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld Zeilen passen zu keiner Stimme und zählen nicht" : {
       "extractionState" : "manual",
       "comment" : "plural: lines that fit none of a person's voices",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Zeile passt zu keiner Stimme und zählt nicht"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Zeilen passen zu keiner Stimme und zählen nicht"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld Zeilen von der App hierher verschoben" : {
       "extractionState" : "manual",
       "comment" : "plural: lines the app moved to this speaker",
-      "localizations" : {}
-    },
-    "+%lld" : {
-      "extractionState" : "manual",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Zeile von der App hierher verschoben"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Zeilen von der App hierher verschoben"
+                }
+              }
+            }
           }
         }
       }
@@ -908,7 +1086,26 @@
     "Auf deinem Mikrofon klingen %lld Stimmen" : {
       "extractionState" : "manual",
       "comment" : "plural: different voices on the user's microphone",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Auf deinem Mikrofon klingt %lld Stimme"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Auf deinem Mikrofon klingen %lld Stimmen"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "Aufgaben" : {
       "extractionState" : "manual",
@@ -919,7 +1116,8 @@
             "value" : "Aufgaben"
           }
         }
-      }
+      },
+      "comment" : "heading in the live summary: action items"
     },
     "Aufgaben:" : {
       "extractionState" : "manual",
@@ -1164,7 +1362,8 @@
             "value" : "Beenden"
           }
         }
-      }
+      },
+      "comment" : "button: stop the recording"
     },
     "Befehle" : {
       "extractionState" : "manual",
@@ -1173,6 +1372,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Befehle"
+          }
+        }
+      }
+    },
+    "Beginnt %@" : {
+      "extractionState" : "manual",
+      "comment" : "a meeting starts; the argument is like “in 5 min.” or “now”",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginnt %@"
           }
         }
       }
@@ -1283,6 +1494,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bestätigen"
+          }
+        }
+      }
+    },
+    "Bisher" : {
+      "extractionState" : "manual",
+      "comment" : "heading in the live summary: what was said so far",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bisher"
+          }
+        }
+      }
+    },
+    "Call" : {
+      "extractionState" : "manual",
+      "comment" : "label of the level meter for the call's sound",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Call"
           }
         }
       }
@@ -1650,6 +1885,17 @@
         }
       }
     },
+    "Die Sprachen, die die Spracherkennung zuverlässig versteht." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Sprachen, die die Spracherkennung zuverlässig versteht."
+          }
+        }
+      }
+    },
     "Die Spracherkennung wird geladen …" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1935,6 +2181,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Einstellungen öffnen"
+          }
+        }
+      }
+    },
+    "Einstellungen …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen …"
           }
         }
       }
@@ -2312,7 +2569,8 @@
             "value" : "Geladen"
           }
         }
-      }
+      },
+      "comment" : "speech model: its files are downloaded"
     },
     "Gesprächspartner werden transkribiert" : {
       "extractionState" : "manual",
@@ -2332,6 +2590,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gestern"
+          }
+        }
+      }
+    },
+    "Gilt nach einem Neustart." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gilt nach einem Neustart."
           }
         }
       }
@@ -2623,6 +2892,17 @@
         }
       }
     },
+    "Jetzt neu starten" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt neu starten"
+          }
+        }
+      }
+    },
     "Kalender" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2630,6 +2910,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kalender"
+          }
+        }
+      }
+    },
+    "Kalenderzugriff" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalenderzugriff"
           }
         }
       }
@@ -2757,6 +3048,17 @@
         }
       }
     },
+    "Keine Aufnahme" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Aufnahme"
+          }
+        }
+      }
+    },
     "Keine Aufnahme mehr vorhanden" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2811,7 +3113,8 @@
             "value" : "Keiner"
           }
         }
-      }
+      },
+      "comment" : "summary provider: none"
     },
     "Keiner davon" : {
       "extractionState" : "manual",
@@ -2905,7 +3208,26 @@
     "Klingt nach %lld Stimmen" : {
       "extractionState" : "manual",
       "comment" : "plural: one speaker's lines sound like this many voices",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Klingt nach %lld Stimme"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Klingt nach %lld Stimmen"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "klingt sehr ähnlich" : {
       "extractionState" : "manual",
@@ -2975,7 +3297,8 @@
             "value" : "Laden"
           }
         }
-      }
+      },
+      "comment" : "button: load the downloaded speech models"
     },
     "Leere Antwort" : {
       "extractionState" : "manual",
@@ -3100,6 +3423,18 @@
         }
       }
     },
+    "Läuft %@" : {
+      "extractionState" : "manual",
+      "comment" : "a meeting is running; the argument is like “for 3 min.” or “now”",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Läuft %@"
+          }
+        }
+      }
+    },
     "Läuft · seit %@" : {
       "extractionState" : "manual",
       "comment" : "a calendar meeting is running, since this time of day",
@@ -3143,16 +3478,28 @@
             "value" : "Markiert"
           }
         }
-      }
+      },
+      "comment" : "heading: the markers set during the recording"
     },
     "Markierung" : {
       "extractionState" : "manual",
-      "comment" : "a marker set during a recording, without a text",
+      "comment" : "a marker set at a moment of the recording, without a note",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Markierung"
+          }
+        }
+      }
+    },
+    "Markierung entfernen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markierung entfernen"
           }
         }
       }
@@ -3326,6 +3673,17 @@
         }
       }
     },
+    "Mikrofonzugriff" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofonzugriff"
+          }
+        }
+      }
+    },
     "Mitteilungen" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3466,6 +3824,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nach dem Transkribieren löschen"
+          }
+        }
+      }
+    },
+    "Nach der Aufnahme möglich." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach der Aufnahme möglich."
           }
         }
       }
@@ -3710,6 +4079,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nächstes Meeting (⌘↓)"
+          }
+        }
+      }
+    },
+    "Offen" : {
+      "extractionState" : "manual",
+      "comment" : "heading in the live summary: open questions",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offen"
           }
         }
       }
@@ -4269,7 +4650,8 @@
             "value" : "spricht"
           }
         }
-      }
+      },
+      "comment" : "accessibility: someone is talking right now"
     },
     "Später" : {
       "extractionState" : "manual",
@@ -4290,6 +4672,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Starte eine Aufnahme mit ⌘R oder über die Menüleiste. Du kannst auch eine Audiodatei hierher ziehen."
+          }
+        }
+      }
+    },
+    "Starte eine Aufnahme mit ⌘R, über die Menüleiste oder aus einer Kalender-Mitteilung." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starte eine Aufnahme mit ⌘R, über die Menüleiste oder aus einer Kalender-Mitteilung."
           }
         }
       }
@@ -4376,7 +4769,26 @@
     "Stimme ähnlich wie in %lld früheren Meetings" : {
       "extractionState" : "manual",
       "comment" : "plural: why a voice is suggested",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Stimme ähnlich wie in einem früheren Meeting"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Stimme ähnlich wie in %lld früheren Meetings"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "Stimmen" : {
       "extractionState" : "manual",
@@ -4579,8 +4991,31 @@
         }
       }
     },
-    "Systemstandard%@" : {
+    "Systemstandard" : {
       "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemstandard"
+          }
+        }
+      }
+    },
+    "Systemstandard (%@)" : {
+      "extractionState" : "manual",
+      "comment" : "microphone: the system's default input, with its name",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemstandard (%@)"
+          }
+        }
+      }
+    },
+    "Systemstandard%@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4630,6 +5065,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transcripts"
+          }
+        }
+      }
+    },
+    "Transcripts beenden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts beenden"
           }
         }
       }
@@ -4693,7 +5139,26 @@
     "und %lld weitere" : {
       "extractionState" : "manual",
       "comment" : "plural: more attendees than the list shows",
-      "localizations" : {}
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "und %lld weitere"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "und %lld weitere"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "Ungültiges JSON" : {
       "extractionState" : "manual",
@@ -4793,6 +5258,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verschieben fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "Vom Call kommt nichts an" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vom Call kommt nichts an"
+          }
+        }
+      }
+    },
+    "Vom Call kommt nichts an. Erlaube Transcripts unter Datenschutz & Sicherheit → Bildschirm- & Systemaudioaufnahme." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vom Call kommt nichts an. Erlaube Transcripts unter Datenschutz & Sicherheit → Bildschirm- & Systemaudioaufnahme."
           }
         }
       }

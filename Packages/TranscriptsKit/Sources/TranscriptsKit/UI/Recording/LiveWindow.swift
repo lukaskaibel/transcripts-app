@@ -121,7 +121,7 @@ struct LiveSessionView: View {
             Button {
                 Task { await model.stopRecording() }
             } label: {
-                Label(String(localized: "Beenden", comment: "button: stop the recording (the same text quits the app in the menu bar menu)"), systemImage: "stop.fill")
+                Label(String(localized: "Beenden", comment: "button: stop the recording"), systemImage: "stop.fill")
             }
             .buttonStyle(StopButtonStyle())
         }

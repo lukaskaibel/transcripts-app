@@ -48,7 +48,7 @@ public struct MenuBarContent: View {
                     openSettings()
                     dismiss()
                 }
-                menuRow("Beenden", shortcut: "⌘Q") { NSApp.terminate(nil) }
+                menuRow("Transcripts beenden", shortcut: "⌘Q") { NSApp.terminate(nil) }
             }
             .padding(6)
         }
@@ -158,7 +158,7 @@ public struct MenuBarContent: View {
                     Task { await model.stopRecording() }
                     dismiss()
                 } label: {
-                    Label(String(localized: "Beenden", comment: "button: stop the recording (the same text quits the app in the menu bar menu)"), systemImage: "stop.fill")
+                    Label(String(localized: "Beenden", comment: "button: stop the recording"), systemImage: "stop.fill")
                 }
                 .buttonStyle(StopButtonStyle())
             }
