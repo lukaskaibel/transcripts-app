@@ -113,11 +113,14 @@ public enum Strings {
     /// A stored reason for a suggestion in the interface's language: "Stimme ähnlich wie in 2 früheren Meetings"
     /// becomes "Voice like in 2 earlier meetings", and a quote gets the language's quotation marks.
     public static func reason(_ stored: String) -> String {
-        if stored == SpeakerIdentifier.conversationReason { return String(localized: "Aus dem Gesprächsverlauf") }
-        if let meetings = SpeakerIdentifier.meetings(inVoiceReason: stored) {
-            return String(localized: "Stimme ähnlich wie in \(meetings) früheren Meetings")
-        }
-        return quoted(stored)
+        // A reason can be several, joined by " · " (a name that was said, and the voice).
+        stored.components(separatedBy: " · ").map { part in
+            if part == SpeakerIdentifier.conversationReason { return String(localized: "Aus dem Gesprächsverlauf") }
+            if let meetings = SpeakerIdentifier.meetings(inVoiceReason: part) {
+                return String(localized: "Stimme ähnlich wie in \(meetings) früheren Meetings", comment: "plural: why a voice is suggested")
+            }
+            return quoted(part)
+        }.joined(separator: " · ")
     }
 
     /// `text` in the quotation marks of the interface's language: „…“, “…”, « … ».

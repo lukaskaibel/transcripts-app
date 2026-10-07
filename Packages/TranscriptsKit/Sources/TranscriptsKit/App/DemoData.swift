@@ -1,8 +1,10 @@
 import Foundation
 
-/// Sample meetings and people for the demo mode (`-demo YES`), used for screenshots and trying the app out.
+/// Sample meetings and people for the demo mode (`-demo YES`), used for screenshots and trying the app out. The
+/// meetings are held in German when the interface is German, and in English otherwise.
 enum DemoData {
     static func seed(_ database: AppDatabase) {
+        let t = AppLanguage.current == .german ? Texts.german : Texts.english
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         func at(_ dayOffset: Int, _ hour: Int, _ minute: Int = 0) -> Date {
@@ -29,35 +31,17 @@ enum DemoData {
         }
 
         // The meeting from the mockups, fully processed.
-        let sync = Meeting(id: "m-sync", title: "Weekly Produkt-Sync", startedAt: at(0, 10), duration: 42 * 60, status: .ready, source: "Zoom", language: "de",
+        let sync = Meeting(id: "m-sync", title: t.syncTitle, startedAt: at(0, 10), duration: 42 * 60, status: .ready, source: "Zoom", language: t.language,
                            attendees: [Attendee(name: "Anna Berger", email: "anna@example.com"), Attendee(name: "Thomas Klein", email: "thomas@example.com"), Attendee(name: "Miriam Okafor", email: "miriam@example.com"), Attendee(name: "Jonas Weber", email: "jonas@example.com")],
                            progress: 1, transcriptionModel: "Parakeet Ultra")
-        let syncLines: [(String, Double, Double, String)] = [
-            ("S1", 0, 14, "Okay, dann fangen wir an. Drei Themen heute: Release 2.4, der Onboarding-Bug und die offene Backend-Stelle."),
-            ("S2", 16, 28, "Zum Release: Wir sind feature-complete, aber der PDF-Export hängt noch bei langen Dokumenten."),
-            ("me", 161, 178, "Ich hab mir das am Freitag angeschaut. Es liegt am Rendering der Tabellen, nicht am Export selbst. Ich schätze zwei Tage."),
-            ("S1", 185, 191, "Dann verschieben wir auf den 14.? Thomas, passt das für dich?"),
-            ("S2", 192, 199, "Ja, der 14. ist realistisch. Dann bleibt noch Puffer für QA."),
-            ("S3", 860, 880, "Zum Onboarding: Fast jeder Dritte bricht im zweiten Schritt ab. Das Formular ist einfach zu lang."),
-            ("S4", 892, 905, "Wir könnten die Firmendaten optional machen und erst später abfragen."),
-            ("S3", 907, 914, "Gute Idee, Jonas. Ich mach bis Mittwoch einen Entwurf dafür."),
-            ("S1", 1904, 1920, "Letzter Punkt: die Backend-Stelle. Wir haben drei Kandidaten in der finalen Runde."),
-            ("me", 1930, 1938, "Ich kann die technischen Interviews diese Woche übernehmen."),
-            ("S1", 1941, 1950, "Super, danke. Dann sind wir durch. Bis nächste Woche!"),
-            // Jonas, whom the diarizer heard as Anna for a while.
-            ("S1", 1240, 1253, "Kurz noch zum Backend: Die Migration der Sync-Engine braucht noch eine Woche."),
-            ("S1", 1260, 1271, "Ich würde die alten Endpunkte bis Ende des Monats parallel laufen lassen."),
-            // Someone the app isn't sure about: Thomas or Daniel.
-            ("S5", 1500, 1512, "Von Kundenseite kam noch die Frage, ob der Export auch als Excel geht."),
-            ("S5", 1530, 1539, "Ich kläre das bis Freitag mit dem Vertrieb."),
-        ]
+        let syncLines = zip(Self.syncTiming, t.syncLines).map { ($0.0, $0.1, $0.2, $1) }
         let jonasInAnna: Set<Int> = [11, 12]
         let syncSpeakers = [
             MeetingSpeaker(meetingId: sync.id, key: "me", label: Strings.meLabel, personId: me.id, assignment: .confirmed, confidence: 1, talkTime: 610, channel: .microphone),
             MeetingSpeaker(meetingId: sync.id, key: "S1", label: Strings.speakerLabel(1), personId: anna.id, assignment: .automatic, confidence: 0.86, talkTime: 790, embedding: jitter(voices[anna.id]!, 0.1).embeddingData, sampleStart: 0, sampleEnd: 12, channel: .system),
             MeetingSpeaker(meetingId: sync.id, key: "S2", label: Strings.speakerLabel(2), personId: thomas.id, assignment: .automatic, confidence: 0.81, talkTime: 530, embedding: jitter(voices[thomas.id]!, 0.1).embeddingData, sampleStart: 16, sampleEnd: 28, channel: .system),
             MeetingSpeaker(meetingId: sync.id, key: "S3", label: Strings.speakerLabel(3), personId: miriam.id, assignment: .confirmed, confidence: 1, talkTime: 400, embedding: jitter(voices[miriam.id]!, 0.1).embeddingData, sampleStart: 860, sampleEnd: 872, channel: .system),
-            MeetingSpeaker(meetingId: sync.id, key: "S4", label: Strings.speakerLabel(4), assignment: .suggested, suggestedPersonId: jonas.id, suggestionReason: "Miriam: „Gute Idee, Jonas.“ · Stimme ähnlich wie in 2 früheren Meetings", confidence: 0.64, talkTime: 190, embedding: jitter(voices[jonas.id]!, 0.2).embeddingData, sampleStart: 892, sampleEnd: 905, channel: .system),
+            MeetingSpeaker(meetingId: sync.id, key: "S4", label: Strings.speakerLabel(4), assignment: .suggested, suggestedPersonId: jonas.id, suggestionReason: "Miriam: „\(t.goodIdea)“ · \(SpeakerIdentifier.voiceReasonPrefix) 2 früheren Meetings", confidence: 0.64, talkTime: 190, embedding: jitter(voices[jonas.id]!, 0.2).embeddingData, sampleStart: 892, sampleEnd: 905, channel: .system),
             MeetingSpeaker(meetingId: sync.id, key: "S5", label: Strings.speakerLabel(5), talkTime: 21, sampleStart: 1500, sampleEnd: 1512, channel: .system, candidatePersonIds: [thomas.id, daniel.id]),
         ]
         insert(sync, lines: syncLines, speakers: syncSpeakers, into: database) { index, key in
@@ -68,36 +52,33 @@ enum DemoData {
         try? database.save(
             summary: MeetingSummary(
                 meetingId: sync.id,
-                overview: "Release 2.4 wird auf den 14. Oktober verschoben, damit der PDF-Export bei langen Dokumenten vorher behoben ist. Fürs Onboarding entsteht ein kürzeres Formular. Lukas übernimmt diese Woche die technischen Interviews.",
-                decisions: ["Release 2.4 am 14. statt am 9. Oktober", "Firmendaten im Onboarding werden optional"],
-                openQuestions: ["Wer informiert die Kunden über die Verschiebung?"],
+                overview: t.overview,
+                decisions: t.decisions,
+                openQuestions: t.openQuestions,
                 model: "Claude Opus 5.5",
                 provider: "Anthropic"
             ),
-            actionItems: [
-                ActionItem(meetingId: sync.id, text: "Tabellen-Rendering im PDF-Export beheben", owner: "Lukas", due: "Mi"),
-                ActionItem(meetingId: sync.id, text: "Entwurf für ein kürzeres Onboarding-Formular", owner: "Miriam", due: "Mi"),
-                ActionItem(meetingId: sync.id, text: "Technische Interviews mit drei Kandidaten", owner: "Lukas", due: "Fr"),
-                ActionItem(meetingId: sync.id, text: "QA-Plan für Release 2.4", owner: "Thomas", due: "Do"),
-            ]
+            actionItems: zip(t.tasks, [("Lukas", 0), ("Miriam", 0), ("Lukas", 2), ("Thomas", 1)]).map { task, owner in
+                ActionItem(meetingId: sync.id, text: task, owner: owner.0, due: t.days[owner.1])
+            }
         )
-        _ = try? database.addMarker(Marker(meetingId: sync.id, time: 1205, text: "Budget für Testgeräte klären"))
+        _ = try? database.addMarker(Marker(meetingId: sync.id, time: 1205, text: t.marker))
 
         // More meetings for the list.
         let others: [(String, String, Date, Double, [MeetingSpeaker.Assignment], [Person?], Bool)] = [
-            ("m-stadtwerke", "Kundencall Stadtwerke Nord", at(-3, 15, 30), 55 * 60, [.confirmed, .unknown], [sarah, nil], true),
-            ("m-11", "1:1 Anna", at(-3, 11), 28 * 60, [.automatic], [anna], true),
-            ("m-arch", "Architektur-Review Sync-Engine", at(-4, 16), 72 * 60, [.automatic, .automatic, .automatic, .automatic], [thomas, jonas, anna, miriam], true),
-            ("m-interview", "Interview Backend-Entwicklung", at(-4, 13), 47 * 60, [.automatic, .confirmed], [thomas, nil], false),
-            ("m-design", "Design-Review Onboarding", at(-5, 10, 30), 35 * 60, [.automatic, .automatic, .automatic], [miriam, anna, jonas], true),
-            ("m-review", "Sprint Review 42", at(-5, 9), 58 * 60, [.automatic, .automatic, .automatic, .automatic], [anna, thomas, jonas, miriam], true),
-            ("m-hoffmann", "Kundencall Hoffmann", at(-6, 15), 31 * 60, [.automatic], [daniel], true),
-            ("m-retro", "Retro Sprint 42", at(-6, 11), 45 * 60, [.automatic, .automatic, .automatic], [anna, thomas, miriam], true),
+            ("m-stadtwerke", t.titles[0], at(-3, 15, 30), 55 * 60, [.confirmed, .unknown], [sarah, nil], true),
+            ("m-11", t.titles[1], at(-3, 11), 28 * 60, [.automatic], [anna], true),
+            ("m-arch", t.titles[2], at(-4, 16), 72 * 60, [.automatic, .automatic, .automatic, .automatic], [thomas, jonas, anna, miriam], true),
+            ("m-interview", t.titles[3], at(-4, 13), 47 * 60, [.automatic, .confirmed], [thomas, nil], false),
+            ("m-design", t.titles[4], at(-5, 10, 30), 35 * 60, [.automatic, .automatic, .automatic], [miriam, anna, jonas], true),
+            ("m-review", t.titles[5], at(-5, 9), 58 * 60, [.automatic, .automatic, .automatic, .automatic], [anna, thomas, jonas, miriam], true),
+            ("m-hoffmann", t.titles[6], at(-6, 15), 31 * 60, [.automatic], [daniel], true),
+            ("m-retro", t.titles[7], at(-6, 11), 45 * 60, [.automatic, .automatic, .automatic], [anna, thomas, miriam], true),
         ]
         for (id, title, start, duration, assignments, persons, summarized) in others {
-            let meeting = Meeting(id: id, title: title, startedAt: start, duration: duration, status: .ready, source: "Zoom", language: "de", progress: 1, transcriptionModel: "Parakeet Ultra")
+            let meeting = Meeting(id: id, title: title, startedAt: start, duration: duration, status: .ready, source: "Zoom", language: t.language, progress: 1, transcriptionModel: "Parakeet Ultra")
             var speakers = [MeetingSpeaker(meetingId: id, key: "me", label: Strings.meLabel, personId: me.id, assignment: .confirmed, confidence: 1, talkTime: duration * 0.25, channel: .microphone)]
-            var lines: [(String, Double, Double, String)] = [("me", 4, 10, "Hallo zusammen, schön dass es geklappt hat.")]
+            var lines: [(String, Double, Double, String)] = [("me", 4, 10, t.hello)]
             var lineVoices: [String: [Float]] = ["me": voices[me.id]!]
             for (index, assignment) in assignments.enumerated() {
                 let key = "S\(index + 1)"
@@ -109,10 +90,10 @@ enum DemoData {
                     embedding: (person.map { jitter(voices[$0.id]!, 0.1) } ?? randomVoice()).embeddingData,
                     sampleStart: 12 + Double(index) * 20, sampleEnd: 22 + Double(index) * 20, channel: .system
                 ))
-                lines.append((key, 12 + Double(index) * 20, 22 + Double(index) * 20, "Von meiner Seite gibt es ein kurzes Update zu den offenen Punkten aus der letzten Runde."))
+                lines.append((key, 12 + Double(index) * 20, 22 + Double(index) * 20, t.update))
                 for round in 0..<5 {
                     let start = 300 + Double(round) * 240 + Double(index) * 50
-                    lines.append((key, start, start + 9 + Double((index + round) % 4), Self.filler[(index + round) % Self.filler.count]))
+                    lines.append((key, start, start + 9 + Double((index + round) % 4), t.filler[(index + round) % t.filler.count]))
                 }
             }
             // Sarah's colleague, whom the diarizer put in with her and who was confirmed as Sarah along with her.
@@ -121,13 +102,13 @@ enum DemoData {
             if id == "m-stadtwerke" {
                 for round in 0..<5 {
                     let start = 1800 + Double(round) * 60
-                    lines.append(("S1", start, start + 10, Self.filler[(round + 2) % Self.filler.count]))
+                    lines.append(("S1", start, start + 10, t.filler[(round + 2) % t.filler.count]))
                     colleagueLines.insert(start)
                 }
                 // Short bits that fit nobody: crosstalk, a cough, "ja, genau".
                 for round in 0..<8 {
                     let start = 2200 + Double(round) * 20
-                    lines.append(("S1", start, start + 2.5 + Double(round % 3), ["Ja, genau.", "Mhm.", "Okay, ja.", "Moment."][round % 4]))
+                    lines.append(("S1", start, start + 2.5 + Double(round % 3), t.noise[round % 4]))
                     noiseLines.insert(start)
                 }
             }
@@ -140,19 +121,126 @@ enum DemoData {
             }
             if summarized {
                 try? database.save(
-                    summary: MeetingSummary(meetingId: id, overview: "Kurzer Abgleich zu den offenen Punkten; alle Themen sind geklärt.", decisions: [], openQuestions: [], model: "Claude Opus 5.5", provider: "Anthropic"),
+                    summary: MeetingSummary(meetingId: id, overview: t.shortOverview, decisions: [], openQuestions: [], model: "Claude Opus 5.5", provider: "Anthropic"),
                     actionItems: []
                 )
             }
         }
     }
 
-    static let filler = [
-        "Das sehe ich ähnlich, wir sollten das aber noch mit dem Team abstimmen.",
-        "Bei uns ist der Stand unverändert, die Tickets sind alle in Arbeit.",
-        "Können wir das nächste Woche noch einmal aufgreifen? Bis dahin habe ich die Zahlen.",
-        "Ich schicke euch nachher die Zusammenfassung und die Links zu den Entwürfen.",
+    /// Who speaks when in the weekly sync.
+    static let syncTiming: [(String, Double, Double)] = [
+        ("S1", 0, 14), ("S2", 16, 28), ("me", 161, 178), ("S1", 185, 191), ("S2", 192, 199), ("S3", 860, 880), ("S4", 892, 905),
+        ("S3", 907, 914), ("S1", 1904, 1920), ("me", 1930, 1938), ("S1", 1941, 1950),
+        // Jonas, whom the diarizer heard as Anna for a while.
+        ("S1", 1240, 1253), ("S1", 1260, 1271),
+        // Someone the app isn't sure about: Thomas or Daniel.
+        ("S5", 1500, 1512), ("S5", 1530, 1539),
     ]
+
+    /// What is said and written in the demo, in German and in English.
+    struct Texts {
+        var language: String
+        var syncTitle: String
+        var syncLines: [String]
+        var goodIdea: String
+        var overview: String
+        var decisions: [String]
+        var openQuestions: [String]
+        var tasks: [String]
+        /// Wednesday, Thursday, Friday, short.
+        var days: [String]
+        var marker: String
+        var titles: [String]
+        var hello: String
+        var update: String
+        var filler: [String]
+        var noise: [String]
+        var shortOverview: String
+        var upcoming: [String]
+
+        static let german = Texts(
+            language: "de",
+            syncTitle: "Weekly Produkt-Sync",
+            syncLines: [
+                "Okay, dann fangen wir an. Drei Themen heute: Release 2.4, der Onboarding-Bug und die offene Backend-Stelle.",
+                "Zum Release: Wir sind feature-complete, aber der PDF-Export hängt noch bei langen Dokumenten.",
+                "Ich hab mir das am Freitag angeschaut. Es liegt am Rendering der Tabellen, nicht am Export selbst. Ich schätze zwei Tage.",
+                "Dann verschieben wir auf den 14.? Thomas, passt das für dich?",
+                "Ja, der 14. ist realistisch. Dann bleibt noch Puffer für QA.",
+                "Zum Onboarding: Fast jeder Dritte bricht im zweiten Schritt ab. Das Formular ist einfach zu lang.",
+                "Wir könnten die Firmendaten optional machen und erst später abfragen.",
+                "Gute Idee, Jonas. Ich mach bis Mittwoch einen Entwurf dafür.",
+                "Letzter Punkt: die Backend-Stelle. Wir haben drei Kandidaten in der finalen Runde.",
+                "Ich kann die technischen Interviews diese Woche übernehmen.",
+                "Super, danke. Dann sind wir durch. Bis nächste Woche!",
+                "Kurz noch zum Backend: Die Migration der Sync-Engine braucht noch eine Woche.",
+                "Ich würde die alten Endpunkte bis Ende des Monats parallel laufen lassen.",
+                "Von Kundenseite kam noch die Frage, ob der Export auch als Excel geht.",
+                "Ich kläre das bis Freitag mit dem Vertrieb.",
+            ],
+            goodIdea: "Gute Idee, Jonas.",
+            overview: "Release 2.4 wird auf den 14. Oktober verschoben, damit der PDF-Export bei langen Dokumenten vorher behoben ist. Fürs Onboarding entsteht ein kürzeres Formular. Lukas übernimmt diese Woche die technischen Interviews.",
+            decisions: ["Release 2.4 am 14. statt am 9. Oktober", "Firmendaten im Onboarding werden optional"],
+            openQuestions: ["Wer informiert die Kunden über die Verschiebung?"],
+            tasks: ["Tabellen-Rendering im PDF-Export beheben", "Entwurf für ein kürzeres Onboarding-Formular", "Technische Interviews mit drei Kandidaten", "QA-Plan für Release 2.4"],
+            days: ["Mi", "Do", "Fr"],
+            marker: "Budget für Testgeräte klären",
+            titles: ["Kundencall Stadtwerke Nord", "1:1 Anna", "Architektur-Review Sync-Engine", "Interview Backend-Entwicklung", "Design-Review Onboarding", "Sprint Review 42", "Kundencall Hoffmann", "Retro Sprint 42"],
+            hello: "Hallo zusammen, schön dass es geklappt hat.",
+            update: "Von meiner Seite gibt es ein kurzes Update zu den offenen Punkten aus der letzten Runde.",
+            filler: [
+                "Das sehe ich ähnlich, wir sollten das aber noch mit dem Team abstimmen.",
+                "Bei uns ist der Stand unverändert, die Tickets sind alle in Arbeit.",
+                "Können wir das nächste Woche noch einmal aufgreifen? Bis dahin habe ich die Zahlen.",
+                "Ich schicke euch nachher die Zusammenfassung und die Links zu den Entwürfen.",
+            ],
+            noise: ["Ja, genau.", "Mhm.", "Okay, ja.", "Moment."],
+            shortOverview: "Kurzer Abgleich zu den offenen Punkten; alle Themen sind geklärt.",
+            upcoming: ["Sprint Planning 43", "Kundencall Hoffmann"]
+        )
+
+        static let english = Texts(
+            language: "en",
+            syncTitle: "Weekly Product Sync",
+            syncLines: [
+                "Okay, let's get started. Three topics today: release 2.4, the onboarding bug and the open backend role.",
+                "On the release: we're feature-complete, but the PDF export still hangs on long documents.",
+                "I looked into it on Friday. It's the table rendering, not the export itself. I'd say two days.",
+                "So we move it to the 14th? Thomas, does that work for you?",
+                "Yes, the 14th is realistic. That still leaves some buffer for QA.",
+                "On onboarding: almost one in three people drop off at the second step. The form is simply too long.",
+                "We could make the company details optional and ask for them later.",
+                "Good idea, Jonas. I'll have a draft ready by Wednesday.",
+                "Last point: the backend role. We have three candidates in the final round.",
+                "I can take the technical interviews this week.",
+                "Great, thanks. That's everything. See you next week!",
+                "One more thing on the backend: migrating the sync engine needs another week.",
+                "I'd keep the old endpoints running in parallel until the end of the month.",
+                "The customer also asked whether the export works with Excel.",
+                "I'll check with sales by Friday.",
+            ],
+            goodIdea: "Good idea, Jonas.",
+            overview: "Release 2.4 moves to October 14 so the PDF export can be fixed for long documents first. Onboarding gets a shorter form. Lukas takes the technical interviews this week.",
+            decisions: ["Release 2.4 on October 14 instead of October 9", "Company details become optional in onboarding"],
+            openQuestions: ["Who tells the customers about the delay?"],
+            tasks: ["Fix table rendering in the PDF export", "Draft a shorter onboarding form", "Technical interviews with three candidates", "QA plan for release 2.4"],
+            days: ["Wed", "Thu", "Fri"],
+            marker: "Sort out the budget for test devices",
+            titles: ["Customer call Northside Utilities", "1:1 Anna", "Architecture review: sync engine", "Interview: backend developer", "Design review: onboarding", "Sprint Review 42", "Customer call Hoffmann", "Retro Sprint 42"],
+            hello: "Hi everyone, glad we could make it work.",
+            update: "A quick update from my side on the open points from last time.",
+            filler: [
+                "I see it the same way, but we should check with the team first.",
+                "Nothing new on our side, the tickets are all in progress.",
+                "Can we come back to this next week? I'll have the numbers by then.",
+                "I'll send you the summary and the links to the drafts afterwards.",
+            ],
+            noise: ["Yes, exactly.", "Mhm.", "Okay, yes.", "One moment."],
+            shortOverview: "A short check-in on the open points; everything is settled.",
+            upcoming: ["Sprint Planning 43", "Customer call Hoffmann"]
+        )
+    }
 
     /// Saves a meeting with its lines; each line gets a voice embedding close to `voice(index, key)`, the
     /// way a real line of that voice would be.
@@ -183,15 +271,16 @@ enum DemoData {
     }
 
     static func upcoming() -> [UpcomingMeeting] {
+        let t = AppLanguage.current == .german ? Texts.german : Texts.english
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let planning = calendar.date(byAdding: .hour, value: 14, to: today)!
         let hoffmann = calendar.date(byAdding: DateComponents(day: 1, hour: 9, minute: 30), to: today)!
         return [
-            UpcomingMeeting(eventId: "e-planning", title: "Sprint Planning 43", start: planning, end: planning.addingTimeInterval(3600),
+            UpcomingMeeting(eventId: "e-planning", title: t.upcoming[0], start: planning, end: planning.addingTimeInterval(3600),
                             attendees: [Attendee(name: "Anna Berger"), Attendee(name: "Thomas Klein"), Attendee(name: "Jonas Weber"), Attendee(name: "Miriam Okafor")],
                             joinURL: URL(string: "https://zoom.us/j/123456789"), app: "Zoom"),
-            UpcomingMeeting(eventId: "e-hoffmann", title: "Kundencall Hoffmann", start: hoffmann, end: hoffmann.addingTimeInterval(1800),
+            UpcomingMeeting(eventId: "e-hoffmann", title: t.upcoming[1], start: hoffmann, end: hoffmann.addingTimeInterval(1800),
                             attendees: [Attendee(name: "Daniel Hoffmann")], joinURL: URL(string: "https://teams.microsoft.com/l/meetup-join/demo"), app: "Microsoft Teams"),
         ]
     }
