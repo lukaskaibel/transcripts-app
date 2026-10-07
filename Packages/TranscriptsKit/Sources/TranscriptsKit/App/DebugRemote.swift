@@ -100,8 +100,18 @@ final class DebugRemote {
             model.showToast(argument.isEmpty ? "Zusammenfassung kopiert" : argument)
         case "focus":
             model.focusedSegmentId = Int64(argument)
+        case "naming":
+            model.section = .meetings
+            model.startNaming(argument.isEmpty ? nil : argument)
+        case "person":
+            model.section = .people
+            model.openPersonId = argument
         case "snap":
             snapshot(window: "main", name: argument)
+        case "closesheet":
+            for window in NSApp.windows where window.isSheet { window.sheetParent?.endSheet(window) }
+        case "snapsheet":
+            snapshot(window: "sheet", name: argument)
         case "snapwindow":
             let names = argument.split(separator: " ").map(String.init)
             if names.count == 2 { snapshot(window: names[0], name: names[1]) }
@@ -136,6 +146,7 @@ final class DebugRemote {
         case "live": window = NSApp.windows.first { $0.identifier?.rawValue == "live" || $0.title == "Aufnahme" }
         case "settings": window = NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true || $0.identifier?.rawValue.contains("settings") == true || $0.title.contains("Allgemein") || $0.title.contains("KI") || $0.title.contains("Aufnahme") && $0.frame.width < 800 || $0.title.contains("Transkription") || $0.title.contains("Stimmen") }
         case "floating": window = NSApp.windows.first { $0 is NSPanel && $0.frame.width == FloatingRecorderController.size.width }
+        case "sheet": window = NSApp.windows.first { $0.isSheet && $0.isVisible }
         default: window = NSApp.windows.first { $0.title == name }
         }
         guard let window, let view = window.contentView else {

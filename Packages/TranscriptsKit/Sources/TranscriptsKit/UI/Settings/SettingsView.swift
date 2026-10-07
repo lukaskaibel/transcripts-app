@@ -473,7 +473,7 @@ struct VoiceSettings: View {
                 Toggle(isOn: $settings.learnVoices) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Sicher erkannte Stimmen dazulernen")
-                        Text("Wenn eine Stimme eindeutig erkannt wurde, merkt sich die App die neue Aufnahme dazu. Bestätigte Zuordnungen lernt sie immer.")
+                        Text("Eindeutig erkannte Stimmen verfeinern, was die App über eine Person weiß, damit sie sich mit der Zeit verändern darf. Sie zählen nur, wo sie zu einer bestätigten Stimme passen. Bestätigte Zuordnungen lernt die App immer.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -485,15 +485,15 @@ struct VoiceSettings: View {
             }
             Section("Stimmbibliothek") {
                 LabeledContent("Personen", value: "\(model.peopleStats.count)")
-                LabeledContent("Stimmproben", value: "\(model.peopleStats.reduce(0) { $0 + $1.voiceprints })")
-                Button("Alle Stimmproben löschen …", role: .destructive) { confirmReset = true }
+                LabeledContent("Stimmproben", value: "\(model.peopleStats.reduce(0) { $0 + $1.voiceSamples })")
+                Button("Alle Stimmen vergessen …", role: .destructive) { confirmReset = true }
             }
         }
         .formStyle(.grouped)
         .scrollDisabled(true)
         .fixedSize(horizontal: false, vertical: true)
-        .confirmationDialog("Alle Stimmproben löschen?", isPresented: $confirmReset) {
-            Button("Löschen", role: .destructive) {
+        .confirmationDialog("Alle Stimmen vergessen?", isPresented: $confirmReset) {
+            Button("Vergessen", role: .destructive) {
                 for stats in model.peopleStats { model.forgetVoice(of: stats.person) }
             }
         } message: {

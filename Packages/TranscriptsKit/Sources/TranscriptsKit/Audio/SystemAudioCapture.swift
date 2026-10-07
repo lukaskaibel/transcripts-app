@@ -20,6 +20,9 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
     private var format: AVAudioFormat?
     private var bufferList: UnsafeMutableAudioBufferListPointer?
     private var outputListener: AudioObjectPropertyListenerBlock?
+    private var rateListener: (AudioObjectID, AudioObjectPropertyListenerBlock)?
+    /// The rate the buffers are read at; its own lock, so the rate listener never waits for a rebuild.
+    private let readRate = OSAllocatedUnfairLock(initialState: Float64(0))
     private var running = false
 
     public init() {}
@@ -50,14 +53,10 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
         guard status == noErr else { throw AudioError.coreAudio("Das Aufnehmen des Systemaudios", status) }
         tapID = tap
 
-        guard var streamDescription = CoreAudioHelpers.tapFormat(tap),
-              let format = AVAudioFormat(streamDescription: &streamDescription) else {
+        guard var streamDescription = CoreAudioHelpers.tapFormat(tap) else {
             destroyTap()
             throw AudioError.unsupportedFormat("Systemaudio")
         }
-        self.format = format
-        let converter = try StreamingResampler(from: format)
-        resampler = converter
 
         let outputUID = CoreAudioHelpers.uid(of: CoreAudioHelpers.defaultOutputDevice) ?? ""
         var aggregate: [String: Any] = [
@@ -82,6 +81,30 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
             throw AudioError.coreAudio("Das Einrichten der Systemaudio-Aufnahme", status)
         }
         aggregateID = device
+
+        // The aggregate runs at the rate of its main device (MacBook speakers: 44.1 kHz) and hands over the
+        // tap's audio at that rate, whatever the tap's own format says (48 kHz). Read with the tap's rate, the
+        // call came out 9 % too fast and too high, with half a second of silence padded in every six seconds.
+        let deviceRate: Float64 = CoreAudioHelpers.value(device, kAudioDevicePropertyNominalSampleRate, default: 0)
+        if deviceRate > 0, abs(deviceRate - streamDescription.mSampleRate) > 1 {
+            Log.audio.info("System audio: tap format says \(streamDescription.mSampleRate) Hz, the device runs at \(deviceRate) Hz")
+            streamDescription.mSampleRate = deviceRate
+        }
+        guard let format = AVAudioFormat(streamDescription: &streamDescription) else {
+            destroyTap()
+            throw AudioError.unsupportedFormat("Systemaudio")
+        }
+        self.format = format
+        readRate.withLock { $0 = format.sampleRate }
+        let converter: StreamingResampler
+        do {
+            converter = try StreamingResampler(from: format)
+        } catch {
+            destroyTap()
+            throw error
+        }
+        resampler = converter
+        listenForRateChanges(of: device)
 
         // The aggregate lists the input streams of its sub-device first, then the tap's. The speakers have none,
         // except when some app uses voice processing, which gives them an echo reference stream: so take the
@@ -116,6 +139,7 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
     }
 
     private func destroyTap() {
+        removeRateListener()
         if aggregateID != AudioObjectID(kAudioObjectUnknown) {
             if let procID {
                 AudioDeviceStop(aggregateID, procID)
@@ -142,18 +166,42 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
     private func listenForOutputChanges() {
         var address = CoreAudioHelpers.address(kAudioHardwarePropertyDefaultOutputDevice)
         let block: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
-            guard let self, self.running else { return }
-            self.lock.withLock {
-                self.destroyTap()
-                do {
-                    try self.createTap()
-                } catch {
-                    Log.audio.error("Restarting the system audio tap failed: \(error.localizedDescription)")
-                }
-            }
+            self?.rebuild()
         }
         outputListener = block
         AudioObjectAddPropertyListenerBlock(AudioObjectID(kAudioObjectSystemObject), &address, queue, block)
+    }
+
+    /// The output device switched to another sample rate: rebuild, so the buffers are read at the new one.
+    /// Called with the lock held.
+    private func listenForRateChanges(of device: AudioObjectID) {
+        var address = CoreAudioHelpers.address(kAudioDevicePropertyNominalSampleRate)
+        let block: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
+            guard let self else { return }
+            let rate: Float64 = CoreAudioHelpers.value(device, kAudioDevicePropertyNominalSampleRate, default: 0)
+            if rate > 0, abs(rate - self.readRate.withLock { $0 }) > 1 { self.rebuild() }
+        }
+        rateListener = (device, block)
+        AudioObjectAddPropertyListenerBlock(device, &address, queue, block)
+    }
+
+    private func removeRateListener() {
+        guard let (device, block) = rateListener else { return }
+        var address = CoreAudioHelpers.address(kAudioDevicePropertyNominalSampleRate)
+        AudioObjectRemovePropertyListenerBlock(device, &address, queue, block)
+        rateListener = nil
+    }
+
+    private func rebuild() {
+        guard running else { return }
+        lock.withLock {
+            destroyTap()
+            do {
+                try createTap()
+            } catch {
+                Log.audio.error("Restarting the system audio tap failed: \(error.localizedDescription)")
+            }
+        }
     }
 
     private func removeOutputListener() {

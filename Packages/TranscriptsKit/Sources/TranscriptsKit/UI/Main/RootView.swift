@@ -89,6 +89,15 @@ struct OverlayHost: View {
                     .padding(.top, 110)
                     .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)).combined(with: .offset(y: -6)))
             }
+            if case .naming(let meetingId) = model.overlay {
+                Theme.scrim
+                    .ignoresSafeArea()
+                    .onTapGesture { model.overlay = nil }
+                    .transition(.opacity)
+                NameVoicesPanel(meetingId: meetingId)
+                    .padding(.top, 80)
+                    .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)).combined(with: .offset(y: -6)))
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .animation(Theme.overlay, value: model.overlay)
@@ -116,6 +125,14 @@ struct ToastStack: View {
                         }
                     }
                     Spacer(minLength: 0)
+                    if let action = toast.action {
+                        Button(action.title) {
+                            model.dismissToast(toast.id)
+                            model.perform(action)
+                        }
+                        .buttonStyle(PrimaryButtonStyle())
+                        .fixedSize()
+                    }
                     IconButton(systemName: "xmark", label: "Schließen", size: 20) { model.dismissToast(toast.id) }
                 }
                 .padding(.vertical, 12)

@@ -98,17 +98,34 @@ scheme, or `open Transcripts.app --args -demo YES`). It runs on made-up meetings
 
 ## How the names come about
 
-1. **Two tracks.** Everything on the microphone track is you; the call track holds everyone else. Lines of the call
-   that come back through your microphone (speakers instead of headphones) are dropped as echoes.
+1. **Two tracks.** Everything on the microphone track is you; the call track holds everyone else. With speakers
+   instead of headphones the call comes back into the microphone; after the meeting that echo is taken out of your
+   track, predicted from the call track itself (delay, room and level per frequency band), so playback has every
+   voice once and your lines are yours. Echoes that still made it into the transcript are dropped.
 2. **Separating voices.** The diarizer splits the call track into voices. Its turns are then checked against the
    voices the app already knows, line by line: a voice that turns out to be two known people is split, and someone
    who introduces themselves by another name is someone else, however alike they sound.
-3. **Recognising voices.** Every voice is a 256-dimensional embedding. A clear match with a known person (similar
-   enough and clearly ahead of the next best) is named automatically; a weaker one becomes a suggestion. How
-   bold the app is can be set in Settings → Stimmen (*Vorsichtig*, *Ausgewogen*, *Großzügig*).
+3. **Recognising voices.** Every line of the transcript gets its own voice embedding (256 dimensions), and a
+   person is all the lines assigned to them. Their lines are grouped by sound: the main group is their voice; a
+   second big one is the same person sounding different (another microphone) or, if it sounds clearly unlike the
+   first, perhaps someone else under their name, which the person's page points out. Small groups that fit nothing
+   are strays (a cough, crosstalk, a line of someone else) and don't count. A clear match with one of a known
+   person's voices is named automatically; a weaker one becomes a suggestion. How bold the app is can be set in
+   Settings → Stimmen (*Vorsichtig*, *Ausgewogen*, *Großzügig*).
 4. **Names from the conversation.** Introductions, people addressed by name, "danke, Jonas" and the calendar's
-   invitees become suggestions. Confirming one teaches the app that voice, and other meetings' unknown voices are
-   checked against it right away.
+   invitees become suggestions.
+5. **Only what you confirm defines a voice.** Recognised lines may refine a voice you confirmed, so it can change
+   over time, but never start one. After every confirmation or correction every voice you haven't settled is
+   judged again, so a wrong name doesn't carry on: correct it once, and what followed from it follows the
+   correction. A speaker whose lines sound like two voices shows both in the meeting; each can be played and
+   given to someone on its own, which splits the speaker in the transcript.
+6. **Lines in the wrong place move.** When some lines of one speaker sound as clearly like another known person
+   as an automatic name needs (three of Hai's lines in Julian's voice), the app moves them there, marked, with
+   *Passt* and *Zurück*. Moved lines count only as recognised speech, so a wrong move teaches nothing.
+7. **Unsure is said out loud.** A voice that may be one of a few people is shown as "Hai oder Julian?", with a
+   button for each, and the summary reads "Sprecher 2 (vielleicht Hai oder Julian)", so nothing is lost and
+   nothing is named wrongly. After a meeting the app asks *Wer ist das?*: one voice after another, the sample
+   playing, its guesses first; a number key or Return names it.
 
 During the recording the same happens in small: known voices are named after a few seconds, and each line is
 checked on its own. The pass after the meeting sees the whole recording and is more accurate.
@@ -119,8 +136,9 @@ checked on its own. The pass after the meeting sees the whole recording and is m
 cd Packages/TranscriptsKit && swift test
 ```
 
-96 tests with Swift Testing: transcript assembly, voice library and refinement, name evidence, the live line check,
-the summary providers (with mocked HTTP), the database, audio files and the app's actions.
+137 tests with Swift Testing: transcript assembly, voice grouping, profiles, the re-check after corrections and moving misplaced lines,
+voice refinement, name evidence, the live line check, echo removal and the repair of old call tracks (on synthetic
+speech), the summary providers (with mocked HTTP), the database, audio files and the app's actions.
 
 The pipeline also runs on the command line, on real audio:
 
@@ -129,7 +147,9 @@ cd Packages/TranscriptsKit && swift build && .build/debug/transcripts-cli models
 ```
 
 `transcripts-cli` has `transcribe`, `diarize`, `live`, `process`, `record` (a whole recording, played from files
-faster than real time), `confirm` and `summarize`; see the top of `Sources/transcripts-cli/main.swift`.
+faster than real time), `confirm`, `summarize`, `voices` (everyone's voice groups, and each meeting's speakers with
+the groups of their lines) and `maintain` (the one-time update after this version, on a copy of the app's folder);
+see the top of `Sources/transcripts-cli/main.swift`.
 `Tools/make-test-meeting.py` builds German test meetings with known speakers and a `truth.json`, and
 `Tools/screenshots/run.sh` drives the app in demo mode and has it render its windows to PNGs (also with a locked
 screen). The app icons are Icon Composer documents drawn by `Tools/make-icon.swift`; `Tools/render-icons.sh` renders

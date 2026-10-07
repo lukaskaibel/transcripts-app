@@ -120,6 +120,24 @@ public final class AppDatabase: Sendable {
                 t.column("text", .text).notNull()
             }
         }
+        migrator.registerMigration("v2-line-voices") { db in
+            try db.alter(table: "segment") { t in
+                t.add(column: "embedding", .blob)
+                t.add(column: "voiceIgnored", .boolean).notNull().defaults(to: false)
+            }
+            try db.alter(table: "meetingSpeaker") { t in
+                t.add(column: "rejectedPersonIds", .jsonText).notNull().defaults(to: "[]")
+            }
+        }
+        migrator.registerMigration("v3-voice-guesses") { db in
+            try db.alter(table: "segment") { t in
+                t.add(column: "placement", .text)
+                t.add(column: "movedFromKey", .text)
+            }
+            try db.alter(table: "meetingSpeaker") { t in
+                t.add(column: "candidatePersonIds", .jsonText).notNull().defaults(to: "[]")
+            }
+        }
         return migrator
     }
 }
@@ -140,12 +158,35 @@ public struct MeetingDetail: Equatable, Sendable {
         speakers.first { $0.key == key }
     }
 
-    /// The name shown for a speaker: the assigned person, "Du" for the microphone, or the label.
+    /// The name shown for a speaker: the assigned person, "Du" for the microphone, whom the app guesses
+    /// ("Hai?", "Hai oder Julian?"), or the label.
     public func displayName(for key: String) -> String {
         guard let speaker = speaker(for: key) else { return key == MeetingSpeaker.meKey ? Strings.me : key }
         if let personId = speaker.personId, let person = people[personId] { return person.name }
         if speaker.isMe { return Strings.me }
+        if let guess = guessText(for: speaker) { return "\(guess)?" }
         return speaker.label
+    }
+
+    /// The name for a summary or an export: like `displayName`, but a guess is spelled out so a reader (or a
+    /// language model) can weigh it: "Sprecher 2 (vielleicht Hai oder Julian)".
+    public func textName(for key: String) -> String {
+        guard let speaker = speaker(for: key), speaker.personId == nil, !speaker.isMe, let guess = guessText(for: speaker) else {
+            return displayName(for: key)
+        }
+        return "\(speaker.label) (vielleicht \(guess))"
+    }
+
+    /// The people a speaker may be, known to this detail.
+    public func guesses(for speaker: MeetingSpeaker) -> [Person] {
+        speaker.guesses.compactMap { people[$0] }
+    }
+
+    private func guessText(for speaker: MeetingSpeaker) -> String? {
+        var names = guesses(for: speaker).map(\.name)
+        if names.isEmpty, speaker.assignment == .suggested, let name = speaker.suggestedName { names = [name] }
+        guard !names.isEmpty else { return nil }
+        return Strings.alternatives(names)
     }
 }
 
@@ -197,7 +238,7 @@ extension AppDatabase {
         guard let meeting = try Meeting.fetchOne(db, key: meetingId) else { return nil }
         let segments = try Segment.filter(Column("meetingId") == meetingId).order(Column("start")).fetchAll(db)
         let speakers = try MeetingSpeaker.filter(Column("meetingId") == meetingId).order(Column("key")).fetchAll(db)
-        let personIds = Set(speakers.flatMap { [$0.personId, $0.suggestedPersonId].compactMap { $0 } })
+        let personIds = Set(speakers.flatMap { [$0.personId, $0.suggestedPersonId].compactMap { $0 } + $0.candidatePersonIds })
         let people = try Person.filter(keys: Array(personIds)).fetchAll(db)
         let summary = try MeetingSummary.fetchOne(db, key: meetingId)
         let items = try ActionItem.filter(Column("meetingId") == meetingId).order(Column("position")).fetchAll(db)

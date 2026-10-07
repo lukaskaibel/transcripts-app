@@ -44,15 +44,27 @@ enum DemoData {
             ("S1", 1904, 1920, "Letzter Punkt: die Backend-Stelle. Wir haben drei Kandidaten in der finalen Runde."),
             ("me", 1930, 1938, "Ich kann die technischen Interviews diese Woche übernehmen."),
             ("S1", 1941, 1950, "Super, danke. Dann sind wir durch. Bis nächste Woche!"),
+            // Jonas, whom the diarizer heard as Anna for a while.
+            ("S1", 1240, 1253, "Kurz noch zum Backend: Die Migration der Sync-Engine braucht noch eine Woche."),
+            ("S1", 1260, 1271, "Ich würde die alten Endpunkte bis Ende des Monats parallel laufen lassen."),
+            // Someone the app isn't sure about: Thomas or Daniel.
+            ("S5", 1500, 1512, "Von Kundenseite kam noch die Frage, ob der Export auch als Excel geht."),
+            ("S5", 1530, 1539, "Ich kläre das bis Freitag mit dem Vertrieb."),
         ]
+        let jonasInAnna: Set<Int> = [11, 12]
         let syncSpeakers = [
             MeetingSpeaker(meetingId: sync.id, key: "me", label: Strings.me, personId: me.id, assignment: .confirmed, confidence: 1, talkTime: 610, channel: .microphone),
             MeetingSpeaker(meetingId: sync.id, key: "S1", label: Strings.speakerLabel(1), personId: anna.id, assignment: .automatic, confidence: 0.86, talkTime: 790, embedding: jitter(voices[anna.id]!, 0.1).embeddingData, sampleStart: 0, sampleEnd: 12, channel: .system),
             MeetingSpeaker(meetingId: sync.id, key: "S2", label: Strings.speakerLabel(2), personId: thomas.id, assignment: .automatic, confidence: 0.81, talkTime: 530, embedding: jitter(voices[thomas.id]!, 0.1).embeddingData, sampleStart: 16, sampleEnd: 28, channel: .system),
             MeetingSpeaker(meetingId: sync.id, key: "S3", label: Strings.speakerLabel(3), personId: miriam.id, assignment: .confirmed, confidence: 1, talkTime: 400, embedding: jitter(voices[miriam.id]!, 0.1).embeddingData, sampleStart: 860, sampleEnd: 872, channel: .system),
             MeetingSpeaker(meetingId: sync.id, key: "S4", label: Strings.speakerLabel(4), assignment: .suggested, suggestedPersonId: jonas.id, suggestionReason: "Miriam: „Gute Idee, Jonas.“ · Stimme ähnlich wie in 2 früheren Meetings", confidence: 0.64, talkTime: 190, embedding: jitter(voices[jonas.id]!, 0.2).embeddingData, sampleStart: 892, sampleEnd: 905, channel: .system),
+            MeetingSpeaker(meetingId: sync.id, key: "S5", label: Strings.speakerLabel(5), talkTime: 21, sampleStart: 1500, sampleEnd: 1512, channel: .system, candidatePersonIds: [thomas.id, daniel.id]),
         ]
-        insert(sync, lines: syncLines, speakers: syncSpeakers, into: database)
+        insert(sync, lines: syncLines, speakers: syncSpeakers, into: database) { index, key in
+            if jonasInAnna.contains(index) { return voices[jonas.id] }
+            if index >= 13 { return nil }
+            return syncSpeakers.first { $0.key == key }?.personId.flatMap { voices[$0] } ?? voices[jonas.id]
+        }
         try? database.save(
             summary: MeetingSummary(
                 meetingId: sync.id,
@@ -86,9 +98,11 @@ enum DemoData {
             let meeting = Meeting(id: id, title: title, startedAt: start, duration: duration, status: .ready, source: "Zoom", language: "de", progress: 1, transcriptionModel: "Parakeet Ultra")
             var speakers = [MeetingSpeaker(meetingId: id, key: "me", label: Strings.me, personId: me.id, assignment: .confirmed, confidence: 1, talkTime: duration * 0.25, channel: .microphone)]
             var lines: [(String, Double, Double, String)] = [("me", 4, 10, "Hallo zusammen, schön dass es geklappt hat.")]
+            var lineVoices: [String: [Float]] = ["me": voices[me.id]!]
             for (index, assignment) in assignments.enumerated() {
                 let key = "S\(index + 1)"
                 let person = persons[index]
+                lineVoices[key] = person.map { voices[$0.id]! } ?? randomVoice()
                 speakers.append(MeetingSpeaker(
                     meetingId: id, key: key, label: Strings.speakerLabel(index + 1), personId: person?.id, assignment: assignment,
                     confidence: person == nil ? 0 : 0.8, talkTime: duration * 0.6 / Double(assignments.count),
@@ -96,8 +110,34 @@ enum DemoData {
                     sampleStart: 12 + Double(index) * 20, sampleEnd: 22 + Double(index) * 20, channel: .system
                 ))
                 lines.append((key, 12 + Double(index) * 20, 22 + Double(index) * 20, "Von meiner Seite gibt es ein kurzes Update zu den offenen Punkten aus der letzten Runde."))
+                for round in 0..<5 {
+                    let start = 300 + Double(round) * 240 + Double(index) * 50
+                    lines.append((key, start, start + 9 + Double((index + round) % 4), Self.filler[(index + round) % Self.filler.count]))
+                }
             }
-            insert(meeting, lines: lines, speakers: speakers, into: database)
+            // Sarah's colleague, whom the diarizer put in with her and who was confirmed as Sarah along with her.
+            var colleagueLines: Set<Double> = []
+            var noiseLines: Set<Double> = []
+            if id == "m-stadtwerke" {
+                for round in 0..<5 {
+                    let start = 1800 + Double(round) * 60
+                    lines.append(("S1", start, start + 10, Self.filler[(round + 2) % Self.filler.count]))
+                    colleagueLines.insert(start)
+                }
+                // Short bits that fit nobody: crosstalk, a cough, "ja, genau".
+                for round in 0..<8 {
+                    let start = 2200 + Double(round) * 20
+                    lines.append(("S1", start, start + 2.5 + Double(round % 3), ["Ja, genau.", "Mhm.", "Okay, ja.", "Moment."][round % 4]))
+                    noiseLines.insert(start)
+                }
+            }
+            lines.sort { $0.1 < $1.1 }
+            let sorted = lines
+            let colleague = randomVoice()
+            insert(meeting, lines: lines, speakers: speakers, into: database) { index, key in
+                if noiseLines.contains(sorted[index].1) { return randomVoice() }
+                return colleagueLines.contains(sorted[index].1) ? colleague : lineVoices[key]
+            }
             if summarized {
                 try? database.save(
                     summary: MeetingSummary(meetingId: id, overview: "Kurzer Abgleich zu den offenen Punkten; alle Themen sind geklärt.", decisions: [], openQuestions: [], model: "Claude Opus 5.5", provider: "Anthropic"),
@@ -107,12 +147,31 @@ enum DemoData {
         }
     }
 
-    private static func insert(_ meeting: Meeting, lines: [(String, Double, Double, String)], speakers: [MeetingSpeaker], into database: AppDatabase) {
+    static let filler = [
+        "Das sehe ich ähnlich, wir sollten das aber noch mit dem Team abstimmen.",
+        "Bei uns ist der Stand unverändert, die Tickets sind alle in Arbeit.",
+        "Können wir das nächste Woche noch einmal aufgreifen? Bis dahin habe ich die Zahlen.",
+        "Ich schicke euch nachher die Zusammenfassung und die Links zu den Entwürfen.",
+    ]
+
+    /// Saves a meeting with its lines; each line gets a voice embedding close to `voice(index, key)`, the
+    /// way a real line of that voice would be.
+    private static func insert(_ meeting: Meeting, lines: [(String, Double, Double, String)], speakers: [MeetingSpeaker], into database: AppDatabase, voice: (Int, String) -> [Float]?) {
         try? database.save(meeting)
-        let segments = lines.map { key, start, end, text in
-            Segment(meetingId: meeting.id, speakerKey: key, channel: key == "me" ? .microphone : .system, start: start, end: end, text: text)
+        let segments = lines.enumerated().map { index, line in
+            let (key, start, end, text) = line
+            return Segment(
+                meetingId: meeting.id, speakerKey: key, channel: key == "me" ? .microphone : .system, start: start, end: end, text: text,
+                embedding: voice(index, key).map { lineOf($0).embeddingData }
+            )
         }
         try? database.replaceTranscript(meetingId: meeting.id, segments: segments, speakers: speakers)
+    }
+
+    /// One line of a voice: about as alike to it as real lines are (0.85).
+    private static func lineOf(_ voice: [Float]) -> [Float] {
+        let noise = randomVoice()
+        return VoiceMath.normalized(zip(voice, noise).map { $0 * 0.85 + $1 * 0.53 })
     }
 
     private static func randomVoice() -> [Float] {

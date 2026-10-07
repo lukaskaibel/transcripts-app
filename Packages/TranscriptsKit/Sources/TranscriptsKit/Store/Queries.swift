@@ -7,18 +7,31 @@ public struct PersonStats: Equatable, Identifiable, Sendable {
     public var meetings: Int
     public var talkTime: Double
     public var lastSeen: Date?
-    public var voiceprints: Int
+    /// Lines (and older averaged samples) the app learns this voice from.
+    public var voiceSamples: Int
+    /// Seconds of speech behind them.
+    public var voiceSpeech: Double
+    /// Meetings they come from.
+    public var voiceMeetings: Int
 
     public var id: String { person.id }
 
+    public init(person: Person, meetings: Int, talkTime: Double, lastSeen: Date?, voiceSamples: Int, voiceSpeech: Double = 0, voiceMeetings: Int = 0) {
+        self.person = person
+        self.meetings = meetings
+        self.talkTime = talkTime
+        self.lastSeen = lastSeen
+        self.voiceSamples = voiceSamples
+        self.voiceSpeech = voiceSpeech
+        self.voiceMeetings = voiceMeetings
+    }
+
     /// 0 none, 1 weak, 2 medium, 3 good: how well the app knows this voice.
     public var voiceQuality: Int {
-        switch (voiceprints, talkTime) {
-        case (0, _): 0
-        case (1, ..<120): 1
-        case (1, _), (2...3, ..<300): 2
-        default: voiceprints >= 2 ? 3 : 2
-        }
+        if voiceSamples == 0 { return 0 }
+        if voiceSpeech < 60 { return 1 }
+        if voiceSpeech < 300 || voiceMeetings < 2 { return 2 }
+        return 3
     }
 }
 
@@ -57,12 +70,46 @@ extension AppDatabase {
             for row in rows {
                 stats[row["personId"]] = (row["meetings"], row["talk"] ?? 0, row["lastSeen"])
             }
-            let prints = try Row.fetchAll(db, sql: "SELECT personId, COUNT(*) AS count FROM voiceprint GROUP BY personId")
-            var printCounts: [String: Int] = [:]
-            for row in prints { printCounts[row["personId"]] = row["count"] }
+            // What each person's voice is learned from: their lines with embeddings, plus older averaged
+            // samples where their meeting has no such lines.
+            var voices: [String: (count: Int, speech: Double, meetings: Int)] = [:]
+            let lines = try Row.fetchAll(db, sql: """
+                SELECT meetingSpeaker.personId AS personId, COUNT(*) AS count,
+                       SUM(segment."end" - segment.start) AS speech, COUNT(DISTINCT segment.meetingId) AS meetings
+                FROM segment
+                JOIN meetingSpeaker ON meetingSpeaker.meetingId = segment.meetingId AND meetingSpeaker."key" = segment.speakerKey
+                WHERE segment.embedding IS NOT NULL AND segment.voiceIgnored = 0 AND meetingSpeaker.personId IS NOT NULL
+                  AND meetingSpeaker.assignment IN ('confirmed', 'automatic')
+                GROUP BY meetingSpeaker.personId
+                """)
+            for row in lines {
+                voices[row["personId"]] = (row["count"], row["speech"] ?? 0, row["meetings"])
+            }
+            let prints = try Row.fetchAll(db, sql: """
+                SELECT personId, COUNT(*) AS count, SUM(duration) AS speech FROM voiceprint
+                WHERE voiceprint.meetingId IS NULL OR (
+                    NOT EXISTS (SELECT 1 FROM segment WHERE segment.meetingId = voiceprint.meetingId AND segment.embedding IS NOT NULL)
+                    AND EXISTS (
+                        SELECT 1 FROM meetingSpeaker
+                        WHERE meetingSpeaker.meetingId = voiceprint.meetingId AND meetingSpeaker.personId = voiceprint.personId
+                          AND meetingSpeaker.assignment IN ('confirmed', 'automatic')
+                    )
+                )
+                GROUP BY personId
+                """)
+            for row in prints {
+                let personId: String = row["personId"]
+                let entry = voices[personId] ?? (0, 0, 0)
+                let count: Int = row["count"]
+                voices[personId] = (entry.count + count, entry.speech + (row["speech"] ?? 0), entry.meetings + count)
+            }
             return people.map { person in
                 let entry = stats[person.id]
-                return PersonStats(person: person, meetings: entry?.0 ?? 0, talkTime: entry?.1 ?? 0, lastSeen: entry?.2, voiceprints: printCounts[person.id] ?? 0)
+                let voice = voices[person.id]
+                return PersonStats(
+                    person: person, meetings: entry?.0 ?? 0, talkTime: entry?.1 ?? 0, lastSeen: entry?.2,
+                    voiceSamples: voice?.count ?? 0, voiceSpeech: voice?.speech ?? 0, voiceMeetings: voice?.meetings ?? 0
+                )
             }
             .sorted { lhs, rhs in
                 if lhs.person.isMe != rhs.person.isMe { return lhs.person.isMe }
@@ -119,23 +166,20 @@ extension AppDatabase {
 }
 
 extension AppDatabase {
-    /// Names a voice for good: the speaker is confirmed as `personId`, and its voice is kept as a sample
-    /// of that person (unless it repeats one already kept), so later meetings recognise them.
-    public func assign(_ speaker: MeetingSpeaker, to personId: String, maxVoiceprints: Int = 15) throws {
-        var speaker = speaker
-        speaker.personId = personId
-        speaker.assignment = .confirmed
-        speaker.suggestedPersonId = nil
-        speaker.suggestedName = nil
-        speaker.suggestionReason = nil
-        speaker.confidence = 1
-        try save(speaker)
-        guard let embedding = speaker.embedding, speaker.talkTime >= 3 else { return }
-        let vector = [Float](embeddingData: embedding)
-        let existing = try reader.read { db in try Voiceprint.filter(Column("personId") == personId).fetchAll(db) }
-        if existing.contains(where: { VoiceMath.cosine([Float](embeddingData: $0.embedding), vector) >= 0.93 }) { return }
-        try save(Voiceprint(personId: personId, embedding: embedding, meetingId: speaker.meetingId, duration: speaker.talkTime))
-        try trimVoiceprints(of: personId, keeping: maxVoiceprints)
+    /// Names a voice for good: the speaker is confirmed as `personId`. Its lines then count for that
+    /// person's voice, so later meetings recognise them.
+    public func assign(_ speaker: MeetingSpeaker, to personId: String) throws {
+        try writer.write { db in
+            guard var speaker = try MeetingSpeaker.fetchOne(db, key: ["meetingId": speaker.meetingId, "key": speaker.key]) else { return }
+            speaker.personId = personId
+            speaker.assignment = .confirmed
+            speaker.suggestedPersonId = nil
+            speaker.suggestedName = nil
+            speaker.suggestionReason = nil
+            speaker.candidatePersonIds = []
+            speaker.confidence = 1
+            try speaker.update(db)
+        }
     }
 
     /// The person with this name, created if there is none yet.

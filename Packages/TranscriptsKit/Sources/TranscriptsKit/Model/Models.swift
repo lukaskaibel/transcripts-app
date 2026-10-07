@@ -116,8 +116,25 @@ public struct Segment: Codable, Hashable, Identifiable, Sendable, FetchableRecor
     public var start: Double
     public var end: Double
     public var text: String
+    /// L2-normalised voice embedding of this line, for lines long enough to have one. The app learns
+    /// people's voices from these, line by line.
+    public var embedding: Data?
+    /// The user said this line should not count for the voice of its speaker.
+    public var voiceIgnored: Bool
+    /// Who put the line with its speaker, when it is not where the voice separation put it.
+    public var placement: Placement?
+    /// For a line the app moved: the speaker it was with before, to send it back.
+    public var movedFromKey: String?
 
-    public init(id: Int64? = nil, meetingId: String, speakerKey: String, channel: Channel, start: Double, end: Double, text: String) {
+    public enum Placement: String, Codable, Sendable {
+        /// The app moved it here because it sounds like this person. Counts only as recognised speech, and
+        /// the user can send it back.
+        case app
+        /// The user put it here; the app leaves it alone.
+        case user
+    }
+
+    public init(id: Int64? = nil, meetingId: String, speakerKey: String, channel: Channel, start: Double, end: Double, text: String, embedding: Data? = nil, voiceIgnored: Bool = false, placement: Placement? = nil, movedFromKey: String? = nil) {
         self.id = id
         self.meetingId = meetingId
         self.speakerKey = speakerKey
@@ -125,7 +142,13 @@ public struct Segment: Codable, Hashable, Identifiable, Sendable, FetchableRecor
         self.start = start
         self.end = end
         self.text = text
+        self.embedding = embedding
+        self.voiceIgnored = voiceIgnored
+        self.placement = placement
+        self.movedFromKey = movedFromKey
     }
+
+    public var duration: Double { end - start }
 
     public mutating func didInsert(_ inserted: InsertionSuccess) {
         id = inserted.rowID
@@ -171,6 +194,10 @@ public struct MeetingSpeaker: Codable, Hashable, Identifiable, Sendable, Fetchab
     public var sampleStart: Double?
     public var sampleEnd: Double?
     public var channel: Channel
+    /// People the user said this voice is not; never suggested or assigned for it again.
+    public var rejectedPersonIds: [String]
+    /// When the app isn't sure: the people the voice may be, most likely first ("Hai oder Julian").
+    public var candidatePersonIds: [String]
 
     public init(
         meetingId: String,
@@ -186,7 +213,9 @@ public struct MeetingSpeaker: Codable, Hashable, Identifiable, Sendable, Fetchab
         embedding: Data? = nil,
         sampleStart: Double? = nil,
         sampleEnd: Double? = nil,
-        channel: Channel = .system
+        channel: Channel = .system,
+        rejectedPersonIds: [String] = [],
+        candidatePersonIds: [String] = []
     ) {
         self.meetingId = meetingId
         self.key = key
@@ -202,10 +231,20 @@ public struct MeetingSpeaker: Codable, Hashable, Identifiable, Sendable, Fetchab
         self.sampleStart = sampleStart
         self.sampleEnd = sampleEnd
         self.channel = channel
+        self.rejectedPersonIds = rejectedPersonIds
+        self.candidatePersonIds = candidatePersonIds
     }
 
     public var isMe: Bool { key == Self.meKey }
     public var needsReview: Bool { assignment == .suggested || (assignment == .unknown && !isMe) }
+
+    /// Whom the voice may be while it isn't settled: the suggestion, then the other candidates.
+    public var guesses: [String] {
+        guard assignment == .suggested || assignment == .unknown else { return [] }
+        var result = suggestedPersonId.map { [$0] } ?? []
+        for id in candidatePersonIds where !result.contains(id) && !rejectedPersonIds.contains(id) { result.append(id) }
+        return Array(result.prefix(3))
+    }
 }
 
 // MARK: - People and voices
@@ -241,7 +280,8 @@ public struct Person: Codable, Hashable, Identifiable, Sendable, FetchableRecord
     }
 }
 
-/// One sample of a person's voice, kept to recognise them in later meetings.
+/// An averaged sample of a person's voice from before transcript lines had embeddings of their own.
+/// Still used for meetings whose audio is gone; new voices are learned from the lines themselves.
 public struct Voiceprint: Codable, Hashable, Identifiable, Sendable, FetchableRecord, PersistableRecord {
     public static let databaseTableName = "voiceprint"
 

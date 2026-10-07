@@ -91,8 +91,7 @@ public enum VoiceRefinement {
             for index in weak {
                 guard let embedding = units[index].embedding else { continue }
                 let scores = groups.map { group -> (String, Float) in
-                    let voices = library.voices[group.key] ?? []
-                    return (group.key, voices.map { VoiceMath.cosine(embedding, $0) }.max() ?? 0)
+                    (group.key, library.similarity(embedding, to: group.key) ?? 0)
                 }.sorted { $0.1 > $1.1 }
                 guard let best = scores.first else { continue }
                 let runnerUp = scores.dropFirst().first?.1 ?? 0

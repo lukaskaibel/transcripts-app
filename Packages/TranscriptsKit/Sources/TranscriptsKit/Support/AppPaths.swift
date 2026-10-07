@@ -36,6 +36,25 @@ public enum AppPaths {
             .first { FileManager.default.fileExists(atPath: $0.path) }
     }
 
+    /// The microphone without the call's echo, made after the meeting; played instead of the recording.
+    public static func cleanedMicrophoneFile(for meetingId: String) -> URL {
+        folder(for: meetingId).appendingPathComponent("microphone-clean.m4a")
+    }
+
+    /// A call track as first recorded, kept when it was repaired (see `CallTrackRepair`).
+    public static func originalSystemFile(for meetingId: String, extension ext: String = "m4a") -> URL {
+        folder(for: meetingId).appendingPathComponent("system-original.\(ext)")
+    }
+
+    /// What to play for a channel: the microphone without echo where there is such a version.
+    public static func playbackAudio(for meetingId: String, channel: Channel) -> URL? {
+        if channel == .microphone {
+            let cleaned = cleanedMicrophoneFile(for: meetingId)
+            if FileManager.default.fileExists(atPath: cleaned.path) { return cleaned }
+        }
+        return existingAudio(for: meetingId, channel: channel)
+    }
+
     /// The file a meeting was imported from, if it was.
     public static func existingImport(for meetingId: String) -> URL? {
         let folder = folder(for: meetingId)
@@ -65,4 +84,11 @@ public enum Strings {
     public static let untitledMeeting = "Meeting"
 
     public static func speakerLabel(_ number: Int) -> String { "Sprecher \(number)" }
+
+    /// "Hai", "Hai oder Julian", "Hai, Julian oder Sven".
+    public static func alternatives(_ names: [String]) -> String {
+        guard let last = names.last else { return "" }
+        guard names.count > 1 else { return last }
+        return names.dropLast().joined(separator: ", ") + " oder " + last
+    }
 }

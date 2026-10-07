@@ -73,7 +73,7 @@ public final class AudioPlayback {
     /// Lays the channels of a meeting on top of each other in one composition.
     private func load(_ meetingId: String) async -> Bool {
         stop()
-        var files = Channel.allCases.compactMap { AppPaths.existingAudio(for: meetingId, channel: $0) }
+        var files = Channel.allCases.compactMap { AppPaths.playbackAudio(for: meetingId, channel: $0) }
         if files.isEmpty, let imported = AppPaths.existingImport(for: meetingId) { files = [imported] }
         guard !files.isEmpty else { return false }
 

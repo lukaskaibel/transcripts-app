@@ -137,7 +137,9 @@ public actor LiveTranscriber {
         }
         let startTime = SpeechAudio.seconds(start)
         guard channel == .system else {
-            onEvent(.final(channel: channel, start: startTime, end: SpeechAudio.seconds(end), text: transcription.text, speaker: nil, embedding: nil, voice: nil))
+            // The microphone's own voice, to notice the call coming back through the speakers.
+            let voice = SpeechAudio.seconds(audio.count) >= 1.5 ? try? await engine.voiceEmbedding(audio[...]) : nil
+            onEvent(.final(channel: channel, start: startTime, end: SpeechAudio.seconds(end), text: transcription.text, speaker: nil, embedding: nil, voice: voice))
             return
         }
         if !diarizerRequested {

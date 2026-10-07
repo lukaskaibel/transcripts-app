@@ -52,7 +52,7 @@ extension AppModel {
             microphoneUID: settings.microphoneUID,
             captureSystemAudio: settings.captureSystemAudio,
             thresholds: settings.voiceStrictness.thresholds
-        ))
+        ), library: voiceLibrary.isEmpty ? nil : voiceLibrary)
         do {
             try await session.start()
         } catch {

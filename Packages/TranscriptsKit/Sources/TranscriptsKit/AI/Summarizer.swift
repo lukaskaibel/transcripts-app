@@ -80,7 +80,9 @@ public enum Summarizer {
     static func systemPrompt(myName: String, language: SummaryLanguage) -> String {
         """
         You summarize meetings for the person who recorded them, \(myName). You get a transcript with timestamps \
-        and speaker names; voices whose name is unknown are labelled "Sprecher 1", "Sprecher 2" and so on.
+        and speaker names; voices whose name is unknown are labelled "Sprecher 1", "Sprecher 2" and so on. When the \
+        app has a guess, it follows in brackets ("Sprecher 2 (vielleicht Hai oder Julian)"): use the conversation \
+        to decide, and if it stays open, name the candidates rather than picking one.
 
         Write every field in the language the meeting was held in (a German meeting gets a German summary). Be brief \
         and factual and stay with what was said: no assumptions, no advice, no filler. Use the names from the \
@@ -102,7 +104,7 @@ public enum Summarizer {
     /// The transcript as the model reads it, with real names wherever they are known.
     public static func transcriptText(_ detail: MeetingDetail, myName: String) -> String {
         detail.segments.map { segment in
-            let name = segment.speakerKey == MeetingSpeaker.meKey ? myName : detail.displayName(for: segment.speakerKey)
+            let name = segment.speakerKey == MeetingSpeaker.meKey ? myName : detail.textName(for: segment.speakerKey)
             return "[\(TimeFormat.clock(segment.start))] \(name): \(segment.text)"
         }.joined(separator: "\n")
     }

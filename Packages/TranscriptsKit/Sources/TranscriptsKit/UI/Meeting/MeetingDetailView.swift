@@ -16,6 +16,7 @@ struct MeetingDetailView: View {
                             VStack(alignment: .leading, spacing: 0) {
                                 titleBlock
                                 StatusBanner(detail: detail)
+                                VoicesBanner(detail: detail)
                                 SummarySection(detail: detail)
                                 TranscriptSection(detail: detail)
                             }
@@ -202,6 +203,42 @@ struct StatusBanner: View {
             .padding(.vertical, 12)
             .cardStyle()
             .padding(.bottom, 24)
+    }
+}
+
+/// "2 Stimmen ohne Namen": the way into naming them, one after another.
+struct VoicesBanner: View {
+    @Environment(AppModel.self) private var model
+    let detail: MeetingDetail
+
+    private var open: [MeetingSpeaker] {
+        detail.speakers.filter { $0.needsReview && $0.talkTime >= 4 }
+    }
+
+    var body: some View {
+        let open = open
+        if detail.meeting.status == .ready, !open.isEmpty {
+            HStack(spacing: 10) {
+                Image(systemName: "person.wave.2").foregroundStyle(Theme.warning)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(open.count == 1 ? "Eine Stimme ohne Namen" : "\(open.count) Stimmen ohne Namen").font(.uiMedium)
+                    Text(hint(open)).font(.small).foregroundStyle(Theme.textSecondary).lineLimit(1)
+                }
+                Spacer()
+                Button("Wer ist das?") { model.startNaming(detail.meeting.id) }
+                    .buttonStyle(PrimaryButtonStyle())
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .cardStyle()
+            .padding(.bottom, 24)
+        }
+    }
+
+    private func hint(_ open: [MeetingSpeaker]) -> String {
+        let guessed = open.filter { !detail.guesses(for: $0).isEmpty || $0.suggestedName != nil }
+        guard !guessed.isEmpty else { return "Anhören und benennen, dann erkennt die App sie wieder." }
+        return guessed.map { detail.displayName(for: $0.key) }.joined(separator: " · ")
     }
 }
 

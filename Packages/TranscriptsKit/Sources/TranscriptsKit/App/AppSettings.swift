@@ -120,6 +120,7 @@ public final class AppSettings {
         static let audioRetention = "audioRetention"
         static let hideDockIcon = "hideDockIcon"
         static let models = "summaryModels"
+        static let callTracksChecked = "callTracksChecked"
     }
 
     public var onboardingDone: Bool { didSet { defaults.set(onboardingDone, forKey: Keys.onboardingDone) } }
@@ -151,6 +152,13 @@ public final class AppSettings {
     public var audioRetention: AudioRetention { didSet { defaults.set(audioRetention.rawValue, forKey: Keys.audioRetention) } }
     /// Without an open window the app lives only in the menu bar.
     public var hideDockIcon: Bool { didSet { defaults.set(hideDockIcon, forKey: Keys.hideDockIcon) } }
+
+    /// The recordings made before the call track was read at the device's rate were checked and repaired
+    /// (see `CallTrackRepair`). Not observed: only the one-time maintenance reads it.
+    @ObservationIgnored public var callTracksChecked: Bool {
+        get { defaults.bool(forKey: Keys.callTracksChecked) }
+        set { defaults.set(newValue, forKey: Keys.callTracksChecked) }
+    }
 
     public func model(for provider: ProviderKind) -> String? {
         summaryModels[provider.rawValue]

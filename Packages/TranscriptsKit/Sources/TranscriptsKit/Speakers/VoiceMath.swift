@@ -67,56 +67,6 @@ public struct VoiceThresholds: Equatable, Sendable {
     public static let relaxed = VoiceThresholds(automatic: 0.66, suggestion: 0.48, margin: 0.05, sameSpeaker: 0.45)
 }
 
-/// A known person's voice compared with an unknown one.
-public struct VoiceMatch: Equatable, Sendable {
-    public var personId: String
-    public var similarity: Float
-    /// How many stored samples of this person there are; more samples make a match more trustworthy.
-    public var samples: Int
-}
-
-/// Compares voices against everyone the app has heard before.
-public struct VoiceLibrary: Sendable {
-    /// Stored embeddings per person.
-    public private(set) var voices: [String: [[Float]]]
-
-    public init(voices: [String: [[Float]]] = [:]) {
-        self.voices = voices
-    }
-
-    public init(voiceprints: [Voiceprint]) {
-        var voices: [String: [[Float]]] = [:]
-        for print in voiceprints {
-            voices[print.personId, default: []].append([Float](embeddingData: print.embedding))
-        }
-        self.voices = voices
-    }
-
-    public var isEmpty: Bool { voices.isEmpty }
-
-    public mutating func add(_ embedding: [Float], to personId: String) {
-        voices[personId, default: []].append(embedding)
-    }
-
-    /// Everyone ranked by similarity, best first.
-    ///
-    /// A person's score is the mean of their two best matching samples (or the single one), which
-    /// is steadier than the maximum when someone has many recordings from different microphones.
-    /// People in `boosted` (for example the invitees of the calendar event) get a small head start.
-    public func rank(_ embedding: [Float], boosted: Set<String> = [], excluding: Set<String> = []) -> [VoiceMatch] {
-        voices.compactMap { personId, samples -> VoiceMatch? in
-            guard !excluding.contains(personId), !samples.isEmpty else { return nil }
-            let scores = samples.map { VoiceMath.cosine(embedding, $0) }.sorted(by: >)
-            var score = scores.count >= 2 ? (scores[0] + scores[1]) / 2 : scores[0]
-            score = max(score, scores[0] - 0.05)
-            // Invitees get a small head start; the score may then exceed 1, which only matters for the order.
-            if boosted.contains(personId) { score += 0.04 }
-            return VoiceMatch(personId: personId, similarity: score, samples: samples.count)
-        }
-        .sorted { $0.similarity > $1.similarity }
-    }
-}
-
 /// Groups utterances of one live recording by voice, as they come in.
 public struct LiveSpeakerTracker: Sendable {
     public struct Voice: Sendable {

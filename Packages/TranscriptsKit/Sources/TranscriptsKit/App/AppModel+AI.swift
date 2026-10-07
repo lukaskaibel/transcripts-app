@@ -167,7 +167,9 @@ extension AppModel {
         guard !hints.isEmpty else { return }
         let identifier = SpeakerIdentifier(library: VoiceLibrary(), people: people, attendees: detail.meeting.attendees, thresholds: settings.voiceStrictness.thresholds) { $0 }
         for hint in hints {
-            guard var speaker = detail.speakers.first(where: { $0.label.lowercased() == hint.speakerLabel.lowercased() }),
+            // The model may quote the whole name the transcript gave ("Sprecher 2 (vielleicht Hai oder Julian)").
+            let quoted = hint.speakerLabel.lowercased()
+            guard var speaker = detail.speakers.first(where: { quoted == $0.label.lowercased() || quoted.hasPrefix($0.label.lowercased() + " (") }),
                   speaker.assignment == .unknown else { continue }
             speaker.assignment = .suggested
             if let person = identifier.person(named: hint.name) {
@@ -183,116 +185,5 @@ extension AppModel {
     public func toggleActionItem(_ item: ActionItem) {
         guard let id = item.id else { return }
         try? database.setActionItem(id, done: !item.done)
-    }
-}
-
-// MARK: - Speakers and people
-
-extension AppModel {
-    /// Accepts the suggestion shown for a voice.
-    public func confirmSuggestion(_ speaker: MeetingSpeaker) {
-        if let personId = speaker.suggestedPersonId {
-            assign(speaker, to: personId)
-        } else if let name = speaker.suggestedName {
-            // The voice's own meeting, which need not be the open one (confirming from the people list).
-            let attendees = (try? database.detail(of: speaker.meetingId))?.meeting.attendees ?? []
-            let attendee = attendees.first { $0.name == name }
-            assign(speaker, toNewPersonNamed: name, email: attendee?.email)
-        }
-    }
-
-    public func rejectSuggestion(_ speaker: MeetingSpeaker) {
-        var speaker = speaker
-        speaker.assignment = .unknown
-        speaker.suggestedPersonId = nil
-        speaker.suggestedName = nil
-        speaker.suggestionReason = nil
-        speaker.confidence = 0
-        try? database.save(speaker)
-    }
-
-    /// Names a voice. The voice is learned, and other meetings' unknown voices are checked against it.
-    public func assign(_ speaker: MeetingSpeaker, to personId: String) {
-        do {
-            try database.assign(speaker, to: personId)
-        } catch {
-            showToast("Zuordnung fehlgeschlagen", error.localizedDescription, isError: true)
-            return
-        }
-        refreshVoiceSuggestions()
-    }
-
-    public func assign(_ speaker: MeetingSpeaker, toNewPersonNamed name: String, email: String? = nil) {
-        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        do {
-            let person = try database.person(named: name, email: email)
-            assign(speaker, to: person.id)
-        } catch {
-            showToast("Person konnte nicht angelegt werden", error.localizedDescription, isError: true)
-        }
-    }
-
-    public func assignToMe(_ speaker: MeetingSpeaker) {
-        let me = (try? database.mePerson(defaultName: Self.defaultMyName))
-        guard let me else { return }
-        assign(speaker, to: me.id)
-    }
-
-    public func unassign(_ speaker: MeetingSpeaker) {
-        var speaker = speaker
-        speaker.personId = nil
-        speaker.assignment = .unknown
-        speaker.confidence = 0
-        try? database.save(speaker)
-    }
-
-    public func rename(_ person: Person, to name: String) {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        var person = person
-        person.name = trimmed
-        try? database.save(person)
-    }
-
-    public func merge(_ source: Person, into target: Person) {
-        guard source.id != target.id, !source.isMe else { return }
-        do {
-            try database.mergePerson(source.id, into: target.id)
-            showToast("Zusammengeführt", "\(source.name) ist jetzt \(target.name).")
-        } catch {
-            showToast("Zusammenführen fehlgeschlagen", error.localizedDescription, isError: true)
-        }
-    }
-
-    public func delete(_ person: Person) {
-        guard !person.isMe else { return }
-        try? database.deletePerson(person.id)
-    }
-
-    public func forgetVoice(of person: Person) {
-        try? database.deleteVoiceprints(of: person.id)
-    }
-
-    /// Re-checks unknown voices of all meetings against the voice library, after it learned something.
-    public func refreshVoiceSuggestions() {
-        let database = database
-        let thresholds = settings.voiceStrictness.thresholds
-        Task.detached(priority: .utility) {
-            guard let prints = try? database.voiceprints(), let people = try? database.people() else { return }
-            let library = VoiceLibrary(voiceprints: prints)
-            let me = people.first(where: \.isMe)?.id
-            guard let reviews = try? database.voiceReviews(limit: 200) else { return }
-            for review in reviews where review.speaker.assignment == .unknown {
-                guard let data = review.speaker.embedding else { continue }
-                let matches = library.rank([Float](embeddingData: data), excluding: me.map { [$0] } ?? [])
-                guard let best = matches.first, best.similarity >= thresholds.suggestion else { continue }
-                var speaker = review.speaker
-                speaker.assignment = .suggested
-                speaker.suggestedPersonId = best.personId
-                speaker.confidence = Double(best.similarity)
-                speaker.suggestionReason = "Stimme ähnlich wie in \(best.samples == 1 ? "einem früheren Meeting" : "\(best.samples) früheren Meetings")"
-                try? database.save(speaker)
-            }
-        }
     }
 }

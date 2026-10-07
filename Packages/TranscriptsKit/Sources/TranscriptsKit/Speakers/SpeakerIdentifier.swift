@@ -21,6 +21,8 @@ public struct IdentityDecision: Equatable, Sendable {
     public var suggestedName: String?
     public var reason: String?
     public var confidence: Double
+    /// Whom the voice may be, when it isn't named: the closest voices, most likely first.
+    public var candidates: [String] = []
 
     public static let unknown = IdentityDecision(assignment: .unknown, personId: nil, suggestedPersonId: nil, suggestedName: nil, reason: nil, confidence: 0)
 }
@@ -53,7 +55,11 @@ public struct SpeakerIdentifier {
         var decisions: [String: IdentityDecision] = [:]
         for voice in voices {
             let matches = voice.embedding.map { library.rank($0, boosted: boosted, excluding: me.map { [$0] } ?? []) } ?? []
-            decisions[voice.key] = decide(voice: voice, matches: matches, guess: guesses[voice.key]?.first)
+            var decision = decide(voice: voice, matches: matches, guess: guesses[voice.key]?.first)
+            if decision.assignment != .automatic {
+                decision.candidates = VoiceLibrary.candidates(matches, thresholds: thresholds)
+            }
+            decisions[voice.key] = decision
         }
         // A one-to-one call: the only other voice is most likely the only other invitee.
         let undecided = voices.filter { decisions[$0.key]?.assignment == .unknown }
@@ -150,6 +156,17 @@ public struct SpeakerIdentifier {
     }
 
     private func voiceReason(_ match: VoiceMatch) -> String {
-        match.samples == 1 ? "Stimme ähnlich wie in einem früheren Meeting" : "Stimme ähnlich wie in \(match.samples) früheren Meetings"
+        Self.voiceReason(match)
+    }
+
+    static func voiceReason(_ match: VoiceMatch) -> String {
+        match.meetings == 1 ? "\(voiceReasonPrefix) einem früheren Meeting" : "\(voiceReasonPrefix) \(match.meetings) früheren Meetings"
+    }
+
+    static let voiceReasonPrefix = "Stimme ähnlich wie in"
+
+    /// Whether a suggestion rests on the voice alone (rather than on a name that was said).
+    static func isVoiceReason(_ reason: String?) -> Bool {
+        reason?.hasPrefix(voiceReasonPrefix) ?? false
     }
 }

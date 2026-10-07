@@ -95,7 +95,7 @@ extension AppModel {
         var meta = TimeFormat.meetingLine(start: detail.meeting.startedAt, duration: detail.meeting.duration)
         if let source = detail.meeting.source { meta += " · \(source)" }
         lines.append(meta)
-        let names = detail.speakers.map { detail.displayName(for: $0.key) == Strings.me ? myName : detail.displayName(for: $0.key) }
+        let names = detail.speakers.map { $0.isMe ? myName : detail.textName(for: $0.key) }
         if !names.isEmpty { lines.append("Teilnehmer: " + names.joined(separator: ", ")) }
         if let summary = detail.summary {
             lines += ["", "## Zusammenfassung", "", summary.overview]
@@ -118,7 +118,7 @@ extension AppModel {
         if !detail.segments.isEmpty {
             lines += ["", "## Transkript", ""]
             for segment in detail.segments {
-                let name = segment.speakerKey == MeetingSpeaker.meKey ? myName : detail.displayName(for: segment.speakerKey)
+                let name = segment.speakerKey == MeetingSpeaker.meKey ? myName : detail.textName(for: segment.speakerKey)
                 lines.append("**\(name)** (\(TimeFormat.clock(segment.start))): \(segment.text)")
                 lines.append("")
             }

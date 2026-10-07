@@ -25,6 +25,8 @@ public final class AppModel {
 
     public enum Overlay: Equatable, Sendable {
         case palette
+        /// "Wer ist das?": the voices still without a name, one after another; those of one meeting first.
+        case naming(meetingId: String?)
     }
 
     public enum WindowRequest: Equatable, Sendable {
@@ -68,6 +70,18 @@ public final class AppModel {
         public var title: String
         public var message: String
         public var isError: Bool
+        public var action: ToastAction?
+    }
+
+    /// A button in a toast.
+    public enum ToastAction: Equatable, Sendable {
+        case nameVoices(meetingId: String)
+
+        public var title: String {
+            switch self {
+            case .nameVoices: "Wer ist das?"
+            }
+        }
     }
 
     // MARK: Infrastructure
@@ -97,6 +111,10 @@ public final class AppModel {
     public internal(set) var reviews: [VoiceReview] = []
     public internal(set) var detail: MeetingDetail?
     public internal(set) var upcoming: [UpcomingMeeting] = []
+    /// Everyone's voice as the app knows it now, rebuilt after every change (see `refreshVoices`).
+    public internal(set) var voiceLibrary = VoiceLibrary()
+    @ObservationIgnored var voiceRefresh: Task<Void, Never>?
+    @ObservationIgnored var voiceRefreshAgain = false
 
     // MARK: Navigation
 
@@ -109,6 +127,8 @@ public final class AppModel {
         }
     }
     public var overlay: Overlay?
+    /// A person whose sheet should open (from a voice that sounds like them, or the debug remote).
+    public var openPersonId: String?
     /// A transcript line to scroll to and highlight, for search results.
     public var focusedSegmentId: Int64?
     public var windowRequest: WindowRequest?
@@ -156,6 +176,7 @@ public final class AppModel {
         floatingRecorder = FloatingRecorderController(model: self)
         DebugRemote.startIfRequested(model: self)
         refreshPermissions()
+        refreshVoices()
         guard !isDemo else { return }
         recoverInterruptedMeetings()
         applyRetention()
@@ -166,6 +187,7 @@ public final class AppModel {
             prepareEngine()
             startCalendar()
             configureCallDetection()
+            startVoiceMaintenance()
         }
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
@@ -261,12 +283,21 @@ public final class AppModel {
         windowRequestCount += 1
     }
 
-    public func showToast(_ title: String, _ message: String = "", isError: Bool = false) {
-        let toast = Toast(title: title, message: message, isError: isError)
+    public func showToast(_ title: String, _ message: String = "", isError: Bool = false, action: ToastAction? = nil) {
+        let toast = Toast(title: title, message: message, isError: isError, action: action)
         toasts.append(toast)
         Task { [weak self] in
-            try? await Task.sleep(for: .seconds(isError ? 8 : 4))
+            try? await Task.sleep(for: .seconds(isError || action != nil ? 10 : 4))
             self?.dismissToast(toast.id)
+        }
+    }
+
+    public func perform(_ action: ToastAction) {
+        switch action {
+        case .nameVoices(let meetingId):
+            openMainWindow()
+            select(meetingId)
+            overlay = .naming(meetingId: meetingId)
         }
     }
 
@@ -405,6 +436,11 @@ public final class AppModel {
 
     // MARK: Processing queue
 
+    /// Meetings waiting for, or in, the full processing pass.
+    var queuedMeetings: Set<String> {
+        Set(processingQueue + [processingMeetingId].compactMap { $0 })
+    }
+
     public func enqueueProcessing(_ meetingId: String) {
         guard !processingQueue.contains(meetingId), processingMeetingId != meetingId else { return }
         processingQueue.append(meetingId)
@@ -435,6 +471,8 @@ public final class AppModel {
             return
         }
         await finishAudio(of: meetingId)
+        refreshVoices()
+        promptForVoices(in: meetingId)
         if settings.autoSummarize, summaryProviderReady {
             await generateSummary(meetingId)
         }

@@ -28,6 +28,9 @@ struct PeopleView: View {
                                 Text("Zu bestätigen").font(.uiSemibold)
                                 Text("\(model.reviews.count)").foregroundStyle(Theme.textTertiary)
                                 Spacer()
+                                Button("Alle durchgehen") { model.startNaming() }
+                                    .buttonStyle(PrimaryButtonStyle())
+                                    .help("Eine Stimme nach der anderen anhören und benennen")
                             }
                             .padding(.horizontal, 14)
                             .frame(height: 34)
@@ -50,6 +53,12 @@ struct PeopleView: View {
         }
         .sheet(item: $selected) { stats in
             PersonSheet(personId: stats.person.id)
+                .id(stats.person.id)
+        }
+        .onChange(of: model.openPersonId, initial: true) { _, personId in
+            guard let personId, let stats = model.peopleStats.first(where: { $0.person.id == personId }) else { return }
+            selected = stats
+            model.openPersonId = nil
         }
     }
 
@@ -119,20 +128,39 @@ struct ReviewRow: View {
             .frame(width: 280, alignment: .leading)
             .help("Meeting öffnen")
 
-            if let name = suggestionName {
+            if guesses.count > 1 {
+                // Not sure between a few: one button each.
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.right").font(.system(size: 11)).foregroundStyle(Theme.textTertiary)
+                    Text("vermutlich").font(.small).foregroundStyle(Theme.textTertiary)
+                    ForEach(guesses) { person in
+                        Button(person.name) { model.assign(review.speaker, to: person.id) }
+                            .buttonStyle(SecondaryButtonStyle())
+                            .help("\(person.name) zuordnen")
+                    }
+                }
+                Spacer(minLength: 8)
+                otherMenu("Andere Person")
+            } else if let name = suggestionName {
                 HStack(spacing: 10) {
                     Image(systemName: "arrow.right").font(.system(size: 11)).foregroundStyle(Theme.textTertiary)
                     Avatar(kind: .person(name: name), size: 20)
                     VStack(alignment: .leading, spacing: 1) {
                         Text(name).font(.uiMedium).lineLimit(1)
-                        if let reason = review.speaker.suggestionReason {
+                        if let reason = review.speaker.suggestionReason ?? (guesses.isEmpty ? nil : "Stimme ähnlich") {
                             Text(reason).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1)
                         }
                     }
                 }
                 Spacer(minLength: 8)
-                Button("Bestätigen") { model.confirmSuggestion(review.speaker) }
-                    .buttonStyle(PrimaryButtonStyle())
+                Button("Bestätigen") {
+                    if let person = guesses.first, review.speaker.suggestedPersonId == nil, review.speaker.suggestedName == nil {
+                        model.assign(review.speaker, to: person.id)
+                    } else {
+                        model.confirmSuggestion(review.speaker)
+                    }
+                }
+                .buttonStyle(PrimaryButtonStyle())
                 otherMenu("Andere Person")
             } else {
                 Text("Kein Name im Gespräch gefallen").font(.small).foregroundStyle(Theme.textTertiary)
@@ -154,7 +182,11 @@ struct ReviewRow: View {
     }
 
     private var suggestionName: String? {
-        review.suggestedPerson?.name ?? review.speaker.suggestedName
+        review.suggestedPerson?.name ?? review.speaker.suggestedName ?? guesses.first?.name
+    }
+
+    private var guesses: [Person] {
+        review.speaker.guesses.compactMap { model.person($0) }
     }
 
     private func otherMenu(_ title: String) -> some View {
@@ -180,11 +212,7 @@ struct ReviewRow: View {
 
     /// An unknown voice the user doesn't care about: keep it unnamed, but out of the review list.
     private func ignore() {
-        var speaker = review.speaker
-        speaker.assignment = .confirmed
-        speaker.suggestedName = nil
-        speaker.suggestedPersonId = nil
-        try? model.database.save(speaker)
+        model.ignoreVoice(review.speaker)
     }
 }
 
@@ -238,55 +266,70 @@ struct PersonSheet: View {
     @State private var name = ""
     @State private var meetings: [Meeting] = []
     @State private var confirmDelete = false
+    @State private var contentHeight: CGFloat = 400
 
     private var stats: PersonStats? { model.peopleStats.first { $0.person.id == personId } }
+
+    /// The screen's height less room for the window's title and the sheet's buttons.
+    static var maximumContentHeight: CGFloat {
+        min(720, (NSScreen.main?.visibleFrame.height ?? 800) - 200)
+    }
 
     var body: some View {
         if let stats {
             VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 12) {
-                    Avatar(kind: stats.person.isMe ? .me(name: stats.person.name) : .person(name: stats.person.name), size: 36)
-                    TextField("Name", text: $name)
-                        .textFieldStyle(.plain)
-                        .font(.system(size: 18, weight: .semibold))
-                        .onSubmit(save)
-                }
-                Text(summary(stats))
-                    .font(.small)
-                    .foregroundStyle(Theme.textSecondary)
-                    .padding(.top, 8)
-
-                Text("Meetings").font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.top, 20)
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 2) {
-                        ForEach(meetings) { meeting in
-                            Button {
-                                save()
-                                model.select(meeting.id)
-                                dismiss()
-                            } label: {
-                                HStack {
-                                    Text(meeting.title).lineLimit(1)
-                                    Spacer()
-                                    Text(TimeFormat.shortDate(meeting.startedAt)).font(.small).foregroundStyle(Theme.textTertiary)
-                                }
-                                .padding(.horizontal, 8)
-                                .frame(height: 28)
-                                .hoverFill(radius: 6)
-                            }
-                            .buttonStyle(PlainPressStyle())
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack(spacing: 12) {
+                            Avatar(kind: stats.person.isMe ? .me(name: stats.person.name) : .person(name: stats.person.name), size: 36)
+                            TextField("Name", text: $name)
+                                .textFieldStyle(.plain)
+                                .font(.system(size: 18, weight: .semibold))
+                                .onSubmit(save)
                         }
-                        if meetings.isEmpty {
-                            Text("Noch keinem Meeting zugeordnet.").font(.small).foregroundStyle(Theme.textTertiary).padding(.vertical, 6)
-                        }
-                    }
-                }
-                .frame(height: 150)
-                .padding(.top, 6)
+                        Text(summary(stats))
+                            .font(.small)
+                            .foregroundStyle(Theme.textSecondary)
+                            .padding(.top, 8)
 
+                        VoiceProfileSection(person: stats.person)
+                            .padding(.top, 20)
+
+                        Text("Meetings").font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.top, 20)
+                        VStack(alignment: .leading, spacing: 2) {
+                            ForEach(meetings) { meeting in
+                                Button {
+                                    save()
+                                    model.select(meeting.id)
+                                    dismiss()
+                                } label: {
+                                    HStack {
+                                        Text(meeting.title).lineLimit(1)
+                                        Spacer()
+                                        Text(TimeFormat.shortDate(meeting.startedAt)).font(.small).foregroundStyle(Theme.textTertiary)
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .frame(height: 28)
+                                    .hoverFill(radius: 6)
+                                }
+                                .buttonStyle(PlainPressStyle())
+                            }
+                            if meetings.isEmpty {
+                                Text("Noch keinem Meeting zugeordnet.").font(.small).foregroundStyle(Theme.textTertiary).padding(.vertical, 6)
+                            }
+                        }
+                        .padding(.top, 6)
+                    }
+                    .padding(24)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+                }
+                // As tall as the content, but never taller than the screen: the buttons below stay in reach.
+                .frame(height: min(max(contentHeight, 200), Self.maximumContentHeight))
+
+                Rectangle().fill(Theme.rowSeparator).frame(height: 1)
                 HStack(spacing: 8) {
                     if !stats.person.isMe {
-                        Menu("Zusammenführen mit …") {
+                        Menu("Zusammenführen …") {
                             ForEach(model.people.filter { $0.id != personId && !$0.isMe }) { other in
                                 Button(other.name) {
                                     model.merge(stats.person, into: other)
@@ -298,22 +341,25 @@ struct PersonSheet: View {
                         .help("Für doppelte Einträge derselben Person")
                     }
                     Button("Stimme vergessen") { model.forgetVoice(of: stats.person) }
-                        .disabled(stats.voiceprints == 0)
-                        .help("Löscht die gespeicherten Stimmproben; die Zuordnungen in Meetings bleiben.")
+                        .fixedSize()
+                        .disabled(stats.voiceSamples == 0)
+                        .help("Die App lernt nicht mehr aus dem, was diese Person gesagt hat; die Zuordnungen in Meetings bleiben.")
                     Spacer()
                     if !stats.person.isMe {
                         Button("Löschen …", role: .destructive) { confirmDelete = true }
+                            .fixedSize()
                     }
                     Button("Fertig") {
                         save()
                         dismiss()
                     }
                     .keyboardShortcut(.defaultAction)
+                    .fixedSize()
                 }
-                .padding(.top, 20)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
             }
-            .padding(24)
-            .frame(width: 460)
+            .frame(width: 540)
             .font(.ui)
             .foregroundStyle(Theme.text)
             .onAppear {
@@ -340,7 +386,7 @@ struct PersonSheet: View {
         var parts: [String] = []
         parts.append(stats.meetings == 1 ? "1 Meeting" : "\(stats.meetings) Meetings")
         if stats.talkTime > 0 { parts.append("\(TimeFormat.duration(stats.talkTime)) gesprochen") }
-        parts.append(stats.voiceprints == 1 ? "1 Stimmprobe" : "\(stats.voiceprints) Stimmproben")
+        parts.append(stats.voiceSamples == 1 ? "1 Stimmprobe" : "\(stats.voiceSamples) Stimmproben")
         if let email = stats.person.email { parts.append(email) }
         return parts.joined(separator: " · ")
     }

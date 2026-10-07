@@ -138,10 +138,17 @@ struct TranscriptLine: View {
             VStack(alignment: .leading, spacing: 2) {
                 if showsHeader {
                     HStack(spacing: 8) {
-                        Text(detail.displayName(for: segment.speakerKey)).font(.uiSemibold)
+                        // Where the guesses stand as buttons, the label says who isn't settled yet.
+                        Text(showsGuesses ? (detail.speaker(for: segment.speakerKey)?.label ?? "") : detail.displayName(for: segment.speakerKey)).font(.uiSemibold)
                         timestamp
-                        if let speaker = detail.speaker(for: segment.speakerKey), speaker.assignment == .suggested, isFirstLine {
+                        if let speaker = detail.speaker(for: segment.speakerKey), speaker.needsReview, isFirstLine {
                             SuggestionChip(detail: detail, speaker: speaker)
+                        }
+                        if segment.placement == .app {
+                            Image(systemName: "arrow.turn.down.right")
+                                .font(.system(size: 9, weight: .semibold))
+                                .foregroundStyle(Theme.textTertiary)
+                                .help("Von der App hierher verschoben, weil es so klingt. Rechts unter „Sprecher“ lässt es sich zurücknehmen.")
                         }
                         if hovering { playButton }
                     }
@@ -169,6 +176,11 @@ struct TranscriptLine: View {
         .padding(.horizontal, -8)
         .onHover { hovering = $0 }
         .animation(Theme.quick, value: isPlaying)
+    }
+
+    private var showsGuesses: Bool {
+        guard isFirstLine, let speaker = detail.speaker(for: segment.speakerKey), speaker.needsReview else { return false }
+        return !detail.guesses(for: speaker).isEmpty || (speaker.suggestedPersonId == nil && speaker.suggestedName != nil)
     }
 
     private var isFirstLine: Bool {
@@ -222,36 +234,39 @@ struct TranscriptLine: View {
     }
 }
 
-/// "Jonas Weber?" next to a voice the app thinks it recognised, with a one-click confirm.
+/// "Jonas Weber?" (or "Hai?" "Julian?") next to a voice the app thinks it recognised, one click each.
 struct SuggestionChip: View {
     @Environment(AppModel.self) private var model
     let detail: MeetingDetail
     let speaker: MeetingSpeaker
 
-    private var name: String? {
-        speaker.suggestedPersonId.flatMap { detail.people[$0]?.name ?? model.person($0)?.name } ?? speaker.suggestedName
-    }
-
     var body: some View {
-        if let name {
-            HStack(spacing: 4) {
-                Button {
-                    model.confirmSuggestion(speaker)
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "checkmark").font(.system(size: 9, weight: .bold))
-                        Text("\(name)?")
-                    }
-                    .font(.tiny.weight(.medium))
-                    .foregroundStyle(Theme.accent)
-                    .padding(.horizontal, 8)
-                    .frame(height: 22)
-                    .background(Capsule().fill(Theme.selectionFill))
-                    .overlay(Capsule().stroke(Theme.selectionBorder, lineWidth: 1))
+        HStack(spacing: 4) {
+            ForEach(detail.guesses(for: speaker)) { person in
+                chip(person.name, help: person.id == speaker.suggestedPersonId ? speaker.suggestionReason : "Stimme ähnlich") {
+                    model.assign(speaker, to: person.id)
                 }
-                .buttonStyle(PlainPressStyle())
-                .help(speaker.suggestionReason.map { "Bestätigen · \($0)" } ?? "Bestätigen")
+            }
+            if speaker.suggestedPersonId == nil, let name = speaker.suggestedName {
+                chip(name, help: speaker.suggestionReason) { model.confirmSuggestion(speaker) }
             }
         }
+    }
+
+    private func chip(_ name: String, help: String?, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: "checkmark").font(.system(size: 9, weight: .bold))
+                Text("\(name)?")
+            }
+            .font(.tiny.weight(.medium))
+            .foregroundStyle(Theme.accent)
+            .padding(.horizontal, 8)
+            .frame(height: 22)
+            .background(Capsule().fill(Theme.selectionFill))
+            .overlay(Capsule().stroke(Theme.selectionBorder, lineWidth: 1))
+        }
+        .buttonStyle(PlainPressStyle())
+        .help(help.map { "\(name) zuordnen · \($0)" } ?? "\(name) zuordnen")
     }
 }

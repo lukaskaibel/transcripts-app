@@ -125,7 +125,7 @@ public final class RecordingSession {
     private let microphone: AudioSource
     private let system: AudioSource
     private var channelTasks: [Task<Void, Never>] = []
-    private var continuations: [Channel: AsyncStream<[Float]>.Continuation] = [:]
+    private var continuations: [Channel: AsyncStream<CapturedChunk>.Continuation] = [:]
     private var transcribers: [Channel: LiveTranscriber] = [:]
     private var tracker: LiveSpeakerTracker
     private var library: VoiceLibrary
@@ -148,7 +148,8 @@ public final class RecordingSession {
     }
 
     /// `sources` replaces the microphone and the system audio tap, for tests that play files instead.
-    public init(meeting: Meeting, database: AppDatabase, engine: SpeechEngine = .shared, configuration: Configuration, sources: [Channel: AudioSource]? = nil) {
+    /// `library` is everyone's voice as the app knows it; loaded from the database when not given.
+    public init(meeting: Meeting, database: AppDatabase, engine: SpeechEngine = .shared, configuration: Configuration, library: VoiceLibrary? = nil, sources: [Channel: AudioSource]? = nil) {
         meetingId = meeting.id
         startedAt = meeting.startedAt
         title = meeting.title
@@ -157,7 +158,7 @@ public final class RecordingSession {
         self.engine = engine
         thresholds = configuration.thresholds
         tracker = LiveSpeakerTracker(threshold: configuration.thresholds.sameSpeaker)
-        library = VoiceLibrary(voiceprints: (try? database.voiceprints()) ?? [])
+        self.library = library ?? VoiceLibrary(samples: (try? database.voiceSamples()) ?? [])
         people = Dictionary(uniqueKeysWithValues: ((try? database.people()) ?? []).map { ($0.id, $0) })
         attendees = meeting.attendees
         capturesSystemAudio = configuration.captureSystemAudio && (sources == nil || sources?[.system] != nil)
@@ -178,7 +179,7 @@ public final class RecordingSession {
         let channels: [Channel] = capturesSystemAudio ? [.microphone, .system] : [.microphone]
         for channel in channels {
             let writer = try AudioFileWriter(url: AppPaths.rawFile(for: meetingId, channel: channel), encoding: .pcm)
-            let (stream, continuation) = AsyncStream<[Float]>.makeStream(bufferingPolicy: .unbounded)
+            let (stream, continuation) = AsyncStream<CapturedChunk>.makeStream(bufferingPolicy: .unbounded)
             continuations[channel] = continuation
             let transcriber = LiveTranscriber(channel: channel, engine: engine) { [weak self] event in
                 Task { @MainActor in self?.handle(event) }
@@ -193,8 +194,16 @@ public final class RecordingSession {
         }
 
         let continuations = continuations
-        microphone.onSamples = { samples in continuations[.microphone]?.yield(samples) }
-        system.onSamples = { samples in continuations[.system]?.yield(samples) }
+        let clock = clock
+        // Stamped when they arrive, not when the pump gets to them: the pump also feeds the live transcriber
+        // and can fall behind, and judged by the time it catches up, a channel would look short of samples
+        // and get silence padded in that never was.
+        microphone.onSamples = { samples in
+            continuations[.microphone]?.yield(CapturedChunk(samples: samples, elapsed: clock.elapsed, paused: clock.isPaused))
+        }
+        system.onSamples = { samples in
+            continuations[.system]?.yield(CapturedChunk(samples: samples, elapsed: clock.elapsed, paused: clock.isPaused))
+        }
 
         clock.start()
         lastMicrophoneSignal = Date()
@@ -259,8 +268,15 @@ public final class RecordingSession {
     }
 
     /// Moves one channel's samples from the capture to the file and the live transcriber.
+    /// Samples as a capture delivered them, with the recording time they arrived at.
+    struct CapturedChunk: Sendable {
+        var samples: [Float]
+        var elapsed: TimeInterval
+        var paused: Bool
+    }
+
     private nonisolated static func pump(
-        _ stream: AsyncStream<[Float]>,
+        _ stream: AsyncStream<CapturedChunk>,
         channel: Channel,
         writer: AudioFileWriter,
         transcriber: LiveTranscriber,
@@ -271,12 +287,13 @@ public final class RecordingSession {
         var peak: Float = 0
         // Exact zeros, not just quiet: what macOS delivers to an app it doesn't let listen.
         var onlyZeros = true
-        for await chunk in stream {
-            if clock.isPaused { continue }
+        for await captured in stream {
+            if captured.paused { continue }
+            let chunk = captured.samples
             var samples = chunk
             // A capture that hiccupped (device switch, tap restart) is padded with silence so both
             // channels stay on the same timeline.
-            let expected = SpeechAudio.samples(clock.elapsed)
+            let expected = SpeechAudio.samples(captured.elapsed)
             let behind = expected - (writer.samplesWritten + samples.count)
             if behind > SpeechAudio.samples(0.5) {
                 samples = [Float](repeating: 0, count: behind) + samples
@@ -388,7 +405,7 @@ public final class RecordingSession {
             }
             if channel == .system { currentSystemKey = key }
             currentSpeakerKey = key
-            if isEcho(channel: channel, text: text, start: start, end: end) { return }
+            if isEcho(channel: channel, text: text, start: start, end: end) || soundsLikeTheCall(channel: channel, voice: voice) { return }
             addVoiceIfNeeded(key, channel: channel, speech: end - start)
             let segment = try? database.appendSegment(Segment(meetingId: meetingId, speakerKey: key, channel: channel, start: start, end: end, text: text))
             let line = LiveLine(id: "\(segment?.id ?? Int64(lines.count))", speakerKey: key, channel: channel, start: start, end: end, text: text, isPartial: false)
@@ -438,6 +455,17 @@ public final class RecordingSession {
     /// The best current picture of a live voice.
     private func centroid(of key: String) -> [Float]? {
         liveEmbeddings[key] ?? tracker.centroid(of: key)
+    }
+
+    /// A line of the microphone whose voice is the call's, not the user's (speakers instead of headphones).
+    private func soundsLikeTheCall(channel: Channel, voice: [Float]?) -> Bool {
+        guard channel == .microphone, let voice else { return false }
+        let me = people.values.first(where: \.isMe)?.id
+        let user = me.flatMap { library.similarity(voice, to: $0) }
+        let callVoices = voices.keys.filter { $0 != MeetingSpeaker.meKey }.compactMap { centroid(of: $0) }
+        let known = library.rank(voice, excluding: me.map { [$0] } ?? []).first?.similarity
+        guard let call = (callVoices.map { VoiceMath.cosine(voice, $0) } + [known].compactMap { $0 }).max() else { return false }
+        return LiveLineCheck.isEchoOfCall(user: user, call: call)
     }
 
     /// The call played through speakers and came back into the microphone: don't show it twice.
@@ -521,9 +549,10 @@ public final class RecordingSession {
             try? database.save(person)
             people[person.id] = person
         }
+        // Recognised from now on in this meeting; after it, the confirmed name carries over to the voice's
+        // lines in the final transcript, and they teach the app the voice.
         if let centroid = centroid(of: key) {
-            library.add(centroid, to: person.id)
-            try? database.save(Voiceprint(personId: person.id, embedding: centroid.embeddingData, meetingId: meetingId, duration: voice.speech))
+            library.add(centroid, to: person.id, duration: voice.speech, meetingId: meetingId)
         }
         voice.personId = person.id
         voice.name = person.name

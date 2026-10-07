@@ -11,6 +11,8 @@ import TranscriptsKit
 //   transcripts-cli process [--mic <file>] [--system <file>] [--import <file>] [--root <dir>] [--attendees "A, B"] [--title T]
 //   transcripts-cli confirm --root <dir> --meeting <id> --assign "S1=Anna Berger, S2=Thomas Klein"
 //   transcripts-cli summarize --root <dir> --meeting <id> --provider ollama|anthropic|openai|google [--model M] [--url U]
+//   transcripts-cli maintain --root <dir>     (the one-time repair and voice update, on a copy of the app's folder)
+//   transcripts-cli voices --root <dir>       (everyone's voice groups and each meeting's speakers)
 
 struct Arguments {
     var positional: [String] = []
@@ -72,6 +74,62 @@ func environment(_ key: String) -> String {
 
 func seconds(since start: Date) -> String {
     String(format: "%.2f s", Date().timeIntervalSince(start))
+}
+
+/// Everyone's voice groups, and each meeting's speakers with the groups of their lines.
+func printVoices(_ database: AppDatabase) {
+    guard let samples = try? database.voiceSamples(), let people = try? database.people(), let rows = try? database.meetingRows() else { return }
+    let names = Dictionary(uniqueKeysWithValues: people.map { ($0.id, $0.name) })
+    let library = VoiceLibrary(samples: samples)
+    var lineTexts: [Int64: String] = [:]
+    for row in rows {
+        for segment in (try? database.detail(of: row.meeting.id))?.segments ?? [] { if let id = segment.id { lineTexts[id] = segment.text } }
+    }
+    print("People:")
+    for (personId, profile) in library.profiles.sorted(by: { (names[$0.key] ?? "") < (names[$1.key] ?? "") }) {
+        print("  \(names[personId] ?? personId): \(profile.samples.count) lines, \(profile.meetingCount) meetings, \(String(format: "%.0f", profile.speech)) s\(profile.possibleSplit != nil ? " — maybe two people" : "")")
+        for group in profile.groups {
+            let other = library.rank(group.centroid, excluding: [personId]).first
+            let hint = other.map { String(format: " → %@ %.2f", names[$0.personId] ?? "?", $0.similarity) } ?? ""
+            let text = group.members.compactMap { index -> String? in
+                guard let id = profile.samples[index].segmentId else { return nil }
+                return lineTexts[id].map { String($0.prefix(30)) }
+            }.prefix(2).joined(separator: " | ")
+            print(String(format: "    %@ %3d lines %6.1f s confirmed %6.1f s recognised, %d meetings%@  %@", group.isTrusted ? "voice" : "stray", group.members.count, group.speech, group.recognizedSpeech, group.meetings.count, hint, text))
+        }
+        if !profile.strays.isEmpty { print("    \(profile.strays.count) single lines fit no voice") }
+        if !profile.ignored.isEmpty { print("    \(profile.ignored.count) lines left out") }
+    }
+    if let moves = try? VoiceRecheck.strayMoves(database: database, library: library, thresholds: .standard), !moves.isEmpty {
+        print("Lines the app would move:")
+        for move in moves {
+            let detail = try? database.detail(of: move.meetingId)
+            let ids = Set(move.segmentIds)
+            let lines: [Segment] = (detail?.segments ?? []).filter { segment in segment.id.map { ids.contains($0) } ?? false }
+            let texts: [String] = lines.map { String($0.text.prefix(40)) }
+            print(String(format: "  %@ %@ → %@ (%.2f): %@", detail?.meeting.title ?? "?", move.fromKey, names[move.personId] ?? "?", move.similarity, texts.joined(separator: " | ")))
+        }
+    }
+    for row in rows {
+        guard let detail = try? database.detail(of: row.meeting.id), !detail.segments.isEmpty else { continue }
+        print("“\(row.meeting.title)”:")
+        let groups = SpeakerVoices.groups(of: detail.segments)
+        for speaker in detail.speakers.sorted(by: { $0.talkTime > $1.talkTime }) {
+            let who = speaker.personId.flatMap { names[$0] } ?? detail.displayName(for: speaker.key)
+            print(String(format: "  %@ %@ %@ %.0f s  %@", speaker.key, speaker.assignment.rawValue, who, speaker.talkTime, speaker.suggestionReason ?? ""))
+            let all = groups[speaker.key] ?? []
+            let shown = Set(SpeakerVoices.notable(all).map(\.id))
+            for group in all where group.speech >= 5 {
+                let best = library.rank(group.centroid, without: row.meeting.id).prefix(2)
+                    .map { "\(names[$0.personId] ?? "?") \(String(format: "%.2f", $0.similarity))" }.joined(separator: ", ")
+                let toMain = all.first.map { VoiceMath.cosine($0.centroid, group.centroid) } ?? 1
+                let here = library.rank(group.centroid, excludingMeeting: row.meeting.id).prefix(2)
+                    .map { "\(names[$0.personId] ?? "?") \(String(format: "%.2f", $0.similarity))" }.joined(separator: ", ")
+                print("        with this meeting: \(here)")
+                print(String(format: "    %@ group %d: %3d lines %6.1f s  to main %.2f  sounds like %@  „%@“", shown.contains(group.id) ? "*" : " ", group.index + 1, group.segmentIds.count, group.speech, toMain, best, String(group.example.text.prefix(44))))
+            }
+        }
+    }
 }
 
 let all = Array(CommandLine.arguments.dropFirst())
@@ -298,6 +356,44 @@ case "summarize":
     print("Action items: \(outcome.actionItems.map { "\($0.text) [\($0.owner ?? "-"), \($0.due ?? "-")]" })")
     print("Open questions: \(outcome.openQuestions)")
     print("Speaker names: \(outcome.speakerNames.map { "\($0.speakerLabel) → \($0.name) (\($0.evidence))" })")
+
+case "maintain":
+    // maintain --root <dir>: what the app does once after this update, on a copy of its folder: repairs call
+    // tracks recorded at the wrong rate (and processes those meetings again), gives older meetings' lines
+    // their voices, and judges every unsettled voice again.
+    guard let rootPath = args["root"] else { fail("maintain --root <dir>") }
+    AppPaths.overrideRoot = URL(fileURLWithPath: rootPath)
+    let database = try AppDatabase.openShared(at: URL(fileURLWithPath: rootPath))
+    await prepare()
+    let processor = MeetingProcessor(database: database, engine: engine)
+    for row in try database.meetingRows() where row.meeting.origin == .recording {
+        if try CallTrackRepair.repairFile(meetingId: row.meeting.id) {
+            print("Repaired the call track of “\(row.meeting.title)”; processing it again …")
+            let start = Date()
+            try await processor.process(meetingId: row.meeting.id, options: .init(model: model, defaultMyName: args["me"] ?? "Lukas"))
+            print("  done in \(seconds(since: start))")
+        }
+    }
+    for meeting in try database.meetingsWithoutLineVoices() where AudioArchiver.hasAudio(meetingId: meeting.id) {
+        try await processor.embedLines(meetingId: meeting.id, model: model)
+        print("Line voices for “\(meeting.title)”")
+    }
+    var library = VoiceLibrary(samples: try database.voiceSamples())
+    for _ in 0..<2 {
+        let renamed = try VoiceRecheck.run(database: database, library: library, thresholds: .standard)
+        if renamed > 0 { library = VoiceLibrary(samples: try database.voiceSamples()) }
+        let moved = try VoiceRecheck.moveStrayLines(database: database, library: library, thresholds: .standard)
+        if moved > 0 { library = VoiceLibrary(samples: try database.voiceSamples()) }
+        print("Voices judged again: \(renamed) changed, \(moved) groups of lines moved")
+        if renamed == 0, moved == 0 { break }
+    }
+    printVoices(database)
+
+case "voices":
+    // voices --root <dir>: everyone's voice groups, and each meeting's speakers with the groups of their lines.
+    guard let rootPath = args["root"] else { fail("voices --root <dir>") }
+    AppPaths.overrideRoot = URL(fileURLWithPath: rootPath)
+    printVoices(try AppDatabase.openShared(at: URL(fileURLWithPath: rootPath)))
 
 default:
     fail("unknown command \(command)")

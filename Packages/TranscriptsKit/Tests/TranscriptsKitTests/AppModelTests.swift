@@ -31,7 +31,7 @@ import Testing
 
     func addMeeting(_ database: AppDatabase, id: String, attendees: [Attendee] = [], speaker: MeetingSpeaker, text: String = "Hallo zusammen") throws {
         try database.save(Meeting(id: id, title: "Meeting \(id)", status: .ready, attendees: attendees))
-        let segment = Segment(meetingId: id, speakerKey: speaker.key, channel: .system, start: 0, end: 6, text: text)
+        let segment = Segment(meetingId: id, speakerKey: speaker.key, channel: .system, start: 0, end: 6, text: text, embedding: speaker.embedding)
         try database.replaceTranscript(meetingId: id, segments: [segment], speakers: [speaker])
     }
 
@@ -53,11 +53,19 @@ import Testing
         let confirmed = try speaker(of: database, in: "a")
         #expect(confirmed.personId == jonas.id)
         #expect(confirmed.assignment == .confirmed)
-        #expect(try database.voiceprints().contains { $0.personId == jonas.id })
+        #expect(try database.voiceSamples().contains { $0.personId == jonas.id && $0.source == .confirmed })
         #expect(try database.voiceReviews(limit: 10).isEmpty)
     }
 
-    @Test func aLearnedVoiceIsSuggestedInOtherMeetings() async throws {
+    /// Waits for the background voice check to settle.
+    func voicesSettled(_ model: AppModel) async throws {
+        for _ in 0..<200 {
+            if model.voiceRefresh == nil { return }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+    }
+
+    @Test func aLearnedVoiceIsRecognisedInOtherMeetings() async throws {
         let (model, database) = try makeModel()
         let first = MeetingSpeaker(meetingId: "a", key: "S1", label: "Sprecher 1", talkTime: 40, embedding: voice(7).embeddingData)
         let later = MeetingSpeaker(meetingId: "b", key: "S2", label: "Sprecher 2", talkTime: 25, embedding: voice(7, jitter: 0.05).embeddingData)
@@ -69,19 +77,78 @@ import Testing
         model.assign(first, toNewPersonNamed: "Thomas Klein")
 
         let thomas = try #require(try database.people().first { $0.name == "Thomas Klein" })
-        // The check runs in the background.
-        var suggestion: MeetingSpeaker?
-        for _ in 0..<60 {
-            let current = try speaker(of: database, in: "b")
-            if current.assignment == .suggested {
-                suggestion = current
-                break
-            }
-            try await Task.sleep(for: .milliseconds(50))
-        }
-        #expect(suggestion?.suggestedPersonId == thomas.id)
-        #expect(suggestion?.suggestionReason?.contains("früheren Meeting") == true)
+        try await voicesSettled(model)
+        let recognised = try speaker(of: database, in: "b")
+        #expect(recognised.assignment == .automatic)
+        #expect(recognised.personId == thomas.id)
         #expect(try speaker(of: database, in: "c").assignment == .unknown)
+        #expect(model.voiceLibrary.profiles[thomas.id]?.hasVoice == true)
+    }
+
+    /// The case from the first real meetings: a voice confirmed as the wrong person. Everything the app
+    /// concluded from that follows the correction.
+    @Test func correctingAConfirmedVoiceCorrectsWhatFollowedFromIt() async throws {
+        let (model, database) = try makeModel()
+        let hai = MeetingSpeaker(meetingId: "a", key: "S1", label: "Sprecher 1", talkTime: 40, embedding: voice(21).embeddingData)
+        let haiAgain = MeetingSpeaker(meetingId: "b", key: "S1", label: "Sprecher 1", talkTime: 30, embedding: voice(21, jitter: 0.05).embeddingData)
+        try addMeeting(database, id: "a", speaker: hai)
+        try addMeeting(database, id: "b", speaker: haiAgain)
+
+        model.assign(hai, toNewPersonNamed: "Sven")
+        try await voicesSettled(model)
+        let sven = try #require(try database.people().first { $0.name == "Sven" })
+        #expect(try speaker(of: database, in: "b").personId == sven.id)
+
+        model.assign(try speaker(of: database, in: "a"), toNewPersonNamed: "Hai")
+        try await voicesSettled(model)
+        let haiPerson = try #require(try database.people().first { $0.name == "Hai" })
+        let corrected = try speaker(of: database, in: "b")
+        #expect(corrected.personId == haiPerson.id)
+        #expect(corrected.assignment == .automatic)
+        #expect(model.voiceLibrary.profiles[sven.id]?.hasVoice != true)
+    }
+
+    @Test func aRejectedPersonIsNotSuggestedAgain() async throws {
+        let (model, database) = try makeModel()
+        let known = MeetingSpeaker(meetingId: "a", key: "S1", label: "Sprecher 1", talkTime: 40, embedding: voice(31).embeddingData)
+        let alike = MeetingSpeaker(meetingId: "b", key: "S1", label: "Sprecher 1", talkTime: 30, embedding: voice(31, jitter: 0.05).embeddingData)
+        try addMeeting(database, id: "a", speaker: known)
+        try addMeeting(database, id: "b", speaker: alike)
+        model.assign(known, toNewPersonNamed: "Anna")
+        try await voicesSettled(model)
+        #expect(try speaker(of: database, in: "b").assignment == .automatic)
+
+        model.unassign(try speaker(of: database, in: "b"))
+        try await voicesSettled(model)
+        let after = try speaker(of: database, in: "b")
+        #expect(after.assignment == .unknown)
+        #expect(after.personId == nil)
+    }
+
+    @Test func linesOfAnotherVoiceCanBeGivenToTheirPerson() async throws {
+        let (model, database) = try makeModel()
+        try database.save(Meeting(id: "a", title: "Sync", status: .ready))
+        let mine = voice(41), other = voice(42)
+        try database.replaceTranscript(meetingId: "a", segments: [
+            Segment(meetingId: "a", speakerKey: "S1", channel: .system, start: 0, end: 9, text: "Eins", embedding: mine.embeddingData),
+            Segment(meetingId: "a", speakerKey: "S1", channel: .system, start: 10, end: 19, text: "Zwei", embedding: other.embeddingData),
+            Segment(meetingId: "a", speakerKey: "S1", channel: .system, start: 20, end: 29, text: "Drei", embedding: voice(41, jitter: 0.05).embeddingData),
+            Segment(meetingId: "a", speakerKey: "S1", channel: .system, start: 30, end: 39, text: "Vier", embedding: voice(42, jitter: 0.05).embeddingData),
+        ], speakers: [MeetingSpeaker(meetingId: "a", key: "S1", label: "Sprecher 1", talkTime: 36)])
+        let detail = try #require(try database.detail(of: "a"))
+        let groups = SpeakerVoices.notable(SpeakerVoices.groups(of: detail.segments)["S1"] ?? [])
+        #expect(groups.count == 2)
+        let julian = try database.person(named: "Julian")
+        let second = try #require(groups.first { $0.segmentIds.contains(detail.segments[1].id!) })
+        #expect(Set(second.segmentIds) == Set([detail.segments[1].id!, detail.segments[3].id!]))
+
+        model.assignLines(second.segmentIds, in: "a", to: julian.id)
+        try await voicesSettled(model)
+        let after = try #require(try database.detail(of: "a"))
+        #expect(after.segments.map(\.speakerKey) == ["S1", "S2", "S1", "S2"])
+        #expect(after.speaker(for: "S2")?.personId == julian.id)
+        #expect(after.speaker(for: "S2")?.assignment == .confirmed)
+        #expect(after.speaker(for: "S1")?.personId == nil)
     }
 
     @Test func rejectingASuggestionLeavesAnUnknownVoice() throws {
