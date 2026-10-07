@@ -17,12 +17,12 @@ tour=build/readme-images/tour.txt
 xcodebuild -project Transcripts.xcodeproj -scheme Transcripts -configuration Debug -destination 'platform=macOS,arch=arm64' \
   -derivedDataPath build/DerivedData build -quiet 2>&1 | grep -E "error:" || true
 
-# run <language> <commands…>: the demo in that language; the snapshots end up in $raw.
+# run <language> <region> <commands…>: the demo in that language and region; the snapshots end up in $raw.
 run() {
-  local language=$1
-  shift
+  local language=$1 region=$2
+  shift 2
   printf '%s\n' "wait 3" "$@" "wait 1" "quit" > "$tour"
-  DEMO_ARGS="-AppleLanguages ($language)" SKIP_BUILD=1 zsh Tools/screenshots/run.sh "$tour" > /dev/null
+  DEMO_ARGS="-AppleLanguages ($language) -AppleLocale ${language}_$region" SKIP_BUILD=1 zsh Tools/screenshots/run.sh "$tour" > /dev/null
   cp build/screens/out/*.png "$raw/"
 }
 
@@ -35,14 +35,15 @@ scenes() {
 }
 
 echo "English, light and dark…"
-run en "${(@f)$(scenes light)}" "${(@f)$(scenes dark)}" \
+run en US "${(@f)$(scenes light)}" "${(@f)$(scenes dark)}" \
   "appearance light" "live" "wait 2.5" "snapframe live live-light" "floating" "wait 1.5" "snapwindow floating floating-light" \
   "menubar" "wait 1.5" "snapwindow MenuBar menubar-light" \
   "appearance dark" "wait 1.5" "snapframe live live-dark" "snapwindow floating floating-dark" "snapwindow MenuBar menubar-dark"
 
-for language in de fr uk; do
+for place in de_DE fr_FR uk_UA; do
+  language=${place%_*}
   echo "The meeting in $language…"
-  run $language "appearance light" "wait 1" "select m-sync" "wait 2" "snapframe main meeting-light-$language"
+  run $language ${place#*_} "appearance light" "wait 1" "select m-sync" "wait 2" "snapframe main meeting-light-$language"
 done
 
 echo "Laying out…"

@@ -95,17 +95,17 @@ struct NameVoicesPanel: View {
                 choose(current.choices[number - 1])
                 return .handled
             }
-            switch key {
-            case "n":
+            // The letters of the interface's language, and the German ones, which always work.
+            if key == Shortcut.newPerson.lowercased() || key == "n" {
                 addingPerson = true
                 focus = .name
-            case "d":
+            } else if key == Shortcut.me.lowercased() || key == "d" {
                 model.assignToMe(current.speaker)
                 next(named: true)
-            case "x":
+            } else if key == Shortcut.nobody.lowercased() || key == "x" {
                 model.ignoreVoice(current.speaker)
                 next(named: false)
-            default:
+            } else {
                 return .ignored
             }
             return .handled
@@ -197,11 +197,11 @@ struct NameVoicesPanel: View {
 
             Rectangle().fill(Theme.rowSeparator).frame(height: 1).padding(.top, 12)
             HStack(spacing: 14) {
-                footerButton("Das bin ich", key: "D") {
+                footerButton("Das bin ich", key: Shortcut.me) {
                     model.assignToMe(item.speaker)
                     next(named: true)
                 }
-                footerButton("Niemand Bestimmtes", key: "X") {
+                footerButton("Niemand Bestimmtes", key: Shortcut.nobody) {
                     model.ignoreVoice(item.speaker)
                     next(named: false)
                 }
@@ -215,7 +215,7 @@ struct NameVoicesPanel: View {
 
     private var newPersonRow: some View {
         HStack(spacing: 10) {
-            Keycap("N")
+            Keycap(Shortcut.newPerson)
             if addingPerson {
                 TextField("Name", text: $newName)
                     .textFieldStyle(.plain)
@@ -269,6 +269,13 @@ struct NameVoicesPanel: View {
             .padding(.horizontal, 12)
             .padding(.top, 8)
             .padding(.bottom, 2)
+    }
+
+    /// One-letter keys for the choices that aren't numbered, taken from their words in the interface's language.
+    private enum Shortcut {
+        static var me: String { String(localized: "D", comment: "one-letter key for \"Das bin ich\" (That's me), ideally its first letter; not a digit, and not the same as the keys for \"Niemand Bestimmtes\" and a new name") }
+        static var nobody: String { String(localized: "X", comment: "one-letter key for \"Niemand Bestimmtes\" (nobody in particular); not a digit, and not the same as the keys for \"Das bin ich\" and a new name") }
+        static var newPerson: String { String(localized: "N", comment: "one-letter key for typing a new name in the Who is this panel, ideally the first letter of \"Name\"; not a digit, and not the same as the keys for \"Das bin ich\" and \"Niemand Bestimmtes\"") }
     }
 
     private func footerButton(_ title: LocalizedStringKey, key: String, action: @escaping () -> Void) -> some View {

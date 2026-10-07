@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Collects every text the app shows, as the Swift compiler sees it, and brings Transcripts/Localizable.xcstrings up to
-# date: new texts are added (to be translated), texts no longer in the code are marked stale, translations stay.
+# date: new texts are added (to be translated), texts no longer in the code are dropped, translations stay.
 #   Tools/localization/extract.sh
 # Then translate what's new (Tools/localization/catalog.py todo lists it) and merge it with catalog.py merge.
 set -e

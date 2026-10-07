@@ -55,7 +55,7 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
         return await center.notificationSettings().authorizationStatus
     }
 
-    /// Whether the notifications stay on screen until clicked ("Hinweise") instead of sliding away.
+    /// Whether the notifications stay on screen until clicked (the style "Dauerhaft", "Persistent") instead of sliding away.
     public func usesPersistentAlerts() async -> Bool {
         guard let center else { return false }
         return await center.notificationSettings().alertStyle == .alert

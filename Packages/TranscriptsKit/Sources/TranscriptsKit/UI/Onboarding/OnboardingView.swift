@@ -57,7 +57,7 @@ struct OnboardingView: View {
                         divider
                         step(
                             title: "Mitteilungen",
-                            detail: "Für „Meeting beginnt – Aufnehmen?“. Stelle in den Systemeinstellungen den Stil „Hinweise“ ein, dann bleibt die Mitteilung stehen, bis du klickst.",
+                            detail: "Für „Meeting beginnt – Aufnehmen?“. Stelle in den Systemeinstellungen den Stil „Dauerhaft“ ein, dann bleibt die Mitteilung stehen, bis du klickst.",
                             state: model.notificationsAllowed,
                             action: ("Erlauben", { Task { await model.requestNotifications() } }),
                             settingsPane: nil

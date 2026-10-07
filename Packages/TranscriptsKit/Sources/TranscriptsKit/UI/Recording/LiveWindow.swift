@@ -50,7 +50,7 @@ struct LiveSessionView: View {
             if let problem = session.microphoneProblem {
                 warning(problem.message, settings: "Privacy_Microphone")
             } else if session.systemAudioSeemsBlocked {
-                warning(String(localized: "Vom Call kommt nichts an. Erlaube Transcripts unter Datenschutz & Sicherheit → Bildschirm- & Systemaudioaufnahme."), settings: "Privacy_ScreenCapture")
+                warning(String(localized: "Vom Call kommt nichts an. Erlaube Transcripts unter Datenschutz & Sicherheit → Aufnahme von Bildschirm & Systemaudio."), settings: "Privacy_ScreenCapture")
             }
             HStack(spacing: 0) {
                 LiveTranscriptView(session: session)

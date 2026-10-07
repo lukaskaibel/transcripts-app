@@ -97,9 +97,9 @@ struct PeopleView: View {
             Spacer()
             Group {
                 Text("Stimmprofil").frame(width: 110, alignment: .leading)
-                Text("Meetings").frame(width: 76, alignment: .trailing)
+                Text("Meetings").frame(width: 92, alignment: .trailing)
                 Text("Sprechzeit").frame(width: 96, alignment: .trailing)
-                Text("Zuletzt").frame(width: 86, alignment: .trailing)
+                Text(String(localized: "Zuletzt", comment: "column header: when the person was last heard in a meeting")).frame(width: 100, alignment: .trailing)
             }
             .font(.smallMedium)
             .foregroundStyle(Theme.textTertiary)
@@ -273,9 +273,9 @@ struct PersonRow: View {
                         .foregroundStyle(Theme.textTertiary)
                 }
                 .frame(width: 110, alignment: .leading)
-                Text("\(stats.meetings)").frame(width: 76, alignment: .trailing)
+                Text("\(stats.meetings)").frame(width: 92, alignment: .trailing)
                 Text(stats.talkTime > 0 ? TimeFormat.duration(stats.talkTime) : "–").frame(width: 96, alignment: .trailing)
-                Text(stats.lastSeen.map { TimeFormat.compactDay($0) } ?? "–").frame(width: 86, alignment: .trailing).lineLimit(1)
+                Text(stats.lastSeen.map { TimeFormat.compactDay($0) } ?? "–").frame(width: 100, alignment: .trailing).lineLimit(1)
             }
             .font(.small)
             .monospacedDigit()

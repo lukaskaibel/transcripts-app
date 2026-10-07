@@ -2,7 +2,7 @@
 """The app's string catalog (Transcripts/Localizable.xcstrings): German is the source, written in the code; the other
 languages are translations kept here.
 
-  catalog.py sync <stringsdata folder>     add the texts the compiler found, mark the rest stale (extract.sh runs it)
+  catalog.py sync <stringsdata folder>     add the texts the compiler found, drop the rest (extract.sh runs it)
   catalog.py todo <language> <out.json>    what a language still lacks, with the code around each text
   catalog.py merge <language> <in.json>    take translations in: {"key": "text"} or {"key": {"one": …, "other": …}}
   catalog.py check                         format specifiers, plural forms and missing translations, per language
@@ -88,14 +88,15 @@ def sync(folder):
             localizations[SOURCE] = unit(key)
     for key in [key for key in strings if not re.search(r"[A-Za-zÄÖÜäöüß]", SPECIFIER.sub("", key))]:
         del strings[key]
+    # Texts no longer in the code go, with their translations.
     stale = [key for key in strings if key not in found]
     for key in stale:
-        strings[key]["extractionState"] = "stale"
+        del strings[key]
     save(catalog)
     os.makedirs(os.path.dirname(CONTEXT), exist_ok=True)
     with open(CONTEXT, "w", encoding="utf-8") as f:
         json.dump(found, f, ensure_ascii=False, indent=1)
-    print(f"{len(found)} texts, {added} new, {len(stale)} stale")
+    print(f"{len(found)} texts, {added} new, {len(stale)} gone")
 
 
 def translated(entry, language):

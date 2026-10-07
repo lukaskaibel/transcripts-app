@@ -170,7 +170,7 @@ public struct MenuBarContent: View {
     @ViewBuilder
     private var recent: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Zuletzt").font(.tinySemibold).foregroundStyle(Theme.textTertiary).padding(.horizontal, 8).padding(.vertical, 4)
+            Text("Letzte Meetings").font(.tinySemibold).foregroundStyle(Theme.textTertiary).padding(.horizontal, 8).padding(.vertical, 4)
             let rows = Array(model.rows.filter { $0.meeting.status != .recording }.prefix(3))
             if rows.isEmpty {
                 Text("Noch keine Meetings").font(.small).foregroundStyle(Theme.textTertiary).padding(.horizontal, 8).frame(height: 28)

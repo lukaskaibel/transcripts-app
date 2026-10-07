@@ -151,7 +151,7 @@ struct GeneralSettings: View {
                 PermissionRow(title: "Mitteilungen", allowed: model.notificationsAllowed, request: { Task { await model.requestNotifications() } }, pane: nil)
                 if model.notificationsAllowed == true, !model.persistentAlerts {
                     HStack(alignment: .top) {
-                        Text("Stell den Stil auf „Hinweise“, damit eine Erinnerung stehen bleibt, bis du „Aufnehmen“ klickst.")
+                        Text("Stell den Stil auf „Dauerhaft“, damit eine Erinnerung stehen bleibt, bis du „Aufnehmen“ klickst.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Spacer()
