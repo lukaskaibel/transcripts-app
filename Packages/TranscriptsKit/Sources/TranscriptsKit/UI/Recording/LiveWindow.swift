@@ -50,7 +50,7 @@ struct LiveSessionView: View {
             if let problem = session.microphoneProblem {
                 warning(problem.message, settings: "Privacy_Microphone")
             } else if session.systemAudioSeemsBlocked {
-                warning("Vom Call kommt nichts an. Erlaube Transcripts unter Datenschutz & Sicherheit → Bildschirm- & Systemaudioaufnahme.", settings: "Privacy_ScreenCapture")
+                warning(String(localized: "Vom Call kommt nichts an. Erlaube Transcripts unter Datenschutz & Sicherheit → Bildschirm- & Systemaudioaufnahme."), settings: "Privacy_ScreenCapture")
             }
             HStack(spacing: 0) {
                 LiveTranscriptView(session: session)
@@ -104,7 +104,7 @@ struct LiveSessionView: View {
                 Image(systemName: "mic").font(.system(size: 11)).foregroundStyle(Theme.textTertiary)
                 LevelBars(level: session.microphoneLevel)
                 if session.capturesSystemAudio {
-                    Text(session.source ?? "Call").font(.small).foregroundStyle(Theme.textTertiary).padding(.leading, 6)
+                    Text(session.source ?? String(localized: "Call", comment: "label of the level meter for the call's sound")).font(.small).foregroundStyle(Theme.textTertiary).padding(.leading, 6)
                     LevelBars(level: session.systemLevel)
                 }
             }
@@ -121,7 +121,7 @@ struct LiveSessionView: View {
             Button {
                 Task { await model.stopRecording() }
             } label: {
-                Label("Beenden", systemImage: "stop.fill")
+                Label(String(localized: "Beenden", comment: "button: stop the recording (the same text quits the app in the menu bar menu)"), systemImage: "stop.fill")
             }
             .buttonStyle(StopButtonStyle())
         }
@@ -134,7 +134,7 @@ struct LiveSessionView: View {
         let voices = session.voices.count
         var parts: [String] = []
         if let source = session.source { parts.append(source) }
-        parts.append(voices == 1 ? "1 Stimme" : "\(voices) Stimmen")
+        parts.append(String(localized: "\(voices) Stimmen", comment: "plural: voices heard so far in the recording"))
         return parts.joined(separator: " · ")
     }
 }
@@ -207,7 +207,7 @@ struct LiveTranscriptView: View {
                 .font(.uiMedium)
                 .foregroundStyle(Theme.textSecondary)
             if case .preparing(let step, let fraction) = model.engineState {
-                Text("\(step) · \(Int(fraction * 100)) %").font(.small).foregroundStyle(Theme.textTertiary)
+                Text("\(step) · \(fraction.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current)))").font(.small).foregroundStyle(Theme.textTertiary)
             }
             Text("Das Live-Transkript ist ein Entwurf. Nach dem Meeting wird alles noch einmal genauer transkribiert.")
                 .font(.small)
@@ -287,7 +287,7 @@ struct SpeakingIndicator: View {
         .onAppear {
             withAnimation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true)) { phase.toggle() }
         }
-        .accessibilityLabel("spricht")
+        .accessibilityLabel(String(localized: "spricht", comment: "accessibility: someone is talking right now"))
     }
 }
 
@@ -299,7 +299,7 @@ struct MarkerRow: View {
         HStack(spacing: 10) {
             Image(systemName: "bookmark.fill").font(.system(size: 10)).foregroundStyle(Theme.accent)
             Text(TimeFormat.clock(time)).font(.small).monospacedDigit().foregroundStyle(Theme.accent)
-            Text(text.isEmpty ? "Markierung" : text).font(.small).foregroundStyle(Theme.textSecondary)
+            Text(text.isEmpty ? String(localized: "Markierung", comment: "a marker set at a moment of the recording, without a note") : text).font(.small).foregroundStyle(Theme.textSecondary)
             Rectangle().fill(Theme.rowSeparator).frame(height: 1)
         }
         .padding(.leading, 34)
@@ -319,13 +319,13 @@ struct LiveSidePane: View {
                     summaryHeader
                     summaryContent
                     if !session.markers.isEmpty {
-                        Text("Markiert").font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.top, 22)
+                        Text(String(localized: "Markiert", comment: "heading: the markers set during the recording")).font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.top, 22)
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(session.markers) { marker in
                                 HStack(spacing: 8) {
                                     Image(systemName: "bookmark.fill").font(.system(size: 10)).foregroundStyle(Theme.accent)
                                     Text(TimeFormat.clock(marker.time)).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
-                                    Text(marker.text.isEmpty ? "Markierung" : marker.text).font(.ui).foregroundStyle(Theme.textBody)
+                                    Text(marker.text.isEmpty ? String(localized: "Markierung", comment: "a marker set at a moment of the recording, without a note") : marker.text).font(.ui).foregroundStyle(Theme.textBody)
                                     Spacer(minLength: 0)
                                     IconButton(systemName: "xmark", label: "Markierung entfernen", size: 18) { session.removeMarker(marker.id) }
                                 }
@@ -393,9 +393,9 @@ struct LiveSidePane: View {
                 .padding(.top, 10)
         } else if let summary = model.liveSummary {
             VStack(alignment: .leading, spacing: 0) {
-                section("Bisher", summary.points)
-                section("Aufgaben", summary.actionItems, checkbox: true)
-                section("Offen", summary.openQuestions)
+                section(String(localized: "Bisher", comment: "heading in the live summary: what was said so far"), summary.points)
+                section(String(localized: "Aufgaben", comment: "heading in the live summary: action items"), summary.actionItems, checkbox: true)
+                section(String(localized: "Offen", comment: "heading in the live summary: open questions"), summary.openQuestions)
             }
         } else if let error = model.liveSummaryError {
             Text(error).font(.small).foregroundStyle(Theme.warning).padding(.top, 10)

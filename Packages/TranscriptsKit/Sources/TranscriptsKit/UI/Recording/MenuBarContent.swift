@@ -67,7 +67,7 @@ public struct MenuBarContent: View {
         VStack(alignment: .leading, spacing: 0) {
             if let meeting = model.imminentMeeting {
                 Label {
-                    Text("\(meeting.start > Date() ? "Beginnt" : "Läuft") \(TimeFormat.relative(to: meeting.start))\(meeting.app.map { " · \($0)" } ?? "")")
+                    Text(when(meeting))
                 } icon: {
                     Image(systemName: "calendar")
                 }
@@ -100,6 +100,15 @@ public struct MenuBarContent: View {
             }
         }
         .padding(14)
+    }
+
+    /// "Beginnt in 5 Min. · Zoom".
+    private func when(_ meeting: UpcomingMeeting) -> String {
+        let relative = TimeFormat.relative(to: meeting.start)
+        let when = meeting.start > Date()
+            ? String(localized: "Beginnt \(relative)", comment: "a meeting starts; the argument is like “in 5 min.” or “now”")
+            : String(localized: "Läuft \(relative)", comment: "a meeting is running; the argument is like “for 3 min.” or “now”")
+        return ([when] + [meeting.app].compactMap { $0 }).joined(separator: " · ")
     }
 
     private func recordButton(event: UpcomingMeeting?) -> some View {
@@ -149,7 +158,7 @@ public struct MenuBarContent: View {
                     Task { await model.stopRecording() }
                     dismiss()
                 } label: {
-                    Label("Beenden", systemImage: "stop.fill")
+                    Label(String(localized: "Beenden", comment: "button: stop the recording (the same text quits the app in the menu bar menu)"), systemImage: "stop.fill")
                 }
                 .buttonStyle(StopButtonStyle())
             }
@@ -188,7 +197,7 @@ public struct MenuBarContent: View {
         .padding(6)
     }
 
-    private func menuRow(_ title: String, shortcut: String, action: @escaping () -> Void) -> some View {
+    private func menuRow(_ title: LocalizedStringKey, shortcut: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack {
                 Text(title)

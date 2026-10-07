@@ -149,10 +149,28 @@ struct Keycap: View {
 /// Square icon button used in headers.
 struct IconButton: View {
     var systemName: String
-    var label: String
+    var label: Text
     var size: CGFloat = 26
     var tint: Color = Theme.textSecondary
     var action: () -> Void
+
+    init(systemName: String, label: LocalizedStringKey, size: CGFloat = 26, tint: Color = Theme.textSecondary, action: @escaping () -> Void) {
+        self.init(systemName: systemName, label: Text(label), size: size, tint: tint, action: action)
+    }
+
+    /// For a label that is already localized. Disfavoured like SwiftUI's own, so a literal stays a localized key.
+    @_disfavoredOverload
+    init<S: StringProtocol>(systemName: String, label: S, size: CGFloat = 26, tint: Color = Theme.textSecondary, action: @escaping () -> Void) {
+        self.init(systemName: systemName, label: Text(label), size: size, tint: tint, action: action)
+    }
+
+    private init(systemName: String, label: Text, size: CGFloat, tint: Color, action: @escaping () -> Void) {
+        self.systemName = systemName
+        self.label = label
+        self.size = size
+        self.tint = tint
+        self.action = action
+    }
 
     var body: some View {
         Button(action: action) {
@@ -226,7 +244,7 @@ struct VoiceQualityBars: View {
             }
         }
         .frame(width: 14, height: 12, alignment: .bottom)
-        .accessibilityLabel(["Kein Stimmprofil", "Schwaches Stimmprofil", "Mittleres Stimmprofil", "Gutes Stimmprofil"][max(0, min(quality, 3))])
+        .accessibilityLabel([String(localized: "Kein Stimmprofil"), String(localized: "Schwaches Stimmprofil"), String(localized: "Mittleres Stimmprofil"), String(localized: "Gutes Stimmprofil")][max(0, min(quality, 3))])
     }
 }
 
@@ -300,9 +318,26 @@ struct SectionHeader: View {
 
 struct EmptyState<Accessory: View>: View {
     var systemImage: String?
-    var title: String
-    var message: String
-    @ViewBuilder var accessory: Accessory
+    var title: Text
+    var message: Text
+    var accessory: Accessory
+
+    init(systemImage: String? = nil, title: LocalizedStringKey, message: LocalizedStringKey, @ViewBuilder accessory: () -> Accessory) {
+        self.init(systemImage: systemImage, title: Text(title), message: Text(message), accessory: accessory())
+    }
+
+    /// For texts that are already localized. Disfavoured like SwiftUI's own, so literals stay localized keys.
+    @_disfavoredOverload
+    init<Title: StringProtocol, Message: StringProtocol>(systemImage: String? = nil, title: Title, message: Message, @ViewBuilder accessory: () -> Accessory) {
+        self.init(systemImage: systemImage, title: Text(title), message: Text(message), accessory: accessory())
+    }
+
+    private init(systemImage: String?, title: Text, message: Text, accessory: Accessory) {
+        self.systemImage = systemImage
+        self.title = title
+        self.message = message
+        self.accessory = accessory
+    }
 
     var body: some View {
         VStack(spacing: 6) {
@@ -312,8 +347,8 @@ struct EmptyState<Accessory: View>: View {
                     .foregroundStyle(Theme.textTertiary)
                     .padding(.bottom, 8)
             }
-            Text(title).font(.uiSemibold)
-            Text(message)
+            title.font(.uiSemibold)
+            message
                 .font(.ui)
                 .foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center)
@@ -326,7 +361,12 @@ struct EmptyState<Accessory: View>: View {
 }
 
 extension EmptyState where Accessory == EmptyView {
-    init(systemImage: String? = nil, title: String, message: String) {
+    init(systemImage: String? = nil, title: LocalizedStringKey, message: LocalizedStringKey) {
+        self.init(systemImage: systemImage, title: title, message: message) { EmptyView() }
+    }
+
+    @_disfavoredOverload
+    init<Title: StringProtocol, Message: StringProtocol>(systemImage: String? = nil, title: Title, message: Message) {
         self.init(systemImage: systemImage, title: title, message: message) { EmptyView() }
     }
 }

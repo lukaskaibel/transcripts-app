@@ -75,6 +75,10 @@ struct AppIconButton: View {
 struct GeneralSettings: View {
     @Environment(AppModel.self) private var model
     @State private var name = ""
+    @State private var language = AppLanguage.chosen()
+
+    /// The choice the app started with and the language it shows since; another choice shows from the next start on.
+    private static let start = (choice: AppLanguage.chosen(), shown: AppLanguage.current)
 
     var body: some View {
         @Bindable var settings = model.settings
@@ -84,6 +88,23 @@ struct GeneralSettings: View {
                     TextField("", text: $name, prompt: Text("Name"))
                         .frame(width: 220)
                         .onSubmit(saveName)
+                }
+                Picker("Sprache", selection: $language) {
+                    ForEach(AppLanguage.allCases) { Text($0.nativeName).tag($0) }
+                }
+                .onChange(of: language) { AppLanguage.choose(language) }
+                Text("Die Sprachen, die die Spracherkennung zuverlässig versteht.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                if needsRestart {
+                    HStack {
+                        Text(busy ? "Nach der Aufnahme möglich." : "Gilt nach einem Neustart.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Jetzt neu starten", action: relaunch)
+                            .disabled(busy)
+                    }
                 }
                 Picker("Erscheinungsbild", selection: $settings.appearance) {
                     ForEach(Appearance.allCases) { Text($0.title).tag($0) }
@@ -155,11 +176,39 @@ struct GeneralSettings: View {
         me.name = trimmed
         try? model.database.save(me)
     }
+
+    private var needsRestart: Bool {
+        language != Self.start.choice && Self.effective(language) != Self.start.shown
+    }
+
+    /// A restart would end the recording or the processing of a meeting.
+    private var busy: Bool {
+        model.recording != nil || model.processingMeetingId != nil
+    }
+
+    /// The language the interface shows with `choice` after a start, like `AppLanguage.current`.
+    private static func effective(_ choice: AppLanguage) -> AppLanguage {
+        let available = Bundle.main.localizations.filter { $0 != "Base" }
+        guard available.count > 1 else { return .german }
+        guard choice == .system else { return choice }
+        let system = UserDefaults.standard.persistentDomain(forName: UserDefaults.globalDomain)?["AppleLanguages"] as? [String] ?? Locale.preferredLanguages
+        return Bundle.preferredLocalizations(from: available, forPreferences: system).first.flatMap { AppLanguage(code: $0) } ?? .english
+    }
+
+    /// Opens the app again as a new instance, then quits this one.
+    private func relaunch() {
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.createsNewApplicationInstance = true
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { _, error in
+            guard error == nil else { return }
+            Task { @MainActor in NSApp.terminate(nil) }
+        }
+    }
 }
 
 struct PermissionRow: View {
     @Environment(AppModel.self) private var model
-    var title: String
+    var title: LocalizedStringKey
     var allowed: Bool?
     var request: () -> Void
     var pane: String?
@@ -193,7 +242,7 @@ struct RecordingSettings: View {
             Section {
                 PermissionRow(title: "Mikrofonzugriff", allowed: model.microphoneAllowed, request: { Task { await model.requestMicrophone() } }, pane: "Privacy_Microphone")
                 Picker("Mikrofon", selection: $settings.microphoneUID) {
-                    Text("Systemstandard\(AudioSystem.defaultInputName.map { " (\($0))" } ?? "")").tag(String?.none)
+                    Text(AudioSystem.defaultInputName.map { String(localized: "Systemstandard (\($0))", comment: "microphone: the system's default input, with its name") } ?? String(localized: "Systemstandard")).tag(String?.none)
                     ForEach(devices) { device in
                         Text(device.name).tag(Optional(device.uid))
                     }
@@ -257,7 +306,7 @@ struct TranscriptionSettings: View {
                         }
                         Spacer()
                         if option.isDownloaded {
-                            Text("Geladen").font(.caption).foregroundStyle(.secondary)
+                            Text(String(localized: "Geladen", comment: "speech model: its files are downloaded")).font(.caption).foregroundStyle(.secondary)
                             if option != model.settings.transcriptionModel {
                                 Button("Löschen") { try? option.deleteFiles() }
                                     .controlSize(.small)
@@ -282,7 +331,7 @@ struct TranscriptionSettings: View {
                     case .preparing(let step, let fraction):
                         HStack {
                             ProgressView(value: fraction).frame(width: 120)
-                            Text("\(step) · \(Int(fraction * 100)) %").font(.caption).foregroundStyle(.secondary)
+                            Text("\(step) · \(fraction.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current)))").font(.caption).foregroundStyle(.secondary)
                         }
                     case .failed(let message):
                         HStack {
@@ -290,7 +339,7 @@ struct TranscriptionSettings: View {
                             Button("Erneut laden") { model.prepareEngine() }
                         }
                     case .idle:
-                        Button(model.modelsDownloaded ? "Laden" : "Herunterladen") { model.prepareEngine() }
+                        Button(model.modelsDownloaded ? String(localized: "Laden", comment: "button: load the downloaded speech models") : String(localized: "Herunterladen")) { model.prepareEngine() }
                     }
                 }
             }
@@ -323,7 +372,7 @@ struct AISettings: View {
                     }
                 }
                 Picker("Anbieter", selection: $settings.summaryProvider) {
-                    Text("Keiner").tag(ProviderKind?.none)
+                    Text(String(localized: "Keiner", comment: "summary provider: none")).tag(ProviderKind?.none)
                     ForEach(ProviderKind.allCases.filter { model.isConfigured($0) || settings.summaryProvider == $0 }) { kind in
                         Text(kind.title).tag(Optional(kind))
                     }
@@ -438,7 +487,7 @@ struct AISettings: View {
     }
 
     static func models(_ count: Int) -> String {
-        count == 1 ? "1 Modell" : "\(count) Modelle"
+        String(localized: "\(count) Modelle", comment: "plural: language models found in Ollama")
     }
 
     private func masked(_ kind: ProviderKind) -> String {

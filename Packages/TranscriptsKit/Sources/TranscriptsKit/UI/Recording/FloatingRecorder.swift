@@ -140,7 +140,7 @@ struct FloatingRecorderView: View {
         if let problem = session.microphoneProblem {
             warning(problem.shortMessage)
         } else if session.systemAudioSeemsBlocked {
-            warning("Vom Call kommt nichts an")
+            warning(String(localized: "Vom Call kommt nichts an"))
         } else if let line = session.partials.values.sorted(by: { $0.start > $1.start }).first ?? session.lines.last {
             HStack(spacing: 7) {
                 Avatar(kind: avatar(for: line.speakerKey, in: session), size: 16)
