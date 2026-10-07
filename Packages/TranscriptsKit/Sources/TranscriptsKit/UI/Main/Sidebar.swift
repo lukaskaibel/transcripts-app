@@ -104,7 +104,7 @@ struct RecordButton: View {
 }
 
 struct SidebarRow: View {
-    var title: String
+    var title: LocalizedStringKey
     var systemImage: String
     var active = false
     var trailing: String?
@@ -130,7 +130,7 @@ struct SidebarRow: View {
                         .padding(.horizontal, 6)
                         .frame(minWidth: 18, minHeight: 18)
                         .background(Capsule().fill(Theme.control))
-                        .help(badge == 1 ? "Eine Stimme wartet auf dich" : "\(badge) Stimmen warten auf dich")
+                        .help(String(localized: "\(badge) Stimmen warten auf dich", comment: "plural: voices waiting for the user to name them"))
                 }
             }
             .font(active ? .uiMedium : .ui)
@@ -179,7 +179,7 @@ struct UpcomingRow: View {
 
     private var when: String {
         let day = TimeFormat.dayTitle(meeting.start)
-        var text = meeting.isRunning ? "Läuft · seit \(TimeFormat.time(meeting.start))" : "\(day), \(TimeFormat.time(meeting.start))"
+        var text = meeting.isRunning ? String(localized: "Läuft · seit \(TimeFormat.time(meeting.start))", comment: "a calendar meeting is running, since this time of day") : "\(day), \(TimeFormat.time(meeting.start))"
         if let app = meeting.app { text += " · \(app)" }
         return text
     }
@@ -207,7 +207,7 @@ struct UpcomingPopover: View {
                         }
                     }
                     if meeting.attendees.count > 8 {
-                        Text("und \(meeting.attendees.count - 8) weitere").font(.small).foregroundStyle(Theme.textTertiary)
+                        Text(String(localized: "und \(meeting.attendees.count - 8) weitere", comment: "plural: more attendees than the list shows")).font(.small).foregroundStyle(Theme.textTertiary)
                     }
                 }
             }
@@ -249,7 +249,7 @@ struct StatusLine: View {
                 .foregroundStyle(Theme.textSecondary)
                 .lineLimit(1)
             Spacer(minLength: 4)
-            IconButton(systemName: "slider.horizontal.3", label: "Einstellungen (⌘,)", size: 24) {
+            IconButton(systemName: "slider.horizontal.3", label: String(localized: "Einstellungen (⌘,)"), size: 24) {
                 openSettings()
             }
         }
@@ -277,22 +277,22 @@ struct StatusLine: View {
     }
 
     private var text: String {
-        if model.recording != nil { return "Aufnahme läuft" }
+        if model.recording != nil { return String(localized: "Aufnahme läuft") }
         if let id = model.processingMeetingId, let row = model.row(for: id) {
-            return "Wird verarbeitet · \(Int(row.meeting.progress * 100)) %"
+            return String(localized: "Wird verarbeitet · \(row.meeting.progress.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current)))")
         }
         switch model.engineState {
-        case .preparing(_, let fraction): return "Modelle werden geladen · \(Int(fraction * 100)) %"
-        case .failed: return "Modelle fehlen"
-        default: return model.modelsDownloaded ? "Bereit · alles lokal" : "Modelle noch nicht geladen"
+        case .preparing(_, let fraction): return String(localized: "Modelle werden geladen · \(fraction.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current)))")
+        case .failed: return String(localized: "Modelle fehlen")
+        default: return model.modelsDownloaded ? String(localized: "Bereit · alles lokal") : String(localized: "Modelle noch nicht geladen")
         }
     }
 
     private var help: String {
         switch model.engineState {
         case .failed(let message): return message
-        case .preparing(let step, _): return "\(step) wird geladen"
-        default: return "Spracherkennung und Stimmerkennung laufen auf diesem Mac."
+        case .preparing(let step, _): return String(localized: "\(step) wird geladen", comment: "%@ is the part being loaded, e.g. Spracherkennung")
+        default: return String(localized: "Spracherkennung und Stimmerkennung laufen auf diesem Mac.")
         }
     }
 }

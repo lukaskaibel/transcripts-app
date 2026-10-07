@@ -25,12 +25,12 @@ struct CommandPalette: View {
         var result: [Entry] = []
         let commands: [Entry] = [
             model.isRecording
-                ? Entry(id: "stop", kind: .command, title: "Aufnahme beenden", systemImage: "stop.circle", shortcut: "⌘R") { Task { await model.stopRecording() } }
-                : Entry(id: "record", kind: .command, title: "Aufnahme starten", systemImage: "record.circle", shortcut: "⌘R") { Task { await model.startRecording() } },
-            Entry(id: "live", kind: .command, title: "Live-Fenster öffnen", systemImage: "waveform", shortcut: "⌘L") { model.request(.live) },
-            Entry(id: "people", kind: .command, title: "Personen", systemImage: "person.2") { model.section = .people },
-            Entry(id: "meetings", kind: .command, title: "Meetings", systemImage: "list.bullet.rectangle") { model.select(nil) },
-            Entry(id: "settings", kind: .command, title: "Einstellungen", systemImage: "slider.horizontal.3", shortcut: "⌘,") { openSettings() },
+                ? Entry(id: "stop", kind: .command, title: String(localized: "Aufnahme beenden"), systemImage: "stop.circle", shortcut: "⌘R") { Task { await model.stopRecording() } }
+                : Entry(id: "record", kind: .command, title: String(localized: "Aufnahme starten"), systemImage: "record.circle", shortcut: "⌘R") { Task { await model.startRecording() } },
+            Entry(id: "live", kind: .command, title: String(localized: "Live-Fenster öffnen"), systemImage: "waveform", shortcut: "⌘L") { model.request(.live) },
+            Entry(id: "people", kind: .command, title: String(localized: "Personen"), systemImage: "person.2") { model.section = .people },
+            Entry(id: "meetings", kind: .command, title: String(localized: "Meetings"), systemImage: "list.bullet.rectangle") { model.select(nil) },
+            Entry(id: "settings", kind: .command, title: String(localized: "Einstellungen"), systemImage: "slider.horizontal.3", shortcut: "⌘,") { openSettings() },
         ]
         result += commands.filter { text.isEmpty || $0.title.lowercased().contains(text) }
         let meetings = model.rows.filter { text.isEmpty || $0.meeting.title.lowercased().contains(text) }.prefix(text.isEmpty ? 6 : 8)
@@ -42,7 +42,7 @@ struct CommandPalette: View {
         }
         if !text.isEmpty {
             result += model.people.filter { $0.name.lowercased().contains(text) }.prefix(4).map { person in
-                Entry(id: "p-\(person.id)", kind: .person, title: person.name, detail: "Person", systemImage: "person") { model.section = .people }
+                Entry(id: "p-\(person.id)", kind: .person, title: person.name, detail: String(localized: "Person"), systemImage: "person") { model.section = .people }
             }
             result += hits.map { hit in
                 Entry(id: "h-\(hit.id)", kind: .hit, title: hit.snippet, detail: "\(hit.meetingTitle) · \(TimeFormat.clock(hit.segment.start))", systemImage: "text.magnifyingglass") {
@@ -123,10 +123,10 @@ struct CommandPalette: View {
 
     private func sectionTitle(_ kind: Entry.Kind) -> String {
         switch kind {
-        case .command: "Befehle"
-        case .meeting: "Meetings"
-        case .person: "Personen"
-        case .hit: "Im Transkript"
+        case .command: String(localized: "Befehle")
+        case .meeting: String(localized: "Meetings")
+        case .person: String(localized: "Personen")
+        case .hit: String(localized: "Im Transkript", comment: "command palette section: lines found in transcripts")
         }
     }
 

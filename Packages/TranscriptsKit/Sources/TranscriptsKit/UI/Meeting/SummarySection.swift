@@ -27,7 +27,7 @@ struct SummarySection: View {
             header(trailing: AnyView(EmptyView()))
             HStack(spacing: 10) {
                 ProgressView().controlSize(.small)
-                Text("Wird mit \(model.settings.summaryProvider.flatMap { model.modelName(for: $0) } ?? "dem Modell") zusammengefasst …")
+                Text(model.settings.summaryProvider.flatMap { model.modelName(for: $0) }.map { String(localized: "Wird mit \($0) zusammengefasst …") } ?? String(localized: "Wird mit dem Modell zusammengefasst …"))
                     .foregroundStyle(Theme.textSecondary)
             }
             VStack(alignment: .leading, spacing: 8) {
@@ -71,12 +71,12 @@ struct SummarySection: View {
         VStack(alignment: .leading, spacing: 0) {
             header(trailing: AnyView(HStack(spacing: 2) {
                 Text(summary.model).font(.small).foregroundStyle(Theme.textTertiary).padding(.trailing, 4)
-                IconButton(systemName: "arrow.clockwise", label: "Neu erstellen") {
+                IconButton(systemName: "arrow.clockwise", label: String(localized: "Neu erstellen")) {
                     Task { await model.generateSummary(detail.meeting.id) }
                 }
                 .disabled(!model.summaryProviderReady)
-                IconButton(systemName: "doc.on.doc", label: "Kopieren") {
-                    model.copyToClipboard(model.summaryText(for: detail), what: "Zusammenfassung")
+                IconButton(systemName: "doc.on.doc", label: String(localized: "Kopieren")) {
+                    model.copyToClipboard(model.summaryText(for: detail), what: String(localized: "Zusammenfassung"))
                 }
             }))
             Text(summary.overview)
@@ -119,7 +119,7 @@ struct SummarySection: View {
         .frame(height: 26)
     }
 
-    private func subheading(_ title: String) -> some View {
+    private func subheading(_ title: LocalizedStringKey) -> some View {
         Text(title)
             .font(.smallSemibold)
             .foregroundStyle(Theme.textSecondary)

@@ -133,7 +133,7 @@ struct ToastStack: View {
                         .buttonStyle(PrimaryButtonStyle())
                         .fixedSize()
                     }
-                    IconButton(systemName: "xmark", label: "Schließen", size: 20) { model.dismissToast(toast.id) }
+                    IconButton(systemName: "xmark", label: String(localized: "Schließen"), size: 20) { model.dismissToast(toast.id) }
                 }
                 .padding(.vertical, 12)
                 .padding(.leading, 14)

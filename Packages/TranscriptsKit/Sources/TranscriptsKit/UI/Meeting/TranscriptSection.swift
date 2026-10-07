@@ -59,13 +59,13 @@ struct TranscriptSection: View {
                                 .font(.tiny)
                                 .foregroundStyle(Theme.textTertiary)
                         }
-                        IconButton(systemName: "xmark", label: "Suche schließen", size: 18) { closeSearch() }
+                        IconButton(systemName: "xmark", label: String(localized: "Suche schließen"), size: 18) { closeSearch() }
                     }
                     .padding(.leading, 8)
                     .frame(width: 230, height: 26)
                     .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Theme.control))
                 } else if !detail.segments.isEmpty {
-                    IconButton(systemName: "magnifyingglass", label: "Im Transkript suchen (⌘F)") {
+                    IconButton(systemName: "magnifyingglass", label: String(localized: "Im Transkript suchen (⌘F)")) {
                         searching = true
                         searchFocused = true
                     }
@@ -98,10 +98,10 @@ struct TranscriptSection: View {
 
     private var emptyText: String {
         switch detail.meeting.status {
-        case .recording: "Sobald jemand spricht, erscheint hier das Live-Transkript."
-        case .processing: "Das Transkript erscheint, sobald die Verarbeitung fertig ist."
-        case .failed: "Kein Transkript."
-        case .ready: "In dieser Aufnahme wurde nicht gesprochen."
+        case .recording: String(localized: "Sobald jemand spricht, erscheint hier das Live-Transkript.")
+        case .processing: String(localized: "Das Transkript erscheint, sobald die Verarbeitung fertig ist.")
+        case .failed: String(localized: "Kein Transkript.")
+        case .ready: String(localized: "In dieser Aufnahme wurde nicht gesprochen.")
         }
     }
 
@@ -139,7 +139,7 @@ struct TranscriptLine: View {
                 if showsHeader {
                     HStack(spacing: 8) {
                         // Where the guesses stand as buttons, the label says who isn't settled yet.
-                        Text(showsGuesses ? (detail.speaker(for: segment.speakerKey)?.label ?? "") : detail.displayName(for: segment.speakerKey)).font(.uiSemibold)
+                        Text(showsGuesses ? (detail.speaker(for: segment.speakerKey)?.displayLabel ?? "") : detail.displayName(for: segment.speakerKey)).font(.uiSemibold)
                         timestamp
                         if let speaker = detail.speaker(for: segment.speakerKey), speaker.needsReview, isFirstLine {
                             SuggestionChip(detail: detail, speaker: speaker)
@@ -243,12 +243,12 @@ struct SuggestionChip: View {
     var body: some View {
         HStack(spacing: 4) {
             ForEach(detail.guesses(for: speaker)) { person in
-                chip(person.name, help: person.id == speaker.suggestedPersonId ? speaker.suggestionReason : "Stimme ähnlich") {
+                chip(person.name, help: person.id == speaker.suggestedPersonId ? speaker.displayReason : String(localized: "Stimme ähnlich")) {
                     model.assign(speaker, to: person.id)
                 }
             }
             if speaker.suggestedPersonId == nil, let name = speaker.suggestedName {
-                chip(name, help: speaker.suggestionReason) { model.confirmSuggestion(speaker) }
+                chip(name, help: speaker.displayReason) { model.confirmSuggestion(speaker) }
             }
         }
     }
@@ -267,6 +267,6 @@ struct SuggestionChip: View {
             .overlay(Capsule().stroke(Theme.selectionBorder, lineWidth: 1))
         }
         .buttonStyle(PlainPressStyle())
-        .help(help.map { "\(name) zuordnen · \($0)" } ?? "\(name) zuordnen")
+        .help(help.map { String(localized: "\(name) zuordnen") + " · " + $0 } ?? String(localized: "\(name) zuordnen"))
     }
 }

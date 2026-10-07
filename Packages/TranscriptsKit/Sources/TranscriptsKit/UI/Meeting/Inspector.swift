@@ -30,7 +30,7 @@ struct Inspector: View {
                 facts
                 if !detail.speakers.isEmpty {
                     divider
-                    Text("Sprecher").font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.bottom, 12)
+                    Text(String(localized: "Sprecher", comment: "heading over the list of the meeting's speakers (plural)")).font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.bottom, 12)
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(remoteSpeakers) { speaker in
                             SpeakerRow(detail: detail, speaker: speaker, share: speaker.talkTime / totalTalk)
@@ -60,7 +60,7 @@ struct Inspector: View {
                                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                                     Image(systemName: "bookmark.fill").font(.system(size: 9)).foregroundStyle(Theme.accent)
                                     Text(TimeFormat.clock(marker.time)).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
-                                    Text(marker.text.isEmpty ? "Markierung" : marker.text).lineLimit(2)
+                                    Text(marker.text.isEmpty ? String(localized: "Markierung") : marker.text).lineLimit(2)
                                     Spacer(minLength: 0)
                                 }
                                 .contentShape(Rectangle())
@@ -126,7 +126,7 @@ struct Inspector: View {
         }
     }
 
-    private func fact(_ label: String, _ value: String) -> some View {
+    private func fact(_ label: LocalizedStringKey, _ value: String) -> some View {
         GridRow {
             Text(label).foregroundStyle(Theme.textTertiary)
             Text(value).lineLimit(1)
@@ -155,7 +155,7 @@ struct SpeakerRow: View {
                             .help("An der Stimme erkannt")
                     }
                     Spacer(minLength: 4)
-                    Text("\(Int((share * 100).rounded())) %").font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
+                    Text(share.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current))).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
                 }
                 ThinBar(fraction: share, color: barColor)
                     .padding(.leading, 26)
@@ -234,12 +234,12 @@ enum NewPersonPrompt {
     @MainActor
     static func ask(for speaker: MeetingSpeaker, model: AppModel) {
         let alert = NSAlert()
-        alert.messageText = "Wer ist \(speaker.label)?"
-        alert.informativeText = "Die Stimme wird gemerkt und in künftigen Meetings wiedererkannt."
-        alert.addButton(withTitle: "Speichern")
-        alert.addButton(withTitle: "Abbrechen")
+        alert.messageText = String(localized: "Wer ist \(speaker.displayLabel)?")
+        alert.informativeText = String(localized: "Die Stimme wird gemerkt und in künftigen Meetings wiedererkannt.")
+        alert.addButton(withTitle: String(localized: "Speichern"))
+        alert.addButton(withTitle: String(localized: "Abbrechen"))
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 240, height: 24))
-        field.placeholderString = "Name"
+        field.placeholderString = String(localized: "Name")
         field.stringValue = speaker.suggestedName ?? ""
         alert.accessoryView = field
         alert.window.initialFirstResponder = field
@@ -261,9 +261,9 @@ struct SuggestionCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
-                Text(guesses.count > 1 ? "Wer ist \(speaker.label)?" : "\(speaker.label) ist vermutlich").font(.small).foregroundStyle(Theme.textSecondary)
+                Text(guesses.count > 1 ? "Wer ist \(speaker.displayLabel)?" : "\(speaker.displayLabel) ist vermutlich").font(.small).foregroundStyle(Theme.textSecondary)
                 Spacer(minLength: 4)
-                IconButton(systemName: "xmark", label: guesses.count > 1 ? "Keiner davon" : "Vorschlag verwerfen", size: 20) { model.rejectGuesses(speaker) }
+                IconButton(systemName: "xmark", label: guesses.count > 1 ? String(localized: "Keiner davon") : String(localized: "Vorschlag verwerfen"), size: 20) { model.rejectGuesses(speaker) }
                     .padding(.top, -3)
                     .padding(.trailing, -4)
             }
@@ -272,7 +272,7 @@ struct SuggestionCard: View {
                     guessRow(name: person.name, reason: reason(for: person.id)) { model.assign(speaker, to: person.id) }
                 }
                 if speaker.suggestedPersonId == nil, let name = speaker.suggestedName {
-                    guessRow(name: name, reason: speaker.suggestionReason, isNew: true) { model.confirmSuggestion(speaker) }
+                    guessRow(name: name, reason: speaker.displayReason, isNew: true) { model.confirmSuggestion(speaker) }
                 }
             }
             .padding(.top, 6)
@@ -308,8 +308,8 @@ struct SuggestionCard: View {
     }
 
     private func reason(for personId: String) -> String? {
-        if personId == speaker.suggestedPersonId { return speaker.suggestionReason }
-        return "Stimme ähnlich"
+        if personId == speaker.suggestedPersonId { return speaker.displayReason }
+        return String(localized: "Stimme ähnlich")
     }
 
     private func guessRow(name: String, reason: String?, isNew: Bool = false, action: @escaping () -> Void) -> some View {
@@ -319,7 +319,7 @@ struct SuggestionCard: View {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Text(name).font(.uiSemibold).lineLimit(1)
-                        if isNew { Text("neu").font(.tiny).foregroundStyle(Theme.textTertiary) }
+                        if isNew { Text(String(localized: "neu", comment: "badge next to a suggested name: this person isn't known yet")).font(.tiny).foregroundStyle(Theme.textTertiary) }
                     }
                     if let reason {
                         Text(reason)
@@ -349,7 +349,7 @@ struct MovedLinesNote: View {
     var body: some View {
         let ids = lines.compactMap(\.id)
         VStack(alignment: .leading, spacing: 4) {
-            Text(lines.count == 1 ? "1 Zeile von der App hierher verschoben" : "\(lines.count) Zeilen von der App hierher verschoben")
+            Text(String(localized: "\(lines.count) Zeilen von der App hierher verschoben", comment: "plural: lines the app moved to this speaker"))
                 .font(.small)
                 .foregroundStyle(Theme.textSecondary)
             Text(origins)
@@ -357,8 +357,8 @@ struct MovedLinesNote: View {
                 .foregroundStyle(Theme.textTertiary)
                 .lineLimit(2)
             HStack(spacing: 12) {
-                Button("Passt") { model.acceptMovedLines(ids) }
-                Button("Zurück") { model.returnMovedLines(ids, in: detail.meeting.id) }
+                Button(String(localized: "Passt", comment: "keep the lines the app moved to this speaker")) { model.acceptMovedLines(ids) }
+                Button(String(localized: "Zurück", comment: "move the lines back to the speaker they came from")) { model.returnMovedLines(ids, in: detail.meeting.id) }
                 if let first = lines.first {
                     Button("Anhören") {
                         Task { await model.player.play(meetingId: detail.meeting.id, from: first.start, until: min(first.end, first.start + 12)) }
@@ -376,8 +376,8 @@ struct MovedLinesNote: View {
 
     private var origins: String {
         let from = Set(lines.compactMap(\.movedFromKey)).map { detail.displayName(for: $0) }.sorted()
-        let quote = lines.max { $0.duration < $1.duration }.map { "„\($0.text.prefix(60))“" } ?? ""
-        return from.isEmpty ? quote : "Vorher bei \(from.joined(separator: ", ")) · \(quote)"
+        let quote = lines.max { $0.duration < $1.duration }.map { Strings.quote(String($0.text.prefix(60))) } ?? ""
+        return from.isEmpty ? quote : String(localized: "Vorher bei \(from.joined(separator: ", ")) · \(quote)", comment: "the speakers the lines were with before, then a quote of the longest line")
     }
 }
 
@@ -390,7 +390,9 @@ struct SpeakerGroupsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(speaker.isMe ? "Auf deinem Mikrofon klingen \(groups.count) Stimmen" : "Klingt nach \(groups.count) Stimmen")
+            Text(speaker.isMe
+                ? String(localized: "Auf deinem Mikrofon klingen \(groups.count) Stimmen", comment: "plural: different voices on the user's microphone")
+                : String(localized: "Klingt nach \(groups.count) Stimmen", comment: "plural: one speaker's lines sound like this many voices"))
                 .font(.small)
                 .foregroundStyle(Theme.warning)
                 .padding(.bottom, 2)
@@ -411,12 +413,12 @@ private struct SpeakerGroupRow: View {
     let number: Int
 
     /// Whom the group sounds like, leaving out what this meeting taught the app.
-    private var match: (name: String, similarity: Float)? {
+    private var match: (name: String, isMe: Bool, similarity: Float)? {
         let excluded: Set<String> = speaker.isMe ? [] : Set([model.me?.id].compactMap { $0 })
         guard let best = model.voiceLibrary.rank(group.centroid, excluding: excluded, without: detail.meeting.id).first,
               best.similarity >= model.settings.voiceStrictness.thresholds.suggestion,
               let person = model.person(best.personId) else { return nil }
-        return (person.isMe ? "dir" : person.firstName, best.similarity)
+        return (person.firstName, person.isMe, best.similarity)
     }
 
     var body: some View {
@@ -427,7 +429,7 @@ private struct SpeakerGroupRow: View {
                     Text("Stimme \(number)").font(.smallMedium)
                     Text(TimeFormat.duration(group.speech)).font(.small).foregroundStyle(Theme.textTertiary)
                 }
-                Text(match.map { "klingt wie \($0.name)" } ?? "„\(group.example.text)“")
+                Text(match.map { $0.isMe ? String(localized: "klingt wie dir", comment: "these lines sound like the user") : String(localized: "klingt wie \($0.name)", comment: "these lines sound like this person") } ?? Strings.quote(group.example.text))
                     .font(.small)
                     .foregroundStyle(Theme.textTertiary)
                     .lineLimit(1)
@@ -439,7 +441,7 @@ private struct SpeakerGroupRow: View {
                     PersonChoices(attendees: detail.meeting.attendees) { personId in
                         model.assignLines(group.segmentIds, in: detail.meeting.id, to: personId)
                     } newPerson: {
-                        if let name = NamePrompt.ask(title: "Wer ist das?", message: "Diese Zeilen werden der Person zugeordnet und ihre Stimme gemerkt.") {
+                        if let name = NamePrompt.ask(title: String(localized: "Wer ist das?"), message: String(localized: "Diese Zeilen werden der Person zugeordnet und ihre Stimme gemerkt.")) {
                             model.assignLines(group.segmentIds, in: detail.meeting.id, toNewPersonNamed: name)
                         }
                     }

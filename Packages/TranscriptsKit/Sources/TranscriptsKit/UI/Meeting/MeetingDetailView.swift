@@ -60,7 +60,7 @@ struct MeetingDetailView: View {
 
     private var header: some View {
         HStack(spacing: 6) {
-            IconButton(systemName: "chevron.left", label: "Zurück zu den Meetings (Esc)") {
+            IconButton(systemName: "chevron.left", label: String(localized: "Zurück zu den Meetings (Esc)")) {
                 model.selectedMeetingId = nil
             }
             Button("Meetings") { model.selectedMeetingId = nil }
@@ -74,20 +74,20 @@ struct MeetingDetailView: View {
                     .font(.small)
                     .monospacedDigit()
                     .foregroundStyle(Theme.textTertiary)
-                IconButton(systemName: "chevron.up", label: "Vorheriges Meeting (⌘↑)") { step(-1) }
+                IconButton(systemName: "chevron.up", label: String(localized: "Vorheriges Meeting (⌘↑)")) { step(-1) }
                     .disabled(index == 0)
                     .keyboardShortcut(.upArrow, modifiers: .command)
-                IconButton(systemName: "chevron.down", label: "Nächstes Meeting (⌘↓)") { step(1) }
+                IconButton(systemName: "chevron.down", label: String(localized: "Nächstes Meeting (⌘↓)")) { step(1) }
                     .disabled(index + 1 >= model.rows.count)
                     .keyboardShortcut(.downArrow, modifiers: .command)
             }
             Menu {
                 Button("Als Markdown kopieren", systemImage: "doc.on.doc") {
-                    model.copyToClipboard(model.markdown(for: detail), what: "Meeting")
+                    model.copyToClipboard(model.markdown(for: detail), what: String(localized: "Meeting"))
                 }
                 if detail.summary != nil {
                     Button("Zusammenfassung kopieren", systemImage: "text.quote") {
-                        model.copyToClipboard(model.summaryText(for: detail), what: "Zusammenfassung")
+                        model.copyToClipboard(model.summaryText(for: detail), what: String(localized: "Zusammenfassung"))
                     }
                 }
                 Button("Als Markdown sichern …", systemImage: "square.and.arrow.down") { model.exportMarkdown(detail) }
@@ -149,7 +149,7 @@ struct MeetingDetailView: View {
     private var metaLine: String {
         var parts = [TimeFormat.meetingLine(start: detail.meeting.startedAt, duration: detail.meeting.duration)]
         if let source = detail.meeting.source { parts.append(source) }
-        if detail.meeting.origin == .importedFile { parts.append("Importiert") }
+        if detail.meeting.origin == .importedFile { parts.append(String(localized: "Importiert", comment: "the meeting comes from an imported audio file")) }
         return parts.joined(separator: " · ")
     }
 }
@@ -173,12 +173,12 @@ struct StatusBanner: View {
             banner {
                 ProgressView().controlSize(.small)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(detail.meeting.processingStep ?? "Wird verarbeitet").font(.uiMedium)
+                    Text(detail.meeting.processingStep ?? String(localized: "Wird verarbeitet")).font(.uiMedium)
                     ThinBar(fraction: detail.meeting.progress)
                         .frame(maxWidth: 260)
                 }
                 Spacer()
-                Text("\(Int(detail.meeting.progress * 100)) %").font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
+                Text(detail.meeting.progress.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current))).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
             }
         case .failed:
             banner {
@@ -221,7 +221,7 @@ struct VoicesBanner: View {
             HStack(spacing: 10) {
                 Image(systemName: "person.wave.2").foregroundStyle(Theme.warning)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(open.count == 1 ? "Eine Stimme ohne Namen" : "\(open.count) Stimmen ohne Namen").font(.uiMedium)
+                    Text(String(localized: "\(open.count) Stimmen ohne Namen", comment: "plural: voices in a meeting nobody has named yet")).font(.uiMedium)
                     Text(hint(open)).font(.small).foregroundStyle(Theme.textSecondary).lineLimit(1)
                 }
                 Spacer()
@@ -237,7 +237,7 @@ struct VoicesBanner: View {
 
     private func hint(_ open: [MeetingSpeaker]) -> String {
         let guessed = open.filter { !detail.guesses(for: $0).isEmpty || $0.suggestedName != nil }
-        guard !guessed.isEmpty else { return "Anhören und benennen, dann erkennt die App sie wieder." }
+        guard !guessed.isEmpty else { return String(localized: "Anhören und benennen, dann erkennt die App sie wieder.") }
         return guessed.map { detail.displayName(for: $0.key) }.joined(separator: " · ")
     }
 }
@@ -259,13 +259,13 @@ struct PlayerBar: View {
             .buttonStyle(PlainPressStyle())
             .keyboardShortcut(.space, modifiers: [])
             .help(player.isPlaying ? "Pause (Leertaste)" : "Abspielen (Leertaste)")
-            IconButton(systemName: "gobackward.15", label: "15 Sekunden zurück") { player.skip(-15) }
-            IconButton(systemName: "goforward.15", label: "15 Sekunden vor") { player.skip(15) }
+            IconButton(systemName: "gobackward.15", label: String(localized: "15 Sekunden zurück")) { player.skip(-15) }
+            IconButton(systemName: "goforward.15", label: String(localized: "15 Sekunden vor")) { player.skip(15) }
             Text(TimeFormat.clock(player.currentTime)).font(.small).monospacedDigit().foregroundStyle(Theme.textSecondary)
             Slider(value: Binding(get: { player.currentTime }, set: { value in Task { await player.seek(to: value) } }), in: 0...max(player.duration, 1))
                 .controlSize(.small)
             Text(TimeFormat.clock(player.duration)).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
-            IconButton(systemName: "xmark", label: "Wiedergabe schließen", size: 22) { player.stop() }
+            IconButton(systemName: "xmark", label: String(localized: "Wiedergabe schließen"), size: 22) { player.stop() }
         }
         .padding(.horizontal, 16)
         .frame(height: 48)

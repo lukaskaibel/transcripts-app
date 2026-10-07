@@ -51,7 +51,7 @@ struct MeetingListView: View {
             Text("Meetings").font(.uiSemibold)
             Text("\(model.rows.count)").foregroundStyle(Theme.textTertiary)
             Spacer()
-            IconButton(systemName: "square.and.arrow.down", label: "Audiodatei importieren …") { importing = true }
+            IconButton(systemName: "square.and.arrow.down", label: String(localized: "Audiodatei importieren …")) { importing = true }
         }
         .padding(.leading, 18)
         .padding(.trailing, 10)
@@ -60,7 +60,7 @@ struct MeetingListView: View {
     }
 
     private var emptyState: some View {
-        EmptyState(systemImage: "waveform", title: "Noch keine Meetings", message: "Starte eine Aufnahme mit ⌘R oder über die Menüleiste. Du kannst auch eine Audiodatei hierher ziehen.") {
+        EmptyState(systemImage: "waveform", title: String(localized: "Noch keine Meetings"), message: String(localized: "Starte eine Aufnahme mit ⌘R oder über die Menüleiste. Du kannst auch eine Audiodatei hierher ziehen.")) {
             HStack(spacing: 8) {
                 Button("Aufnahme starten") { Task { await model.startRecording() } }
                     .buttonStyle(PrimaryButtonStyle())
@@ -117,10 +117,10 @@ struct MeetingRowView: View {
                     .font(.uiMedium)
                     .lineLimit(1)
                 if row.pendingVoices > 0, row.meeting.status == .ready {
-                    DotChip(text: row.pendingVoices == 1 ? "1 Stimme offen" : "\(row.pendingVoices) Stimmen offen", color: Theme.warning)
+                    DotChip(text: String(localized: "\(row.pendingVoices) Stimmen offen", comment: "plural: voices in a meeting still waiting for a name"), color: Theme.warning)
                 }
                 if row.meeting.status == .processing {
-                    Text(row.meeting.processingStep ?? "Wird verarbeitet")
+                    Text(row.meeting.processingStep ?? String(localized: "Wird verarbeitet"))
                         .font(.small)
                         .foregroundStyle(Theme.textTertiary)
                         .lineLimit(1)
@@ -130,7 +130,7 @@ struct MeetingRowView: View {
                 }
                 Spacer(minLength: 12)
                 AvatarStack(kinds: row.avatarKinds(people: peopleById), ring: hovering ? Theme.hover : Theme.panel)
-                Text(row.meeting.status == .recording ? "läuft" : TimeFormat.duration(row.meeting.duration))
+                Text(row.meeting.status == .recording ? String(localized: "läuft", comment: "in place of a meeting's duration: it is being recorded right now") : TimeFormat.duration(row.meeting.duration))
                     .font(.small)
                     .monospacedDigit()
                     .foregroundStyle(Theme.textTertiary)
@@ -172,7 +172,7 @@ struct MeetingMenuItems: View {
         Divider()
         Button("Als Markdown kopieren", systemImage: "doc.on.doc") {
             if let detail = try? model.database.detail(of: meetingId) {
-                model.copyToClipboard(model.markdown(for: detail), what: "Meeting")
+                model.copyToClipboard(model.markdown(for: detail), what: String(localized: "Meeting"))
             }
         }
         .disabled(!ready)
