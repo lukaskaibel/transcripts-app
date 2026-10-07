@@ -1,0 +1,270 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "NSAudioCaptureUsageDescription" : {
+      "comment" : "Why the app records the sound the Mac plays (the call)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts nimmt den Ton deiner Calls auf, um die anderen Teilnehmer auf diesem Mac zu transkribieren."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts records the sound of your calls to transcribe the other participants on this Mac."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts enregistre le son de vos appels pour transcrire les autres participants sur ce Mac."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts graba el audio de tus llamadas para transcribir a los demás participantes en este Mac."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts registra l’audio delle tue chiamate per trascrivere gli altri partecipanti su questo Mac."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Transcripts grava o áudio das suas chamadas para transcrever os outros participantes neste Mac."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts neemt het geluid van je gesprekken op om de andere deelnemers op deze Mac uit te schrijven."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts nagrywa dźwięk Twoich rozmów, aby transkrybować pozostałych uczestników na tym Macu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts записывает звук ваших звонков, чтобы расшифровать речь других участников на этом Mac."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts записує звук ваших дзвінків, щоб розшифрувати мовлення інших учасників на цьому Mac."
+          }
+        }
+      }
+    },
+    "NSCalendarsFullAccessUsageDescription" : {
+      "comment" : "Why the app reads the calendar",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts benennt Meetings nach deinen Terminen, kennt die Teilnehmer und erinnert dich ans Aufnehmen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts names meetings after your calendar events, knows who’s invited and reminds you to record."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts nomme les réunions d’après vos événements, connaît les participants et vous rappelle d’enregistrer."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts pone a las reuniones el nombre de tus eventos, sabe quién está invitado y te recuerda grabar."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts dà alle riunioni il nome dei tuoi eventi, conosce i partecipanti e ti ricorda di registrare."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Transcripts dá às reuniões o nome dos seus eventos, sabe quem foi convidado e lembra você de gravar."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts geeft vergaderingen de naam van je agenda-afspraken, weet wie er is uitgenodigd en herinnert je eraan op te nemen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts nazywa spotkania według wydarzeń w kalendarzu, zna zaproszone osoby i przypomina o nagrywaniu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts называет встречи по событиям вашего календаря, знает приглашённых и напоминает о записи."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts називає зустрічі за подіями вашого календаря, знає запрошених і нагадує про запис."
+          }
+        }
+      }
+    },
+    "NSCalendarsUsageDescription" : {
+      "comment" : "Why the app reads the calendar",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts benennt Meetings nach deinen Terminen, kennt die Teilnehmer und erinnert dich ans Aufnehmen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts names meetings after your calendar events, knows who’s invited and reminds you to record."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts nomme les réunions d’après vos événements, connaît les participants et vous rappelle d’enregistrer."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts pone a las reuniones el nombre de tus eventos, sabe quién está invitado y te recuerda grabar."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts dà alle riunioni il nome dei tuoi eventi, conosce i partecipanti e ti ricorda di registrare."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Transcripts dá às reuniões o nome dos seus eventos, sabe quem foi convidado e lembra você de gravar."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts geeft vergaderingen de naam van je agenda-afspraken, weet wie er is uitgenodigd en herinnert je eraan op te nemen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts nazywa spotkania według wydarzeń w kalendarzu, zna zaproszone osoby i przypomina o nagrywaniu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts называет встречи по событиям вашего календаря, знает приглашённых и напоминает о записи."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts називає зустрічі за подіями вашого календаря, знає запрошених і нагадує про запис."
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Why the app records the microphone",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts nimmt deine Stimme in Meetings auf und transkribiert sie auf diesem Mac."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts records your voice in meetings and transcribes it on this Mac."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts enregistre votre voix pendant les réunions et la transcrit sur ce Mac."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts graba tu voz en las reuniones y la transcribe en este Mac."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts registra la tua voce nelle riunioni e la trascrive su questo Mac."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Transcripts grava sua voz nas reuniões e a transcreve neste Mac."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts neemt je stem op in vergaderingen en zet die op deze Mac om in tekst."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts nagrywa Twój głos podczas spotkań i transkrybuje go na tym Macu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts записывает ваш голос на встречах и расшифровывает его на этом Mac."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripts записує ваш голос на зустрічах і розшифровує його на цьому Mac."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
