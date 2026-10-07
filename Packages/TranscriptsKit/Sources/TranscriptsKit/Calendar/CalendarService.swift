@@ -103,7 +103,7 @@ public final class CalendarService {
         guard !attendees.isEmpty || link != nil else { return nil }
         return UpcomingMeeting(
             eventId: event.eventIdentifier ?? UUID().uuidString,
-            title: event.title?.trimmingCharacters(in: .whitespacesAndNewlines).nonEmpty ?? "Meeting",
+            title: event.title?.trimmingCharacters(in: .whitespacesAndNewlines).nonEmpty ?? String(localized: "Meeting", comment: "title of a calendar event that has none"),
             start: event.startDate,
             end: event.endDate,
             attendees: attendees,

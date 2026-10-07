@@ -66,9 +66,9 @@ public struct SpeakerIdentifier {
         if voices.count == 1, undecided.count == 1, attendees.count == 1, let attendee = attendees.first {
             let key = undecided[0].key
             if let person = person(for: attendee) {
-                decisions[key] = IdentityDecision(assignment: .suggested, personId: nil, suggestedPersonId: person.id, suggestedName: nil, reason: "Einziger weiterer Teilnehmer im Kalender", confidence: 0.5)
+                decisions[key] = IdentityDecision(assignment: .suggested, personId: nil, suggestedPersonId: person.id, suggestedName: nil, reason: Self.calendarReason, confidence: 0.5)
             } else {
-                decisions[key] = IdentityDecision(assignment: .suggested, personId: nil, suggestedPersonId: nil, suggestedName: attendee.name, reason: "Einziger weiterer Teilnehmer im Kalender", confidence: 0.5)
+                decisions[key] = IdentityDecision(assignment: .suggested, personId: nil, suggestedPersonId: nil, suggestedName: attendee.name, reason: Self.calendarReason, confidence: 0.5)
             }
         }
         return decisions
@@ -166,6 +166,7 @@ public struct SpeakerIdentifier {
     // Reasons are stored in German and shown in the interface's language by `Strings.reason(_:)`.
     static let voiceReasonPrefix = "Stimme ähnlich wie in"
     static let conversationReason = "Aus dem Gesprächsverlauf"
+    static let calendarReason = "Einziger weiterer Teilnehmer im Kalender"
 
     /// 2 for "Stimme ähnlich wie in 2 früheren Meetings", 1 for "… einem früheren Meeting".
     static func meetings(inVoiceReason reason: String) -> Int? {

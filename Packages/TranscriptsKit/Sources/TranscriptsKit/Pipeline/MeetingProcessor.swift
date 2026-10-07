@@ -14,7 +14,7 @@ public final class MeetingProcessor: @unchecked Sendable {
         /// The name used for the user before they set one.
         public var defaultMyName: String
 
-        public init(model: TranscriptionModel = .ultra, thresholds: VoiceThresholds = .standard, learnVoices: Bool = true, defaultMyName: String = "Ich") {
+        public init(model: TranscriptionModel = .ultra, thresholds: VoiceThresholds = .standard, learnVoices: Bool = true, defaultMyName: String = String(localized: "Ich", comment: "the user's name until they set one")) {
             self.model = model
             self.thresholds = thresholds
             self.learnVoices = learnVoices
@@ -57,15 +57,15 @@ public final class MeetingProcessor: @unchecked Sendable {
     }
 
     private func run(meetingId: String, options: Options, report: @escaping Progress) async throws {
-        report("Modelle werden geladen", 0.01)
+        report(String(localized: "Modelle werden geladen"), 0.01)
         try await engine.prepare(model: options.model) { state in
             if case .preparing(let step, let fraction) = state {
-                report("\(step) wird geladen", 0.01 + fraction * 0.04)
+                report(String(localized: "\(step) wird geladen", comment: "processing step; the argument names the model being loaded: Spracherkennung, Stimmerkennung or Sprechertrennung"), 0.01 + fraction * 0.04)
             }
         }
         guard let meeting = try await database.reader.read({ try Meeting.fetchOne($0, key: meetingId) }) else { return }
 
-        report("Audio wird gelesen", 0.06)
+        report(String(localized: "Audio wird gelesen"), 0.06)
         let importURL = AppPaths.existingImport(for: meetingId)
         var microphone = try AppPaths.existingAudio(for: meetingId, channel: .microphone).map(SpeechAudio.load) ?? []
         let system = try AppPaths.existingAudio(for: meetingId, channel: .system).map(SpeechAudio.load) ?? []
@@ -87,7 +87,7 @@ public final class MeetingProcessor: @unchecked Sendable {
             audioByChannel[.microphone] = imported
             lines = try await room(imported, channel: .microphone, meStart: 0.1, library: library, people: people, thresholds: options.thresholds, report: report)
         } else {
-            report("Sprache wird gesucht", 0.08)
+            report(String(localized: "Sprache wird gesucht"), 0.08)
             let systemSpeech = try await speechSeconds(system)
             // Loudness of the microphone before and after the echo came out, and of the call, to tell the
             // user's words from what is left of the echo (see `MicrophoneWords`).
@@ -95,7 +95,7 @@ public final class MeetingProcessor: @unchecked Sendable {
             if systemSpeech >= 3, !microphone.isEmpty {
                 // Played through speakers, the call comes back into the microphone: a second, later copy of
                 // every voice in the recording and in the user's own lines.
-                report("Echo wird entfernt", 0.09)
+                report(String(localized: "Echo wird entfernt"), 0.09)
                 if let cleaned = EchoSuppressor.clean(microphone: microphone, reference: system) {
                     echoLevels = (MicrophoneWords.levels(microphone), MicrophoneWords.levels(cleaned), MicrophoneWords.levels(system))
                     microphone = cleaned
@@ -108,17 +108,17 @@ public final class MeetingProcessor: @unchecked Sendable {
             audioByChannel[.microphone] = microphone
             audioByChannel[.system] = system
             if systemSpeech >= 3 {
-                report("Gesprächspartner werden transkribiert", 0.12)
+                report(String(localized: "Gesprächspartner werden transkribiert"), 0.12)
                 let systemText = try await engine.transcribe(system)
-                report("Stimmen werden getrennt", 0.4)
-                let diarization = try await engine.diarize(system) { fraction in report("Stimmen werden getrennt", 0.4 + fraction * 0.25) }
+                report(String(localized: "Stimmen werden getrennt"), 0.4)
+                let diarization = try await engine.diarize(system) { fraction in report(String(localized: "Stimmen werden getrennt"), 0.4 + fraction * 0.25) }
                 let turns = try await refined(diarization.turns, words: systemText.words, audio: system, library: library, people: people, thresholds: options.thresholds, excluding: [me.id])
                 let speakers = TranscriptAssembly.speakers(for: systemText.words, turns: turns)
                 let breaks = TranscriptAssembly.pauseBreaks(words: systemText.words, turns: turns)
                 let systemLines = TranscriptAssembly.renumbered(TranscriptAssembly.lines(words: systemText.words, speakers: speakers, channel: .system, breaks: breaks)).lines
                 var microphoneLines: [DraftLine] = []
                 if microphoneSpeech >= 0.5 {
-                    report("Deine Spur wird transkribiert", 0.67)
+                    report(String(localized: "Deine Spur wird transkribiert"), 0.67)
                     let microphoneText = try await engine.transcribe(microphone)
                     var words = microphoneText.words
                     if let echoLevels {
@@ -139,7 +139,7 @@ public final class MeetingProcessor: @unchecked Sendable {
             }
         }
 
-        report("Stimmen werden erkannt", 0.8)
+        report(String(localized: "Stimmen werden erkannt"), 0.8)
         // A voice embedding for every line long enough to have one: the app learns voices line by line, and
         // a line that sounds like someone else than the rest of its speaker stands out.
         var lineEmbeddings: [Int: [Float]] = [:]
@@ -152,7 +152,7 @@ public final class MeetingProcessor: @unchecked Sendable {
             if let embedding = try await engine.voiceEmbedding(Self.slice(audio, from: line.start, to: min(line.end, line.start + 20))) {
                 lineEmbeddings[index] = embedding
             }
-            if count % 20 == 0 { report("Stimmen werden erkannt", 0.8 + 0.1 * Double(count) / Double(max(measured.count, 1))) }
+            if count % 20 == 0 { report(String(localized: "Stimmen werden erkannt"), 0.8 + 0.1 * Double(count) / Double(max(measured.count, 1))) }
         }
         let isRoom = lines.allSatisfy { $0.channel == .microphone }
 
@@ -205,7 +205,7 @@ public final class MeetingProcessor: @unchecked Sendable {
         }
         decisions = identifier.decide(voices: voices, guesses: guesses)
 
-        report("Wird gespeichert", 0.93)
+        report(String(localized: "Wird gespeichert"), 0.93)
         var speakers: [MeetingSpeaker] = []
         if lines.contains(where: { $0.speakerKey == MeetingSpeaker.meKey }) {
             speakers.append(MeetingSpeaker(
@@ -260,7 +260,7 @@ public final class MeetingProcessor: @unchecked Sendable {
             meeting.language = language
             meeting.transcriptionModel = options.model.title
         }
-        report("Fertig", 1)
+        report(String(localized: "Fertig", comment: "processing step: everything is done"), 1)
     }
 
     /// At most this many lines get a voice embedding, the longest ones.
@@ -294,10 +294,10 @@ public final class MeetingProcessor: @unchecked Sendable {
 
     /// A recording with everyone on one channel: transcribe, separate the voices, number them.
     private func room(_ audio: [Float], channel: Channel, meStart: Double, library: VoiceLibrary, people: [Person], thresholds: VoiceThresholds, report: @escaping Progress) async throws -> [DraftLine] {
-        report("Wird transkribiert", meStart)
+        report(String(localized: "Wird transkribiert"), meStart)
         let text = try await engine.transcribe(audio)
-        report("Stimmen werden getrennt", 0.45)
-        let diarization = try await engine.diarize(audio) { fraction in report("Stimmen werden getrennt", 0.45 + fraction * 0.3) }
+        report(String(localized: "Stimmen werden getrennt"), 0.45)
+        let diarization = try await engine.diarize(audio) { fraction in report(String(localized: "Stimmen werden getrennt"), 0.45 + fraction * 0.3) }
         let turns = try await refined(diarization.turns, words: text.words, audio: audio, library: library, people: people, thresholds: thresholds, excluding: [])
         let speakers = TranscriptAssembly.speakers(for: text.words, turns: turns)
         let breaks = TranscriptAssembly.pauseBreaks(words: text.words, turns: turns)

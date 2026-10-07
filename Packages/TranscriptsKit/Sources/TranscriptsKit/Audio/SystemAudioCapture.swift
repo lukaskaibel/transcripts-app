@@ -50,12 +50,12 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
 
         var tap = AudioObjectID(kAudioObjectUnknown)
         var status = AudioHardwareCreateProcessTap(description, &tap)
-        guard status == noErr else { throw AudioError.coreAudio("Das Aufnehmen des Systemaudios", status) }
+        guard status == noErr else { throw AudioError.coreAudio(String(localized: "Das Aufnehmen des Systemaudios ist fehlgeschlagen (Fehler \(status))."), status) }
         tapID = tap
 
         guard var streamDescription = CoreAudioHelpers.tapFormat(tap) else {
             destroyTap()
-            throw AudioError.unsupportedFormat("Systemaudio")
+            throw AudioError.unsupportedFormat(String(localized: "Systemaudio", comment: "the sound other apps play, as opposed to the microphone"))
         }
 
         let outputUID = CoreAudioHelpers.uid(of: CoreAudioHelpers.defaultOutputDevice) ?? ""
@@ -78,7 +78,7 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
         status = AudioHardwareCreateAggregateDevice(aggregate as CFDictionary, &device)
         guard status == noErr else {
             destroyTap()
-            throw AudioError.coreAudio("Das Einrichten der Systemaudio-Aufnahme", status)
+            throw AudioError.coreAudio(String(localized: "Das Einrichten der Systemaudio-Aufnahme ist fehlgeschlagen (Fehler \(status))."), status)
         }
         aggregateID = device
 
@@ -92,7 +92,7 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
         }
         guard let format = AVAudioFormat(streamDescription: &streamDescription) else {
             destroyTap()
-            throw AudioError.unsupportedFormat("Systemaudio")
+            throw AudioError.unsupportedFormat(String(localized: "Systemaudio", comment: "the sound other apps play, as opposed to the microphone"))
         }
         self.format = format
         readRate.withLock { $0 = format.sampleRate }
@@ -123,12 +123,12 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
         }
         guard status == noErr, let procID else {
             destroyTap()
-            throw AudioError.coreAudio("Das Starten der Systemaudio-Aufnahme", status)
+            throw AudioError.coreAudio(String(localized: "Das Starten der Systemaudio-Aufnahme ist fehlgeschlagen (Fehler \(status))."), status)
         }
         status = AudioDeviceStart(device, procID)
         guard status == noErr else {
             destroyTap()
-            throw AudioError.coreAudio("Das Starten der Systemaudio-Aufnahme", status)
+            throw AudioError.coreAudio(String(localized: "Das Starten der Systemaudio-Aufnahme ist fehlgeschlagen (Fehler \(status))."), status)
         }
     }
 

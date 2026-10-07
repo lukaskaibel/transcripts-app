@@ -174,16 +174,18 @@ public final class AudioFileWriter {
 
 public enum AudioError: LocalizedError {
     case unsupportedFormat(String)
+    /// The message says what failed, as one sentence in the interface's language.
     case coreAudio(String, OSStatus)
+    /// The message says what the app may not use, as one sentence in the interface's language.
     case permissionDenied(String)
     case noInputDevice
 
     public var errorDescription: String? {
         switch self {
-        case .unsupportedFormat(let format): "Dieses Audioformat wird nicht unterstützt (\(format))."
-        case .coreAudio(let what, let status): "\(what) ist fehlgeschlagen (Fehler \(status))."
-        case .permissionDenied(let what): "Kein Zugriff auf \(what). Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit."
-        case .noInputDevice: "Es ist kein Mikrofon verfügbar."
+        case .unsupportedFormat(let format): String(localized: "Dieses Audioformat wird nicht unterstützt (\(format)).")
+        case .coreAudio(let message, _): message
+        case .permissionDenied(let message): message
+        case .noInputDevice: String(localized: "Es ist kein Mikrofon verfügbar.")
         }
     }
 }

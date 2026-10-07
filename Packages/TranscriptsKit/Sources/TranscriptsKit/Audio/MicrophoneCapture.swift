@@ -32,7 +32,7 @@ public final class MicrophoneCapture: AudioSource, @unchecked Sendable {
 
     public func start() throws {
         switch Self.permission {
-        case .denied, .restricted: throw AudioError.permissionDenied("das Mikrofon")
+        case .denied, .restricted: throw AudioError.permissionDenied(String(localized: "Kein Zugriff auf das Mikrofon. Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit."))
         default: break
         }
         try configureAndStart()

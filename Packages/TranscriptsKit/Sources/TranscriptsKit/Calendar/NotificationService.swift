@@ -34,10 +34,10 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
     public func activate() {
         guard let center else { return }
         center.delegate = self
-        let record = UNNotificationAction(identifier: Self.recordAction, title: "Aufnehmen", options: [])
-        let later = UNNotificationAction(identifier: Self.laterAction, title: "Später", options: [])
-        let ignore = UNNotificationAction(identifier: Self.ignoreAction, title: "Ignorieren", options: [.destructive])
-        let stop = UNNotificationAction(identifier: Self.stopAction, title: "Aufnahme beenden", options: [])
+        let record = UNNotificationAction(identifier: Self.recordAction, title: String(localized: "Aufnehmen", comment: "notification button: start recording"), options: [])
+        let later = UNNotificationAction(identifier: Self.laterAction, title: String(localized: "Später", comment: "notification button: remind me later"), options: [])
+        let ignore = UNNotificationAction(identifier: Self.ignoreAction, title: String(localized: "Ignorieren", comment: "notification button: ignore the detected meeting"), options: [.destructive])
+        let stop = UNNotificationAction(identifier: Self.stopAction, title: String(localized: "Aufnahme beenden"), options: [])
         center.setNotificationCategories([
             UNNotificationCategory(identifier: Self.meetingCategory, actions: [record, later], intentIdentifiers: []),
             UNNotificationCategory(identifier: Self.detectedCategory, actions: [record, ignore], intentIdentifiers: []),
@@ -71,8 +71,8 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
             let fireAt = meeting.start.addingTimeInterval(-lead)
             guard fireAt > now.addingTimeInterval(5), fireAt < now.addingTimeInterval(36 * 3600) else { continue }
             let content = UNMutableNotificationContent()
-            content.title = lead >= 60 ? "\(meeting.title) beginnt gleich" : "\(meeting.title) beginnt"
-            content.body = meeting.subtitle.isEmpty ? "Aufnahme starten?" : "\(meeting.subtitle)\nAufnahme starten?"
+            content.title = lead >= 60 ? String(localized: "\(meeting.title) beginnt gleich") : String(localized: "\(meeting.title) beginnt")
+            content.body = meeting.subtitle.isEmpty ? String(localized: "Aufnahme starten?") : "\(meeting.subtitle)\n\(String(localized: "Aufnahme starten?"))"
             content.categoryIdentifier = Self.meetingCategory
             content.sound = .default
             content.interruptionLevel = .timeSensitive
@@ -86,8 +86,8 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
     public func snooze(eventId: String, title: String, start: Date, minutes: Double = 5) async {
         guard let center else { return }
         let content = UNMutableNotificationContent()
-        content.title = "\(title) läuft"
-        content.body = "Aufnahme jetzt starten?"
+        content.title = String(localized: "\(title) läuft", comment: "notification title: the meeting has started and is still going on")
+        content.body = String(localized: "Aufnahme jetzt starten?")
         content.categoryIdentifier = Self.meetingCategory
         content.sound = .default
         content.userInfo = ["eventId": eventId, "start": start.timeIntervalSince1970, "title": title]
@@ -98,8 +98,8 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
     public func notifyCallDetected(appName: String) async {
         guard let center else { return }
         let content = UNMutableNotificationContent()
-        content.title = "Meeting erkannt"
-        content.body = "\(appName) nutzt gerade das Mikrofon. Aufnehmen?"
+        content.title = String(localized: "Meeting erkannt")
+        content.body = String(localized: "\(appName) nutzt gerade das Mikrofon. Aufnehmen?")
         content.categoryIdentifier = Self.detectedCategory
         content.sound = .default
         content.interruptionLevel = .timeSensitive
@@ -109,8 +109,8 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
     public func notifyCallEnded(appName: String) async {
         guard let center else { return }
         let content = UNMutableNotificationContent()
-        content.title = "Call beendet?"
-        content.body = "\(appName) nutzt das Mikrofon nicht mehr, die Aufnahme läuft aber noch."
+        content.title = String(localized: "Call beendet?")
+        content.body = String(localized: "\(appName) nutzt das Mikrofon nicht mehr, die Aufnahme läuft aber noch.")
         content.categoryIdentifier = Self.endedCategory
         content.sound = .default
         try? await center.add(UNNotificationRequest(identifier: "ended-\(UUID().uuidString)", content: content, trigger: nil))
@@ -134,7 +134,7 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
         let info = response.notification.request.content.userInfo
         let category = response.notification.request.content.categoryIdentifier
         let eventId = info["eventId"] as? String
-        let title = info["title"] as? String ?? "Meeting"
+        let title = info["title"] as? String ?? String(localized: "Meeting", comment: "title of a calendar event that has none")
         let start = (info["start"] as? Double).map { Date(timeIntervalSince1970: $0) }
         let action: NotificationAction?
         switch response.actionIdentifier {

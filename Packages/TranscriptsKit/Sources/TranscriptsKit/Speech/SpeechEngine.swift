@@ -28,9 +28,9 @@ public enum TranscriptionModel: String, CaseIterable, Codable, Identifiable, Sen
 
     public var detail: String {
         switch self {
-        case .ultra: "Am genauesten, empfohlen · ca. 650 MB"
-        case .v3: "Der bewährte Vorgänger · ca. 480 MB"
-        case .redux: "Kleiner, etwas ungenauer · ca. 220 MB"
+        case .ultra: String(localized: "Am genauesten, empfohlen · ca. 650 MB")
+        case .v3: String(localized: "Der bewährte Vorgänger · ca. 480 MB")
+        case .redux: String(localized: "Kleiner, etwas ungenauer · ca. 220 MB")
         }
     }
 
@@ -127,9 +127,9 @@ public actor SpeechEngine {
         }
         do {
             if asr == nil || loadedModel != model {
-                report("Spracherkennung", 0)
+                report(String(localized: "Spracherkennung", comment: "step while preparing: the speech-to-text model"), 0)
                 let models = try await AsrModels.downloadAndLoad(version: model.version) { update in
-                    report("Spracherkennung", update.fractionCompleted * 0.8)
+                    report(String(localized: "Spracherkennung", comment: "step while preparing: the speech-to-text model"), update.fractionCompleted * 0.8)
                 }
                 let manager = AsrManager(config: .default)
                 try await manager.loadModels(models)
@@ -137,13 +137,13 @@ public actor SpeechEngine {
                 loadedModel = model
             }
             if vad == nil {
-                report("Spracherkennung", 0.82)
+                report(String(localized: "Spracherkennung", comment: "step while preparing: the speech-to-text model"), 0.82)
                 vad = try await VadManager(config: VadConfig(defaultThreshold: 0.6))
             }
             if embedder == nil {
-                report("Stimmerkennung", 0.85)
+                report(String(localized: "Stimmerkennung", comment: "step while preparing: the model that recognises voices"), 0.85)
                 let models = try await DiarizerModels.downloadIfNeeded { update in
-                    report("Stimmerkennung", 0.85 + update.fractionCompleted * 0.07)
+                    report(String(localized: "Stimmerkennung", comment: "step while preparing: the model that recognises voices"), 0.85 + update.fractionCompleted * 0.07)
                 }
                 let manager = DiarizerManager()
                 diarizerModels = models
@@ -151,9 +151,9 @@ public actor SpeechEngine {
                 embedder = manager
             }
             if diarizer == nil {
-                report("Sprechertrennung", 0.92)
+                report(String(localized: "Sprechertrennung", comment: "step while preparing: the model that tells apart who speaks when"), 0.92)
                 let models = try await OfflineDiarizerModels.load { update in
-                    report("Sprechertrennung", 0.92 + update.fractionCompleted * 0.08)
+                    report(String(localized: "Sprechertrennung", comment: "step while preparing: the model that tells apart who speaks when"), 0.92 + update.fractionCompleted * 0.08)
                 }
                 let manager = OfflineDiarizerManager(config: OfflineDiarizerConfig())
                 manager.initialize(models: models)
@@ -274,8 +274,8 @@ public enum SpeechError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .notReady: "Die Sprachmodelle sind noch nicht geladen."
-        case .noAudio: "Die Aufnahme enthält kein Audio."
+        case .notReady: String(localized: "Die Sprachmodelle sind noch nicht geladen.")
+        case .noAudio: String(localized: "Die Aufnahme enthält kein Audio.")
         }
     }
 }

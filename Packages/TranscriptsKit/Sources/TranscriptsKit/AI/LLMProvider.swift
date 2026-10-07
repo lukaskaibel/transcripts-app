@@ -91,16 +91,16 @@ public enum LLMError: LocalizedError, Equatable {
 
     public var errorDescription: String? {
         switch self {
-        case .missingKey(let provider): "Für \(provider.title) ist noch kein API-Key hinterlegt."
-        case .invalidKey(let provider): "\(provider.title) hat den API-Key abgelehnt. Prüfe ihn in den Einstellungen."
-        case .rateLimited(let provider): "\(provider.title) meldet zu viele Anfragen. Versuch es gleich noch einmal."
-        case .overloaded(let provider): "\(provider.title) ist gerade überlastet. Versuch es gleich noch einmal."
-        case .refused(let reason): "Das Modell hat die Anfrage abgelehnt\(reason.isEmpty ? "" : " (\(reason))")."
-        case .truncated: "Die Antwort war zu lang und wurde abgeschnitten."
-        case .server(let provider, let status, let message): "\(provider.title) antwortet mit Fehler \(status)\(message.isEmpty ? "" : ": \(message)")"
-        case .unreachable(let provider, let message): "\(provider.title) ist nicht erreichbar: \(message)"
-        case .badResponse(let message): "Die Antwort des Modells war unbrauchbar: \(message)"
-        case .noModels(let provider): "\(provider.title) bietet keine passenden Modelle an."
+        case .missingKey(let provider): String(localized: "Für \(provider.title) ist noch kein API-Key hinterlegt.")
+        case .invalidKey(let provider): String(localized: "\(provider.title) hat den API-Key abgelehnt. Prüfe ihn in den Einstellungen.")
+        case .rateLimited(let provider): String(localized: "\(provider.title) meldet zu viele Anfragen. Versuch es gleich noch einmal.")
+        case .overloaded(let provider): String(localized: "\(provider.title) ist gerade überlastet. Versuch es gleich noch einmal.")
+        case .refused(let reason): reason.isEmpty ? String(localized: "Das Modell hat die Anfrage abgelehnt.") : String(localized: "Das Modell hat die Anfrage abgelehnt (\(reason)).")
+        case .truncated: String(localized: "Die Antwort war zu lang und wurde abgeschnitten.")
+        case .server(let provider, let status, let message): message.isEmpty ? String(localized: "\(provider.title) antwortet mit Fehler \(status)") : String(localized: "\(provider.title) antwortet mit Fehler \(status): \(message)")
+        case .unreachable(let provider, let message): String(localized: "\(provider.title) ist nicht erreichbar: \(message)")
+        case .badResponse(let message): String(localized: "Die Antwort des Modells war unbrauchbar: \(message)")
+        case .noModels(let provider): String(localized: "\(provider.title) bietet keine passenden Modelle an.")
         }
     }
 
@@ -208,7 +208,7 @@ struct HTTPClient: Sendable {
         } catch {
             throw LLMError.unreachable(provider, error.localizedDescription)
         }
-        guard let http = response as? HTTPURLResponse else { throw LLMError.badResponse("Keine HTTP-Antwort") }
+        guard let http = response as? HTTPURLResponse else { throw LLMError.badResponse(String(localized: "Keine HTTP-Antwort", comment: "why a language model's answer was unusable")) }
         let json = try? JSONDecoder().decode(JSONValue.self, from: data)
         guard (200..<300).contains(http.statusCode) else {
             let message = json.map(Self.errorMessage) ?? String(data: data.prefix(300), encoding: .utf8) ?? ""
@@ -255,7 +255,7 @@ public enum JSONExtraction {
             return value
         }
         // The outermost braces, ignoring braces inside strings.
-        guard let start = cleaned.firstIndex(of: "{") else { throw LLMError.badResponse("Kein JSON gefunden") }
+        guard let start = cleaned.firstIndex(of: "{") else { throw LLMError.badResponse(String(localized: "Kein JSON gefunden", comment: "why a language model's answer was unusable")) }
         var depth = 0
         var inString = false
         var escaped = false
@@ -280,7 +280,7 @@ public enum JSONExtraction {
         }
         guard let end, let data = String(cleaned[start...end]).data(using: .utf8),
               let value = try? JSONDecoder().decode(JSONValue.self, from: data) else {
-            throw LLMError.badResponse("Ungültiges JSON")
+            throw LLMError.badResponse(String(localized: "Ungültiges JSON", comment: "why a language model's answer was unusable"))
         }
         return value
     }

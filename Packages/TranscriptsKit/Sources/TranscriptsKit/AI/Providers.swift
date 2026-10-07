@@ -83,7 +83,7 @@ public struct AnthropicProvider: LLMProvider {
             .filter { $0["type"]?.string == "text" }
             .compactMap { $0["text"]?.string }
             .joined()
-        guard !text.isEmpty else { throw LLMError.badResponse("Leere Antwort") }
+        guard !text.isEmpty else { throw LLMError.badResponse(String(localized: "Leere Antwort", comment: "why a language model's answer was unusable")) }
         return text
     }
 
@@ -180,14 +180,14 @@ public struct OpenAIProvider: LLMProvider {
         if let format { body["response_format"] = format }
         let urlRequest = try HTTPClient.jsonRequest(baseURL.appendingPathComponent("chat/completions"), headers: headers, body: .object(body))
         let json = try await http.send(urlRequest)
-        guard let choice = json["choices"]?.array?.first else { throw LLMError.badResponse("Keine Antwort") }
+        guard let choice = json["choices"]?.array?.first else { throw LLMError.badResponse(String(localized: "Keine Antwort", comment: "why a language model's answer was unusable")) }
         if let refusal = choice["message"]?["refusal"]?.string, !refusal.isEmpty { throw LLMError.refused(refusal) }
         switch choice["finish_reason"]?.string {
         case "length": throw LLMError.truncated
         case "content_filter": throw LLMError.refused("content_filter")
         default: break
         }
-        guard let text = choice["message"]?["content"]?.string, !text.isEmpty else { throw LLMError.badResponse("Leere Antwort") }
+        guard let text = choice["message"]?["content"]?.string, !text.isEmpty else { throw LLMError.badResponse(String(localized: "Leere Antwort", comment: "why a language model's answer was unusable")) }
         return text
     }
 }
@@ -254,7 +254,7 @@ public struct GeminiProvider: LLMProvider {
         let urlRequest = try HTTPClient.jsonRequest(baseURL.appendingPathComponent(path), headers: headers, body: body)
         let json = try await http.send(urlRequest)
         if let blocked = json["promptFeedback"]?["blockReason"]?.string { throw LLMError.refused(blocked) }
-        guard let candidate = json["candidates"]?.array?.first else { throw LLMError.badResponse("Keine Antwort") }
+        guard let candidate = json["candidates"]?.array?.first else { throw LLMError.badResponse(String(localized: "Keine Antwort", comment: "why a language model's answer was unusable")) }
         switch candidate["finishReason"]?.string {
         case "MAX_TOKENS": throw LLMError.truncated
         case "SAFETY", "RECITATION", "PROHIBITED_CONTENT", "BLOCKLIST": throw LLMError.refused(candidate["finishReason"]?.string ?? "")
@@ -264,7 +264,7 @@ public struct GeminiProvider: LLMProvider {
             .filter { $0["thought"] != .bool(true) }
             .compactMap { $0["text"]?.string }
             .joined()
-        guard !text.isEmpty else { throw LLMError.badResponse("Leere Antwort") }
+        guard !text.isEmpty else { throw LLMError.badResponse(String(localized: "Leere Antwort", comment: "why a language model's answer was unusable")) }
         return text
     }
 }
@@ -333,10 +333,10 @@ public struct OllamaProvider: LLMProvider {
         let urlRequest = try HTTPClient.jsonRequest(baseURL.appendingPathComponent("api/chat"), body: .object(body), timeout: 900)
         let json = try await http.send(urlRequest, retries: 0)
         if let error = json["error"]?.string { throw LLMError.server(.ollama, 500, error) }
-        guard let text = json["message"]?["content"]?.string else { throw LLMError.badResponse("Keine Antwort") }
+        guard let text = json["message"]?["content"]?.string else { throw LLMError.badResponse(String(localized: "Keine Antwort", comment: "why a language model's answer was unusable")) }
         if json["done_reason"]?.string == "length" { throw LLMError.truncated }
         let cleaned = Self.strippingThinking(text)
-        guard !cleaned.isEmpty else { throw LLMError.badResponse("Leere Antwort") }
+        guard !cleaned.isEmpty else { throw LLMError.badResponse(String(localized: "Leere Antwort", comment: "why a language model's answer was unusable")) }
         return cleaned
     }
 

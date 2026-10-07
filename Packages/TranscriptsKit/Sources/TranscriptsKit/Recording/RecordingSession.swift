@@ -67,15 +67,15 @@ public enum MicrophoneProblem: Equatable, Sendable {
 
     public var message: String {
         switch self {
-        case .silent: "Vom Mikrofon kommt nur Stille. Ist es stummgeschaltet? Sonst prüfe unter Datenschutz & Sicherheit → Mikrofon, ob Transcripts erlaubt ist."
-        case .noSignal: "Das Mikrofon liefert nichts. Prüfe das Eingabegerät in den Einstellungen unter Aufnahme."
+        case .silent: String(localized: "Vom Mikrofon kommt nur Stille. Ist es stummgeschaltet? Sonst prüfe unter Datenschutz & Sicherheit → Mikrofon, ob Transcripts erlaubt ist.")
+        case .noSignal: String(localized: "Das Mikrofon liefert nichts. Prüfe das Eingabegerät in den Einstellungen unter Aufnahme.")
         }
     }
 
     public var shortMessage: String {
         switch self {
-        case .silent: "Mikrofon stumm oder ohne Zugriff"
-        case .noSignal: "Mikrofon liefert nichts"
+        case .silent: String(localized: "Mikrofon stumm oder ohne Zugriff")
+        case .noSignal: String(localized: "Mikrofon liefert nichts")
         }
     }
 }
@@ -570,7 +570,7 @@ public final class RecordingSession {
 
     public func displayName(for key: String) -> String {
         guard let voice = voices[key] else { return key == MeetingSpeaker.meKey ? Strings.me : key }
-        return voice.name ?? voice.label
+        return voice.name ?? Strings.label(voice.label)
     }
 
     // MARK: Markers

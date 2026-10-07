@@ -43,7 +43,7 @@ public struct KeychainStore: SecretStore {
         attributes[kSecAttrLabel as String] = "Transcripts – \(account)"
         let status = SecItemAdd(attributes as CFDictionary, nil)
         guard status == errSecSuccess else {
-            throw NSError(domain: NSOSStatusErrorDomain, code: Int(status), userInfo: [NSLocalizedDescriptionKey: "Der API-Key konnte nicht im Schlüsselbund gespeichert werden (\(status))."])
+            throw NSError(domain: NSOSStatusErrorDomain, code: Int(status), userInfo: [NSLocalizedDescriptionKey: String(localized: "Der API-Key konnte nicht im Schlüsselbund gespeichert werden (\(status)).")])
         }
     }
 }
