@@ -64,31 +64,121 @@ public struct NameGuess: Equatable, Sendable {
 /// "… hier"), hand over with a name ("Thomas, was meinst du?" — the next speaker is Thomas), and
 /// answer with a name ("Danke, Jonas." — the previous speaker was Jonas). Words count as names when
 /// they belong to someone known (the voice library or the calendar invitees), are common first names,
-/// or are tagged as personal names by Apple's NaturalLanguage framework.
+/// or are tagged as personal names by Apple's NaturalLanguage framework. In languages that change a name when
+/// someone is called by it (Polish "Anno" for Anna, Ukrainian "Олено" for Олена), the form is traced back to the
+/// known name it comes from.
 public struct NameEvidenceFinder {
     public var knownNames: [String]
 
     public init(knownNames: [String] = []) {
         self.knownNames = knownNames
-        knownTokens = Set(knownNames.flatMap { $0.lowercased().split(separator: " ").map(String.init) })
+        var spellings: [String: String] = [:]
+        for token in knownNames.flatMap({ $0.split(separator: " ").map(String.init) }) { spellings[token.lowercased()] = token }
+        knownSpellings = spellings
     }
 
-    private let knownTokens: Set<String>
+    /// Every word of a known name, lowercased, with its spelling.
+    private let knownSpellings: [String: String]
 
     private static let name = #"(\p{Lu}[\p{L}’'-]{1,30}(?:\s\p{Lu}[\p{L}’'-]{1,30})?)"#
     private static let firstName = #"(\p{Lu}[\p{L}’'-]{1,30})"#
 
+    /// The words around names, in every language the app speaks (`AppLanguage`): German, English, French, Spanish,
+    /// Italian, Portuguese, Dutch, Polish, Russian, Ukrainian.
+    private enum Phrases {
+        /// "Mein Name ist …": whatever follows is a name, even one nobody knows.
+        static let strongIntroduction = [
+            "ich heiße", "ich heisse", "mein name ist", "my name is", "i am called", "je m'appelle", "mon nom est",
+            "me llamo", "mi nombre es", "mi chiamo", "il mio nome è", "me chamo", "chamo-me", "meu nome é",
+            "mijn naam is", "ik heet", "nazywam się", "mam na imię", "меня зовут", "моё имя", "мое имя", "мене звати",
+            "моє ім'я",
+        ]
+        /// "Ich bin …", "this is …": a name if the word is one.
+        static let introduction = [
+            "ich bin", "hier ist", "hier spricht", "i'm", "i am", "this is", "it's", "je suis", "moi c'est", "soy",
+            "aquí", "sono", "sou", "aqui é", "ik ben", "hier is", "jestem", "z tej strony", "я",
+        ]
+        /// "der", "also" between "ich bin" and the name.
+        static let introductionFiller = ["der", "die", "also", "einfach", "nur"]
+        /// "Paula hier", "Paula speaking".
+        static let here = ["hier", "here", "speaking", "ici", "aquí", "qui", "aqui", "tutaj", "на связи", "на зв'язку", "тут"]
+        static let greetings = [
+            "hallo", "hi", "hey", "servus", "moin", "guten morgen", "guten tag", "guten abend", "hello", "bonjour", "salut",
+            "hola", "buenos días", "buenas", "ciao", "buongiorno", "olá", "oi", "bom dia", "goedemorgen", "goedemiddag",
+            "dzień dobry", "cześć", "привет", "здравствуйте", "добрый день", "привіт", "добрий день", "вітаю",
+        ]
+        /// Words that may come before a name someone is addressed with ("Also, Thomas, …").
+        static let leading = [
+            "also", "ok", "okay", "ja", "gut", "danke", "genau", "super", "prima", "hallo", "hi", "hey", "thanks",
+            "thank you", "great", "right", "so", "und", "alors", "oui", "bon", "merci", "et", "bueno", "vale", "sí",
+            "gracias", "y", "entonces", "allora", "grazie", "e", "bene", "então", "sim", "obrigado", "obrigada", "bom",
+            "dus", "oké", "goed", "dank je", "en", "więc", "dobra", "okej", "tak", "dzięki", "i", "no", "ну", "да",
+            "хорошо", "спасибо", "и", "ладно", "так", "добре", "дякую", "і", "гаразд",
+        ]
+        /// "Danke, Jonas": the previous speaker was Jonas.
+        static let thanks = [
+            "danke", "danke dir", "vielen dank", "dank dir", "merci", "thanks", "thank you", "willkommen", "welcome",
+            "bienvenue", "gracias", "bienvenido", "bienvenida", "grazie", "benvenuto", "benvenuta", "obrigado", "obrigada",
+            "bem-vindo", "bem-vinda", "dank je", "dank u", "bedankt", "welkom", "dzięki", "dziękuję", "witaj", "спасибо",
+            "благодарю", "добро пожаловать", "дякую", "спасибі", "ласкаво просимо",
+        ]
+        /// "Gute Idee, Jonas": an answer, with a name.
+        static let agreement = [
+            "gute idee", "guter punkt", "genau", "stimmt", "richtig", "super", "prima", "klasse", "einverstanden",
+            "good point", "good idea", "exactly", "right", "agreed", "great", "bonne idée", "bon point", "exactement",
+            "d'accord", "tout à fait", "buena idea", "buen punto", "exacto", "de acuerdo", "claro", "buona idea",
+            "giusto", "esatto", "d'accordo", "perfetto", "boa ideia", "bom ponto", "exato", "exatamente", "concordo",
+            "certo", "goed idee", "goed punt", "precies", "klopt", "akkoord", "dobry pomysł", "słusznie", "dokładnie",
+            "zgoda", "racja", "хорошая идея", "точно", "верно", "согласен", "согласна", "правильно", "отлично",
+            "гарна ідея", "згоден", "згодна", "чудово",
+        ]
+        /// "Thomas, was meinst du?": the next speaker is Thomas.
+        static let handover = [
+            "?", "was meinst du", "was denkst du", "was sagst du", "magst du", "kannst du", "willst du", "möchtest du",
+            "übernimmst du", "würdest du", "hast du", "bist du", "du bist dran", "dein punkt", "bitte",
+            "what do you think", "can you", "could you", "would you", "will you", "go ahead", "your turn", "over to you",
+            "qu'en penses-tu", "tu en penses quoi", "tu peux", "peux-tu", "à toi", "vas-y", "qué opinas", "qué piensas",
+            "puedes", "podrías", "te toca", "adelante", "cosa ne pensi", "che ne pensi", "puoi", "potresti",
+            "tocca a te", "o que você acha", "o que achas", "você pode", "podes", "poderia", "sua vez", "wat vind jij",
+            "wat denk jij", "kun jij", "kan jij", "wil jij", "ga je gang", "jouw beurt", "co myślisz", "możesz",
+            "mógłbyś", "mogłabyś", "twoja kolej", "proszę", "что думаешь", "как думаешь", "можешь", "сможешь",
+            "твоя очередь", "пожалуйста", "що думаєш", "як думаєш", "можеш", "зможеш", "твоя черга", "будь ласка",
+        ]
+        /// Words that look like names in these positions but aren't.
+        static let notNames = [
+            "leute", "zusammen", "alle", "team", "freunde", "kollegen", "kolleginnen", "danke", "okay", "ok", "ja",
+            "nein", "gut", "super", "genau", "also", "hallo", "hi", "hey", "frage", "punkt", "sache", "meinung", "moment",
+            "ende", "everyone", "guys", "folks", "all", "thanks", "yes", "no", "right", "sorry", "great", "good", "jetzt",
+            "hier", "da", "dabei", "dran", "fertig", "sicher", "froh", "gespannt", "neu", "raus", "weg", "zurück", "the",
+            "a", "an", "just", "not", "so", "here", "there", "back", "done", "sure", "glad", "new", "in", "der", "die",
+            "das", "ein", "eine", "einer", "nicht", "noch", "schon", "auch", "nur", "mal", "eigentlich",
+            "tous", "tout", "monde", "équipe", "merci", "oui", "non", "bon", "désolé", "todos", "equipo", "gracias", "sí",
+            "bueno", "vale", "perdón", "tutti", "ragazzi", "squadra", "grazie", "bene", "scusa", "pessoal", "equipe",
+            "obrigado", "sim", "não", "desculpa", "iedereen", "allemaal", "bedankt", "nee", "goed", "sorry", "wszyscy",
+            "zespół", "dzięki", "tak", "nie", "dobra", "państwo", "przepraszam", "все", "коллеги", "команда", "спасибо",
+            "да", "нет", "хорошо", "ребята", "извините", "ну", "всі", "усі", "колеги", "дякую", "так", "ні", "добре",
+            "вибачте",
+        ]
+    }
+
+    /// `phrases` as alternatives of a pattern; an apostrophe matches both ' and ’.
+    private static func either(_ phrases: [String]) -> String {
+        "(?:" + phrases.sorted { $0.count > $1.count }
+            .map { NSRegularExpression.escapedPattern(for: $0).replacingOccurrences(of: "'", with: "['’]") }
+            .joined(separator: "|") + ")"
+    }
+
     private static let introductions: [NSRegularExpression] = [
-        #"\b(?:ich heiße|ich heisse|mein name ist|my name is|i am called)\s+"# + name,
-        #"\b(?:ich bin|i'm|i am|hier ist|hier spricht|this is|it's)\s+(?:der |die |also |einfach |nur )?"# + name,
-        #"^(?:(?:hallo|hi|hey|servus|moin|guten (?:morgen|tag|abend)|hello)[,!.]?\s+)?(?:zusammen[,!.]?\s+)?"# + firstName + #"\s+(?:hier|here|speaking)\b"#,
+        #"\b"# + either(Phrases.strongIntroduction) + #"\s+"# + name,
+        #"\b"# + either(Phrases.introduction) + #"\s+(?:"# + either(Phrases.introductionFiller) + #"\s+)?"# + name,
+        #"^(?:"# + either(Phrases.greetings) + #"[,!.]?\s+)?(?:zusammen[,!.]?\s+)?"# + firstName + #"\s+"# + either(Phrases.here) + #"\b"#,
     ].map { try! NSRegularExpression(pattern: $0, options: [.caseInsensitive]) }
 
     /// Strong introductions name someone even when the word is unknown ("mein Name ist Xaver").
     private static let strongIntroductionIndex = 0
 
     private static let leadingVocative = try! NSRegularExpression(
-        pattern: #"^(?:(?:also|ok(?:ay)?|ja|gut|danke|genau|super|prima|hallo|hi|hey|thanks|thank you|great|right|so|und)[,!]?\s+)?"# + firstName + #"\s*[,:]\s+\S"#,
+        pattern: #"^(?:"# + either(Phrases.leading) + #"[,!]?\s+)?"# + firstName + #"\s*[,:]\s+\S"#,
         options: [.caseInsensitive]
     )
     private static let trailingVocative = try! NSRegularExpression(
@@ -96,35 +186,22 @@ public struct NameEvidenceFinder {
         options: []
     )
     private static let thanks = try! NSRegularExpression(
-        pattern: #"\b(?:danke(?:\s+dir)?|vielen dank|dank dir|merci|thanks|thank you|willkommen|welcome)[,!]?\s+"# + firstName + #"\b"#,
+        pattern: #"\b"# + either(Phrases.thanks) + #"[,!]?\s+"# + firstName + #"\b"#,
         options: [.caseInsensitive]
     )
     /// "Gute Idee, Jonas, ich mache …" — an answer with a name in the middle of the sentence.
     private static let acknowledgedByName = try! NSRegularExpression(
-        pattern: #"\b(?:gute idee|guter punkt|genau|stimmt|richtig|super|prima|klasse|einverstanden|good point|good idea|exactly|right|agreed|great)[,!]?\s+"# + firstName + #"\s*[,.!?]"#,
+        pattern: #"\b"# + either(Phrases.agreement) + #"[,!]?\s+"# + firstName + #"\s*[,.!?]"#,
         options: [.caseInsensitive]
     )
 
-    private static let handover = [
-        "?", "was meinst du", "was denkst du", "was sagst du", "magst du", "kannst du", "willst du", "möchtest du",
-        "übernimmst du", "würdest du", "hast du", "bist du", "du bist dran", "dein punkt", "bitte",
-        "what do you think", "can you", "could you", "would you", "will you", "go ahead", "your turn", "over to you",
-    ]
-    private static let acknowledgement = [
-        "danke", "dank dir", "merci", "gute idee", "guter punkt", "genau", "stimmt", "richtig", "super", "prima",
-        "willkommen", "einverstanden", "thanks", "thank you", "good point", "good idea", "right", "exactly", "welcome",
-        "agreed",
-    ]
+    private static let handover = Phrases.handover.map(normalizedApostrophes)
+    private static let acknowledgement = (Phrases.thanks + Phrases.agreement).map(normalizedApostrophes)
+    private static let notNames = Set(Phrases.notNames)
 
-    /// Words that look like names in these positions but aren't.
-    private static let notNames: Set<String> = [
-        "leute", "zusammen", "alle", "team", "freunde", "kollegen", "kolleginnen", "danke", "okay", "ok", "ja", "nein",
-        "gut", "super", "genau", "also", "hallo", "hi", "hey", "frage", "punkt", "sache", "meinung", "moment", "ende",
-        "everyone", "guys", "folks", "all", "team", "thanks", "yes", "no", "right", "sorry", "great", "good", "okay",
-        "jetzt", "hier", "da", "dabei", "dran", "fertig", "sicher", "froh", "gespannt", "neu", "raus", "weg", "zurück",
-        "the", "a", "an", "just", "not", "so", "also", "here", "there", "back", "done", "sure", "glad", "new", "in",
-        "der", "die", "das", "ein", "eine", "einer", "nicht", "noch", "schon", "auch", "nur", "mal", "eigentlich",
-    ]
+    private static func normalizedApostrophes(_ text: String) -> String {
+        text.replacingOccurrences(of: "’", with: "'")
+    }
 
     public func clues(in lines: [SpokenLine]) -> [NameClue] {
         var clues: [NameClue] = []
@@ -181,11 +258,11 @@ public struct NameEvidenceFinder {
 
     private func addressClues(in sentence: String, lineIndex: Int, lines: [SpokenLine]) -> [NameClue] {
         let line = lines[lineIndex]
-        let lowered = sentence.lowercased()
+        let lowered = Self.normalizedApostrophes(sentence.lowercased())
         var names: [String] = []
         for regex in [Self.leadingVocative, Self.trailingVocative, Self.thanks, Self.acknowledgedByName] {
             for match in Self.matches(regex, in: sentence) {
-                if let candidate = Self.capture(match, in: sentence), let name = trimmedName(candidate, strong: false, context: sentence) {
+                if let candidate = Self.capture(match, in: sentence), let name = trimmedName(candidate, strong: false, inflected: true, context: sentence) {
                     names.append(name)
                 }
             }
@@ -218,23 +295,39 @@ public struct NameEvidenceFinder {
         return nil
     }
 
-    /// Keeps the candidate if it is plausibly a name, trimming a trailing word that isn't.
-    private func trimmedName(_ candidate: String, strong: Bool, context: String) -> String? {
+    /// Keeps the candidate if it is plausibly a name, trimming a trailing word that isn't. With `inflected`, a form
+    /// of a known name (someone called by it) counts and comes back as the name itself.
+    private func trimmedName(_ candidate: String, strong: Bool, inflected: Bool = false, context: String) -> String? {
         var parts = candidate.split(separator: " ").map(String.init)
-        while let last = parts.last, parts.count > 1, !isName(last, strong: false, context: context) || Self.notNames.contains(last.lowercased()) {
+        while let last = parts.last, parts.count > 1, !isName(last, strong: false, inflected: inflected, context: context) || Self.notNames.contains(last.lowercased()) {
             parts.removeLast()
         }
         guard let first = parts.first, !Self.notNames.contains(first.lowercased()) else { return nil }
-        guard isName(first, strong: strong, context: context) else { return nil }
+        guard isName(first, strong: strong, inflected: inflected, context: context) else { return nil }
+        if inflected { parts = parts.map { knownName(inflected: $0) ?? $0 } }
         return parts.joined(separator: " ").trimmingCharacters(in: CharacterSet(charactersIn: "’'-"))
     }
 
-    private func isName(_ word: String, strong: Bool, context: String) -> Bool {
+    private func isName(_ word: String, strong: Bool, inflected: Bool = false, context: String) -> Bool {
         let lowered = word.lowercased()
         guard word.first?.isUppercase == true, !Self.notNames.contains(lowered) else { return false }
-        if knownTokens.contains(lowered) || FirstNames.common.contains(lowered) { return true }
+        if knownSpellings[lowered] != nil || FirstNames.common.contains(lowered) { return true }
+        if inflected, knownName(inflected: word) != nil { return true }
         if strong { return true }
         return Self.taggedAsPersonalName(word, in: context)
+    }
+
+    /// The known name `word` is a form of: "Anno" is Anna, "Tomaszu" Tomasz, "Олено" Олена, "Annas" Anna. Only when
+    /// exactly one known name fits and the word isn't a first name of its own ("Marcel" is not Marc).
+    private func knownName(inflected word: String) -> String? {
+        let lowered = word.lowercased().replacingOccurrences(of: "’", with: "'")
+        if let exact = knownSpellings[lowered] { return exact }
+        guard lowered.count >= 3, !FirstNames.common.contains(lowered) else { return nil }
+        let fitting = knownSpellings.filter { key, _ in
+            key.count >= 3 && lowered.count >= key.count - 1 && lowered.count <= key.count + 3
+                && lowered.commonPrefix(with: key).count >= max(3, key.count - 2)
+        }
+        return fitting.count == 1 ? fitting.first?.value : nil
     }
 
     private static func taggedAsPersonalName(_ word: String, in sentence: String) -> Bool {
@@ -273,9 +366,10 @@ public struct NameEvidenceFinder {
     }
 }
 
-/// Common first names across the languages people in German-speaking offices tend to have.
+/// Common first names across the languages people in German-speaking offices tend to have, and in the other languages
+/// the app speaks.
 enum FirstNames {
-    static let common: Set<String> = Set("""
+    static let common: Set<String> = Set(("""
     aaron adam adrian ahmed aisha alan albert alex alexa alexander alexandra alexei ali alice alicia alina alisa \
     amelie amir amy ana andi andre andrea andreas andrei andrew andy angela angelika anja anke ann anna annabel \
     anne annika anton antonia arne arthur aylin ayse barbara bastian beate ben benedikt benjamin bernd bernhard \
@@ -300,5 +394,21 @@ enum FirstNames {
     sophie stefan stefanie stephan steffen stella sven svenja tamara tanja thea theo thomas thorsten tim timo \
     tina tobias tom tomas torsten uwe ulrich ute valentin valentina vanessa vera verena victor viktor viktoria \
     vincent volker walter werner wolfgang xaver yannick yasmin yusuf zoe zeynep
-    """.split(whereSeparator: { $0 == " " || $0 == "\n" }).map(String.init))
+    """ + " " + """
+    agathe amélie antoine aurélie baptiste camille céline chloé clément élodie émilie étienne françois gaël hugo \
+    inès jérôme julien léa léo lucie manon mathieu maxime mélanie nathan océane pierre quentin romain sébastien \
+    sylvie théo thibault valérie yves agustín alba alejandro álvaro andrés beatriz carlota cristina diego \
+    fernando gonzalo guillermo iker javier jesús jorge josé juan lucía marta miguel nerea pablo pedro pilar \
+    raquel rocío sergio sofía teresa alessandra alessia alessio andrea antonella chiara davide emanuele federica \
+    federico francesca francesco gianluca giorgia giovanni giuseppe ilaria lorenzo martina mattia riccardo \
+    roberta salvatore silvia stefano tommaso afonso bruna caio duarte fábio gonçalo guilherme inês joana joão \
+    leonor mariana rafaela rodrigo rui thiago tiago vinícius anouk bas bram daan femke fleur floor jeroen joost \
+    koen lieke maarten niels pieter roel sanne sem stijn thijs wouter agata agnieszka bartosz damian dorota \
+    ewa grzegorz jacek jakub joanna kamil katarzyna krzysztof łukasz maciej małgorzata marcin michał monika \
+    paweł piotr rafał tomasz wojciech zofia александр алексей анастасия андрей анна артём борис вадим \
+    валентина виктор владимир галина денис дмитрий евгений екатерина елена иван игорь ирина кирилл ксения \
+    максим мария михаил наталья николай нина олег ольга павел роман светлана сергей татьяна юлия юрий \
+    андрій богдан василь віктор володимир дарина дмитро іван ірина катерина марія микола наталія олег \
+    олександр олександра олексій олена оксана остап петро сергій софія тарас юлія ярослав
+    """).split(whereSeparator: { $0 == " " || $0 == "\n" }).map(String.init))
 }
