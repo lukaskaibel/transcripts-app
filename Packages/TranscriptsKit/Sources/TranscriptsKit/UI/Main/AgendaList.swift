@@ -57,7 +57,7 @@ struct AgendaList: View {
             let place = index < started ? index : index + 1
             switch item.kind {
             case .recorded(let row):
-                RecordedLine(row: row, time: TimeFormat.time(row.meeting.startedAt), timeWidth: timeWidth, axis: axis(place), onDelete: onDelete)
+                RecordedLine(row: row, time: TimeFormat.compactTime(row.meeting.startedAt), timeWidth: timeWidth, axis: axis(place), onDelete: onDelete)
             case .planned(let meeting):
                 PlannedLine(meeting: meeting, now: now, timeWidth: timeWidth, axis: axis(place), isNext: meeting.id == next?.id)
             }
@@ -101,7 +101,7 @@ struct AgendaList: View {
         let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular)
         let calendar = Calendar.current
         let day = calendar.startOfDay(for: Date())
-        let samples = [10, 12, 22, 23].compactMap { calendar.date(bySettingHour: $0, minute: 58, second: 0, of: day) }.map(TimeFormat.time)
+        let samples = [10, 12, 22, 23].compactMap { calendar.date(bySettingHour: $0, minute: 58, second: 0, of: day) }.map(TimeFormat.compactTime)
             + (1...6).compactMap { calendar.date(byAdding: .day, value: -$0, to: Date()) }.map { TimeFormat.shortDay($0) }
         let widest = samples.map { ($0 as NSString).size(withAttributes: [.font: font]).width }.max() ?? 34
         return ceil(widest) + 2
@@ -204,7 +204,7 @@ private struct NowLine: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(TimeFormat.time(now))
+            Text(TimeFormat.compactTime(now))
                 .font(.system(size: 11, weight: .semibold))
                 .monospacedDigit()
                 .foregroundStyle(Theme.textSecondary)
@@ -290,7 +290,7 @@ private struct PlannedLine: View {
         Button {
             showing = true
         } label: {
-            AgendaLine(time: TimeFormat.time(meeting.start), timeWidth: timeWidth, axis: axis, look: isNext ? .next : .plain, title: meeting.title,
+            AgendaLine(time: TimeFormat.compactTime(meeting.start), timeWidth: timeWidth, axis: axis, look: isNext ? .next : .plain, title: meeting.title,
                        subtitle: isNext ? ([TimeFormat.relative(to: meeting.start, now: now)] + [meeting.app].compactMap { $0 }).joined(separator: " · ") : nil) {
                 MeetingGlyph(state: .upcoming)
             } trailing: {

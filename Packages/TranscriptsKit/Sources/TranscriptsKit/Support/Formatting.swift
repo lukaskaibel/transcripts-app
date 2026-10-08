@@ -53,6 +53,14 @@ public enum TimeFormat {
         date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: locale))
     }
 
+    /// "14:00", or "2:00p" where the clock has twelve hours: for a narrow column of times.
+    public static func compactTime(_ date: Date) -> String {
+        guard DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: locale)?.contains("a") == true else { return time(date) }
+        return date.formatted(Date.FormatStyle(locale: locale).hour(.defaultDigits(amPM: .narrow)).minute())
+            .replacingOccurrences(of: "\u{202F}", with: "")
+            .replacingOccurrences(of: " ", with: "")
+    }
+
     /// "Montag, 5. Oktober · 10:00–10:42".
     public static func meetingLine(start: Date, duration: Double) -> String {
         let day = start.formatted(Date.FormatStyle(locale: locale).weekday(.wide).day().month(.wide))

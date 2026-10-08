@@ -2,7 +2,8 @@
 # Builds the app, starts it on the demo data and has it render its own windows to PNGs.
 #   Tools/screenshots/run.sh [command-file]
 # The commands (see DebugRemote.swift) come from the given file, or a standard tour.
-# Works while the screen is locked: the app draws into images itself.
+# Works while the screen is locked: the app draws into images itself. BACKGROUND=1 starts it without taking the focus
+# (for working on the Mac meanwhile).
 set -e
 cd "$(dirname "$0")/../.."
 out=build/screens/out
@@ -20,7 +21,7 @@ pkill -f "$app/Contents/MacOS/Transcripts -demo YES" 2>/dev/null || true
 sleep 0.5
 cmd=build/screens/cmd
 : > "$cmd"
-open -n "$app" --args -demo YES -debugCommandFile "$PWD/$cmd" -debugOutput "$PWD/$out" ${=DEMO_ARGS} \
+open ${BACKGROUND:+-g} -n "$app" --args -demo YES -debugCommandFile "$PWD/$cmd" -debugOutput "$PWD/$out" ${=DEMO_ARGS} \
   "-NSWindow Frame MainWindow" "100 80 1280 820 0 0 1512 949"
 sleep 3
 

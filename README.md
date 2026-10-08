@@ -57,6 +57,10 @@ About half a minute after a call, the meeting is transcribed again in a careful 
 and named, and the summary is written: an overview, decisions, action items with owner and due day, and open
 questions. Play any line, set markers while recording, export as Markdown, or search every transcript with ⌘K.
 
+The sidebar plans your day: today's calendar meetings and recordings in one list with a line for now, the next
+meeting set apart, and the latest meetings below. The inbox collects what a meeting leaves behind: a new summary,
+action items not on GitHub yet, voices without a name.
+
 ### It learns the voices
 
 Confirm a voice once and the app recognises that person in every later meeting. The People screen lists the voices
