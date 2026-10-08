@@ -99,6 +99,8 @@ public final class AppSettings {
         calendarReminders = defaults.object(forKey: Keys.calendarReminders) as? Bool ?? true
         reminderLead = defaults.object(forKey: Keys.reminderLead) as? Double ?? 60
         detectCalls = defaults.object(forKey: Keys.detectCalls) as? Bool ?? true
+        onlyMyMeetings = defaults.object(forKey: Keys.onlyMyMeetings) as? Bool ?? true
+        hiddenMeetings = defaults.data(forKey: Keys.hiddenMeetings).flatMap { try? JSONDecoder().decode([HiddenCalendarItem].self, from: $0) } ?? []
         voiceStrictness = VoiceStrictness(rawValue: defaults.string(forKey: Keys.voiceStrictness) ?? "") ?? .standard
         learnVoices = defaults.object(forKey: Keys.learnVoices) as? Bool ?? true
         audioRetention = AudioRetention(rawValue: defaults.string(forKey: Keys.audioRetention) ?? "") ?? .forever
@@ -131,6 +133,8 @@ public final class AppSettings {
         static let calendarReminders = "calendarReminders"
         static let reminderLead = "reminderLead"
         static let detectCalls = "detectCalls"
+        static let onlyMyMeetings = "onlyMyMeetings"
+        static let hiddenMeetings = "hiddenMeetings"
         static let voiceStrictness = "voiceStrictness"
         static let learnVoices = "learnVoices"
         static let audioRetention = "audioRetention"
@@ -167,6 +171,12 @@ public final class AppSettings {
     /// Seconds before the start a reminder appears.
     public var reminderLead: Double { didSet { defaults.set(reminderLead, forKey: Keys.reminderLead) } }
     public var detectCalls: Bool { didSet { defaults.set(detectCalls, forKey: Keys.detectCalls) } }
+    /// Leave out calendar events with guests the user isn't among (see `MeetingFilter.onlyMine`).
+    public var onlyMyMeetings: Bool { didSet { defaults.set(onlyMyMeetings, forKey: Keys.onlyMyMeetings) } }
+    /// Meetings and calendars the user said aren't theirs, newest last.
+    public var hiddenMeetings: [HiddenCalendarItem] {
+        didSet { defaults.set(try? JSONEncoder().encode(hiddenMeetings), forKey: Keys.hiddenMeetings) }
+    }
     public var voiceStrictness: VoiceStrictness { didSet { defaults.set(voiceStrictness.rawValue, forKey: Keys.voiceStrictness) } }
     public var learnVoices: Bool { didSet { defaults.set(learnVoices, forKey: Keys.learnVoices) } }
     public var audioRetention: AudioRetention { didSet { defaults.set(audioRetention.rawValue, forKey: Keys.audioRetention) } }

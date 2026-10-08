@@ -79,11 +79,13 @@ public final class AppModel {
     public enum ToastAction: Equatable, Sendable {
         case nameVoices(meetingId: String)
         case openURL(URL)
+        case unhide(HiddenCalendarItem)
 
         public var title: String {
             switch self {
             case .nameVoices: String(localized: "Wer ist das?")
             case .openURL: String(localized: "Auf GitHub öffnen")
+            case .unhide: String(localized: "Rückgängig")
             }
         }
     }
@@ -347,6 +349,8 @@ public final class AppModel {
             overlay = .naming(meetingId: meetingId)
         case .openURL(let url):
             NSWorkspace.shared.open(url)
+        case .unhide(let item):
+            unhide(item)
         }
     }
 

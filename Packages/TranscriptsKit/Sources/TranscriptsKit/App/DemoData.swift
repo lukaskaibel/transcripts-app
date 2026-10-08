@@ -174,6 +174,7 @@ enum DemoData {
         var noise: [String]
         var shortOverview: String
         var upcoming: [String]
+        var calendars: [String]
 
         static let german = Texts(
             language: "de",
@@ -213,7 +214,8 @@ enum DemoData {
             ],
             noise: ["Ja, genau.", "Mhm.", "Okay, ja.", "Moment."],
             shortOverview: "Kurzer Abgleich zu den offenen Punkten; alle Themen sind geklärt.",
-            upcoming: ["Sprint Planning 43", "Kundencall Hoffmann"]
+            upcoming: ["Sprint Planning 43", "Kundencall Hoffmann"],
+            calendars: ["Arbeit", "Vertrieb"]
         )
 
         static let english = Texts(
@@ -254,7 +256,8 @@ enum DemoData {
             ],
             noise: ["Yes, exactly.", "Mhm.", "Okay, yes.", "One moment."],
             shortOverview: "A short check-in on the open points; everything is settled.",
-            upcoming: ["Sprint Planning 43", "Customer call Hoffmann"]
+            upcoming: ["Sprint Planning 43", "Customer call Hoffmann"],
+            calendars: ["Work", "Sales"]
         )
     }
 
@@ -295,9 +298,11 @@ enum DemoData {
         return [
             UpcomingMeeting(eventId: "e-planning", title: t.upcoming[0], start: planning, end: planning.addingTimeInterval(3600),
                             attendees: [Attendee(name: "Anna Berger"), Attendee(name: "Thomas Klein"), Attendee(name: "Jonas Weber"), Attendee(name: "Miriam Okafor")],
-                            joinURL: URL(string: "https://zoom.us/j/123456789"), app: "Zoom"),
+                            joinURL: URL(string: "https://zoom.us/j/123456789"), app: "Zoom",
+                            calendarId: "c-work", calendarTitle: t.calendars[0], calendarColor: [0.20, 0.47, 0.96], isRecurring: true),
             UpcomingMeeting(eventId: "e-hoffmann", title: t.upcoming[1], start: hoffmann, end: hoffmann.addingTimeInterval(1800),
-                            attendees: [Attendee(name: "Daniel Hoffmann")], joinURL: URL(string: "https://teams.microsoft.com/l/meetup-join/demo"), app: "Microsoft Teams"),
+                            attendees: [Attendee(name: "Daniel Hoffmann")], joinURL: URL(string: "https://teams.microsoft.com/l/meetup-join/demo"), app: "Microsoft Teams",
+                            calendarId: "c-sales", calendarTitle: t.calendars[1], calendarColor: [0.96, 0.58, 0.16]),
         ]
     }
 }
@@ -334,7 +339,7 @@ extension DemoData {
 extension AppModel {
     /// Fills the parts of the state that normally come from the system.
     func loadDemoState() {
-        upcoming = DemoData.upcoming()
+        upcoming = DemoData.upcoming().filter(meetingFilter.allows)
         engineState = .ready
         providerStatus = [.anthropic: .connected, .ollama: .connected]
         providerModels = [

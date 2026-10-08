@@ -127,7 +127,8 @@ the languages its speech recognition transcribes best. It follows macOS, or the 
   accept with one click.
 - **Knows your calendar.** Meetings are named after the event and know who was invited. When a meeting starts you get
   a notification with a *Record* button. Calls without a calendar event are noticed too, and you're reminded to stop
-  when the call is over.
+  when the call is over. Events of shared calendars that you aren't invited to stay out, and *Not my meeting* hides
+  any other series or a whole calendar.
 - **Summarises, if you want.** Overview, decisions, action items and open questions from Anthropic, OpenAI, Google or
   a local model in Ollama, automatically after each meeting or on request, plus an optional live summary while
   recording. In the meeting's language or one you choose. API keys stay in the Keychain.

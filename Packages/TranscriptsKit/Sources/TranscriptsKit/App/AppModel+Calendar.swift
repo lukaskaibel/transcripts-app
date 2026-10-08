@@ -22,8 +22,45 @@ extension AppModel {
 
     public func refreshCalendar() {
         guard !isDemo else { return }
-        upcoming = calendar.upcoming()
+        upcoming = calendar.upcoming(filter: meetingFilter)
         Task { await rescheduleReminders() }
+    }
+
+    /// The user's meetings: by the rule in the settings, without the ones they hid.
+    var meetingFilter: MeetingFilter {
+        let hidden = settings.hiddenMeetings
+        return MeetingFilter(onlyMine: settings.onlyMyMeetings,
+                             hiddenEvents: Set(hidden.filter { $0.kind == .event }.map(\.identifier)),
+                             hiddenCalendars: Set(hidden.filter { $0.kind == .calendar }.map(\.identifier)))
+    }
+
+    // MARK: Not my meeting
+
+    /// "Nicht mein Meeting": the series (or the whole calendar) no longer shows up and no longer reminds.
+    public func hide(_ item: HiddenCalendarItem) {
+        settings.hiddenMeetings.removeAll { $0.id == item.id }
+        settings.hiddenMeetings.append(item)
+        if isDemo {
+            upcoming.removeAll { !meetingFilter.allows($0) }
+        } else {
+            refreshCalendar()
+        }
+        let title = switch item.kind {
+        case .event: item.isRecurring
+            ? String(localized: "Serie „\(item.title)“ ausgeblendet", comment: "toast: a recurring calendar meeting no longer shows up")
+            : String(localized: "„\(item.title)“ ausgeblendet", comment: "toast: a calendar meeting no longer shows up")
+        case .calendar: String(localized: "Kalender „\(item.title)“ ausgeblendet", comment: "toast: the meetings of a calendar no longer show up")
+        }
+        showToast(title, String(localized: "Auch keine Erinnerungen mehr. Zurückholen: Einstellungen › Allgemein."), action: .unhide(item))
+    }
+
+    public func unhide(_ item: HiddenCalendarItem) {
+        settings.hiddenMeetings.removeAll { $0.id == item.id }
+        if isDemo {
+            upcoming = DemoData.upcoming().filter(meetingFilter.allows)
+        } else {
+            refreshCalendar()
+        }
     }
 
     func rescheduleReminders() async {
@@ -82,6 +119,8 @@ extension AppModel {
             Task { await startRecording(event: event) }
         case .snooze(let eventId, let title, let start):
             Task { await notifications.snooze(eventId: eventId, title: title, start: start) }
+        case .notMine(let eventId, let title):
+            hide(upcoming.first { $0.eventId == eventId }.map(HiddenCalendarItem.meeting) ?? HiddenCalendarItem(kind: .event, identifier: eventId, title: title))
         case .stopRecording:
             Task { await stopRecording() }
         case .open:

@@ -118,6 +118,22 @@ final class DebugRemote {
             model.stopDemoRecording()
         case "menubar":
             showPanel(MenuBarContent(), width: 300, title: "MenuBar")
+        case "upcoming":
+            // upcoming <event id>: the popover of a meeting in "Anstehend", in a window of its own.
+            if let meeting = model.upcoming.first(where: { $0.eventId == argument }) {
+                showPanel(UpcomingPopover(meeting: meeting) {}, width: 280, title: "Upcoming")
+            }
+        case "notmine":
+            // notmine <event id>: "Nicht mein Meeting" on a reminder.
+            model.handle(.notMine(eventId: argument, title: argument))
+        case "hidecalendar":
+            if let meeting = model.upcoming.first(where: { $0.eventId == argument }), let item = HiddenCalendarItem.calendar(of: meeting) { model.hide(item) }
+        case "calendarreport":
+            log(model.calendar.report(filter: model.meetingFilter).joined(separator: "\n"))
+        case "unhideall":
+            for item in model.settings.hiddenMeetings { model.unhide(item) }
+        case "calendar":
+            log("upcoming=\(model.upcoming.map { "\($0.eventId)[\($0.calendarTitle ?? "-")]" }) hidden=\(model.settings.hiddenMeetings.map(\.id)) onlyMine=\(model.settings.onlyMyMeetings) toasts=\(model.toasts.map { "\($0.title) | \($0.message) | \($0.action?.title ?? "-")" })")
         case "toast":
             model.showToast(argument.isEmpty ? "Zusammenfassung kopiert" : argument)
         case "focus":

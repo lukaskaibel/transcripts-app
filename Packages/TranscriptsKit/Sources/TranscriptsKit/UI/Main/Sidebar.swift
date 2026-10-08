@@ -172,6 +172,8 @@ struct UpcomingRow: View {
             .hoverFill(radius: 7)
         }
         .buttonStyle(PlainPressStyle())
+        .debugFrame("upcoming.\(meeting.eventId)")
+        .contextMenu { NotMineItems(meeting: meeting) }
         .popover(isPresented: $showing, arrowEdge: .trailing) {
             UpcomingPopover(meeting: meeting) { showing = false }
         }
@@ -228,11 +230,54 @@ struct UpcomingPopover: View {
                     .buttonStyle(SecondaryButtonStyle())
                 }
             }
+            Rectangle().fill(Theme.rowSeparator).frame(height: 1).padding(.top, 2)
+            HStack(spacing: 6) {
+                if let title = meeting.calendarTitle {
+                    Circle()
+                        .fill(meeting.calendarColor.map { Color(red: $0[0], green: $0[1], blue: $0[2]) } ?? Theme.textTertiary)
+                        .frame(width: 7, height: 7)
+                    Text(title)
+                        .font(.small)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 8)
+                Menu {
+                    NotMineItems(meeting: meeting, done: close)
+                } label: {
+                    Text("Nicht mein Meeting").font(.small)
+                }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.visible)
+                .fixedSize()
+                .tint(Theme.textSecondary)
+                .accessibilityIdentifier("upcoming.notMine")
+            }
         }
         .padding(16)
         .frame(width: 280, alignment: .leading)
         .font(.ui)
         .foregroundStyle(Theme.text)
+    }
+}
+
+/// "Nicht mein Meeting": hide the series, or everything from its calendar.
+struct NotMineItems: View {
+    @Environment(AppModel.self) private var model
+    var meeting: UpcomingMeeting
+    var done: () -> Void = {}
+
+    var body: some View {
+        Button(meeting.isRecurring ? String(localized: "Diese Serie ausblenden") : String(localized: "Diesen Termin ausblenden"), systemImage: "eye.slash") {
+            done()
+            model.hide(.meeting(meeting))
+        }
+        if let calendar = HiddenCalendarItem.calendar(of: meeting) {
+            Button(String(localized: "Alles aus „\(calendar.title)“ ausblenden", comment: "hide every meeting of this calendar"), systemImage: "calendar") {
+                done()
+                model.hide(calendar)
+            }
+        }
     }
 }
 

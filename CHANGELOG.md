@@ -19,6 +19,10 @@ All notable changes to this project are recorded here. The format follows
   create the tasks in their remembered place. Settings › GitHub lists what the app remembered. Signs in through the
   GitHub CLI like Issues for GitHub, or with a code on github.com when the build has an OAuth client ID. Public
   repositories never get context or quotes from the transcript.
+- **Only your meetings.** Calendar events with guests that you're neither among nor organizing (a team's shared
+  calendar, a colleague's) no longer show up under *Upcoming* or remind you. *Not my meeting* in an event's popover,
+  its context menu or the reminder hides a series or everything from its calendar; Settings › General lists what's
+  hidden and brings it back. A meeting that is in two calendars shows once.
 
 ### Fixed
 

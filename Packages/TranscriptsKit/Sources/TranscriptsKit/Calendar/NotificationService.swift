@@ -6,6 +6,8 @@ public enum NotificationAction: Equatable, Sendable {
     /// Start recording; carries the calendar event when the reminder came from one.
     case record(eventId: String?, start: Date?)
     case snooze(eventId: String, title: String, start: Date)
+    /// "Nicht mein Meeting" on a reminder: hide the series.
+    case notMine(eventId: String, title: String)
     case stopRecording
     case open
     /// "Anlegen" on the tasks of a summary: create them where they were prepared to go.
@@ -28,6 +30,7 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
     nonisolated static let recordAction = "RECORD"
     nonisolated static let laterAction = "LATER"
     nonisolated static let ignoreAction = "IGNORE"
+    nonisolated static let notMineAction = "NOT_MINE"
     nonisolated static let stopAction = "STOP"
     nonisolated static let reminderPrefix = "reminder-"
 
@@ -43,12 +46,13 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
         center.delegate = self
         let record = UNNotificationAction(identifier: Self.recordAction, title: String(localized: "Aufnehmen", comment: "notification button: start recording"), options: [])
         let later = UNNotificationAction(identifier: Self.laterAction, title: String(localized: "Später", comment: "notification button: remind me later"), options: [])
+        let notMine = UNNotificationAction(identifier: Self.notMineAction, title: String(localized: "Nicht mein Meeting", comment: "notification button: this calendar meeting isn't the user's, don't remind again"), options: [])
         let ignore = UNNotificationAction(identifier: Self.ignoreAction, title: String(localized: "Ignorieren", comment: "notification button: ignore the detected meeting"), options: [.destructive])
         let stop = UNNotificationAction(identifier: Self.stopAction, title: String(localized: "Aufnahme beenden"), options: [])
         let create = UNNotificationAction(identifier: Self.createIssuesAction, title: String(localized: "Anlegen", comment: "notification button: create the prepared GitHub issues"), options: [])
         let review = UNNotificationAction(identifier: Self.reviewIssuesAction, title: String(localized: "Vorher ansehen", comment: "notification button: look at the GitHub issues before creating them"), options: [.foreground])
         center.setNotificationCategories([
-            UNNotificationCategory(identifier: Self.meetingCategory, actions: [record, later], intentIdentifiers: []),
+            UNNotificationCategory(identifier: Self.meetingCategory, actions: [record, later, notMine], intentIdentifiers: []),
             UNNotificationCategory(identifier: Self.detectedCategory, actions: [record, ignore], intentIdentifiers: []),
             UNNotificationCategory(identifier: Self.endedCategory, actions: [stop], intentIdentifiers: []),
             UNNotificationCategory(identifier: Self.issuesCategory, actions: [create, review], intentIdentifiers: []),
@@ -163,6 +167,8 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
             action = .record(eventId: eventId, start: start)
         case Self.laterAction:
             action = eventId.map { .snooze(eventId: $0, title: title, start: start ?? Date()) }
+        case Self.notMineAction:
+            action = eventId.map { .notMine(eventId: $0, title: title) }
         case Self.stopAction:
             action = .stopRecording
         case Self.createIssuesAction:

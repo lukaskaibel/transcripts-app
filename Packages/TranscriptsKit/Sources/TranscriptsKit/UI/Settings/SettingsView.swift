@@ -154,6 +154,19 @@ struct GeneralSettings: View {
                 Text("Meldet sich, wenn Zoom, Teams, Meet im Browser & Co. das Mikrofon benutzen, und wenn der Call vorbei ist, die Aufnahme aber noch läuft.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Toggle("Nur Meetings, bei denen du dabei bist", isOn: $settings.onlyMyMeetings)
+                    .onChange(of: settings.onlyMyMeetings) { model.refreshCalendar() }
+                Text("Termine mit Gästen, zu denen du weder eingeladen bist noch selbst eingeladen hast, erscheinen nicht, etwa aus dem geteilten Kalender eines Teams. Andere blendest du beim Termin mit „Nicht mein Meeting“ aus.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            if !settings.hiddenMeetings.isEmpty {
+                Section("Ausgeblendet") {
+                    ForEach(settings.hiddenMeetings.reversed()) { item in
+                        HiddenMeetingRow(item: item)
+                    }
+                }
             }
 
             Section("Mitteilungen") {
@@ -211,6 +224,36 @@ struct GeneralSettings: View {
         NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { _, error in
             guard error == nil else { return }
             Task { @MainActor in NSApp.terminate(nil) }
+        }
+    }
+}
+
+/// A meeting series or calendar the user hid, with the way back.
+private struct HiddenMeetingRow: View {
+    @Environment(AppModel.self) private var model
+    let item: HiddenCalendarItem
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: item.kind == .calendar ? "calendar" : (item.isRecurring ? "repeat" : "calendar.badge.minus"))
+                .foregroundStyle(.secondary)
+                .frame(width: 18)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(item.title).lineLimit(1)
+                Text(kind).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+            }
+            Spacer(minLength: 8)
+            Button("Einblenden") { model.unhide(item) }
+        }
+    }
+
+    private var kind: String {
+        switch item.kind {
+        case .calendar:
+            String(localized: "Ganzer Kalender", comment: "a hidden calendar: all of its meetings")
+        case .event:
+            [item.isRecurring ? String(localized: "Serie", comment: "a hidden recurring calendar meeting") : String(localized: "Einzelner Termin", comment: "a hidden calendar meeting that doesn't repeat"),
+             item.calendarTitle].compactMap { $0 }.joined(separator: " · ")
         }
     }
 }

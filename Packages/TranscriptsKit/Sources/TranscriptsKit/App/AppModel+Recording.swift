@@ -31,7 +31,7 @@ extension AppModel {
         }
 
         let now = Date()
-        let calendarMeeting = event ?? calendar.meeting(around: now)
+        let calendarMeeting = event ?? calendar.meeting(around: now, filter: meetingFilter)
         let meeting = Meeting(
             title: calendarMeeting?.title ?? String(localized: "Meeting \(TimeFormat.time(now))", comment: "title of a recording without a calendar event; the time it started"),
             startedAt: now,
