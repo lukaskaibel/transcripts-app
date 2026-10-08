@@ -22,6 +22,7 @@
 </p>
 
 <p align="center">
+  <a href="https://lukaskaibel.github.io/transcripts-app/"><b>Website</b></a> &nbsp;·&nbsp;
   <a href="#a-quick-tour"><b>Tour</b></a> &nbsp;·&nbsp;
   <a href="#how-the-names-come-about"><b>How names work</b></a> &nbsp;·&nbsp;
   <a href="#languages"><b>Languages</b></a> &nbsp;·&nbsp;
@@ -297,15 +298,24 @@ Packages/TranscriptsKit/      Everything else, as a Swift package
   Tests/TranscriptsKitTests/
 Packages/Vendor/FluidAudio/   FluidAudio, vendored (see below)
 Config/                       Build settings, Info.plist, entitlements
-Tools/                        App icons, test meetings, screenshots, README pictures, translations
+Tools/                        App icons, test meetings, screenshots, README and website pictures, translations
 Design/                       Icon, README pictures, social preview
+Website/                      The website on GitHub Pages: home, privacy policy, terms, support, Impressum
 ```
 
 The interface texts are written in German in the code and translated in `Transcripts/Localizable.xcstrings`. After
 changing texts, `Tools/localization/extract.sh` brings the catalog up to date; `Tools/localization/catalog.py` lists
 what a language lacks, takes translations in and checks placeholders and plural forms. The pictures in this README are
-made by `Tools/readme-images.sh`: the app renders its own windows in demo mode, in light and dark, and
-`Tools/readme-images/build.py` lays them out. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose changes.
+made by `Tools/readme-images.sh`: the app renders its own windows in demo mode, in light and dark,
+`Tools/readme-images/build.py` lays them out, and `Tools/readme-images/website.py` makes the website's pictures from
+the same windows. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose changes.
+
+The [website](https://lukaskaibel.github.io/transcripts-app/) is plain HTML and CSS in `Website/`, without a build
+step; `.github/workflows/website.yml` publishes it to GitHub Pages when it changes on `main`. To look at it locally:
+
+```bash
+python3 -m http.server --directory Website
+```
 
 Data lives in `~/Library/Application Support/Transcripts` (the database and the recordings, compressed to AAC after
 processing; keep them forever, for 30 days, or not at all). API keys are in the Keychain.

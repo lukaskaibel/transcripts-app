@@ -36,7 +36,9 @@ Every pull request is reviewed and merged by the maintainer; nothing lands on `m
   label, the reason for a suggestion) stay German and are shown through `Strings.label` and `Strings.reason`.
 - **Colours and fonts come from `UI/Theme.swift`.** Every colour needs a light and a dark value.
 - **Show what changed.** A change people will notice gets a line in `CHANGELOG.md` under "Unreleased", and the README
-  follows: its feature sections, the shortcut table, "Good to know", and the pictures (`Tools/readme-images.sh`).
+  follows: its feature sections, the shortcut table, "Good to know", and the pictures (`Tools/readme-images.sh`,
+  which also makes the website's). When what the app stores or sends changes, so do the privacy policy and the
+  support page in `Website/`.
 - Match the style of the code around you. Comments explain why, not what.
 
 ## Releases

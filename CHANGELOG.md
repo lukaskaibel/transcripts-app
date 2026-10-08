@@ -23,6 +23,9 @@ All notable changes to this project are recorded here. The format follows
   calendar, a colleague's) no longer show up under *Upcoming* or remind you. *Not my meeting* in an event's popover,
   its context menu or the reminder hides a series or everything from its calendar; Settings › General lists what's
   hidden and brings it back. A meeting that is in two calendars shows once.
+- **A website** at [lukaskaibel.github.io/transcripts-app](https://lukaskaibel.github.io/transcripts-app/): the app
+  on one screen, with a note that it is coming to the Mac App Store, and the pages a store listing needs: privacy
+  policy, terms of use, support with common questions, and the Impressum.
 
 ### Fixed
 
