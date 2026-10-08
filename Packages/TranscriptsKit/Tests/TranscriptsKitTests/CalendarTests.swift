@@ -28,6 +28,19 @@ import Testing
         #expect(EventPerson.includesUser(attendees: [room], organizer: team, ownAddresses: []))
     }
 
+    @Test func aTeamCalendarIsNotTheUser() {
+        // "Lela, Bashar?, Tim" as EventKit reports it: the lab's calendar organizes and is a guest, both as the current user.
+        let calendar = EventPerson(email: "e3nn294mjobv4b4n12vcv9pc5g@group.calendar.google.com", reportedAsCurrentUser: true, isRoom: false)
+        let lela = EventPerson(email: "lelat98@zedat.fu-berlin.de", reportedAsCurrentUser: false, isRoom: false)
+        #expect(!calendar.isCurrentUser && !calendar.isPerson)
+        #expect(!EventPerson.includesUser(attendees: [calendar, lela], organizer: calendar, ownAddresses: []))
+        // The user's own calendar at Google is still the user.
+        let own = EventPerson(email: "lukas.kaibel@gmail.com", reportedAsCurrentUser: true, isRoom: false)
+        #expect(EventPerson.includesUser(attendees: [lela, own], organizer: lela, ownAddresses: []))
+        // A room counts as no one.
+        #expect(!EventPerson(email: "room@example.com", reportedAsCurrentUser: false, isRoom: true).isPerson)
+    }
+
     @Test func anotherAddressOfTheUserCounts() {
         // Invited at the work address, shown in a calendar of the private account.
         let work = EventPerson(email: "Lukas.Kaibel@FU-Berlin.de", isCurrentUser: false)

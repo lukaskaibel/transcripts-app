@@ -108,6 +108,24 @@ struct EventPerson: Equatable {
     /// Rooms and equipment are guests too, but say nothing about who takes part.
     var isPerson = true
 
+    init(email: String?, isCurrentUser: Bool, isPerson: Bool = true) {
+        self.email = email
+        self.isCurrentUser = isCurrentUser
+        self.isPerson = isPerson
+    }
+
+    /// As EventKit reports a participant. A team's Google calendar organizes its own events and is the "current user"
+    /// in them, as the owner of that calendar: a calendar, not the user.
+    init(email: String?, reportedAsCurrentUser: Bool, isRoom: Bool) {
+        let isCalendar = email.map(Self.isCalendarAddress) ?? false
+        self.init(email: email, isCurrentUser: reportedAsCurrentUser && !isCalendar, isPerson: !isRoom && !isCalendar)
+    }
+
+    /// "…@group.calendar.google.com", "…@resource.calendar.google.com": the address of a calendar.
+    static func isCalendarAddress(_ email: String) -> Bool {
+        email.lowercased().hasSuffix(".calendar.google.com")
+    }
+
     /// Whether the user takes part: invited or organizing. Without guests nothing says otherwise.
     static func includesUser(attendees: [EventPerson], organizer: EventPerson?, ownAddresses: Set<String>) -> Bool {
         let people = attendees.filter(\.isPerson)
@@ -181,7 +199,7 @@ public final class CalendarService {
     static func meetings(from events: [EKEvent], filter: MeetingFilter) -> [UpcomingMeeting] {
         // The user's addresses, from the events they are in: an invitation to one of them counts in every calendar.
         let ownAddresses = Set(events.flatMap { ($0.attendees ?? []) + [$0.organizer].compactMap { $0 } }
-            .filter(\.isCurrentUser).compactMap { Self.email(of: $0)?.lowercased() })
+            .map(person).filter(\.isCurrentUser).compactMap { $0.email?.lowercased() })
         var seen = Set<String>()
         return events.compactMap { event in
             guard let meeting = meeting(from: event, onlyMine: filter.onlyMine, ownAddresses: ownAddresses), filter.allows(meeting) else { return nil }
@@ -196,8 +214,8 @@ public final class CalendarService {
     }
 
     private static func person(_ participant: EKParticipant) -> EventPerson {
-        EventPerson(email: email(of: participant), isCurrentUser: participant.isCurrentUser,
-                    isPerson: participant.participantType != .room && participant.participantType != .resource)
+        EventPerson(email: email(of: participant), reportedAsCurrentUser: participant.isCurrentUser,
+                    isRoom: participant.participantType == .room || participant.participantType == .resource)
     }
 
     static func meeting(from event: EKEvent, onlyMine: Bool = true, ownAddresses: Set<String> = []) -> UpcomingMeeting? {
@@ -206,7 +224,7 @@ public final class CalendarService {
         if participants.contains(where: { $0.isCurrentUser && $0.participantStatus == .declined }) { return nil }
         if onlyMine, !EventPerson.includesUser(attendees: participants.map(person), organizer: event.organizer.map(person), ownAddresses: ownAddresses) { return nil }
         let attendees = participants
-            .filter { !$0.isCurrentUser && $0.participantType != .room && $0.participantType != .resource }
+            .filter { !$0.isCurrentUser && person($0).isPerson }
             .compactMap { participant -> Attendee? in
                 let email = email(of: participant)
                 let name = participant.name?.trimmingCharacters(in: .whitespaces)

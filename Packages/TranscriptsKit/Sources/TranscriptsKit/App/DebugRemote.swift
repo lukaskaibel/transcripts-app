@@ -129,7 +129,8 @@ final class DebugRemote {
         case "hidecalendar":
             if let meeting = model.upcoming.first(where: { $0.eventId == argument }), let item = HiddenCalendarItem.calendar(of: meeting) { model.hide(item) }
         case "calendarreport":
-            log(model.calendar.report(filter: model.meetingFilter).joined(separator: "\n"))
+            // calendarreport [hours]
+            log(model.calendar.report(hours: Double(argument) ?? 36, filter: model.meetingFilter).joined(separator: "\n"))
         case "unhideall":
             for item in model.settings.hiddenMeetings { model.unhide(item) }
         case "calendar":
