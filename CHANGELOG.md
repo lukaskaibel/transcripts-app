@@ -6,6 +6,12 @@ All notable changes to this project are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **A website** at [lukaskaibel.github.io/transcripts-app](https://lukaskaibel.github.io/transcripts-app/): the app
+  on one screen, with a note that it is coming to the Mac App Store, and the pages a store listing needs: privacy
+  policy, terms of use, support with common questions, and the Impressum.
+
 ## [0.1.0] - 2026-10-07
 
 The first version: everything below is new.

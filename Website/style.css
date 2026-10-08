@@ -1,0 +1,683 @@
+/* The website of Transcripts. Colours follow the app's Theme.swift (indigo accent, the red of a recording), in light
+   and dark. No fonts, scripts or images from other servers. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #F5F5F9;
+  --text: #16171B;
+  --text-2: #4F535B;
+  --text-3: #6B6F78;
+  --accent: #5B63D3;
+  --recording: #D64545;
+  --line: rgba(22, 24, 44, 0.10);
+  --surface: rgba(255, 255, 255, 0.55);
+  --surface-hover: rgba(255, 255, 255, 0.85);
+  --button: #16171B;
+  --button-text: #FFFFFF;
+  --button-hover: #2A2C33;
+  --window-shadow: rgba(36, 38, 80, 0.26);
+  --glow-indigo: 128, 135, 240;
+  --glow-coral: 236, 128, 116;
+  --glow-sky: 104, 178, 226;
+  --glow-indigo-a: 0.42;
+  --glow-coral-a: 0.20;
+  --glow-sky-a: 0.16;
+  --bar-top: 91, 99, 211;
+  --bar-bottom: 196, 110, 160;
+  --bar-a: 0.24;
+  --noise: 0.05;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0B0C10;
+    --text: #F0F1F5;
+    --text-2: #A9ADBA;
+    --text-3: #7D8290;
+    --accent: #8F96F2;
+    --recording: #EB6A6A;
+    --line: rgba(255, 255, 255, 0.09);
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-hover: rgba(255, 255, 255, 0.08);
+    --button: #F0F1F5;
+    --button-text: #0B0C10;
+    --button-hover: #FFFFFF;
+    --window-shadow: rgba(0, 0, 0, 0.6);
+    --glow-indigo: 101, 108, 230;
+    --glow-coral: 214, 92, 92;
+    --glow-sky: 70, 150, 210;
+    --glow-indigo-a: 0.74;
+    --glow-coral-a: 0.26;
+    --glow-sky-a: 0.20;
+    --bar-top: 143, 150, 242;
+    --bar-bottom: 222, 120, 170;
+    --bar-a: 0.22;
+    --noise: 0.07;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 var(--font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* The backdrop: an indigo glow behind the window, the warm light of a recording below it, a cool one in the corner,
+   and a fine grain so the gradients don't band. Fixed layers, so long pages scroll over them
+   (background-attachment: fixed doesn't work on iOS). */
+body::before, body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+}
+
+body::before {
+  background:
+    radial-gradient(circle max(75vw, 640px) at 78% 42%,
+      rgba(var(--glow-indigo), var(--glow-indigo-a)) 0%,
+      rgba(var(--glow-indigo), calc(var(--glow-indigo-a) * 0.56)) 25%,
+      rgba(var(--glow-indigo), calc(var(--glow-indigo-a) * 0.25)) 50%,
+      rgba(var(--glow-indigo), calc(var(--glow-indigo-a) * 0.06)) 75%,
+      rgba(var(--glow-indigo), 0) 100%),
+    radial-gradient(circle max(42vw, 380px) at 38% 108%,
+      rgba(var(--glow-coral), var(--glow-coral-a)) 0%,
+      rgba(var(--glow-coral), calc(var(--glow-coral-a) * 0.56)) 25%,
+      rgba(var(--glow-coral), calc(var(--glow-coral-a) * 0.25)) 50%,
+      rgba(var(--glow-coral), 0) 100%),
+    radial-gradient(circle max(48vw, 420px) at -4% -8%,
+      rgba(var(--glow-sky), var(--glow-sky-a)) 0%,
+      rgba(var(--glow-sky), calc(var(--glow-sky-a) * 0.56)) 25%,
+      rgba(var(--glow-sky), calc(var(--glow-sky-a) * 0.25)) 50%,
+      rgba(var(--glow-sky), 0) 100%);
+}
+
+body::after {
+  z-index: -1;
+  opacity: var(--noise);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 1.6 -0.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+a { color: inherit; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+/* Buttons */
+
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 20px 0 18px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease-out, border-color 0.15s ease-out, transform 0.15s ease-out;
+}
+
+.button svg { width: 20px; height: 20px; flex: none; fill: currentColor; }
+
+.button.primary { background: var(--button); color: var(--button-text); }
+.button.primary:hover { background: var(--button-hover); }
+.button:active { transform: scale(0.98); }
+
+/* Until the app is out: says so, in the place the Mac App Store badge will take, with the app's recording dot. */
+.soon {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.soon::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--recording);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--recording) 40%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--recording) 0%, transparent); }
+}
+
+.soon strong { color: var(--text); font-weight: 600; }
+
+.store-badge { display: block; height: 48px; width: auto; }
+
+/* Footer */
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 20px clamp(20px, 6vw, 120px) 24px;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.footer nav { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+.footer a { text-decoration: none; transition: color 0.15s ease-out; }
+.footer a:hover { color: var(--text); }
+.footer a[aria-current="page"] { color: var(--text); }
+
+/* ------------------------------------------------------------------------------------------------------------ */
+/* The home page: one screen, no scrolling. */
+
+.home {
+  --pad: clamp(24px, 7vw, 132px);
+  --copy: clamp(380px, 22vw + 150px, 560px);
+  --footer: 64px;
+  /* The window's width: what is left beside the text, unless the window is too short for it, and at most about its
+     real size. It runs off the right edge by 8 %, and the recorder stands out 6 % on its left. */
+  --mac: min(calc((100vw - var(--pad) - var(--copy) - 40px) / 0.98), calc((100vh - var(--footer) - 150px) * 1.56), 1320px);
+  --mac: min(calc((100vw - var(--pad) - var(--copy) - 40px) / 0.98), calc((100svh - var(--footer) - 150px) * 1.56), 1320px);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 48px var(--pad) 24px;
+}
+
+.copy { position: relative; z-index: 2; width: var(--copy); }
+
+.app-icon {
+  display: block;
+  width: clamp(112px, 4vw + 70px, 156px);
+  height: auto;
+  margin: 0 0 18px -10px;
+}
+
+.home h1 {
+  margin: 0;
+  font-size: clamp(52px, 5.6vw, 96px);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+}
+
+.lead {
+  margin: 22px 0 0;
+  font-size: clamp(22px, 1.1vw + 14px, 34px);
+  line-height: 1.25;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.lead span { display: block; color: var(--text-2); }
+
+.sub {
+  margin: 16px 0 0;
+  max-width: 420px;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--text-3);
+  text-wrap: pretty;
+}
+
+.home .actions { margin-top: 34px; }
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text-2);
+}
+
+.facts li { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; }
+
+/* A white glyph on a small coloured square, as in the Mac's System Settings. */
+.glyph {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: linear-gradient(var(--glyph-top), var(--glyph-bottom));
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(20, 22, 50, 0.14);
+}
+
+.glyph svg { width: 15px; height: 15px; fill: none; stroke: #FFFFFF; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.glyph rect { fill: #FFFFFF; stroke: none; }
+.glyph.free { --glyph-top: #5DD36F; --glyph-bottom: #2CB24A; }
+.glyph.code { --glyph-top: #8D94F3; --glyph-bottom: #5B63D3; }
+.glyph.private { --glyph-top: #5AAEFF; --glyph-bottom: #1F7BF0; }
+
+/* The Mac: the meeting window runs off the right edge, the floating recorder hovers over its lower left corner, as
+   it does over any window while a meeting is recorded. */
+
+.screens {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: calc(var(--mac) * -0.08);
+  width: calc(var(--mac) * 1.06);
+  height: calc(var(--mac) * 0.676);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.screens img { display: block; width: 100%; height: auto; }
+
+.screens .mac {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--mac);
+  filter: drop-shadow(0 calc(var(--mac) * 0.025) calc(var(--mac) * 0.04) var(--window-shadow));
+}
+
+.screens .recorder {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(var(--mac) * 0.34);
+  filter: drop-shadow(0 calc(var(--mac) * 0.016) calc(var(--mac) * 0.024) var(--window-shadow));
+}
+
+/* A voice behind it all: rounded bars like the ones in the icon, louder in the middle, each one moving at its own
+   pace. Seven heights, five speeds and four delays repeat at different rates, so no pattern shows. */
+.voice {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: calc(var(--mac) * 1.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  transform: translateY(-50%);
+  pointer-events: none;
+  /* Fades out before the text and towards the top and bottom. */
+  -webkit-mask-image: linear-gradient(to right, transparent calc(var(--pad) + var(--copy) * 0.8), #000 calc(var(--pad) + var(--copy) + 80px)),
+    linear-gradient(transparent, #000 22%, #000 78%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent calc(var(--pad) + var(--copy) * 0.8), #000 calc(var(--pad) + var(--copy) + 80px)),
+    linear-gradient(transparent, #000 22%, #000 78%, transparent);
+  mask-composite: intersect;
+}
+
+.voice i {
+  --h: 0.6;
+  --e: 1;
+  --lo: 0.45;
+  --t: 1.6s;
+  --d: 0s;
+  flex: none;
+  width: clamp(5px, 0.7vw, 12px);
+  height: calc(var(--h) * var(--e) * 100%);
+  border-radius: 99px;
+  background: linear-gradient(rgba(var(--bar-top), var(--bar-a)), rgba(var(--bar-bottom), var(--bar-a)));
+  transform: scaleY(var(--lo));
+  animation: speak var(--t) ease-in-out var(--d) infinite;
+}
+
+.voice i:nth-child(7n+1) { --h: 0.62; }
+.voice i:nth-child(7n+2) { --h: 0.92; }
+.voice i:nth-child(7n+3) { --h: 0.46; }
+.voice i:nth-child(7n+4) { --h: 1; }
+.voice i:nth-child(7n+5) { --h: 0.7; }
+.voice i:nth-child(7n+6) { --h: 0.36; }
+.voice i:nth-child(7n) { --h: 0.82; }
+
+.voice i:nth-child(5n+1) { --t: 1.3s; --lo: 0.5; }
+.voice i:nth-child(5n+2) { --t: 1.9s; --lo: 0.7; }
+.voice i:nth-child(5n+3) { --t: 1.55s; --lo: 0.55; }
+.voice i:nth-child(5n+4) { --t: 2.2s; --lo: 0.75; }
+.voice i:nth-child(5n) { --t: 1.7s; --lo: 0.6; }
+
+.voice i:nth-child(4n+1) { --d: -0.4s; }
+.voice i:nth-child(4n+2) { --d: -1.3s; }
+.voice i:nth-child(4n+3) { --d: -0.8s; }
+.voice i:nth-child(4n) { --d: -1.9s; }
+
+/* Louder in the middle. */
+.voice i:nth-child(-n+8), .voice i:nth-child(n+51) { --e: 0.32; }
+.voice i:nth-child(n+9):nth-child(-n+16), .voice i:nth-child(n+45):nth-child(-n+50) { --e: 0.55; }
+.voice i:nth-child(n+17):nth-child(-n+22), .voice i:nth-child(n+39):nth-child(-n+44) { --e: 0.8; }
+
+@keyframes speak {
+  0%, 100% { transform: scaleY(var(--lo)); }
+  50% { transform: scaleY(1); }
+}
+
+.home .footer { position: relative; z-index: 3; }
+
+/* Laptops with short screens: a little smaller, so everything fits above the footer. */
+@media (min-width: 901px) and (min-aspect-ratio: 1001/1000) and (max-height: 820px) {
+  .hero { padding-top: 32px; padding-bottom: 16px; }
+  .app-icon { width: 100px; margin-bottom: 12px; }
+  .home h1 { font-size: clamp(48px, 5vw, 80px); }
+  .lead { margin-top: 16px; }
+  .home .actions { margin-top: 26px; }
+}
+
+@media (min-width: 901px) and (min-aspect-ratio: 1001/1000) and (max-height: 720px) {
+  .sub { display: none; }
+}
+
+/* Narrow windows and phones: the text on top, and below it the whole window, as large as the space allows, with
+   the recorder over its lower edge, big enough to read. */
+@media (max-width: 900px), (max-aspect-ratio: 1/1) {
+  .home { --copy: min(560px, 100%); }
+
+  /* The voice shares the window's cell, so its bars stay around the window and out of the text. */
+  .hero {
+    display: grid;
+    grid-template-rows: auto minmax(var(--screens-min, 200px), 1fr);
+    align-items: stretch;
+    justify-items: center;
+    padding: clamp(28px, 6vh, 72px) 16px 0;
+    text-align: center;
+  }
+
+  .copy { grid-row: 1; display: flex; flex-direction: column; align-items: center; }
+  .app-icon { width: 96px; height: 96px; margin: 0 0 10px; }
+  .sub { margin-left: auto; margin-right: auto; }
+  .home .actions, .facts { justify-content: center; }
+  .home .actions { margin-top: 28px; }
+
+  .screens, .voice {
+    position: relative;
+    grid-row: 2;
+    grid-column: 1;
+    top: auto;
+    right: auto;
+    justify-self: stretch;
+    width: auto;
+    height: auto;
+    margin: clamp(24px, 4vh, 44px) 0 8px;
+    transform: none;
+  }
+
+  .screens { container-type: size; }
+
+  /* --m is the window's width, --r the recorder's; together they are about 0.75 window widths high. */
+  .screens > * {
+    --m: min(calc(100cqw - 8px), calc(100cqh / 0.75), 760px);
+    --r: min(calc(var(--m) * 0.8), 340px);
+  }
+
+  .screens .mac {
+    top: calc(50% - var(--m) * 0.375);
+    right: auto;
+    left: 50%;
+    width: var(--m);
+    transform: translateX(-50%);
+    filter: drop-shadow(0 calc(var(--m) * 0.03) calc(var(--m) * 0.05) var(--window-shadow));
+  }
+
+  .screens .recorder {
+    top: calc(50% - var(--m) * 0.375 + var(--m) * 0.641 - var(--r) * 0.11);
+    bottom: auto;
+    left: 50%;
+    width: var(--r);
+    transform: translateX(-50%);
+    filter: drop-shadow(0 calc(var(--r) * 0.04) calc(var(--r) * 0.06) var(--window-shadow));
+  }
+
+  .voice {
+    left: auto;
+    margin-left: -16px;
+    margin-right: -16px;
+    -webkit-mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 45%, transparent 100%);
+    mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 45%, transparent 100%);
+  }
+
+  .home .footer { flex-direction: column; justify-content: center; padding-top: 12px; text-align: center; }
+  .home .footer nav { order: -1; justify-content: center; }
+}
+
+@media (max-width: 900px) and (max-height: 860px), (max-aspect-ratio: 1/1) and (max-height: 860px) {
+  .sub { display: none; }
+}
+
+@media (max-width: 900px) and (max-height: 760px), (max-aspect-ratio: 1/1) and (max-height: 760px) {
+  .home { --screens-min: 170px; }
+  .hero { padding-top: 24px; }
+  .app-icon { width: 72px; height: 72px; margin-bottom: 8px; }
+  .home h1 { font-size: 46px; }
+  .lead { margin-top: 12px; font-size: 20px; }
+  .home .actions { margin-top: 20px; gap: 10px; }
+  .button, .soon { height: 44px; }
+  .facts { margin-top: 18px; }
+  .screens, .voice { margin-top: 16px; }
+  .home .footer { gap: 4px; padding-top: 6px; padding-bottom: 16px; }
+}
+
+@media (max-width: 900px) and (max-height: 640px), (max-aspect-ratio: 1/1) and (max-height: 640px) {
+  .home { --screens-min: 140px; }
+  .app-icon { width: 60px; height: 60px; margin-bottom: 6px; }
+  .home h1 { font-size: 40px; }
+  .lead { margin-top: 10px; font-size: 18px; }
+  .home .actions { margin-top: 16px; }
+  .facts { margin-top: 14px; }
+}
+
+@media (max-width: 420px) {
+  .home .actions { flex-direction: column; align-items: stretch; width: min(100%, 300px); }
+  .button, .soon { justify-content: center; }
+  .facts { gap: 8px 12px; font-size: 13.5px; }
+  .facts li { gap: 6px; }
+  .glyph { width: 21px; height: 21px; border-radius: 6px; }
+  .glyph svg { width: 13px; height: 13px; }
+}
+
+/* Too short for one screen (a phone on its side): let it scroll rather than cut off the text. */
+@media (max-height: 500px) {
+  .home { overflow: visible; }
+}
+
+/* ------------------------------------------------------------------------------------------------------------ */
+/* Text pages: privacy, terms, support, legal notice. */
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 22px clamp(20px, 5vw, 48px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.brand img { width: 34px; height: 34px; margin: -3px 0; }
+
+.top .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: color 0.15s ease-out;
+}
+
+.top .link:hover { color: var(--text); }
+.top .link svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* The footer stays at the bottom of the window on short pages. */
+body:not(.home) { display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; }
+.top, .doc, .doc + .footer { width: 100%; }
+
+.doc {
+  flex: 1 0 auto;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(28px, 7vh, 72px) 20px 56px;
+}
+
+.doc h1 {
+  margin: 0;
+  font-size: clamp(36px, 5vw, 52px);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.doc .intro {
+  margin: 18px 0 0;
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+
+.doc .updated { margin: 14px 0 0; font-size: 13px; color: var(--text-3); }
+
+.doc h2 {
+  margin: 48px 0 0;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+  font-size: 21px;
+  line-height: 1.3;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.doc h3 { margin: 28px 0 0; font-size: 16px; font-weight: 650; letter-spacing: -0.01em; }
+
+.doc p, .doc ul, .doc address { margin: 12px 0 0; color: var(--text-2); }
+.doc address { font-style: normal; }
+.doc ul { padding-left: 20px; }
+.doc li { margin: 6px 0 0; padding-left: 4px; }
+.doc li::marker { color: var(--text-3); }
+.doc strong { color: var(--text); font-weight: 600; }
+.doc code {
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  font: 0.88em/1.4 ui-monospace, "SF Mono", Menlo, monospace;
+  overflow-wrap: anywhere;
+}
+
+.doc a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); text-underline-offset: 3px; }
+.doc a:hover { text-decoration-color: var(--accent); }
+
+/* Support: ways to get in touch. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 32px 0 0;
+}
+
+.doc .card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 18px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition: background-color 0.15s ease-out, border-color 0.15s ease-out;
+}
+
+.doc .card:hover { background: var(--surface-hover); }
+.card svg { width: 22px; height: 22px; margin-bottom: 10px; fill: none; stroke: var(--accent); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.card svg.filled { fill: var(--accent); stroke: none; }
+.card b { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.card span { font-size: 13.5px; line-height: 1.45; color: var(--text-3); overflow-wrap: anywhere; }
+
+/* Support: questions that fold open. */
+.faq { margin: 16px 0 0; border-top: 1px solid var(--line); }
+.faq details { border-bottom: 1px solid var(--line); }
+
+.faq summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 2px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq summary::-webkit-details-marker { display: none; }
+
+.faq summary::after {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-right: 1.6px solid var(--text-3);
+  border-bottom: 1.6px solid var(--text-3);
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.2s ease-out;
+}
+
+.faq details[open] summary::after { transform: translateY(2px) rotate(-135deg); }
+.faq details > :not(summary) { margin: 0 2px; }
+.faq details > :last-child { padding-bottom: 18px; }
+
+.doc + .footer { max-width: 720px; margin: 0 auto; padding-left: 20px; padding-right: 20px; border-top: 1px solid var(--line); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

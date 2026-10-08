@@ -1,7 +1,7 @@
 #!/bin/zsh
 # Takes the README's pictures: the app in demo mode renders its own windows (in English, light and dark, and the
-# meeting in a few other languages), and Tools/readme-images/build.py lays them out as Design/screenshots/*.webp and
-# Design/social-preview.png.
+# meeting in a few other languages), Tools/readme-images/build.py lays them out as Design/screenshots/*.webp and
+# Design/social-preview.png, and Tools/readme-images/website.py makes the website's pictures in Website/images.
 #   Tools/readme-images.sh
 # Needs Python 3 with Pillow and NumPy. Works with a locked screen: the app draws into images itself, nothing is
 # captured from the screen.
@@ -48,3 +48,5 @@ done
 
 echo "Laying out…"
 python3 Tools/readme-images/build.py "$raw"
+echo "The website's pictures…"
+python3 Tools/readme-images/website.py "$raw"

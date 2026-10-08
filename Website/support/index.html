@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Support · Transcripts</title>
+  <meta name="description" content="Help with Transcripts: how to get in touch, and answers to common questions about recording, names, summaries and your data.">
+  <meta name="theme-color" content="#F5F5F9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0B0C10" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="../images/favicon-light.png" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="../images/favicon-dark.png" media="(prefers-color-scheme: dark)">
+  <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="../">
+      <picture>
+        <source srcset="../images/icon-dark.png" media="(prefers-color-scheme: dark)">
+        <img src="../images/icon-light.png" width="34" height="34" alt="">
+      </picture>
+      Transcripts
+    </a>
+    <a class="link" href="https://github.com/lukaskaibel/transcripts-app">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+      GitHub
+    </a>
+  </header>
+
+  <main class="doc">
+    <h1>Support</h1>
+    <p class="intro">A question, a problem or an idea? Write an email or open an issue on GitHub. Every message is
+      read.</p>
+
+    <div class="cards">
+      <a class="card" href="mailto:transcripts.app@icloud.com">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>
+        <b>Email</b>
+        <span>transcripts.app@icloud.com</span>
+      </a>
+      <a class="card" href="https://github.com/lukaskaibel/transcripts-app/issues">
+        <svg class="filled" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/></svg>
+        <b>GitHub Issues</b>
+        <span>Bugs and feature requests, in the open.</span>
+      </a>
+      <a class="card" href="https://github.com/lukaskaibel/transcripts-app#getting-started">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 8-4 4 4 4M15.5 8l4 4-4 4M13.5 5.5l-3 13"/></svg>
+        <b>Build it yourself</b>
+        <span>The source and how to run it with Xcode.</span>
+      </a>
+    </div>
+
+    <h2>Common questions</h2>
+    <div class="faq">
+      <details>
+        <summary>Where do I get the app?</summary>
+        <p>It is coming to the Mac App Store. Until then you build it from the source with Xcode, which takes a few
+          minutes; the <a href="https://github.com/lukaskaibel/transcripts-app#getting-started">README</a> walks you
+          through it.</p>
+      </details>
+      <details>
+        <summary>Which Macs does it run on?</summary>
+        <p>Macs with Apple silicon (M1 or later) and macOS 26 or later. Speech recognition runs on the Neural Engine; a
+          30-minute meeting is finished about half a minute after it ends.</p>
+      </details>
+      <details>
+        <summary>Does it join my call?</summary>
+        <p>No bot joins. The app records your microphone and the sound your Mac plays, as two separate tracks, so it
+          works with Zoom, Microsoft Teams, Google Meet in the browser and any other call app. It also transcribes audio
+          and video files you import, such as voice memos or a meeting recorded in a room.</p>
+      </details>
+      <details>
+        <summary>Does anything leave my Mac?</summary>
+        <p>Recordings, transcripts and voices stay on the Mac. Only if you turn on summaries with Anthropic, OpenAI or
+          Google does the meeting's text go to that service, with your own API key. With a local model in Ollama even
+          that stays on the Mac. The details are in the <a href="../privacy/">privacy policy</a>.</p>
+      </details>
+      <details>
+        <summary>Do I need headphones?</summary>
+        <p>No. With speakers the call comes back into your microphone; after the meeting the app takes that echo out of
+          your track, so every voice is in the transcript once and your own lines stay complete.</p>
+      </details>
+      <details>
+        <summary>How does it know who is speaking?</summary>
+        <p>Confirm a voice once, and the app recognises that person in every later meeting. Names from the conversation
+          (“Thanks, Jonas”, “this is Paula”) and the calendar's invitees become suggestions you accept with a click. When
+          it isn't sure, it says so: “Hai or Julian?”. After a meeting, <strong>Who Is This?</strong> goes through the
+          voices it doesn't know yet, with a sample of each.</p>
+      </details>
+      <details>
+        <summary>Which languages does it understand?</summary>
+        <p>The interface speaks English, German, French, Spanish, Italian, Portuguese, Dutch, Polish, Russian and
+          Ukrainian. Meetings are transcribed in 25 European languages, also mixed in one meeting, and best in these
+          ten.</p>
+      </details>
+      <details>
+        <summary>The transcript has only my voice, or nothing at all.</summary>
+        <p>Transcripts needs two permissions, which macOS asks for the first time you record: <strong>Microphone</strong>
+          for your voice and <strong>Screen &amp; System Audio Recording</strong> for the call. Both are in System
+          Settings › Privacy &amp; Security. Also check that the microphone isn't muted; the app warns you while
+          recording when either track stays silent.</p>
+      </details>
+      <details>
+        <summary>Which summary services can I use?</summary>
+        <p>Anthropic, OpenAI and Google with your own API key, or a local model in
+          <a href="https://ollama.com">Ollama</a>. Enter one under Settings › AI; summaries are then written after each
+          meeting, or when you ask, in the meeting's language or one you choose.</p>
+      </details>
+      <details>
+        <summary>Am I allowed to record my meetings?</summary>
+        <p>Tell the people in a meeting that you record it. In many countries, Germany among them, you need everyone's
+          consent. The app never starts recording by itself; the reminders only ask. More in the
+          <a href="../terms/">terms</a>.</p>
+      </details>
+      <details>
+        <summary>How do I remove my data?</summary>
+        <p>Delete a meeting or a person in the app, or have recordings deleted after 30 days or right after
+          transcribing (Settings › Recording). To remove everything, delete the app and its folders in
+          <code>~/Library/Application Support</code> (<code>Transcripts</code> and <code>FluidAudio</code>). More in
+          the <a href="../privacy/">privacy policy</a>.</p>
+      </details>
+      <details>
+        <summary>Does it cost anything?</summary>
+        <p>No. Transcripts is free and open source; the code is on
+          <a href="https://github.com/lukaskaibel/transcripts-app">GitHub</a>. Summaries from Anthropic, OpenAI or Google
+          cost what those services charge for your API key.</p>
+      </details>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span>© 2026 Lukas Kaibel</span>
+    <nav aria-label="Legal and support">
+      <a href="../support/" aria-current="page">Support</a>
+      <a href="../privacy/">Privacy</a>
+      <a href="../terms/">Terms</a>
+      <a href="../impressum/">Impressum</a>
+    </nav>
+  </footer>
+</body>
+</html>
