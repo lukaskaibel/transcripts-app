@@ -216,8 +216,28 @@ public struct MeetingRow: Equatable, Identifiable, Sendable {
     public var speakers: [MeetingSpeaker]
     public var hasSummary: Bool
     public var pendingVoices: Int
+    /// When the summary was written, for "Neue Zusammenfassung" in the inbox.
+    public var summaryCreatedAt: Date?
+    /// The summary's first paragraph.
+    public var summaryOverview: String?
+    /// The summary's tasks, in their order.
+    public var actionItems: [ActionItem]
 
     public var id: String { meeting.id }
+
+    /// Open tasks that are on GitHub neither as a new nor as a linked issue.
+    public var unsentTasks: Int { actionItems.filter { !$0.done && $0.issue == nil }.count }
+
+    public init(meeting: Meeting, speakers: [MeetingSpeaker] = [], hasSummary: Bool = false, pendingVoices: Int = 0,
+                summaryCreatedAt: Date? = nil, summaryOverview: String? = nil, actionItems: [ActionItem] = []) {
+        self.meeting = meeting
+        self.speakers = speakers
+        self.hasSummary = hasSummary
+        self.pendingVoices = pendingVoices
+        self.summaryCreatedAt = summaryCreatedAt
+        self.summaryOverview = summaryOverview
+        self.actionItems = actionItems
+    }
 }
 
 /// A transcript line that matched a search.
@@ -238,14 +258,21 @@ extension AppDatabase {
     static func fetchMeetingRows(_ db: Database) throws -> [MeetingRow] {
         let meetings = try Meeting.order(Column("startedAt").desc).fetchAll(db)
         let speakers = Dictionary(grouping: try MeetingSpeaker.fetchAll(db), by: \.meetingId)
-        let summarized = Set(try String.fetchAll(db, sql: "SELECT meetingId FROM summary"))
+        var summarized: [String: (written: Date, overview: String)] = [:]
+        for row in try Row.fetchAll(db, sql: "SELECT meetingId, createdAt, overview FROM summary") {
+            summarized[row["meetingId"]] = (row["createdAt"], row["overview"])
+        }
+        let items = Dictionary(grouping: try ActionItem.order(Column("position")).fetchAll(db), by: \.meetingId)
         return meetings.map { meeting in
             let list = (speakers[meeting.id] ?? []).sorted { $0.talkTime > $1.talkTime }
             return MeetingRow(
                 meeting: meeting,
                 speakers: list,
-                hasSummary: summarized.contains(meeting.id),
-                pendingVoices: list.filter(\.needsReview).count
+                hasSummary: summarized[meeting.id] != nil,
+                pendingVoices: list.filter(\.needsReview).count,
+                summaryCreatedAt: summarized[meeting.id]?.written,
+                summaryOverview: summarized[meeting.id]?.overview,
+                actionItems: items[meeting.id] ?? []
             )
         }
     }

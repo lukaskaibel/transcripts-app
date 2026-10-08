@@ -56,7 +56,7 @@ enum Theme {
     static let quick = Animation.easeOut(duration: 0.14)
     static let overlay = Animation.spring(response: 0.26, dampingFraction: 0.86)
 
-    static let sidebarWidth: CGFloat = 220
+    static let sidebarWidth: CGFloat = 236
     static let headerHeight: CGFloat = 44
     static let rowHeight: CGFloat = 38
     static let inspectorWidth: CGFloat = 280

@@ -46,8 +46,11 @@ struct MeetingDetailView: View {
         .onKeyPress(.escape) {
             // SwiftUI hands this view key presses meant for an open dropdown too; Escape belongs to the dropdown.
             guard model.overlay == nil, !Dropdown.isOpen else { return .ignored }
-            model.selectedMeetingId = nil
+            model.goBack()
             return .handled
+        }
+        .onChange(of: detail.summary?.createdAt, initial: true) { _, written in
+            if let written { model.markSummaryRead(detail.meeting.id, written: written) }
         }
         .confirmationDialog("„\(detail.meeting.title)“ löschen?", isPresented: $deleting) {
             Button("Löschen", role: .destructive) { model.deleteMeeting(detail.meeting.id) }
@@ -61,10 +64,10 @@ struct MeetingDetailView: View {
 
     private var header: some View {
         HStack(spacing: 6) {
-            IconButton(systemName: "chevron.left", label: String(localized: "Zurück zu den Meetings (Esc)")) {
-                model.selectedMeetingId = nil
+            IconButton(systemName: "chevron.left", label: model.backSection == nil ? String(localized: "Zurück zu den Meetings (Esc)") : String(localized: "Zurück (Esc)")) {
+                model.goBack()
             }
-            Button("Meetings") { model.selectedMeetingId = nil }
+            Button((model.backSection ?? .meetings).title) { model.goBack() }
                 .buttonStyle(PlainPressStyle())
                 .foregroundStyle(Theme.textSecondary)
             Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold)).foregroundStyle(Theme.textTertiary)

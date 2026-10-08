@@ -61,6 +61,12 @@ struct ContentPanel: View {
                     MeetingListView()
                         .transition(.opacity)
                 }
+            case .inbox:
+                InboxView()
+                    .transition(.opacity)
+            case .tasks:
+                TasksView()
+                    .transition(.opacity)
             case .people:
                 PeopleView()
                     .transition(.opacity)

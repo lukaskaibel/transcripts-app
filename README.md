@@ -233,7 +233,7 @@ interface is German. Add `-AppleLanguages "(fr)"` to see it in another language.
 | ⇧⌘M | Add a marker |
 | ⌘L | Live window |
 | ⌘K | Search and commands |
-| ⌘1 / ⌘2 | Meetings / People |
+| ⌘1 – ⌘4 | Inbox / All Meetings / Action Items / People |
 | ⌘↑ / ⌘↓ | Previous / next meeting |
 | ⌘F | Find in the transcript |
 | Space | Play or pause the recording |

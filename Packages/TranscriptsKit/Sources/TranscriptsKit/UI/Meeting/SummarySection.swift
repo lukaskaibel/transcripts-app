@@ -255,7 +255,7 @@ struct ActionItemList: View {
     var body: some View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                ActionItemRow(detail: detail, item: item, people: people)
+                ActionItemRow(item: item, people: people)
                     .overlay(alignment: .top) {
                         if index > 0 { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
                     }
@@ -270,7 +270,6 @@ struct ActionItemList: View {
 
 struct ActionItemRow: View {
     @Environment(AppModel.self) private var model
-    let detail: MeetingDetail
     let item: ActionItem
     let people: [Person]
     @State private var hovering = false

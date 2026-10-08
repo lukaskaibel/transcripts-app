@@ -293,7 +293,12 @@ enum DemoData {
         let t = AppLanguage.current == .german ? Texts.german : Texts.english
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        let planning = calendar.date(byAdding: .hour, value: 14, to: today)!
+        // At two, or soon after now later in the day, so there is always a meeting to come.
+        let soon = Date().addingTimeInterval(45 * 60)
+        let minute = calendar.component(.minute, from: soon)
+        let nextHalfHour = calendar.date(bySettingHour: calendar.component(.hour, from: soon), minute: minute < 30 ? 30 : 0, second: 0, of: soon)!
+            .addingTimeInterval(minute < 30 ? 0 : 3600)
+        let planning = max(calendar.date(byAdding: .hour, value: 14, to: today)!, nextHalfHour)
         let hoffmann = calendar.date(byAdding: DateComponents(day: 1, hour: 9, minute: 30), to: today)!
         return [
             UpcomingMeeting(eventId: "e-planning", title: t.upcoming[0], start: planning, end: planning.addingTimeInterval(3600),
@@ -308,6 +313,26 @@ enum DemoData {
 }
 
 extension DemoData {
+    /// Today's and tomorrow's calendar: the meetings to come, the weekly that was recorded and a daily that wasn't.
+    static func agenda() -> [UpcomingMeeting] {
+        let t = AppLanguage.current == .german ? Texts.german : Texts.english
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        func at(_ day: Int, _ hour: Int, _ minute: Int = 0) -> Date {
+            calendar.date(byAdding: DateComponents(day: day, hour: hour, minute: minute), to: today)!
+        }
+        let team = [Attendee(name: "Anna Berger"), Attendee(name: "Thomas Klein"), Attendee(name: "Miriam Okafor")]
+        let daily = { (day: Int) in
+            UpcomingMeeting(eventId: "e-daily", title: "Daily", start: at(day, 9, 15), end: at(day, 9, 30), attendees: team,
+                            joinURL: URL(string: "https://meet.google.com/abc-defg-hij"), app: "Google Meet",
+                            calendarId: "c-work", calendarTitle: t.calendars[0], calendarColor: [0.20, 0.47, 0.96], isRecurring: true)
+        }
+        let sync = UpcomingMeeting(eventId: "e-weekly-sync", title: t.syncTitle, start: at(0, 10), end: at(0, 10, 45),
+                                   attendees: team + [Attendee(name: "Jonas Weber")], joinURL: URL(string: "https://zoom.us/j/987654321"), app: "Zoom",
+                                   calendarId: "c-work", calendarTitle: t.calendars[0], calendarColor: [0.20, 0.47, 0.96], isRecurring: true)
+        return ([daily(0), sync, daily(1)] + upcoming()).sorted { $0.start < $1.start }
+    }
+
     /// What the language model would propose for the sample tasks (by their place in the weekly's list).
     static func issueSuggestions(for tasks: [ActionItem], labels: [GitHubLabel]) -> [IssueSuggestion] {
         let has = Set(labels.map(\.name))
@@ -340,6 +365,12 @@ extension AppModel {
     /// Fills the parts of the state that normally come from the system.
     func loadDemoState() {
         upcoming = DemoData.upcoming().filter(meetingFilter.allows)
+        agendaEvents = DemoData.agenda().filter(meetingFilter.allows)
+        // The weekly's summary is new; the others were read long ago.
+        settings.inboxSince = .distantPast
+        for row in rows where row.id != "m-sync" {
+            if let written = row.summaryCreatedAt { settings.openedSummaries[row.id] = written }
+        }
         engineState = .ready
         providerStatus = [.anthropic: .connected, .ollama: .connected]
         providerModels = [

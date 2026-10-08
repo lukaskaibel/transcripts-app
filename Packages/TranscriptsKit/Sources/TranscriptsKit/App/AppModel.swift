@@ -19,8 +19,19 @@ struct WeakModel: @unchecked Sendable {
 @Observable
 public final class AppModel {
     public enum Section: Hashable, Sendable {
+        case inbox
         case meetings
+        case tasks
         case people
+
+        public var title: String {
+            switch self {
+            case .inbox: String(localized: "Eingang", comment: "sidebar: what waits for the user after their meetings")
+            case .meetings: String(localized: "Meetings")
+            case .tasks: String(localized: "Aufgaben")
+            case .people: String(localized: "Personen")
+            }
+        }
     }
 
     public enum Overlay: Equatable, Sendable {
@@ -117,6 +128,8 @@ public final class AppModel {
     public internal(set) var reviews: [VoiceReview] = []
     public internal(set) var detail: MeetingDetail?
     public internal(set) var upcoming: [UpcomingMeeting] = []
+    /// Today's and tomorrow's calendar meetings, also those already over, for the day plan in the sidebar.
+    public internal(set) var agendaEvents: [UpcomingMeeting] = []
     /// Everyone's voice as the app knows it now, rebuilt after every change (see `refreshVoices`).
     public internal(set) var voiceLibrary = VoiceLibrary()
     @ObservationIgnored var voiceRefresh: Task<Void, Never>?
@@ -132,6 +145,8 @@ public final class AppModel {
             if player.meetingId != selectedMeetingId { player.stop() }
         }
     }
+    /// Where "Zurück" leads from a meeting that was opened from the inbox, the tasks or the people.
+    public internal(set) var backSection: Section?
     public var overlay: Overlay?
     /// A person whose sheet should open (from a voice that sounds like them, or the debug remote).
     public var openPersonId: String?
@@ -294,7 +309,6 @@ public final class AppModel {
     public var people: [Person] { peopleStats.map(\.person) }
     public var me: Person? { people.first(where: \.isMe) }
     public var myName: String { me?.name ?? Self.defaultMyName }
-    public var pendingVoiceCount: Int { reviews.count }
 
     public static var defaultMyName: String {
         let full = NSFullUserName().trimmingCharacters(in: .whitespaces)
@@ -359,8 +373,28 @@ public final class AppModel {
     }
 
     public func select(_ meetingId: String?) {
+        if meetingId == nil {
+            backSection = nil
+        } else if section != .meetings {
+            backSection = section
+        }
         section = .meetings
         selectedMeetingId = meetingId
+    }
+
+    /// Shows the inbox, the tasks or the people.
+    public func show(_ section: Section) {
+        guard section != .meetings else { return select(nil) }
+        backSection = nil
+        self.section = section
+    }
+
+    /// From a meeting back to where it was opened.
+    public func goBack() {
+        let target = backSection
+        backSection = nil
+        selectedMeetingId = nil
+        if let target { section = target }
     }
 
     /// Opens the main window and brings the app to the front.

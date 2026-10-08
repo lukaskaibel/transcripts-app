@@ -171,6 +171,13 @@ public final class CalendarService {
             .sorted { $0.start < $1.start }
     }
 
+    /// Every meeting between `start` and `end`, also those already over, soonest first: the day plan in the sidebar.
+    public func meetings(from start: Date, to end: Date, filter: MeetingFilter = MeetingFilter()) -> [UpcomingMeeting] {
+        guard Self.hasAccess else { return [] }
+        let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
+        return Self.meetings(from: store.events(matching: predicate), filter: filter).sorted { $0.start < $1.start }
+    }
+
     /// The meeting happening at `date`, for naming a recording that was started by hand.
     public func meeting(around date: Date, filter: MeetingFilter = MeetingFilter()) -> UpcomingMeeting? {
         guard Self.hasAccess else { return nil }

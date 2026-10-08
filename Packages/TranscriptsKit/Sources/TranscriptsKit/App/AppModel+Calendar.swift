@@ -23,6 +23,8 @@ extension AppModel {
     public func refreshCalendar() {
         guard !isDemo else { return }
         upcoming = calendar.upcoming(filter: meetingFilter)
+        let today = Calendar.current.startOfDay(for: Date())
+        agendaEvents = calendar.meetings(from: today, to: Calendar.current.date(byAdding: .day, value: 2, to: today) ?? today, filter: meetingFilter)
         Task { await rescheduleReminders() }
     }
 
@@ -42,6 +44,7 @@ extension AppModel {
         settings.hiddenMeetings.append(item)
         if isDemo {
             upcoming.removeAll { !meetingFilter.allows($0) }
+            agendaEvents.removeAll { !meetingFilter.allows($0) }
         } else {
             refreshCalendar()
         }
@@ -58,6 +61,7 @@ extension AppModel {
         settings.hiddenMeetings.removeAll { $0.id == item.id }
         if isDemo {
             upcoming = DemoData.upcoming().filter(meetingFilter.allows)
+            agendaEvents = DemoData.agenda().filter(meetingFilter.allows)
         } else {
             refreshCalendar()
         }
@@ -71,12 +75,6 @@ extension AppModel {
         }
         let recordingEvent = recording.flatMap { session in rows.first { $0.id == session.meetingId }?.meeting.calendarEventId }
         await notifications.scheduleReminders(for: upcoming, lead: settings.reminderLead, recordingEventId: recordingEvent)
-    }
-
-    /// The next meeting worth showing in the sidebar and the menu bar: running now or starting within 12 hours.
-    public var nextMeetings: [UpcomingMeeting] {
-        let now = Date()
-        return upcoming.filter { $0.end > now && $0.start < now.addingTimeInterval(36 * 3600) }
     }
 
     /// A meeting that starts within 15 minutes or is running, for the record button in the menu bar.

@@ -8,6 +8,13 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- **A sidebar that plans your day.** Below *Inbox*, *All Meetings* and *Action Items*, the sidebar shows today: the
+  calendar's meetings and your recordings in one list from the morning on, a quiet line for now, the next meeting set
+  apart with how long until it starts, and meetings you didn't record greyed out. Tomorrow folds away below, then the
+  latest meetings; one click opens a recording. *Inbox* gathers what waits after a meeting: new summaries, action items
+  that aren't on GitHub yet and voices without a name. *Action Items* lists the open tasks of every meeting, all or
+  only yours. People moved to the bottom, next to Settings, and ⌘1–⌘4 go to Inbox, All Meetings, Action Items and
+  People. A meeting opened from the inbox, the action items or People goes back there.
 - **Action items into GitHub.** *Send to GitHub* above a meeting's action items (or ⇧⌘G) turns them into issues, in a
   popover like a new issue in Issues for GitHub: project and repository on top, and per task status, assignees and
   labels, each from a search field that has the keyboard at once (S, A, L, Z for the place, Space, Return, ⌘Return).
@@ -20,7 +27,7 @@ All notable changes to this project are recorded here. The format follows
   GitHub CLI like Issues for GitHub, or with a code on github.com when the build has an OAuth client ID. Public
   repositories never get context or quotes from the transcript.
 - **Only your meetings.** Calendar events with guests that you're neither among nor organizing (a team's shared
-  calendar, a colleague's) no longer show up under *Upcoming* or remind you. *Not my meeting* in an event's popover,
+  calendar, a colleague's) no longer show up in the sidebar or remind you. *Not my meeting* in an event's popover,
   its context menu or the reminder hides a series or everything from its calendar; Settings › General lists what's
   hidden and brings it back. A meeting that is in two calendars shows once.
 - **A website** at [lukaskaibel.github.io/transcripts-app](https://lukaskaibel.github.io/transcripts-app/): the app

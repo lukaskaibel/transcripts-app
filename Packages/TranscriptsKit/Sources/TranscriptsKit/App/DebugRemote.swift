@@ -90,7 +90,8 @@ final class DebugRemote {
         case "select":
             model.select(argument.isEmpty ? nil : argument)
         case "section":
-            model.section = argument == "people" ? .people : .meetings
+            // section inbox|meetings|tasks|people
+            model.show(["inbox": .inbox, "tasks": .tasks, "people": .people][argument] ?? .meetings)
         case "back":
             model.selectedMeetingId = nil
         case "palette":

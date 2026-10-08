@@ -109,6 +109,16 @@ public final class AppSettings {
         githubSuggestLabels = defaults.object(forKey: Keys.githubSuggestLabels) as? Bool ?? true
         githubIncludeContext = defaults.object(forKey: Keys.githubIncludeContext) as? Bool ?? true
         githubAskAfterSummary = defaults.object(forKey: Keys.githubAskAfterSummary) as? Bool ?? true
+        if let since = defaults.object(forKey: Keys.inboxSince) as? Date {
+            inboxSince = since
+        } else {
+            // What happened before the inbox existed is known already.
+            let now = Date()
+            defaults.set(now, forKey: Keys.inboxSince)
+            inboxSince = now
+        }
+        openedSummaries = defaults.data(forKey: Keys.openedSummaries).flatMap { try? JSONDecoder().decode([String: Date].self, from: $0) } ?? [:]
+        inboxDismissed = Set(defaults.stringArray(forKey: Keys.inboxDismissed) ?? [])
         if let data = defaults.data(forKey: Keys.models), let models = try? JSONDecoder().decode([String: String].self, from: data) {
             summaryModels = models
         } else {
@@ -135,6 +145,9 @@ public final class AppSettings {
         static let detectCalls = "detectCalls"
         static let onlyMyMeetings = "onlyMyMeetings"
         static let hiddenMeetings = "hiddenMeetings"
+        static let inboxSince = "inboxSince"
+        static let openedSummaries = "openedSummaries"
+        static let inboxDismissed = "inboxDismissed"
         static let voiceStrictness = "voiceStrictness"
         static let learnVoices = "learnVoices"
         static let audioRetention = "audioRetention"
@@ -177,6 +190,14 @@ public final class AppSettings {
     public var hiddenMeetings: [HiddenCalendarItem] {
         didSet { defaults.set(try? JSONEncoder().encode(hiddenMeetings), forKey: Keys.hiddenMeetings) }
     }
+    /// Summaries and tasks from before this moment don't show up in the inbox.
+    public var inboxSince: Date { didSet { defaults.set(inboxSince, forKey: Keys.inboxSince) } }
+    /// When the user last saw each meeting's summary.
+    public var openedSummaries: [String: Date] {
+        didSet { defaults.set(try? JSONEncoder().encode(openedSummaries), forKey: Keys.openedSummaries) }
+    }
+    /// Inbox entries the user put aside ("github:<meeting id>").
+    public var inboxDismissed: Set<String> { didSet { defaults.set(Array(inboxDismissed).sorted(), forKey: Keys.inboxDismissed) } }
     public var voiceStrictness: VoiceStrictness { didSet { defaults.set(voiceStrictness.rawValue, forKey: Keys.voiceStrictness) } }
     public var learnVoices: Bool { didSet { defaults.set(learnVoices, forKey: Keys.learnVoices) } }
     public var audioRetention: AudioRetention { didSet { defaults.set(audioRetention.rawValue, forKey: Keys.audioRetention) } }

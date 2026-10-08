@@ -175,10 +175,14 @@ struct AppCommands: Commands {
             Button("Suchen …") { model.overlay = model.overlay == .palette ? nil : .palette }
                 .keyboardShortcut("k", modifiers: .command)
             Divider()
-            Button("Meetings") { model.select(nil) }
+            Button(AppModel.Section.inbox.title) { model.show(.inbox) }
                 .keyboardShortcut("1", modifiers: .command)
-            Button("Personen") { model.section = .people }
+            Button("Alle Meetings") { model.select(nil) }
                 .keyboardShortcut("2", modifiers: .command)
+            Button(AppModel.Section.tasks.title) { model.show(.tasks) }
+                .keyboardShortcut("3", modifiers: .command)
+            Button(AppModel.Section.people.title) { model.show(.people) }
+                .keyboardShortcut("4", modifiers: .command)
             Button("Live-Fenster") { model.request(.live) }
                 .keyboardShortcut("l", modifiers: .command)
             Button("Alle Meetings öffnen") { model.openMainWindow() }
