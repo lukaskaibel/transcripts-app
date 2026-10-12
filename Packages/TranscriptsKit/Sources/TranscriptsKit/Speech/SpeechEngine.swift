@@ -142,7 +142,7 @@ public actor SpeechEngine {
             }
             if embedder == nil {
                 report(String(localized: "Stimmerkennung", comment: "step while preparing: the model that recognises voices"), 0.85)
-                let models = try await DiarizerModels.downloadIfNeeded { update in
+                let models = try await DiarizerModels.downloadIfNeeded(configuration: Self.voiceModelConfiguration) { update in
                     report(String(localized: "Stimmerkennung", comment: "step while preparing: the model that recognises voices"), 0.85 + update.fractionCompleted * 0.07)
                 }
                 let manager = DiarizerManager()
@@ -152,7 +152,7 @@ public actor SpeechEngine {
             }
             if diarizer == nil {
                 report(String(localized: "Sprechertrennung", comment: "step while preparing: the model that tells apart who speaks when"), 0.92)
-                let models = try await OfflineDiarizerModels.load { update in
+                let models = try await OfflineDiarizerModels.load(configuration: Self.voiceModelConfiguration) { update in
                     report(String(localized: "Sprechertrennung", comment: "step while preparing: the model that tells apart who speaks when"), 0.92 + update.fractionCompleted * 0.08)
                 }
                 let manager = OfflineDiarizerManager(config: OfflineDiarizerConfig())
@@ -165,6 +165,19 @@ public actor SpeechEngine {
             progress?(.failed(error.localizedDescription))
             throw error
         }
+    }
+
+    /// The voice models' settings. iOS lets no app use the graphics processor while it is in the background, as it is
+    /// while recording with the screen locked, so on iPhone and iPad they stay on the CPU and the Neural Engine, as the
+    /// speech recognition always does; on the Mac they may use everything (FluidAudio's default).
+    static var voiceModelConfiguration: MLModelConfiguration? {
+        #if os(iOS)
+        let configuration = MLModelConfiguration()
+        configuration.computeUnits = .cpuAndNeuralEngine
+        return configuration
+        #else
+        return nil
+        #endif
     }
 
     /// Frees the models' memory, for example after the transcription model was switched.

@@ -9,12 +9,29 @@
 	<key>GitHubClientID</key>
 	<string>$(GITHUB_CLIENT_ID)</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Transcripts nimmt deine Stimme in Meetings auf und transkribiert sie auf diesem Mac.</string>
+	<string>Transcripts nimmt Meetings über das Mikrofon auf und transkribiert sie auf diesem Gerät.</string>
 	<key>NSAudioCaptureUsageDescription</key>
 	<string>Transcripts nimmt den Ton deiner Calls auf, um die anderen Teilnehmer auf diesem Mac zu transkribieren.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Transcripts benennt Meetings nach deinen Terminen, kennt die Teilnehmer und erinnert dich ans Aufnehmen.</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Transcripts benennt Meetings nach deinen Terminen, kennt die Teilnehmer und erinnert dich ans Aufnehmen.</string>
+	<!-- iPhone and iPad: finish processing a meeting after the app went to the background (iOS 26), each run named
+	     <bundle id>.processing.<uuid>. -->
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).processing.*</string>
+	</array>
+	<!-- iPhone and iPad: keep recording with the screen locked or another app in front. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+	<!-- iPhone and iPad: the launch screen is the app's background colour, so opening it doesn't flash. -->
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+	</dict>
 </dict>
 </plist>

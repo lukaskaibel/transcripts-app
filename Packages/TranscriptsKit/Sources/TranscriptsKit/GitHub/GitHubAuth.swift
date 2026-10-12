@@ -51,14 +51,20 @@ public actor GitHubTokenStore: GitHubTokenSource {
 /// Reads the token of an existing GitHub CLI login.
 public enum GitHubCLI {
     public static func executableURL() -> URL? {
+        #if os(macOS)
         ["/opt/homebrew/bin/gh", "/usr/local/bin/gh", "/usr/bin/gh"]
             .map { URL(fileURLWithPath: $0) }
             .first { FileManager.default.isExecutableFile(atPath: $0.path) }
+        #else
+        // iPhone and iPad run no command-line tools; they sign in on github.com with a code.
+        nil
+        #endif
     }
 
     public static var isAvailable: Bool { executableURL() != nil }
 
     public static func token() async throws -> String {
+        #if os(macOS)
         guard let url = executableURL() else { throw GitHubError.noToken }
         return try await withCheckedThrowingContinuation { continuation in
             let process = Process()
@@ -82,6 +88,9 @@ public enum GitHubCLI {
                 continuation.resume(throwing: GitHubError.noToken)
             }
         }
+        #else
+        throw GitHubError.noToken
+        #endif
     }
 }
 

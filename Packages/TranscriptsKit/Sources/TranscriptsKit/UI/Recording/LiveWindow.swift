@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if os(macOS)
 /// The live window: the transcript as it is spoken, and next to it the running summary and markers.
 public struct LiveWindowView: View {
     @Environment(AppModel.self) private var model
@@ -139,6 +140,8 @@ struct LiveSessionView: View {
     }
 }
 
+#endif
+
 struct LiveTranscriptView: View {
     @Environment(AppModel.self) private var model
     let session: RecordingSession
@@ -190,8 +193,8 @@ struct LiveTranscriptView: View {
                     }
                     Color.clear.frame(height: 1).id("bottom")
                 }
-                .padding(.horizontal, 40)
-                .padding(.vertical, 26)
+                .padding(.horizontal, Platform.isMobile ? 20 : 40)
+                .padding(.vertical, Platform.isMobile ? 18 : 26)
                 .frame(maxWidth: 760, alignment: .leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -236,22 +239,33 @@ struct LiveLineView: View {
                         Button {
                             session.confirm(line.speakerKey, as: suggestion)
                         } label: {
-                            Label("Als „\(suggestion)“ speichern", systemImage: "checkmark")
-                                .font(.tiny.weight(.medium))
-                                .foregroundStyle(Theme.accent)
-                                .padding(.horizontal, 9)
-                                .frame(height: 22)
-                                .background(Capsule().fill(Theme.selectionFill))
-                                .overlay(Capsule().stroke(Theme.selectionBorder, lineWidth: 1))
+                            Group {
+                                #if os(macOS)
+                                Label("Als „\(suggestion)“ speichern", systemImage: "checkmark")
+                                #else
+                                // A phone has room for the name only.
+                                ViewThatFits(in: .horizontal) {
+                                    Label("Als „\(suggestion)“ speichern", systemImage: "checkmark").fixedSize()
+                                    Label("\(suggestion)?", systemImage: "checkmark").fixedSize()
+                                }
+                                #endif
+                            }
+                            .font(.tiny.weight(.medium))
+                            .foregroundStyle(Theme.accent)
+                            .padding(.horizontal, 9)
+                            .frame(height: Platform.isMobile ? 28 : 22)
+                            .background(Capsule().fill(Theme.selectionFill))
+                            .overlay(Capsule().stroke(Theme.selectionBorder, lineWidth: 1))
                         }
                         .buttonStyle(PlainPressStyle())
+                        .accessibilityLabel(Text("Als „\(suggestion)“ speichern"))
                         IconButton(systemName: "xmark", label: "Vorschlag verwerfen", size: 20) {
                             session.dismissSuggestion(for: line.speakerKey)
                         }
                     }
                 }
                 Text(line.text)
-                    .font(.system(size: 15))
+                    .font(.live)
                     .lineSpacing(3)
                     .foregroundStyle(line.isPartial ? Theme.textSecondary : Theme.textBody)
                     .textSelection(.enabled)
@@ -300,6 +314,7 @@ struct MarkerRow: View {
             Image(systemName: "bookmark.fill").font(.system(size: 10)).foregroundStyle(Theme.accent)
             Text(TimeFormat.clock(time)).font(.small).monospacedDigit().foregroundStyle(Theme.accent)
             Text(text.isEmpty ? String(localized: "Markierung", comment: "a marker set at a moment of the recording, without a note") : text).font(.small).foregroundStyle(Theme.textSecondary)
+                .layoutPriority(1)
             Rectangle().fill(Theme.rowSeparator).frame(height: 1)
         }
         .padding(.leading, 34)
@@ -342,8 +357,9 @@ struct LiveSidePane: View {
             VStack(alignment: .leading, spacing: 6) {
                 TextField("Notiz oder Markierung …", text: $note)
                     .textFieldStyle(.plain)
+                    .submitLabel(.done)
                     .padding(.horizontal, 12)
-                    .frame(height: 34)
+                    .frame(height: Platform.isMobile ? 44 : 34)
                     .cardStyle(radius: 8)
                     .focused($noteFocused)
                     .onSubmit(addMarker)
@@ -419,7 +435,7 @@ struct LiveSidePane: View {
                         } else {
                             Circle().fill(Theme.textTertiary).frame(width: 4, height: 4).offset(y: -2)
                         }
-                        Text(item).font(.system(size: 13.5)).foregroundStyle(Theme.textBody).fixedSize(horizontal: false, vertical: true)
+                        Text(item).font(Platform.isMobile ? .ui : .system(size: 13.5)).foregroundStyle(Theme.textBody).fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }

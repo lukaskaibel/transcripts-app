@@ -1,6 +1,6 @@
-import AppKit
 import SwiftUI
 
+#if os(macOS)
 public struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @State private var tab: AppModel.SettingsTab = .general
@@ -43,6 +43,23 @@ public struct SettingsView: View {
         if case .settings(let requested) = model.windowRequest { tab = requested }
     }
 }
+#endif
+
+extension View {
+    /// A settings page: on the Mac a form as tall as its content in the settings window, on iPhone and iPad a
+    /// grouped list that scrolls.
+    func settingsForm() -> some View {
+        #if os(macOS)
+        formStyle(.grouped)
+            .scrollDisabled(true)
+            .fixedSize(horizontal: false, vertical: true)
+        #else
+        // Each button in a row is a button of its own, not the whole row.
+        formStyle(.grouped)
+            .buttonStyle(.borderless)
+        #endif
+    }
+}
 
 // MARK: - General
 
@@ -57,7 +74,7 @@ struct AppIconButton: View {
             VStack(spacing: 4) {
                 Group {
                     if let image = choice.image {
-                        Image(nsImage: image).resizable().interpolation(.high)
+                        Image(platformImage: image).resizable().interpolation(.high)
                     } else {
                         Color.gray.opacity(0.2)
                     }
@@ -106,6 +123,7 @@ struct GeneralSettings: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 if needsRestart {
+                    #if os(macOS)
                     HStack {
                         Text(busy ? "Nach der Aufnahme möglich." : "Gilt nach einem Neustart.")
                             .font(.caption)
@@ -114,11 +132,30 @@ struct GeneralSettings: View {
                         Button("Jetzt neu starten", action: relaunch)
                             .disabled(busy)
                     }
+                    #else
+                    Text("Gilt nach einem Neustart.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    #endif
                 }
+                #if os(macOS)
                 Picker("Erscheinungsbild", selection: $settings.appearance) {
                     ForEach(Appearance.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
+                #else
+                // A segmented control in a list shows no label of its own.
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Erscheinungsbild")
+                    Picker("Erscheinungsbild", selection: $settings.appearance) {
+                        ForEach(Appearance.allCases) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                }
+                .padding(.vertical, 4)
+                #endif
+                #if os(macOS)
                 LabeledContent("App-Icon") {
                     VStack(alignment: .trailing, spacing: 8) {
                         HStack(spacing: 10) {
@@ -135,6 +172,23 @@ struct GeneralSettings: View {
                 }
                 Toggle("Beim Anmelden starten", isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
                 Toggle("Ohne offenes Fenster nur in der Menüleiste", isOn: $settings.hideDockIcon)
+                #else
+                if UIApplication.shared.supportsAlternateIcons {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("App-Icon")
+                        HStack(spacing: 10) {
+                            ForEach(AppIconChoice.allCases) { choice in
+                                AppIconButton(choice: choice, selected: settings.appIcon == choice) { model.setAppIcon(choice) }
+                            }
+                        }
+                        Text("„Automatisch“ passt sich an wie die anderen Icons: hell, dunkel, getönt oder klar.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.vertical, 4)
+                }
+                #endif
             }
 
             Section("Kalender") {
@@ -149,11 +203,13 @@ struct GeneralSettings: View {
                 }
                 .disabled(!settings.calendarReminders)
                 .onChange(of: settings.reminderLead) { model.refreshCalendar() }
+                #if os(macOS)
                 Toggle("Calls ohne Kalendereintrag erkennen", isOn: $settings.detectCalls)
                     .onChange(of: settings.detectCalls) { model.configureCallDetection() }
                 Text("Meldet sich, wenn Zoom, Teams, Meet im Browser & Co. das Mikrofon benutzen, und wenn der Call vorbei ist, die Aufnahme aber noch läuft.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                #endif
                 Toggle("Nur Meetings, bei denen du dabei bist", isOn: $settings.onlyMyMeetings)
                     .onChange(of: settings.onlyMyMeetings) { model.refreshCalendar() }
                 Text("Termine mit Gästen, zu denen du weder eingeladen bist noch selbst eingeladen hast, erscheinen nicht, etwa aus dem geteilten Kalender eines Teams. Andere blendest du beim Termin mit „Nicht mein Meeting“ aus.")
@@ -182,9 +238,7 @@ struct GeneralSettings: View {
                 }
             }
         }
-        .formStyle(.grouped)
-        .scrollDisabled(true)
-        .fixedSize(horizontal: false, vertical: true)
+        .settingsForm()
         .onAppear {
             name = model.me?.name ?? AppModel.defaultMyName
             model.refreshPermissions()
@@ -217,6 +271,7 @@ struct GeneralSettings: View {
         return Bundle.preferredLocalizations(from: available, forPreferences: system).first.flatMap { AppLanguage(code: $0) } ?? .english
     }
 
+    #if os(macOS)
     /// Opens the app again as a new instance, then quits this one.
     private func relaunch() {
         let configuration = NSWorkspace.OpenConfiguration()
@@ -226,6 +281,7 @@ struct GeneralSettings: View {
             Task { @MainActor in NSApp.terminate(nil) }
         }
     }
+    #endif
 }
 
 /// A meeting series or calendar the user hid, with the way back.
@@ -285,7 +341,9 @@ struct PermissionRow: View {
 
 struct RecordingSettings: View {
     @Environment(AppModel.self) private var model
+    #if os(macOS)
     @State private var devices: [AudioInputDevice] = []
+    #endif
     @State private var storage: Int64 = 0
 
     var body: some View {
@@ -293,6 +351,7 @@ struct RecordingSettings: View {
         Form {
             Section {
                 PermissionRow(title: "Mikrofonzugriff", allowed: model.microphoneAllowed, request: { Task { await model.requestMicrophone() } }, pane: "Privacy_Microphone")
+                #if os(macOS)
                 Picker("Mikrofon", selection: $settings.microphoneUID) {
                     Text(AudioSystem.defaultInputName.map { String(localized: "Systemstandard (\($0))", comment: "microphone: the system's default input, with its name") } ?? String(localized: "Systemstandard")).tag(String?.none)
                     ForEach(devices) { device in
@@ -303,11 +362,18 @@ struct RecordingSettings: View {
                 Text("Nimmt alles auf, was der Mac abspielt, getrennt von deinem Mikrofon. So weiß die App sicher, was du gesagt hast und was die anderen. Läuft der Call über die Lautsprecher, landet er auch im Mikrofon; diese doppelten Zeilen lässt die App weg.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                #else
+                Text("Leg das \(Platform.deviceName) in die Mitte des Tisches, Bildschirm nach oben. Es nimmt über sein eingebautes Mikrofon den ganzen Raum auf, auch mit gesperrtem Bildschirm, und trennt danach die Stimmen.", comment: "iPhone or iPad")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                #endif
             }
+            #if os(macOS)
             Section("Während der Aufnahme") {
                 Toggle("Schwebende Leiste anzeigen", isOn: $settings.floatingRecorder)
                 Toggle("Live-Fenster öffnen", isOn: $settings.openLiveWindow)
             }
+            #endif
             Section("Speicher") {
                 Picker("Aufnahmen", selection: $settings.audioRetention) {
                     ForEach(AudioRetention.allCases) { Text($0.title).tag($0) }
@@ -315,10 +381,12 @@ struct RecordingSettings: View {
                 LabeledContent("Belegt") {
                     HStack {
                         Text(TimeFormat.fileSize(storage)).foregroundStyle(.secondary)
+                        #if os(macOS)
                         Button("Im Finder zeigen") {
                             try? FileManager.default.createDirectory(at: AppPaths.recordings, withIntermediateDirectories: true)
                             NSWorkspace.shared.activateFileViewerSelecting([AppPaths.recordings])
                         }
+                        #endif
                     }
                 }
                 Text("Transkripte und Zusammenfassungen bleiben immer erhalten; mit der Aufnahme kannst du Stellen nachhören und neu transkribieren.")
@@ -326,11 +394,11 @@ struct RecordingSettings: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .formStyle(.grouped)
-        .scrollDisabled(true)
-        .fixedSize(horizontal: false, vertical: true)
+        .settingsForm()
         .onAppear {
+            #if os(macOS)
             devices = AudioSystem.inputDevices()
+            #endif
             model.refreshPermissions()
             Task.detached {
                 let size = AppPaths.sizeOfRecordings()
@@ -371,34 +439,43 @@ struct TranscriptionSettings: View {
             } header: {
                 Text("Spracherkennung")
             } footer: {
+                #if os(macOS)
                 Text("Parakeet läuft auf der Neural Engine dieses Macs und versteht 25 europäische Sprachen, auch gemischt. Nichts davon geht ins Internet.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                #else
+                Text("Parakeet läuft auf der Neural Engine dieses Geräts und versteht 25 europäische Sprachen, auch gemischt. Nichts davon geht ins Internet. Lade das Modell am besten im WLAN.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                #endif
             }
             Section("Status") {
                 LabeledContent("Modelle") {
-                    switch model.engineState {
-                    case .ready:
-                        Label("Bereit", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
-                    case .preparing(let step, let fraction):
-                        HStack {
-                            ProgressView(value: fraction).frame(width: 120)
-                            Text("\(step) · \(fraction.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current)))").font(.caption).foregroundStyle(.secondary)
-                        }
-                    case .failed(let message):
-                        HStack {
-                            Text(message).font(.caption).foregroundStyle(.orange).lineLimit(2)
-                            Button("Erneut laden") { model.prepareEngine() }
-                        }
-                    case .idle:
-                        Button(model.modelsDownloaded ? String(localized: "Laden", comment: "button: load the downloaded speech models") : String(localized: "Herunterladen")) { model.prepareEngine() }
-                    }
+                    modelState
                 }
             }
         }
-        .formStyle(.grouped)
-        .scrollDisabled(true)
-        .fixedSize(horizontal: false, vertical: true)
+        .settingsForm()
+    }
+
+    @ViewBuilder
+    private var modelState: some View {
+        switch model.engineState {
+        case .ready:
+            Label("Bereit", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+        case .preparing(let step, let fraction):
+            HStack {
+                ProgressView(value: fraction).frame(width: 120)
+                Text("\(step) · \(fraction.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current)))").font(.caption).foregroundStyle(.secondary)
+            }
+        case .failed(let message):
+            HStack {
+                Text(message).font(.caption).foregroundStyle(.orange).lineLimit(2)
+                Button("Erneut laden") { model.prepareEngine() }
+            }
+        case .idle:
+            Button(model.modelsDownloaded ? String(localized: "Laden", comment: "button: load the downloaded speech models") : String(localized: "Herunterladen")) { model.prepareEngine() }
+        }
     }
 }
 
@@ -448,17 +525,29 @@ struct AISettings: View {
                 ForEach([ProviderKind.anthropic, .openAI, .google]) { kind in
                     providerRow(kind)
                 }
+                #if os(macOS)
                 ollamaRow
+                #endif
             }
 
             Section {
+                #if os(macOS)
                 Label("API-Keys liegen im macOS-Schlüsselbund. Für eine Zusammenfassung geht nur der Text des Transkripts an den Anbieter – mit Ollama verlässt nichts deinen Mac.", systemImage: "key")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                #else
+                Label("API-Keys liegen im Schlüsselbund dieses Geräts. Für eine Zusammenfassung geht nur der Text des Transkripts an den Anbieter.", systemImage: "key")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                #endif
             }
         }
+        #if os(macOS)
         .formStyle(.grouped)
         .fixedSize(horizontal: false, vertical: true)
+        #else
+        .settingsForm()
+        #endif
         .onAppear { ollamaURL = model.settings.ollamaURL }
     }
 
@@ -590,9 +679,7 @@ struct VoiceSettings: View {
                 Button("Alle Stimmen vergessen …", role: .destructive) { confirmReset = true }
             }
         }
-        .formStyle(.grouped)
-        .scrollDisabled(true)
-        .fixedSize(horizontal: false, vertical: true)
+        .settingsForm()
         .confirmationDialog("Alle Stimmen vergessen?", isPresented: $confirmReset) {
             Button("Vergessen", role: .destructive) {
                 for stats in model.peopleStats { model.forgetVoice(of: stats.person) }
@@ -666,8 +753,12 @@ struct GitHubSettings: View {
                 }
             }
         }
+        #if os(macOS)
         .formStyle(.grouped)
         .fixedSize(horizontal: false, vertical: true)
+        #else
+        .settingsForm()
+        #endif
         .task { await model.refreshGitHubCatalog() }
     }
 
@@ -751,6 +842,7 @@ private struct RouteRow: View {
             Image(systemName: route.kind == .people ? "person.2" : (route.kind == .series ? "calendar" : "text.quote"))
                 .foregroundStyle(.secondary)
                 .frame(width: 18)
+            #if os(macOS)
             VStack(alignment: .leading, spacing: 1) {
                 Text(route.label).lineLimit(1)
                 Text(kind).font(.caption).foregroundStyle(.secondary)
@@ -758,15 +850,32 @@ private struct RouteRow: View {
             Spacer(minLength: 8)
             TargetLabel(target: route.target)
                 .foregroundStyle(.primary)
-            Text("\(group.routes.map(\.count).max() ?? route.count)×").font(.caption).monospacedDigit().foregroundStyle(.secondary).frame(minWidth: 22, alignment: .trailing)
+            Text(count).font(.caption).monospacedDigit().foregroundStyle(.secondary).frame(minWidth: 22, alignment: .trailing)
+            #else
+            // Narrow: what it is for over where it goes.
+            VStack(alignment: .leading, spacing: 3) {
+                Text(route.label).lineLimit(2)
+                Text("\(kind) · \(count)").font(.caption).foregroundStyle(.secondary)
+                TargetLabel(target: route.target)
+                    .font(.footnote)
+                    .foregroundStyle(.primary)
+            }
+            Spacer(minLength: 8)
+            #endif
             Button {
                 for route in group.routes { model.forgetRoute(route) }
             } label: {
-                Image(systemName: "xmark").font(.system(size: 10, weight: .semibold))
+                Image(systemName: "xmark").font(.system(size: Platform.isMobile ? 13 : 10, weight: .semibold))
+                    .frame(minWidth: Platform.isMobile ? 32 : nil, minHeight: Platform.isMobile ? 32 : nil)
             }
             .buttonStyle(.borderless)
             .help("Vergessen")
+            .accessibilityLabel(Text("Vergessen"))
         }
+    }
+
+    private var count: String {
+        "\(group.routes.map(\.count).max() ?? route.count)×"
     }
 
     private var kind: String {

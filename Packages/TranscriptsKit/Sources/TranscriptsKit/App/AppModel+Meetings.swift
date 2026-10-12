@@ -1,7 +1,9 @@
-import AppKit
 import AVFoundation
 import Foundation
 import UniformTypeIdentifiers
+#if os(macOS)
+import AppKit
+#endif
 
 extension AppModel {
     public func rename(meetingId: String, to title: String) {
@@ -142,11 +144,11 @@ extension AppModel {
 
     /// Puts `text` on the clipboard and says so with `toast` ("Zusammenfassung kopiert").
     public func copyToClipboard(_ text: String, toast: String) {
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(text, forType: .string)
+        Platform.copy(text)
         showToast(toast)
     }
 
+    #if os(macOS)
     public func exportMarkdown(_ detail: MeetingDetail) {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [UTType(filenameExtension: "md") ?? .plainText]
@@ -168,4 +170,5 @@ extension AppModel {
         }
         NSWorkspace.shared.activateFileViewerSelecting([folder])
     }
+    #endif
 }

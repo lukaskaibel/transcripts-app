@@ -15,4 +15,15 @@ CODE_SIGN_IDENTITY = -
 // A GitHub OAuth app's client ID for signing in on github.com with a code. Empty: sign in through the GitHub CLI.
 GITHUB_CLIENT_ID =
 
+// iPhone and iPad (one app target for every platform, as in Issues for GitHub). The simulator needs no team; a
+// device does (Local.xcconfig).
+INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphone*] = YES
+INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphone*] = YES
+INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone[sdk=iphone*] = UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad[sdk=iphone*] = UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO
+// The icons offered in Settings › Allgemein, as alternate Home Screen icons.
+ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=iphone*] = AppIcon-Light AppIcon-Dark AppIcon-Indigo
+ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS[sdk=iphone*] = YES
+
 #include? "Local.xcconfig"

@@ -1,9 +1,13 @@
-import AppKit
 import AVFoundation
 import Foundation
 import GRDB
 import Observation
+#if os(macOS)
+import AppKit
 import ServiceManagement
+#else
+import UIKit
+#endif
 
 /// Lets background callbacks reach the model without keeping it alive.
 struct WeakModel: @unchecked Sendable {
@@ -38,6 +42,13 @@ public final class AppModel {
         case palette
         /// "Wer ist das?": the voices still without a name, one after another; those of one meeting first.
         case naming(meetingId: String?)
+    }
+
+    /// Something iPhone and iPad should show. They keep their screens in navigation stacks of their own and push it
+    /// there; the Mac shows `section` and `selectedMeetingId` directly and leaves this alone.
+    public enum NavigationRequest: Equatable, Sendable {
+        case meeting(String)
+        case section(Section)
     }
 
     public enum WindowRequest: Equatable, Sendable {
@@ -119,7 +130,9 @@ public final class AppModel {
     @ObservationIgnored private var processingTask: Task<Void, Never>?
     @ObservationIgnored var liveSummaryTask: Task<Void, Never>?
     @ObservationIgnored var calendarTimerTask: Task<Void, Never>?
+    #if os(macOS)
     @ObservationIgnored var floatingRecorder: FloatingRecorderController?
+    #endif
 
     // MARK: Data
 
@@ -154,6 +167,8 @@ public final class AppModel {
     public var focusedSegmentId: Int64?
     public var windowRequest: WindowRequest?
     public var windowRequestCount = 0
+    public internal(set) var navigationRequest: NavigationRequest?
+    public internal(set) var navigationRequestCount = 0
     public internal(set) var toasts: [Toast] = []
 
     // MARK: Recording and processing
@@ -227,8 +242,10 @@ public final class AppModel {
     /// Everything that may ask the system for something; called once the first window is up.
     public func launch() {
         settings.appIcon.apply()
+        #if os(macOS)
         floatingRecorder = FloatingRecorderController(model: self)
         DebugRemote.startIfRequested(model: self)
+        #endif
         refreshPermissions()
         refreshVoices()
         if settings.githubLogin != nil { Task { await refreshGitHubCatalog() } }
@@ -244,7 +261,9 @@ public final class AppModel {
             configureCallDetection()
             startVoiceMaintenance()
         }
+        #if os(macOS)
         launchAtLogin = SMAppService.mainApp.status == .enabled
+        #endif
     }
 
     // MARK: Observation
@@ -311,7 +330,12 @@ public final class AppModel {
     public var myName: String { me?.name ?? Self.defaultMyName }
 
     public static var defaultMyName: String {
+        #if os(macOS)
         let full = NSFullUserName().trimmingCharacters(in: .whitespaces)
+        #else
+        // iOS doesn't tell apps the owner's name; onboarding and Settings ask for it.
+        let full = ""
+        #endif
         return full.isEmpty ? String(localized: "Ich", comment: "the user's own name when macOS knows none") : full
     }
 
@@ -362,7 +386,7 @@ public final class AppModel {
             select(meetingId)
             overlay = .naming(meetingId: meetingId)
         case .openURL(let url):
-            NSWorkspace.shared.open(url)
+            Platform.open(url)
         case .unhide(let item):
             unhide(item)
         }
@@ -380,6 +404,7 @@ public final class AppModel {
         }
         section = .meetings
         selectedMeetingId = meetingId
+        requestNavigation(meetingId.map(NavigationRequest.meeting) ?? .section(.meetings))
     }
 
     /// Shows the inbox, the tasks or the people.
@@ -387,6 +412,13 @@ public final class AppModel {
         guard section != .meetings else { return select(nil) }
         backSection = nil
         self.section = section
+        requestNavigation(.section(section))
+    }
+
+    private func requestNavigation(_ request: NavigationRequest) {
+        guard Platform.isMobile else { return }
+        navigationRequest = request
+        navigationRequestCount += 1
     }
 
     /// From a meeting back to where it was opened.
@@ -399,16 +431,20 @@ public final class AppModel {
 
     /// Opens the main window and brings the app to the front.
     public func openMainWindow() {
+        #if os(macOS)
         showInDock()
         NSApp.activate()
+        #endif
         request(.main)
     }
 
+    #if os(macOS)
     /// Puts the app in the Dock, wearing the chosen icon (the Dock forgets it while the app is hidden from it).
     public func showInDock() {
         NSApp.setActivationPolicy(.regular)
         settings.appIcon.apply()
     }
+    #endif
 
     public func setAppIcon(_ choice: AppIconChoice) {
         settings.appIcon = choice
@@ -492,19 +528,28 @@ public final class AppModel {
         await rescheduleReminders()
     }
 
-    /// Opens the right pane of System Settings › Privacy & Security.
+    /// Opens the right pane of System Settings › Privacy & Security (on iPhone and iPad: the app's page in Settings).
     public func openPrivacySettings(_ pane: String) {
+        #if os(macOS)
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?\(pane)") {
-            NSWorkspace.shared.open(url)
+            Platform.open(url)
         }
+        #else
+        if let url = URL(string: UIApplication.openSettingsURLString) { Platform.open(url) }
+        #endif
     }
 
     public func openNotificationSettings() {
+        #if os(macOS)
         if let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension") {
-            NSWorkspace.shared.open(url)
+            Platform.open(url)
         }
+        #else
+        if let url = URL(string: UIApplication.openNotificationSettingsURLString) { Platform.open(url) }
+        #endif
     }
 
+    #if os(macOS)
     public func setLaunchAtLogin(_ enabled: Bool) {
         do {
             if enabled { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
@@ -513,6 +558,7 @@ public final class AppModel {
         }
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
+    #endif
 
     public func finishOnboarding() {
         settings.onboardingDone = true
@@ -544,6 +590,11 @@ public final class AppModel {
     private func process(_ meetingId: String) async {
         processingMeetingId = meetingId
         defer { processingMeetingId = nil }
+        #if os(iOS)
+        // On iPhone and iPad the processing may go on with the screen locked, its progress shown by the system.
+        BackgroundProcessing.shared.begin(title: String(localized: "Meeting wird verarbeitet"), subtitle: row(for: meetingId)?.meeting.title ?? "")
+        defer { BackgroundProcessing.shared.end(success: row(for: meetingId)?.meeting.status == .ready) }
+        #endif
         let options = MeetingProcessor.Options(
             model: settings.transcriptionModel,
             thresholds: settings.voiceStrictness.thresholds,

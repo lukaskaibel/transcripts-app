@@ -52,7 +52,8 @@ public final class CallDetector {
     public init() {}
 
     public func start() {
-        guard timer == nil else { return }
+        // iPhone and iPad can't see other apps using the microphone; there the calendar is what reminds.
+        guard timer == nil, !Platform.isMobile else { return }
         timer = Task { [weak self] in
             while !Task.isCancelled {
                 self?.scan()
@@ -71,12 +72,14 @@ public final class CallDetector {
     }
 
     private func scan() {
+        #if os(macOS)
         let ownPid = ProcessInfo.processInfo.processIdentifier
         let current = AudioSystem.processes()
             .filter { $0.isRunningInput && $0.pid != ownPid }
             .compactMap { process in Self.callApp(for: process.bundleID).map { DetectedCall(bundleID: process.bundleID, appName: $0) } }
             .first
         update(with: current, now: Date())
+        #endif
     }
 
     /// The state machine, separate from Core Audio so it can be tested.

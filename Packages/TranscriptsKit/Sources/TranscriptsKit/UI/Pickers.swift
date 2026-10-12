@@ -15,7 +15,9 @@ struct PickerItem: Identifiable {
     /// A section title shown above this row while nothing has been typed.
     var header: String? = nil
 
-    var height: CGFloat { detail == nil ? 32 : 44 }
+    var height: CGFloat {
+        Platform.isMobile ? (detail == nil ? 44 : 56) : (detail == nil ? 32 : 44)
+    }
 }
 
 /// Subsequence match: every character of the query appears in order. Higher is better; nil is no match.
@@ -70,10 +72,10 @@ struct PickerList: View {
                     .focused($focused)
                     .focusOnAppear()
                     .accessibilityIdentifier("picker.search")
-                if let hint { Keycap(hint) }
+                if let hint, !Platform.isMobile { Keycap(hint) }
             }
-            .padding(.horizontal, 12)
-            .frame(height: 40)
+            .padding(.horizontal, Platform.isMobile ? 16 : 12)
+            .frame(height: Platform.isMobile ? 52 : 40)
             .onKeyPress(.downArrow) {
                 index = min(index + 1, max(visible.count - 1, 0))
                 return .handled
@@ -126,7 +128,12 @@ struct PickerList: View {
                     .padding(.vertical, 4)
                 }
                 .scrollIndicators(.never)
+                #if os(macOS)
                 .frame(height: listHeight(visible))
+                #else
+                // In a sheet, the list takes the room the sheet has.
+                .frame(maxHeight: .infinity)
+                #endif
                 .onChange(of: index) {
                     if visible.indices.contains(index) { proxy.scrollTo(visible[index].id) }
                 }
@@ -141,11 +148,18 @@ struct PickerList: View {
                     .frame(height: 30)
             }
         }
+        #if os(macOS)
         .frame(width: width)
+        #else
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(Theme.popover)
+        .presentationDetents([.medium, .large])
+        #endif
         .font(.ui)
         .foregroundStyle(Theme.text)
         .onAppear {
-            focused = true
+            // On iPhone and iPad the keyboard waits for a tap in the field, so it doesn't cover the list.
+            focused = !Platform.isMobile
             // Single-choice pickers start on the current value, so Return keeps it.
             if !staysOpen, let current = items.firstIndex(where: \.selected) { index = current }
         }
@@ -208,7 +222,7 @@ struct PickerRow: View {
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(Theme.textBody)
             }
-            if let shortcut = item.shortcut {
+            if let shortcut = item.shortcut, !Platform.isMobile {
                 Text(shortcut)
                     .font(.system(size: 12, design: .monospaced))
                     .foregroundStyle(active ? Theme.textSecondary : Theme.textTertiary)

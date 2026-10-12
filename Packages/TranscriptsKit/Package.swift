@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "TranscriptsKit",
-    platforms: [.macOS("26.0")],
+    platforms: [.macOS("26.0"), .iOS("26.0")],
     products: [
         .library(name: "TranscriptsKit", targets: ["TranscriptsKit"]),
     ],

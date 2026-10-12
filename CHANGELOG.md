@@ -8,6 +8,16 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- **iPhone and iPad.** The same app for the meetings around a table: put the phone in the middle, tap *Record* and lock
+  the screen. It records the room through the built-in microphone, with a live transcript, tells the voices apart
+  afterwards and names the ones it knows, all on the device. On the iPhone, *Record* sits above the tab bar on every
+  screen and turns into the running recording's time, level, pause and stop; the recording screen has the transcript
+  and the buttons to mark, pause and stop. Inbox, Meetings with today's day plan, Action Items, People with the voice
+  map, and Search; a planned meeting offers to record it. The iPad has a sidebar like the Mac, the list with the
+  meeting beside it, the inspector when there is room and the live summary beside the live transcript, and the Mac's
+  keyboard shortcuts. *Who is this?*, *Send to GitHub*, the summary, the speakers and the settings are the Mac's own
+  views laid out for a narrow screen. A phone call interrupts a recording, which carries on afterwards, and on iOS 26
+  a meeting goes on being processed with the screen locked. Meetings and voices don't move between devices yet.
 - **A sidebar that plans your day.** Below *Inbox*, *All Meetings* and *Action Items*, the sidebar shows today: the
   calendar's meetings and your recordings in one list from the morning on, a quiet line for now, the next meeting set
   apart with how long until it starts, and meetings you didn't record greyed out. Tomorrow folds away below, then the
@@ -33,6 +43,10 @@ All notable changes to this project are recorded here. The format follows
 - **A website** at [lukaskaibel.github.io/transcripts-app](https://lukaskaibel.github.io/transcripts-app/): the app
   on one screen, with a note that it is coming to the Mac App Store, and the pages a store listing needs: privacy
   policy, terms of use, support with common questions, and the Impressum.
+
+### Changed
+
+- The app asks for the microphone in words that fit the Mac, the iPhone and the iPad alike.
 
 ### Fixed
 

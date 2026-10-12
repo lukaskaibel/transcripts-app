@@ -200,67 +200,67 @@
       }
     },
     "NSMicrophoneUsageDescription" : {
-      "comment" : "Why the app records the microphone",
+      "comment" : "Why the app uses the microphone: on the Mac your voice, on iPhone and iPad the whole room",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcripts nimmt deine Stimme in Meetings auf und transkribiert sie auf diesem Mac."
+            "value" : "Transcripts nimmt Meetings über das Mikrofon auf und transkribiert sie auf diesem Gerät."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcripts records your voice in meetings and transcribes it on this Mac."
+            "value" : "Transcripts records meetings through the microphone and transcribes them on this device."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcripts enregistre votre voix pendant les réunions et la transcrit sur ce Mac."
+            "value" : "Transcripts enregistre les réunions avec le micro et les transcrit sur cet appareil."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcripts graba tu voz en las reuniones y la transcribe en este Mac."
+            "value" : "Transcripts graba las reuniones con el micrófono y las transcribe en este dispositivo."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcripts registra la tua voce nelle riunioni e la trascrive su questo Mac."
+            "value" : "Transcripts registra le riunioni con il microfono e le trascrive su questo dispositivo."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Transcripts grava sua voz nas reuniões e a transcreve neste Mac."
+            "value" : "O Transcripts grava as reuniões pelo microfone e as transcreve neste dispositivo."
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcripts neemt je stem op in vergaderingen en zet die op deze Mac om in tekst."
+            "value" : "Transcripts neemt vergaderingen op via de microfoon en zet ze op dit apparaat om in tekst."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcripts nagrywa Twój głos podczas spotkań i transkrybuje go na tym Macu."
+            "value" : "Transcripts nagrywa spotkania przez mikrofon i transkrybuje je na tym urządzeniu."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcripts записывает ваш голос на встречах и расшифровывает его на этом Mac."
+            "value" : "Transcripts записывает встречи через микрофон и расшифровывает их на этом устройстве."
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcripts записує ваш голос на зустрічах і розшифровує його на цьому Mac."
+            "value" : "Transcripts записує зустрічі через мікрофон і розшифровує їх на цьому пристрої."
           }
         }
       }

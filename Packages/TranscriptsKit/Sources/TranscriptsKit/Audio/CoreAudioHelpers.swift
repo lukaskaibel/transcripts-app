@@ -1,3 +1,4 @@
+#if os(macOS)
 import AudioToolbox
 import CoreAudio
 import Foundation
@@ -137,3 +138,4 @@ public enum AudioSystem {
         }
     }
 }
+#endif

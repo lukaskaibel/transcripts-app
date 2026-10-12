@@ -1,3 +1,4 @@
+#if os(macOS)
 import AVFoundation
 import CoreAudio
 import Foundation
@@ -211,3 +212,4 @@ public final class SystemAudioCapture: AudioSource, @unchecked Sendable {
         self.outputListener = nil
     }
 }
+#endif

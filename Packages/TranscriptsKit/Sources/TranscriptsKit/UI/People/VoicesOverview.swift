@@ -30,17 +30,32 @@ struct VoicesOverview: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 8) {
-                Text("Stimmenkarte").font(.uiSemibold)
-                Text("Jeder Punkt ist eine Zeile; was ähnlich klingt, liegt nah beieinander.")
-                    .font(.small)
-                    .foregroundStyle(Theme.textTertiary)
-                    .lineLimit(1)
-                Spacer(minLength: 8)
-                legend
+            // In one line where there is room; on a phone the explanation and the legend go underneath.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) {
+                    Text("Stimmenkarte").font(.uiSemibold)
+                    Text("Jeder Punkt ist eine Zeile; was ähnlich klingt, liegt nah beieinander.")
+                        .font(.small)
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineLimit(1)
+                        .fixedSize()
+                    Spacer(minLength: 8)
+                    legend.fixedSize()
+                }
+                .padding(.horizontal, 14)
+                .frame(height: 38)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Stimmenkarte").font(.uiSemibold)
+                    Text("Jeder Punkt ist eine Zeile; was ähnlich klingt, liegt nah beieinander.")
+                        .font(.small)
+                        .foregroundStyle(Theme.textTertiary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    legend
+                }
+                .padding(.horizontal, 14)
+                .padding(.top, 12)
+                .padding(.bottom, 10)
             }
-            .padding(.horizontal, 14)
-            .frame(height: 38)
 
             GeometryReader { proxy in
                 let size = proxy.size

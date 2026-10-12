@@ -1,9 +1,7 @@
-import AppKit
 import SwiftUI
 
 struct SummarySection: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.openSettings) private var openSettings
     let detail: MeetingDetail
 
     var body: some View {
@@ -57,7 +55,6 @@ struct SummarySection: View {
                 Spacer(minLength: 8)
                 Button("Einrichten …") {
                     model.request(.settings(.ai))
-                    openSettings()
                 }
                 .buttonStyle(SecondaryButtonStyle())
             }
@@ -71,7 +68,12 @@ struct SummarySection: View {
     private func content(_ summary: MeetingSummary) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             header(trailing: AnyView(HStack(spacing: 2) {
-                Text(summary.model).font(.small).foregroundStyle(Theme.textTertiary).padding(.trailing, 4)
+                // On a phone there is no room for it next to the buttons.
+                ViewThatFits(in: .horizontal) {
+                    Text(summary.model).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1).fixedSize()
+                    Color.clear.frame(width: 0, height: 0)
+                }
+                .padding(.trailing, 4)
                 IconButton(systemName: "arrow.clockwise", label: String(localized: "Neu erstellen")) {
                     Task { await model.generateSummary(detail.meeting.id) }
                 }
@@ -291,6 +293,12 @@ struct ActionItemRow: View {
                     }
                 }
                 .frame(width: 14, height: 14)
+                #if os(iOS)
+                // Big enough for a finger, without moving the box.
+                .frame(width: 34, height: 34)
+                .contentShape(Rectangle())
+                .padding(-10)
+                #endif
             }
             .buttonStyle(PlainPressStyle())
             .accessibilityLabel(item.done ? "Als offen markieren" : "Als erledigt markieren")
@@ -305,7 +313,9 @@ struct ActionItemRow: View {
             Spacer(minLength: 8)
             if let issue = item.issue {
                 IssuePill(issue: issue)
-            } else if !item.done {
+            } else if !item.done, !Platform.isMobile || open {
+                // On iPhone and iPad the button's place is the row's menu (a long press), as there is no pointer
+                // to show it on; it stays while its sheet is open, which hangs on it.
                 Button {
                     open = true
                 } label: {
@@ -330,7 +340,8 @@ struct ActionItemRow: View {
             }
         }
         .padding(.horizontal, 14)
-        .frame(minHeight: 38)
+        .padding(.vertical, Platform.isMobile ? 9 : 0)
+        .frame(minHeight: Platform.isMobile ? 46 : 38)
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
@@ -349,8 +360,7 @@ struct ActionItemRow: View {
             if let issue = item.issue {
                 Button("Auf GitHub öffnen", systemImage: "arrow.up.right.square") { model.openIssue(issue) }
                 Button("Link kopieren", systemImage: "link") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(issue.url, forType: .string)
+                    Platform.copy(issue.url)
                 }
                 Divider()
                 Button("Verknüpfung mit \(issue.reference) lösen", systemImage: "xmark.circle") { model.unlinkIssue(item) }

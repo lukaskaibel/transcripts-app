@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// "Wer ist das?": the voices still without a name, one after another. The sample plays by itself, the
-/// app's guesses come first, a number key or Return names the voice and the next one follows.
+/// app's guesses come first, a number key or Return names the voice and the next one follows. The Mac shows it as a
+/// panel over the window, iPhone and iPad in a sheet, where a tap on a name does what the keys do.
 struct NameVoicesPanel: View {
     @Environment(AppModel.self) private var model
     let meetingId: String?
@@ -62,10 +63,12 @@ struct NameVoicesPanel: View {
                 done
             }
         }
+        #if os(macOS)
         .frame(width: 560)
         .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Theme.popover))
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.popoverBorder, lineWidth: 1))
         .shadow(color: Theme.shadow, radius: 30, y: 16)
+        #endif
         .focusable()
         .focusEffectDisabled()
         .focused($focus, equals: .panel)
@@ -123,7 +126,7 @@ struct NameVoicesPanel: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Text("Wer ist das?").font(.system(size: 15, weight: .semibold))
+            Text("Wer ist das?").font(Platform.isMobile ? .headline : .system(size: 15, weight: .semibold))
             Spacer()
             if current != nil, queue.count > 1 {
                 Text("\(min(position + 1, queue.count)) von \(queue.count)")
@@ -134,7 +137,7 @@ struct NameVoicesPanel: View {
             IconButton(systemName: "xmark", label: String(localized: "Schließen (esc)"), size: 22) { close() }
         }
         .padding(.horizontal, 18)
-        .frame(height: 50)
+        .frame(height: Platform.isMobile ? 56 : 50)
     }
 
     private func content(_ item: Item) -> some View {
@@ -142,9 +145,9 @@ struct NameVoicesPanel: View {
             HStack(alignment: .top, spacing: 14) {
                 Button(action: playSample) {
                     Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 14))
+                        .font(.system(size: Platform.isMobile ? 17 : 14))
                         .foregroundStyle(Theme.onColor)
-                        .frame(width: 40, height: 40)
+                        .frame(width: Platform.isMobile ? 48 : 40, height: Platform.isMobile ? 48 : 40)
                         .background(Circle().fill(Theme.accentFill))
                 }
                 .buttonStyle(PlainPressStyle())
@@ -215,7 +218,11 @@ struct NameVoicesPanel: View {
 
     private var newPersonRow: some View {
         HStack(spacing: 10) {
-            Keycap(Shortcut.newPerson)
+            if Platform.isMobile {
+                Image(systemName: "person.badge.plus").font(.callout).foregroundStyle(Theme.textSecondary).frame(width: 24)
+            } else {
+                Keycap(Shortcut.newPerson)
+            }
             if addingPerson {
                 TextField("Name", text: $newName)
                     .textFieldStyle(.plain)
@@ -241,7 +248,7 @@ struct NameVoicesPanel: View {
             }
         }
         .padding(.horizontal, 12)
-        .frame(height: 34)
+        .frame(height: Platform.isMobile ? 48 : 34)
     }
 
     private var done: some View {
@@ -282,10 +289,12 @@ struct NameVoicesPanel: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Text(title)
-                Keycap(key)
+                if !Platform.isMobile { Keycap(key) }
             }
-            .font(.small)
+            .font(Platform.isMobile ? .smallMedium : .small)
             .foregroundStyle(Theme.textSecondary)
+            .frame(minHeight: Platform.isMobile ? 44 : nil)
+            .contentShape(Rectangle())
         }
         .buttonStyle(PlainPressStyle())
     }
@@ -416,18 +425,31 @@ private struct ChoiceRow: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Keycap(highlighted ? "↩" : "\(number)")
-                    .frame(width: 26)
-                Avatar(kind: .person(name: choice.name), size: 20)
-                Text(choice.name).font(.uiMedium).lineLimit(1)
-                if let detail = choice.detail {
-                    Text(detail).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1)
+                if !Platform.isMobile {
+                    Keycap(highlighted ? "↩" : "\(number)")
+                        .frame(width: 26)
+                }
+                Avatar(kind: .person(name: choice.name), size: Platform.isMobile ? 26 : 20)
+                if Platform.isMobile {
+                    // Narrow: why the app thinks so goes under the name, with room for a quote.
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(choice.name).font(.uiMedium).lineLimit(1)
+                        if let detail = choice.detail {
+                            Text(detail).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(2)
+                        }
+                    }
+                } else {
+                    Text(choice.name).font(.uiMedium).lineLimit(1)
+                    if let detail = choice.detail {
+                        Text(detail).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1)
+                    }
                 }
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 12)
-            .frame(height: 34)
-            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(hovering || highlighted ? Theme.hover : .clear))
+            .padding(.vertical, Platform.isMobile ? 7 : 0)
+            .frame(minHeight: Platform.isMobile ? 52 : 34)
+            .background(RoundedRectangle(cornerRadius: Platform.isMobile ? 12 : 8, style: .continuous).fill(hovering || highlighted ? Theme.hover : .clear))
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainPressStyle())

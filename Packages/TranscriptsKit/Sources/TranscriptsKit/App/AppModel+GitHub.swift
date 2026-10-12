@@ -1,4 +1,3 @@
-import AppKit
 import Foundation
 
 extension AppModel {
@@ -8,7 +7,13 @@ extension AppModel {
     public var githubViewer: GitHubUser? { githubCatalog?.viewer ?? githubConnection.user }
 
     /// Whether this Mac has a GitHub CLI to sign in with (as Issues for GitHub does).
-    public var githubCLIAvailable: Bool { isDemo || GitHubCLI.isAvailable }
+    public var githubCLIAvailable: Bool {
+        #if os(macOS)
+        isDemo || GitHubCLI.isAvailable
+        #else
+        false
+        #endif
+    }
     public var githubDeviceFlowAvailable: Bool { !isDemo && GitHubDeviceFlow.configuredClientID != nil }
 
     /// Signs in with the token of the GitHub CLI.
@@ -37,9 +42,8 @@ extension AppModel {
             do {
                 let code = try await flow.start()
                 githubDeviceCode = code
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(code.userCode, forType: .string)
-                NSWorkspace.shared.open(code.verificationURL)
+                Platform.copy(code.userCode)
+                Platform.open(code.verificationURL)
                 let token = try await flow.waitForToken(code)
                 githubDeviceCode = nil
                 try secrets.setSecret(token, for: GitHubTokenStore.account)
@@ -634,7 +638,7 @@ extension AppModel {
     }
 
     public func openIssue(_ issue: LinkedIssue) {
-        if let url = URL(string: issue.url) { NSWorkspace.shared.open(url) }
+        if let url = URL(string: issue.url) { Platform.open(url) }
     }
 
     public func forgetRoute(_ route: GitHubRoute) {

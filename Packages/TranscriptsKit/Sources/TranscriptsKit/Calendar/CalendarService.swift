@@ -1,4 +1,3 @@
-import AppKit
 import EventKit
 import Foundation
 
@@ -251,7 +250,7 @@ public final class CalendarService {
             app: link?.app,
             calendarId: event.calendar?.calendarIdentifier,
             calendarTitle: event.calendar?.title,
-            calendarColor: event.calendar?.cgColor.flatMap { NSColor(cgColor: $0)?.usingColorSpace(.sRGB) }.map { [$0.redComponent, $0.greenComponent, $0.blueComponent].map(Double.init) },
+            calendarColor: event.calendar?.cgColor?.srgbComponents,
             isRecurring: event.hasRecurrenceRules || event.isDetached
         )
     }

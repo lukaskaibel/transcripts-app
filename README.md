@@ -8,12 +8,15 @@
 <h1 align="center">Transcripts</h1>
 
 <p align="center">
-  <b>A native Mac app that transcribes your meetings on the Mac itself and learns who is speaking.</b><br>
-  A live transcript while you talk, the names of the people on the call, and a summary afterwards if you want one.
+  <b>A native app for Mac, iPhone and iPad that transcribes your meetings on the device itself and learns who is
+  speaking.</b><br>
+  A live transcript while you talk, the names of the people on the call or around the table, and a summary afterwards
+  if you want one.
 </p>
 
 <p align="center">
   <img alt="Platform: macOS 26 or later" src="https://img.shields.io/badge/macOS-26%2B-111214">
+  <img alt="Platform: iOS and iPadOS 26 or later" src="https://img.shields.io/badge/iOS%20%26%20iPadOS-26%2B-111214">
   <img alt="Apple silicon" src="https://img.shields.io/badge/Apple%20silicon-native-111214">
   <img alt="Swift 6" src="https://img.shields.io/badge/Swift-6-F05138">
   <img alt="Ten interface languages" src="https://img.shields.io/badge/languages-10-5B63D3">
@@ -24,6 +27,7 @@
 <p align="center">
   <a href="https://lukaskaibel.github.io/transcripts-app/"><b>Website</b></a> &nbsp;·&nbsp;
   <a href="#a-quick-tour"><b>Tour</b></a> &nbsp;·&nbsp;
+  <a href="#iphone-and-ipad"><b>iPhone and iPad</b></a> &nbsp;·&nbsp;
   <a href="#how-the-names-come-about"><b>How names work</b></a> &nbsp;·&nbsp;
   <a href="#languages"><b>Languages</b></a> &nbsp;·&nbsp;
   <a href="#getting-started"><b>Getting started</b></a> &nbsp;·&nbsp;
@@ -39,7 +43,8 @@
 </picture>
 
 > **Status: early.** Version 0.1.0 records, transcribes, names and summarises meetings every day on the maintainer's
-> Mac. There are no downloadable builds yet; you build it from source (a few minutes, see below).
+> Mac. The iPhone and iPad app is new and has been tested in the simulator so far. There are no downloadable builds
+> yet; you build it from source (a few minutes, see below).
 
 ## Why
 
@@ -115,6 +120,31 @@ The interface speaks English, German, French, Spanish, Italian, Portuguese, Dutc
 the languages its speech recognition transcribes best. It follows macOS, or the language you pick in Settings.
 
 <img alt="The same meeting in German, French and Ukrainian, three windows on top of each other" src="Design/screenshots/languages.webp">
+
+## iPhone and iPad
+
+The same app on iPhone and iPad, for the meetings around a table: put the phone in the middle, tap *Record* and lock
+the screen. It records the room through the built-in microphone, writes a live transcript, tells the voices apart
+afterwards and names the ones it knows, just like the Mac. Speech recognition, voice recognition and the archive stay on
+the device; only the transcript text goes to the summary service you choose.
+
+- **Record from anywhere.** On the iPhone, *Record* sits above the tab bar on every screen. While it records, that bar
+  shows the time, the level, pause and stop; a tap opens the live transcript with the time, the level and buttons to
+  mark a moment, pause and stop in reach of the thumb. On the iPad the record button sits at the top of the sidebar,
+  as on the Mac. A phone call pauses the recording, and it carries on when the call ends.
+- **The same screens.** Inbox, Meetings (today as a day plan with a line for now, then every meeting by day), Action
+  Items, People with the voice map, and Search through every transcript. A planned meeting offers to record it, with
+  who's invited. A meeting has its summary, action items, speakers and transcript; play it back from any line.
+- **iPad like the Mac.** A sidebar, the list with the meeting beside it, and the facts and the voices in a column on the
+  right when there is room. The live window shows the live summary and the markers beside the transcript. With a
+  keyboard: ⌘R records, ⇧⌘P pauses, ⇧⌘M marks, ⌘K searches, ⌘1–⌘4 switch, ⌘[ goes back.
+- **Finished in the background.** After the recording the meeting is processed on the device; iOS 26 lets that go on
+  with the screen locked and shows its progress.
+- **Shared views.** *Who is this?*, *Send to GitHub*, the speakers, the summary and the settings are the Mac's own views,
+  laid out for a narrow screen, so a change shows on every device.
+
+Not there yet: meetings and voices don't travel between the Mac and the iPhone; each device keeps its own archive and
+learns the voices it hears. Summaries use Anthropic, OpenAI or Google (Ollama runs on the Mac only).
 
 ## What it does
 
@@ -201,7 +231,7 @@ Parakeet's fifteen other languages are still transcribed, just less reliably.
 
 ## Getting started
 
-You need a Mac with Apple silicon, macOS 26 or later and Xcode 27.
+You need a Mac with Apple silicon, macOS 26 or later and Xcode 27. For iPhone and iPad: iOS or iPadOS 26 or later.
 
 ```bash
 git clone https://github.com/lukaskaibel/transcripts-app.git
@@ -224,6 +254,10 @@ open Transcripts.xcodeproj
 Tip: set the notification style for Transcripts to *Persistent* in System Settings › Notifications, so the "… is
 starting. Start recording?" reminder stays until you click it.
 
+On iPhone and iPad it's the same scheme: pick a simulator or your device as the destination in Xcode. The simulator
+needs no team; a device needs the team in `Config/Local.xcconfig`. The first start asks for your name, the microphone,
+the calendar and notifications, and downloads the speech models (about 700 MB, best on Wi‑Fi).
+
 To try the app without touching your data, start it in demo mode: `-demo YES` as a launch argument (in the scheme, or
 `open Transcripts.app --args -demo YES`). It runs on made-up meetings in memory, in English, or in German when the
 interface is German. Add `-AppleLanguages "(fr)"` to see it in another language.
@@ -244,6 +278,7 @@ interface is German. Add `-AppleLanguages "(fr)"` to see it in another language.
 | ⌘I | Import an audio or video file |
 | 1–9, Return, M, X, → | In *Who Is This?*: pick a name, the most likely one, you, nobody in particular, skip |
 | ⇧⌘G | Send the meeting's action items to GitHub |
+| ⌘[ | On the iPad: back |
 | ↑↓, Space, S, A, L, Z, Return, ⌘Return | In *Send to GitHub*: move between the tasks, include one or not, its status, assignees, labels, where they go, edit the title, create |
 
 ## Testing
@@ -252,10 +287,19 @@ interface is German. Add `-AppleLanguages "(fr)"` to see it in another language.
 cd Packages/TranscriptsKit && swift test
 ```
 
-146 tests with Swift Testing: transcript assembly, voice grouping, profiles, the re-check after corrections and moving
+191 tests with Swift Testing: transcript assembly, voice grouping, profiles, the re-check after corrections and moving
 misplaced lines, voice refinement, name evidence in all ten languages, the live line check, echo removal and the repair
 of old call tracks (on synthetic speech), the summary providers (with mocked HTTP), the database, audio files and the
 app's actions.
+
+The iPhone and iPad app has UI tests that run on the demo data in the simulator, on an iPhone and an iPad of their own
+(created on first use): every screen, recording and stopping, naming a voice, sending tasks to GitHub, renaming,
+checking off a task, the settings, the first start. Each step leaves a screenshot in `build/test-results/`.
+
+```bash
+Tools/test-ios.sh            # iPhone and iPad
+Tools/test-ios.sh iphone     # one device; add a test, e.g. PhoneTests/testOnboarding
+```
 
 The pipeline also runs on the command line, on real audio:
 
@@ -285,7 +329,8 @@ memory). The live transcript keeps up with several times real time.
 ## For contributors
 
 ```
-Transcripts/                  App target: entry point, icons, the string catalogs (Localizable, InfoPlist)
+Transcripts/                  App target for Mac, iPhone and iPad: entry point, icons, the string catalogs
+TranscriptsUITests/           UI tests of the iPhone and iPad app (Tools/test-ios.sh)
 Packages/TranscriptsKit/      Everything else, as a Swift package
   Sources/TranscriptsKit/
     Audio/                    Microphone, system audio tap, echo removal, audio files
@@ -296,7 +341,10 @@ Packages/TranscriptsKit/      Everything else, as a Swift package
     Calendar/                 Calendar, reminders, call detection
     AI/                       Summary providers and prompts
     Model/  Store/            Records and the GRDB database with full-text search
-    App/  UI/                 App model, settings, scenes; SwiftUI views
+    App/                      App model, settings, demo data
+    UI/                       SwiftUI views every platform shares: the meeting, people, GitHub, settings, live transcript
+    UI/Mac/                   The Mac's windows: sidebar, menu bar, floating recorder, command palette, dropdowns
+    UI/iOS/                   iPhone and iPad: tabs and the iPad's sidebar, the screens around the shared views
     Support/                  Paths, formatting, the languages the app speaks
   Sources/transcripts-cli/    The pipeline on the command line
   Tests/TranscriptsKitTests/

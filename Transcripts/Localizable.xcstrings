@@ -655,6 +655,71 @@
         }
       }
     },
+    "%@ erlauben" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ erlauben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autoriser : %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consenti %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sta %@ toe"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zezwól: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешить: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дозволити: %@"
+          }
+        }
+      }
+    },
     "%@ gesprochen" : {
       "extractionState" : "manual",
       "comment" : "how long a person spoke, e.g. 42 min",
@@ -1831,6 +1896,71 @@
         }
       }
     },
+    "%@ und die Stimmerkennung, etwa 700 MB. Einmal laden, am besten im WLAN, danach läuft alles offline." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ und die Stimmerkennung, etwa 700 MB. Einmal laden, am besten im WLAN, danach läuft alles offline."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ and voice recognition, about 700 MB. Download once, ideally on Wi‑Fi; after that everything works offline."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ et la reconnaissance des voix, environ 700 Mo. À télécharger une fois, de préférence en Wi‑Fi ; ensuite tout fonctionne hors ligne."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ y el reconocimiento de voces, unos 700 MB. Descárgalos una vez, mejor con wifi; después todo funciona sin conexión."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ e il riconoscimento delle voci, circa 700 MB. Scaricali una volta, meglio con il Wi‑Fi; poi funziona tutto offline."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ e o reconhecimento de vozes, cerca de 700 MB. Baixe uma vez, de preferência no Wi‑Fi; depois tudo funciona offline."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ en de stemherkenning, ongeveer 700 MB. Eén keer downloaden, het liefst via wifi; daarna werkt alles offline."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ i rozpoznawanie głosów, około 700 MB. Pobierz raz, najlepiej przez Wi‑Fi; potem wszystko działa offline."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ и распознавание голосов, около 700 МБ. Загрузите один раз, лучше по Wi‑Fi, дальше всё работает без интернета."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ і розпізнавання голосів, близько 700 МБ. Завантажте один раз, краще через Wi‑Fi, далі все працює без інтернету."
+          }
+        }
+      }
+    },
     "%@ und die Stimmerkennung, etwa 700 MB. Einmal laden, danach läuft alles offline." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2349,6 +2479,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@#%lld уже существует. Привяжите его вместо создания нового."
+          }
+        }
+      }
+    },
+    "%@: erlaubt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: erlaubt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: allowed"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : autorisé"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: permitido"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: consentito"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: permitido"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: toegestaan"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: dozwolone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: разрешено"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: дозволено"
           }
         }
       }
@@ -5881,6 +6076,228 @@
         }
       }
     },
+    "%lld offen" : {
+      "extractionState" : "manual",
+      "comment" : "plural: tasks not done yet",
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld offen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld offen"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld open"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld open"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld à faire"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld à faire"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pendiente"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pendientes"
+                }
+              }
+            }
+          }
+        },
+        "it" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld da fare"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld da fare"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pendente"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pendentes"
+                }
+              }
+            }
+          }
+        },
+        "nl" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld open"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld open"
+                }
+              }
+            }
+          }
+        },
+        "pl" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld otwarte"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld otwarte"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld otwartych"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld otwartego"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld открыта"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld открыты"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld открыто"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld открыто"
+                }
+              }
+            }
+          }
+        },
+        "uk" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld відкрите"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld відкриті"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld відкритих"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld відкритого"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld s" : {
       "extractionState" : "manual",
       "comment" : "seconds, short",
@@ -8662,6 +9079,71 @@
         }
       }
     },
+    "Abspielen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abspielen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducir"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riproduci"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afspelen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odtwórz"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Воспроизвести"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Відтворити"
+          }
+        }
+      }
+    },
     "Abspielen (Leertaste)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10942,6 +11424,71 @@
         }
       }
     },
+    "API-Keys liegen im Schlüsselbund dieses Geräts. Für eine Zusammenfassung geht nur der Text des Transkripts an den Anbieter." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API-Keys liegen im Schlüsselbund dieses Geräts. Für eine Zusammenfassung geht nur der Text des Transkripts an den Anbieter."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API keys are stored in this device’s keychain. For a summary, only the text of the transcript is sent to the provider."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les clés API sont stockées dans le trousseau de cet appareil. Pour un résumé, seul le texte de la transcription est envoyé au fournisseur."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las claves de API se guardan en el llavero de este dispositivo. Para un resumen, solo se envía al proveedor el texto de la transcripción."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le chiavi API sono nel portachiavi di questo dispositivo. Per un riassunto, al provider va solo il testo della trascrizione."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As chaves de API ficam nas Chaves deste dispositivo. Para um resumo, só o texto da transcrição vai para o provedor."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API-sleutels staan in de sleutelhanger van dit apparaat. Voor een samenvatting gaat alleen de tekst van het transcript naar de aanbieder."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klucze API są przechowywane w pęku kluczy tego urządzenia. Do podsumowania dostawca otrzymuje tylko tekst transkrypcji."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключи API хранятся в Связке ключей этого устройства. Для сводки провайдеру отправляется только текст расшифровки."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключі API зберігаються у зв’язці ключів цього пристрою. Для підсумку постачальнику надсилається лише текст транскрипту."
+          }
+        }
+      }
+    },
     "App-Icon" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12658,6 +13205,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nagraj"
+          }
+        }
+      }
+    },
+    "Aus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactivé"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desactivado"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disattivato"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desativado"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uit"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wyłączone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выкл."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вимк."
           }
         }
       }
@@ -16959,6 +17571,136 @@
         }
       }
     },
+    "Die Aufnahme ist beendet." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Aufnahme ist beendet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The recording has ended."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’enregistrement est terminé."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La grabación ha terminado."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La registrazione è terminata."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A gravação terminou."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De opname is gestopt."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nagrywanie zakończone."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запись завершена."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запис завершено."
+          }
+        }
+      }
+    },
+    "Die Aufnahme läuft weiter" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Aufnahme läuft weiter"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The recording keeps running"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’enregistrement continue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La grabación sigue"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La registrazione continua"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A gravação continua"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De opname loopt door"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nagrywanie trwa dalej"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запись продолжается"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запис триває далі"
+          }
+        }
+      }
+    },
     "Die Aufnahme wurde unterbrochen, bevor Audio gespeichert war." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17869,6 +18611,71 @@
         }
       }
     },
+    "Diese Person gibt es nicht mehr." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Person gibt es nicht mehr."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This person no longer exists."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette personne n’existe plus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta persona ya no existe."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa persona non esiste più."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta pessoa não existe mais."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze persoon bestaat niet meer."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tej osoby już nie ma."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этого человека больше нет."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цієї людини більше немає."
+          }
+        }
+      }
+    },
     "Diese Serie ausblenden" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18385,6 +19192,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ten format audio nie jest obsługiwany (%@)."
+          }
+        }
+      }
+    },
+    "Dieses Meeting gibt es nicht mehr." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Meeting gibt es nicht mehr."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This meeting no longer exists."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette réunion n’existe plus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta reunión ya no existe."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa riunione non esiste più."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta reunião não existe mais."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze vergadering bestaat niet meer."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tego spotkania już nie ma."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этой встречи больше нет."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цієї зустрічі більше немає."
           }
         }
       }
@@ -18907,6 +19779,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Скорее не для репозитория"
+          }
+        }
+      }
+    },
+    "Ein" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activé"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activado"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attivato"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativado"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aan"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Włączone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вкл."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Увімк."
           }
         }
       }
@@ -21386,6 +22323,71 @@
         }
       }
     },
+    "Für alle Stimmen im Raum." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für alle Stimmen im Raum."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For every voice in the room."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour toutes les voix de la pièce."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para todas las voces de la sala."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per tutte le voci nella stanza."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para todas as vozes da sala."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voor alle stemmen in de ruimte."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dla wszystkich głosów w pomieszczeniu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для всех голосов в комнате."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для всіх голосів у кімнаті."
+          }
+        }
+      }
+    },
     "Für deine eigene Stimme." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -21707,6 +22709,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Skonfiguruj model AI do podsumowań"
+          }
+        }
+      }
+    },
+    "Für „Meeting beginnt – Aufnehmen?“." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für „Meeting beginnt – Aufnehmen?“."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For “Meeting starting – Record?”."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour « La réunion commence – Enregistrer ? »."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para «La reunión empieza – ¿Grabar?»."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per «La riunione inizia – Registrare?»."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para “Reunião começando – Gravar?”."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voor ‘Vergadering begint – Opnemen?’."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dla „Spotkanie się zaczyna – Nagrać?”."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для «Встреча начинается – записать?»."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для «Зустріч починається – записати?»."
           }
         }
       }
@@ -22360,6 +23427,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wczoraj"
+          }
+        }
+      }
+    },
+    "Gesucht wird in den Titeln, den Personen und in jeder Zeile der Transkripte." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesucht wird in den Titeln, den Personen und in jeder Zeile der Transkripte."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Searches titles, people and every line of every transcript."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La recherche porte sur les titres, les personnes et chaque ligne des transcriptions."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se busca en los títulos, las personas y cada línea de las transcripciones."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ricerca riguarda i titoli, le persone e ogni riga delle trascrizioni."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A busca inclui títulos, pessoas e cada linha das transcrições."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er wordt gezocht in titels, personen en elke regel van de transcripten."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Szukane są tytuły, osoby i każda linijka transkrypcji."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск идёт по названиям, людям и каждой строке расшифровок."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пошук охоплює назви, людей і кожен рядок транскриптів."
           }
         }
       }
@@ -25767,6 +26899,71 @@
         }
       }
     },
+    "Kein Meeting ausgewählt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Meeting ausgewählt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No meeting selected"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune réunion sélectionnée"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguna reunión seleccionada"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuna riunione selezionata"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma reunião selecionada"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen vergadering gekozen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie wybrano spotkania"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Встреча не выбрана"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зустріч не вибрано"
+          }
+        }
+      }
+    },
     "Kein Meeting in Sicht" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -28796,6 +29993,204 @@
         }
       }
     },
+    "Leg das %@ in die Mitte des Tisches und tippe auf „Aufnehmen“. Du kannst auch eine Aufnahme aus Dateien oder Sprachmemos importieren." : {
+      "extractionState" : "manual",
+      "comment" : "iPhone or iPad",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leg das %@ in die Mitte des Tisches und tippe auf „Aufnehmen“. Du kannst auch eine Aufnahme aus Dateien oder Sprachmemos importieren."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put your %@ in the middle of the table and tap Record. You can also import a recording from Files or Voice Memos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posez votre %@ au milieu de la table et touchez Enregistrer. Vous pouvez aussi importer un enregistrement depuis Fichiers ou Dictaphone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pon tu %@ en el centro de la mesa y toca Grabar. También puedes importar una grabación de Archivos o Notas de Voz."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metti il tuo %@ al centro del tavolo e tocca Registra. Puoi anche importare una registrazione da File o da Memo Vocali."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coloque o %@ no meio da mesa e toque em Gravar. Você também pode importar uma gravação do app Arquivos ou do Gravador."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leg je %@ in het midden van de tafel en tik op Opnemen. Je kunt ook een opname uit Bestanden of Dictafoon importeren."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połóż %@ na środku stołu i stuknij Nagrywaj. Możesz też zaimportować nagranie z Plików lub Dyktafonu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Положите %@ в центр стола и нажмите «Записать». Можно также импортировать запись из «Файлов» или «Диктофона»."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покладіть %@ посередині столу й торкніться «Записати». Також можна імпортувати запис із «Файлів» або «Диктофона»."
+          }
+        }
+      }
+    },
+    "Leg das %@ in die Mitte des Tisches, Bildschirm nach oben. Es nimmt über sein eingebautes Mikrofon den ganzen Raum auf, auch mit gesperrtem Bildschirm, und trennt danach die Stimmen." : {
+      "extractionState" : "manual",
+      "comment" : "iPhone or iPad",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leg das %@ in die Mitte des Tisches, Bildschirm nach oben. Es nimmt über sein eingebautes Mikrofon den ganzen Raum auf, auch mit gesperrtem Bildschirm, und trennt danach die Stimmen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put your %@ in the middle of the table, screen up. Its built-in microphone records the whole room, even with the screen locked, and the voices are told apart afterwards."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posez votre %@ au milieu de la table, écran vers le haut. Son micro intégré enregistre toute la pièce, même écran verrouillé, puis les voix sont séparées."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pon tu %@ en el centro de la mesa, con la pantalla hacia arriba. Su micrófono integrado graba toda la sala, incluso con la pantalla bloqueada, y después se separan las voces."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metti il tuo %@ al centro del tavolo, con lo schermo verso l’alto. Il microfono integrato registra tutta la stanza, anche a schermo bloccato, e poi le voci vengono separate."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coloque o %@ no meio da mesa, com a tela para cima. O microfone embutido grava a sala inteira, mesmo com a tela bloqueada, e depois as vozes são separadas."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leg je %@ in het midden van de tafel, scherm naar boven. De ingebouwde microfoon neemt de hele ruimte op, ook met vergrendeld scherm, en daarna worden de stemmen gescheiden."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połóż %@ na środku stołu, ekranem do góry. Wbudowany mikrofon nagrywa całe pomieszczenie, także przy zablokowanym ekranie, a potem głosy są rozdzielane."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Положите %@ в центр стола экраном вверх. Встроенный микрофон записывает всю комнату, даже при заблокированном экране, а потом голоса разделяются."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покладіть %@ посередині столу екраном догори. Вбудований мікрофон записує всю кімнату, навіть із заблокованим екраном, а потім голоси розділяються."
+          }
+        }
+      }
+    },
+    "Leg das %@ in Meetings auf den Tisch: Transcripts nimmt den Raum auf, schreibt mit, wer was gesagt hat, und erkennt die Stimmen mit der Zeit wieder. Alles auf diesem %@. Ein paar Dinge braucht es dafür:" : {
+      "extractionState" : "manual",
+      "comment" : "iPhone or iPad, twice",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leg das %@ in Meetings auf den Tisch: Transcripts nimmt den Raum auf, schreibt mit, wer was gesagt hat, und erkennt die Stimmen mit der Zeit wieder. Alles auf diesem %@. Ein paar Dinge braucht es dafür:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put your %@ on the table in meetings: Transcripts records the room, writes down who said what, and learns to recognize the voices over time. All on this %@. It needs a few things for that:"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posez votre %@ sur la table pendant vos réunions : Transcripts enregistre la pièce, note qui a dit quoi et apprend à reconnaître les voix. Tout se passe sur cet %@. Pour cela, il lui faut quelques autorisations :"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pon tu %@ sobre la mesa en las reuniones: Transcripts graba la sala, apunta quién dijo qué y con el tiempo reconoce las voces. Todo en este %@. Para eso necesita algunas cosas:"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metti il tuo %@ sul tavolo durante le riunioni: Transcripts registra la stanza, scrive chi ha detto cosa e col tempo riconosce le voci. Tutto su questo %@. Per farlo servono alcune cose:"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coloque o %@ na mesa nas reuniões: o Transcripts grava a sala, anota quem disse o quê e com o tempo reconhece as vozes. Tudo neste %@. Para isso, ele precisa de algumas coisas:"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leg je %@ tijdens vergaderingen op tafel: Transcripts neemt de ruimte op, schrijft op wie wat zei en herkent de stemmen na verloop van tijd. Alles op deze %@. Daarvoor is een paar dingen nodig:"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Połóż %@ na stole podczas spotkań: Transcripts nagrywa pomieszczenie, zapisuje, kto co powiedział, i z czasem rozpoznaje głosy. Wszystko na tym urządzeniu (%@). Potrzebuje do tego kilku rzeczy:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Положите %@ на стол во время встречи: Transcripts записывает комнату, отмечает, кто что сказал, и со временем узнаёт голоса. Всё прямо на этом %@. Для этого нужно несколько разрешений:"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Покладіть %@ на стіл під час зустрічі: Transcripts записує кімнату, фіксує, хто що сказав, і з часом упізнає голоси. Усе просто на цьому %@. Для цього потрібно кілька дозволів:"
+          }
+        }
+      }
+    },
     "Lernt bei jedem Anlegen dazu. Serien kommen aus dem Kalender, Runden aus den erkannten Stimmen." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -29903,6 +31298,72 @@
         }
       }
     },
+    "Markieren" : {
+      "extractionState" : "manual",
+      "comment" : "button: mark this moment of the recording",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marquer"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Segna"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markeren"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oznacz"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отметить"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позначити"
+          }
+        }
+      }
+    },
     "Markiert" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -30428,6 +31889,71 @@
         }
       }
     },
+    "Meeting gelöscht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting gelöscht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting deleted"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réunion supprimée"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reunión eliminada"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riunione eliminata"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reunião apagada"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergadering verwijderd"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spotkanie usunięte"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Встреча удалена"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зустріч видалено"
+          }
+        }
+      }
+    },
     "Meeting konnte nicht verarbeitet werden" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -30555,6 +32081,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Skopiowano spotkanie"
+          }
+        }
+      }
+    },
+    "Meeting wird verarbeitet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting wird verarbeitet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Processing meeting"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traitement de la réunion"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Procesando la reunión"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elaborazione della riunione"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Processando a reunião"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergadering wordt verwerkt"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przetwarzanie spotkania"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обработка встречи"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обробка зустрічі"
           }
         }
       }
@@ -30750,6 +32341,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spotkania są transkrybowane na tym Macu. Z czasem aplikacja nauczy się rozpoznawać głosy innych osób. Potrzebuje do tego kilku rzeczy:"
+          }
+        }
+      }
+    },
+    "Meetings, Personen, Gesagtes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meetings, Personen, Gesagtes"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meetings, people, what was said"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réunions, personnes, propos"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reuniones, personas, lo dicho"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riunioni, persone, cose dette"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reuniões, pessoas, o que foi dito"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergaderingen, personen, wat er gezegd is"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spotkania, osoby, wypowiedzi"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Встречи, люди, сказанное"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зустрічі, люди, сказане"
           }
         }
       }
@@ -34236,6 +35892,71 @@
         }
       }
     },
+    "Niemand ausgewählt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niemand ausgewählt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No one selected"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personne n’est sélectionné"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nadie seleccionado"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuno selezionato"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguém selecionado"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niemand gekozen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nikogo nie wybrano"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Никто не выбран"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нікого не вибрано"
+          }
+        }
+      }
+    },
     "Niemand Bestimmtes" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -34427,6 +36148,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nagrywa wszystko, co odtwarza Mac, osobno od twojego mikrofonu. Dzięki temu aplikacja na pewno wie, co mówisz ty, a co pozostali. Jeśli rozmowa leci z głośników, trafia też do mikrofonu; takie zdublowane wypowiedzi aplikacja pomija."
+          }
+        }
+      }
+    },
+    "Nimmt den Raum auf" : {
+      "extractionState" : "manual",
+      "comment" : "the phone records everyone in the room",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nimmt den Raum auf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recording the room"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistre la pièce"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grabando la sala"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra la stanza"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravando a sala"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neemt de ruimte op"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nagrywa pomieszczenie"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записывает комнату"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записує кімнату"
           }
         }
       }
@@ -34883,6 +36670,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Пока ничего не запомнено. Когда вы отправите задачи на GitHub, приложение запомнит место для серии в календаре, названия и состава участников."
+          }
+        }
+      }
+    },
+    "Noch nichts zu durchsuchen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch nichts zu durchsuchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to search yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien à rechercher pour l’instant"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay nada que buscar"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ancora niente da cercare"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há nada para buscar"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nog niets om te doorzoeken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na razie nie ma czego przeszukiwać"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока искать нечего"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поки що нема чого шукати"
           }
         }
       }
@@ -35864,6 +37716,71 @@
         }
       }
     },
+    "Parakeet läuft auf der Neural Engine dieses Geräts und versteht 25 europäische Sprachen, auch gemischt. Nichts davon geht ins Internet. Lade das Modell am besten im WLAN." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet läuft auf der Neural Engine dieses Geräts und versteht 25 europäische Sprachen, auch gemischt. Nichts davon geht ins Internet. Lade das Modell am besten im WLAN."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet runs on this device’s Neural Engine and understands 25 European languages, even mixed together. Nothing is sent over the internet. Best download the model on Wi‑Fi."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet s’exécute sur le Neural Engine de cet appareil et comprend 25 langues européennes, même mélangées. Rien n’est envoyé sur Internet. Téléchargez de préférence le modèle en Wi‑Fi."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet funciona en el Neural Engine de este dispositivo y entiende 25 idiomas europeos, incluso mezclados. Nada sale a internet. Mejor descarga el modelo con wifi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet funziona sul Neural Engine di questo dispositivo e capisce 25 lingue europee, anche mescolate. Nulla viene inviato su internet. Meglio scaricare il modello con il Wi‑Fi."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Parakeet roda no Neural Engine deste dispositivo e entende 25 idiomas europeus, inclusive misturados. Nada disso vai para a internet. De preferência, baixe o modelo no Wi‑Fi."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet draait op de Neural Engine van dit apparaat en verstaat 25 Europese talen, ook door elkaar. Niets daarvan gaat naar het internet. Download het model het liefst via wifi."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet działa na Neural Engine tego urządzenia i rozumie 25 języków europejskich, także gdy się mieszają. Nic z tego nie trafia do internetu. Model najlepiej pobierz przez Wi‑Fi."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet работает на Neural Engine этого устройства и понимает 25 европейских языков, в том числе вперемешку. Ничего не отправляется в интернет. Модель лучше загружать по Wi‑Fi."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parakeet працює на Neural Engine цього пристрою і розуміє 25 європейських мов, навіть упереміш. Нічого з цього не потрапляє в інтернет. Модель краще завантажувати через Wi‑Fi."
+          }
+        }
+      }
+    },
     "Parakeet läuft auf der Neural Engine dieses Macs und versteht 25 europäische Sprachen, auch gemischt. Nichts davon geht ins Internet." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -36383,7 +38300,8 @@
             "value" : "Wstrzymano"
           }
         }
-      }
+      },
+      "comment" : "the recording is paused"
     },
     "Pegel von Mikrofon und Call" : {
       "extractionState" : "manual",
@@ -36511,6 +38429,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Osoba"
+          }
+        }
+      }
+    },
+    "Person gelöscht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Person gelöscht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Person deleted"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personne supprimée"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Persona eliminada"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Persona eliminata"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pessoa apagada"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Persoon verwijderd"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Osoba usunięta"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Человек удалён"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Людину видалено"
           }
         }
       }
@@ -36706,6 +38689,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Люди та голоси (⌘4)"
+          }
+        }
+      }
+    },
+    "Position" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Position"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posición"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posizione"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posição"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Positie"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pozycja"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позиция"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позиція"
           }
         }
       }
@@ -38211,6 +40259,71 @@
         }
       }
     },
+    "Sobald ein Meeting transkribiert ist, findest du hier jedes gesagte Wort." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobald ein Meeting transkribiert ist, findest du hier jedes gesagte Wort."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once a meeting is transcribed, you can find every word said here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dès qu’une réunion est transcrite, vous retrouvez ici chaque mot prononcé."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En cuanto se transcriba una reunión, aquí encontrarás cada palabra dicha."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appena una riunione è trascritta, qui trovi ogni parola detta."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assim que uma reunião for transcrita, você encontra aqui cada palavra dita."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zodra een vergadering is uitgeschreven, vind je hier elk gezegd woord."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gdy spotkanie zostanie przepisane, znajdziesz tu każde wypowiedziane słowo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как только встреча будет расшифрована, здесь можно найти каждое сказанное слово."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Щойно зустріч буде розшифровано, тут можна знайти кожне сказане слово."
+          }
+        }
+      }
+    },
     "Sobald ein Transkript fertig ist." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -38728,6 +40841,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rozpoznawanie mowy"
+          }
+        }
+      }
+    },
+    "Spracherkennung und Stimmerkennung laufen auf diesem Gerät." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spracherkennung und Stimmerkennung laufen auf diesem Gerät."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speech and voice recognition run on this device."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La reconnaissance vocale et l’identification des voix s’exécutent sur cet appareil."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reconocimiento del habla y la identificación de voces funcionan en este dispositivo."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il riconoscimento vocale e quello delle voci avvengono su questo dispositivo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O reconhecimento de fala e o de vozes rodam neste dispositivo."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spraak- en stemherkenning draaien op dit apparaat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rozpoznawanie mowy i głosów działa na tym urządzeniu."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Распознавание речи и голосов работает на этом устройстве."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Розпізнавання мовлення й голосів працює на цьому пристрої."
           }
         }
       }
@@ -42668,6 +44846,136 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nie udało się wydzielić"
+          }
+        }
+      }
+    },
+    "Umbenennen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umbenennen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renommer"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renombrar"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rinomina"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renomear"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wijzig naam"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zmień nazwę"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переименовать"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейменувати"
+          }
+        }
+      }
+    },
+    "Umbenennen …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umbenennen …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renommer…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renombrar…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rinomina…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renomear…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wijzig naam…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zmień nazwę…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переименовать…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перейменувати…"
           }
         }
       }
@@ -47124,6 +49432,201 @@
         }
       }
     },
+    "Wähle links ein Meeting oder nimm ein neues auf." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle links ein Meeting oder nimm ein neues auf."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a meeting on the left or record a new one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez une réunion à gauche ou enregistrez-en une nouvelle."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige una reunión a la izquierda o graba una nueva."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli una riunione a sinistra o registrane una nuova."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha uma reunião à esquerda ou grave uma nova."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies links een vergadering of neem een nieuwe op."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz spotkanie po lewej lub nagraj nowe."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите встречу слева или запишите новую."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виберіть зустріч ліворуч або запишіть нову."
+          }
+        }
+      }
+    },
+    "Wähle links eine Person, um ihre Stimme und ihre Meetings zu sehen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle links eine Person, um ihre Stimme und ihre Meetings zu sehen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick a person on the left to see their voice and meetings."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez une personne à gauche pour voir sa voix et ses réunions."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige una persona a la izquierda para ver su voz y sus reuniones."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli una persona a sinistra per vedere la sua voce e le sue riunioni."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha uma pessoa à esquerda para ver a voz e as reuniões dela."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies links een persoon om hun stem en vergaderingen te zien."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz osobę po lewej, aby zobaczyć jej głos i spotkania."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите человека слева, чтобы увидеть его голос и встречи."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виберіть людину ліворуч, щоб побачити її голос і зустрічі."
+          }
+        }
+      }
+    },
+    "Wähle links etwas aus dem Eingang." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle links etwas aus dem Eingang."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick something from the inbox on the left."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez un élément de la boîte de réception à gauche."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige algo de la bandeja de entrada a la izquierda."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli qualcosa dalla posta in arrivo a sinistra."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha algo da caixa de entrada à esquerda."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies links iets uit de inbox."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz coś ze skrzynki po lewej."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите что-нибудь во входящих слева."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виберіть щось у вхідних ліворуч."
+          }
+        }
+      }
+    },
     "Wählst du das Konto von %@, merkt sich die App das" : {
       "extractionState" : "manual",
       "comment" : "under the assignee picker: the app learns a person's GitHub account from the choice",
@@ -47317,6 +49820,136 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Х"
+          }
+        }
+      }
+    },
+    "Zeigt das Live-Transkript" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt das Live-Transkript"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows the live transcript"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiche la transcription en direct"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra la transcripción en directo"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra la trascrizione dal vivo"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra a transcrição ao vivo"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toont het live-transcript"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokazuje transkrypcję na żywo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показывает расшифровку в реальном времени"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показує транскрипт наживо"
+          }
+        }
+      }
+    },
+    "Zeigt, wer eingeladen ist, und nimmt auf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt, wer eingeladen ist, und nimmt auf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows who’s invited and records"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiche les invités et enregistre"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra quién está invitado y graba"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra chi è invitato e registra"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra quem foi convidado e grava"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toont wie er is uitgenodigd en neemt op"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokazuje zaproszonych i nagrywa"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показывает приглашённых и записывает"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показує запрошених і записує"
           }
         }
       }
@@ -49993,6 +52626,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Usunąć spotkanie „%@”?"
+          }
+        }
+      }
+    },
+    "„Automatisch“ passt sich an wie die anderen Icons: hell, dunkel, getönt oder klar." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Automatisch“ passt sich an wie die anderen Icons: hell, dunkel, getönt oder klar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Automatic” adapts like your other icons: light, dark, tinted, or clear."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« Automatique » s’adapte comme vos autres icônes : clair, sombre, teinté ou transparent."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Automático» se adapta como tus otros iconos: claro, oscuro, tintado o transparente."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Automatico» si adatta come le altre icone: chiaro, scuro, colorato o trasparente."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Automático” se adapta como os outros ícones: claro, escuro, colorido ou transparente."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Automatisch” past zich aan zoals je andere symbolen: licht, donker, getint of helder."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wariant „Automatyczny” dopasowuje się jak pozostałe ikony: jasny, ciemny, barwiony lub przezroczysty."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Автоматически» подстраивается, как и другие значки: светлый, тёмный, тонированный или прозрачный."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Варіант «Автоматично» змінюється так само, як інші піктограми: світлий, темний, тонований чи прозорий."
           }
         }
       }

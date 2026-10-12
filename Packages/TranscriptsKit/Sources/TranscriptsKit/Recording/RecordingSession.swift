@@ -161,7 +161,8 @@ public final class RecordingSession {
         self.library = library ?? VoiceLibrary(samples: (try? database.voiceSamples()) ?? [])
         people = Dictionary(uniqueKeysWithValues: ((try? database.people()) ?? []).map { ($0.id, $0) })
         attendees = meeting.attendees
-        capturesSystemAudio = configuration.captureSystemAudio && (sources == nil || sources?[.system] != nil)
+        // iPhone and iPad record the room through the microphone; only the Mac can tap a call's sound.
+        capturesSystemAudio = configuration.captureSystemAudio && (sources == nil || sources?[.system] != nil) && !Platform.isMobile
         if let sources {
             microphone = sources[.microphone] ?? FileAudioSource.silent
             system = sources[.system] ?? FileAudioSource.silent
@@ -169,7 +170,11 @@ public final class RecordingSession {
             let capture = MicrophoneCapture()
             capture.deviceUID = configuration.microphoneUID
             microphone = capture
+            #if os(macOS)
             system = SystemAudioCapture()
+            #else
+            system = FileAudioSource.silent
+            #endif
         }
     }
 
@@ -335,10 +340,12 @@ public final class RecordingSession {
             systemAudioSeemsBlocked = false
             return
         }
+        #if os(macOS)
         let ownPid = ProcessInfo.processInfo.processIdentifier
         let othersPlaying = AudioSystem.processes().contains { $0.isRunningOutput && $0.pid != ownPid }
         silentSystemSeconds = othersPlaying ? silentSystemSeconds + 5 : 0
         systemAudioSeemsBlocked = silentSystemSeconds >= 20
+        #endif
     }
 
     private var lastMicrophoneSignal = Date()
@@ -577,7 +584,8 @@ public final class RecordingSession {
 
     @discardableResult
     public func addMarker(_ text: String) -> LiveMarker? {
-        let time = clock.elapsed
+        // The demo's recording has its time without a running clock.
+        let time = max(clock.elapsed, elapsed)
         guard let marker = try? database.addMarker(Marker(meetingId: meetingId, time: time, text: text.trimmingCharacters(in: .whitespacesAndNewlines))) else { return nil }
         let live = LiveMarker(id: marker.id ?? 0, time: marker.time, text: marker.text)
         markers.append(live)

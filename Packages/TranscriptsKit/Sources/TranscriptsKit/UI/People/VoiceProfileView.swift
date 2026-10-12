@@ -198,7 +198,7 @@ private struct VoiceGroupRow: View {
                 PersonChoices(excluding: profile.personId) { personId in
                     model.move(group, of: profile, to: personId)
                 } newPerson: {
-                    if let name = NamePrompt.ask(title: String(localized: "Wem gehört diese Stimme?"), message: String(localized: "Die Zeilen dieser Gruppe werden in allen Meetings dieser Person zugeordnet.")) {
+                    NamePrompt.ask(title: String(localized: "Wem gehört diese Stimme?"), message: String(localized: "Die Zeilen dieser Gruppe werden in allen Meetings dieser Person zugeordnet.")) { name in
                         model.move(group, of: profile, toNewPersonNamed: name)
                     }
                 }
@@ -408,25 +408,5 @@ struct PersonChoices: View {
     private func matches(_ attendee: Attendee, _ person: Person) -> Bool {
         if let email = attendee.email?.lowercased(), let personEmail = person.email?.lowercased(), email == personEmail { return true }
         return attendee.name.lowercased() == person.name.lowercased()
-    }
-}
-
-/// Asks for a name with a small panel.
-enum NamePrompt {
-    @MainActor
-    static func ask(title: String, message: String, initial: String = "") -> String? {
-        let alert = NSAlert()
-        alert.messageText = title
-        alert.informativeText = message
-        alert.addButton(withTitle: String(localized: "Speichern"))
-        alert.addButton(withTitle: String(localized: "Abbrechen"))
-        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 240, height: 24))
-        field.placeholderString = String(localized: "Name")
-        field.stringValue = initial
-        alert.accessoryView = field
-        alert.window.initialFirstResponder = field
-        guard alert.runModal() == .alertFirstButtonReturn else { return nil }
-        let name = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        return name.isEmpty ? nil : name
     }
 }

@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 
 /// Design tokens, shared with the Issues app. Every colour has a light and a dark value.
@@ -48,8 +47,8 @@ enum Theme {
     static let segmentActive = Color(light: 0xFFFFFF, dark: 0x2A2D33)
     static let onColor = Color(light: 0xFFFFFF, dark: 0x111214)
     static let scrim = Color(light: 0x14161A, dark: 0x000000).opacity(0.4)
-    static let shadow = Color(nsColor: NSColor(name: nil) { appearance in
-        NSColor.black.withAlphaComponent(appearance.isDark ? 0.5 : 0.16)
+    static let shadow = Color(platformColor: .dynamic { isDark in
+        PlatformColor.black.withAlphaComponent(isDark ? 0.5 : 0.16)
     })
 
     static let spring = Animation.spring(response: 0.3, dampingFraction: 0.82)
@@ -98,16 +97,16 @@ enum Theme {
         guard let value = UInt32(hex, radix: 16) else { return textSecondary }
         let r = Double((value >> 16) & 0xFF) / 255, g = Double((value >> 8) & 0xFF) / 255, b = Double(value & 0xFF) / 255
         let luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
-        return Color(nsColor: NSColor(name: nil) { appearance in
-            if appearance.isDark, luminance < 0.25 {
+        return Color(platformColor: .dynamic { isDark in
+            if isDark, luminance < 0.25 {
                 let lift = 0.45
-                return NSColor(srgbRed: r + (1 - r) * lift, green: g + (1 - g) * lift, blue: b + (1 - b) * lift, alpha: 1)
+                return PlatformColor(srgbRed: r + (1 - r) * lift, green: g + (1 - g) * lift, blue: b + (1 - b) * lift, alpha: 1)
             }
-            if !appearance.isDark, luminance > 0.7 {
+            if !isDark, luminance > 0.7 {
                 let keep = 0.62
-                return NSColor(srgbRed: r * keep, green: g * keep, blue: b * keep, alpha: 1)
+                return PlatformColor(srgbRed: r * keep, green: g * keep, blue: b * keep, alpha: 1)
             }
-            return NSColor(srgbRed: r, green: g, blue: b, alpha: 1)
+            return PlatformColor(srgbRed: r, green: g, blue: b, alpha: 1)
         })
     }
 
@@ -120,9 +119,7 @@ enum Theme {
 extension Color {
     /// A colour that follows the window's appearance.
     init(light: UInt32, dark: UInt32) {
-        self.init(nsColor: NSColor(name: nil) { appearance in
-            NSColor(hex: appearance.isDark ? dark : light)
-        })
+        self.init(platformColor: .dynamic { isDark in PlatformColor(hex: isDark ? dark : light) })
     }
 
     init(hex: UInt32) {
@@ -134,22 +131,8 @@ extension Color {
     }
 }
 
-extension NSColor {
-    convenience init(hex: UInt32, alpha: CGFloat = 1) {
-        self.init(
-            srgbRed: CGFloat((hex >> 16) & 0xFF) / 255,
-            green: CGFloat((hex >> 8) & 0xFF) / 255,
-            blue: CGFloat(hex & 0xFF) / 255,
-            alpha: alpha
-        )
-    }
-}
-
-extension NSAppearance {
-    var isDark: Bool { bestMatch(from: [.darkAqua, .aqua]) == .darkAqua }
-}
-
 extension Font {
+    #if os(macOS)
     static let ui = Font.system(size: 13)
     static let uiMedium = Font.system(size: 13, weight: .medium)
     static let uiSemibold = Font.system(size: 13, weight: .semibold)
@@ -160,6 +143,22 @@ extension Font {
     static let tinySemibold = Font.system(size: 11, weight: .semibold)
     static let reading = Font.system(size: 14)
     static let pageTitle = Font.system(size: 22, weight: .semibold)
+    /// The live transcript, a little larger than a meeting's.
+    static let live = Font.system(size: 15)
+    #else
+    // On iPhone and iPad the same roles follow the reader's text size, as in Issues for GitHub.
+    static let ui = Font.callout
+    static let uiMedium = Font.callout.weight(.medium)
+    static let uiSemibold = Font.callout.weight(.semibold)
+    static let small = Font.footnote
+    static let smallMedium = Font.footnote.weight(.medium)
+    static let smallSemibold = Font.footnote.weight(.semibold)
+    static let tiny = Font.caption
+    static let tinySemibold = Font.caption.weight(.semibold)
+    static let reading = Font.body
+    static let pageTitle = Font.title2.weight(.semibold)
+    static let live = Font.body
+    #endif
 }
 
 /// A button that looks like plain content and dims slightly while pressed.
@@ -207,16 +206,33 @@ extension View {
     }
 }
 
+/// Sizes of the app's buttons: compact for a pointer on the Mac, big enough for a finger on iPhone and iPad.
+enum ButtonMetrics {
+    #if os(macOS)
+    static let height: CGFloat = 26
+    static let radius: CGFloat = 6
+    static let padding: CGFloat = 12
+    static let font = Font.system(size: 12, weight: .semibold)
+    static let secondaryFont = Font.small
+    #else
+    static let height: CGFloat = 36
+    static let radius: CGFloat = 10
+    static let padding: CGFloat = 14
+    static let font = Font.subheadline.weight(.semibold)
+    static let secondaryFont = Font.subheadline.weight(.medium)
+    #endif
+}
+
 struct PrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 12, weight: .semibold))
+            .font(ButtonMetrics.font)
             .foregroundStyle(.white)
-            .padding(.horizontal, 12)
-            .frame(height: 26)
-            .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Theme.accentFill))
+            .padding(.horizontal, ButtonMetrics.padding)
+            .frame(minHeight: ButtonMetrics.height)
+            .background(RoundedRectangle(cornerRadius: ButtonMetrics.radius, style: .continuous).fill(Theme.accentFill))
             .opacity(isEnabled ? (configuration.isPressed ? 0.8 : 1) : 0.4)
             .contentShape(Rectangle())
     }
@@ -227,12 +243,12 @@ struct SecondaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.small)
+            .font(ButtonMetrics.secondaryFont)
             .foregroundStyle(Theme.textBody)
-            .padding(.horizontal, 10)
-            .frame(height: 26)
-            .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(configuration.isPressed ? Theme.controlActive : Theme.card))
-            .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Theme.chipBorder, lineWidth: 1))
+            .padding(.horizontal, ButtonMetrics.padding - 2)
+            .frame(minHeight: ButtonMetrics.height)
+            .background(RoundedRectangle(cornerRadius: ButtonMetrics.radius, style: .continuous).fill(configuration.isPressed ? Theme.controlActive : Theme.card))
+            .overlay(RoundedRectangle(cornerRadius: ButtonMetrics.radius, style: .continuous).stroke(Theme.chipBorder, lineWidth: 1))
             .opacity(isEnabled ? 1 : 0.45)
             .contentShape(Rectangle())
     }
@@ -242,11 +258,11 @@ struct SecondaryButtonStyle: ButtonStyle {
 struct StopButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 12, weight: .semibold))
+            .font(ButtonMetrics.font)
             .foregroundStyle(.white)
-            .padding(.horizontal, 11)
-            .frame(height: 28)
-            .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(Theme.recordingFill))
+            .padding(.horizontal, ButtonMetrics.padding - 1)
+            .frame(minHeight: ButtonMetrics.height + 2)
+            .background(RoundedRectangle(cornerRadius: ButtonMetrics.radius + 1, style: .continuous).fill(Theme.recordingFill))
             .opacity(configuration.isPressed ? 0.8 : 1)
             .contentShape(Rectangle())
     }

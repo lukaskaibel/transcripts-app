@@ -18,7 +18,7 @@ render() {
 
 render Transcripts/AppIcon.icon Default "$work/light.png"
 render Transcripts/AppIcon.icon Dark "$work/dark.png"
-render Design/AppIcon-Indigo.icon Default "$work/indigo.png"
+render Transcripts/AppIcon-Indigo.icon Default "$work/indigo.png"
 swift Tools/pad-icon.swift --split "$work/light.png" "$work/dark.png" "$work/automatic.png"
 
 for name in automatic light dark indigo; do

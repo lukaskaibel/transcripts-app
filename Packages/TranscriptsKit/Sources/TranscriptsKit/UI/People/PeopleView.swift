@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 
 /// Everyone the app knows by voice, and the voices that wait for a name.
@@ -305,7 +304,11 @@ struct PersonSheet: View {
 
     /// The screen's height less room for the window's title and the sheet's buttons.
     static var maximumContentHeight: CGFloat {
+        #if os(macOS)
         min(720, (NSScreen.main?.visibleFrame.height ?? 800) - 200)
+        #else
+        .infinity
+        #endif
     }
 
     var body: some View {
@@ -320,7 +323,7 @@ struct PersonSheet: View {
                                 .font(.system(size: 18, weight: .semibold))
                                 .onSubmit(save)
                         }
-                        Text(summary(stats))
+                        Text(Self.summary(stats))
                             .font(.small)
                             .foregroundStyle(Theme.textSecondary)
                             .padding(.top, 8)
@@ -418,7 +421,8 @@ struct PersonSheet: View {
         model.rename(stats.person, to: name)
     }
 
-    private func summary(_ stats: PersonStats) -> String {
+    /// "12 Meetings · 42 min gesprochen · 230 Stimmproben", for the Mac's sheet and the person's screen on iPhone and iPad.
+    static func summary(_ stats: PersonStats) -> String {
         var parts: [String] = []
         parts.append(String(localized: "\(stats.meetings) Meetings", comment: "plural: meetings"))
         if stats.talkTime > 0 { parts.append(String(localized: "\(TimeFormat.duration(stats.talkTime)) gesprochen", comment: "how long a person spoke, e.g. 42 min")) }
@@ -441,57 +445,88 @@ struct PersonGitHubRow: View {
 
     var body: some View {
         if person.github != nil || model.settings.githubLogin != nil {
-            HStack(spacing: 10) {
-                HStack(spacing: 5) {
-                    GitHubMark(size: 12)
-                    Text("GitHub")
+            Group {
+                #if os(macOS)
+                HStack(spacing: 10) {
+                    label.frame(width: 80, alignment: .leading)
+                    account
+                    Spacer(minLength: 8)
+                    choose
                 }
-                .font(.small)
-                .foregroundStyle(Theme.textSecondary)
-                .frame(width: 80, alignment: .leading)
-                if let user = person.github {
-                    HStack(spacing: 6) {
-                        GitHubAvatar(user: user, size: 16)
-                        Text(user.login)
+                #else
+                // On iPhone and iPad the account and its buttons go under the label.
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        label
+                        Spacer(minLength: 8)
+                        choose
                     }
-                    .padding(.leading, 4)
-                    .padding(.trailing, 9)
-                    .frame(height: 24)
-                    .overlay(Capsule().stroke(Theme.chipBorder, lineWidth: 1))
-                    if person.isMe {
-                        Text("Dein Konto").font(.small).foregroundStyle(Theme.textTertiary)
-                    }
-                } else if let guess {
-                    Text("Vermutlich \(guess.login)").foregroundStyle(Theme.textBody)
-                    Button("Bestätigen") { model.setGitHub(guess, for: person) }
-                        .buttonStyle(SecondaryButtonStyle())
-                } else {
-                    Text("Nicht verknüpft").foregroundStyle(Theme.textTertiary)
+                    account
                 }
-                Spacer(minLength: 8)
-                if !person.isMe {
-                    Button(person.github == nil ? "Konto wählen …" : "Ändern") { picking = true }
-                        .buttonStyle(PlainPressStyle())
-                        .font(.small)
-                        .foregroundStyle(Theme.accent)
-                        .dropdown(isPresented: $picking) { close in
-                            PickerList(
-                                placeholder: String(localized: "GitHub-Konto suchen …"),
-                                items: (person.github == nil ? [] : [PickerItem(id: "", title: String(localized: "Nicht verknüpft", comment: "a person without a GitHub account"), icon: AnyView(Image(systemName: "person.crop.circle.badge.xmark").foregroundStyle(Theme.textTertiary)))])
-                                    + model.knownGitHubUsers.map { user in
-                                        PickerItem(id: user.id, title: user.login, subtitle: user.name, selected: user.id == person.github?.id, icon: AnyView(GitHubAvatar(user: user, size: 18)))
-                                    },
-                                width: 300,
-                                footer: model.knownGitHubUsers.isEmpty ? String(localized: "Noch keine Konten geladen – einmal „Nach GitHub“ öffnen", comment: "Nach GitHub is the button above a meeting's tasks") : nil,
-                                onPick: { id in model.setGitHub(model.knownGitHubUsers.first { $0.id == id }, for: person) },
-                                onClose: close
-                            )
-                        }
-                }
+                #endif
             }
             .font(.ui)
             .frame(minHeight: 26)
             .task { await model.loadKnownGitHubAccounts() }
+        }
+    }
+
+    private var label: some View {
+        HStack(spacing: 5) {
+            GitHubMark(size: 12)
+            Text("GitHub")
+        }
+        .font(.small)
+        .foregroundStyle(Theme.textSecondary)
+    }
+
+    @ViewBuilder
+    private var account: some View {
+        HStack(spacing: 10) {
+            if let user = person.github {
+                HStack(spacing: 6) {
+                    GitHubAvatar(user: user, size: 16)
+                    Text(user.login)
+                }
+                .padding(.leading, 4)
+                .padding(.trailing, 9)
+                .frame(height: 24)
+                .overlay(Capsule().stroke(Theme.chipBorder, lineWidth: 1))
+                if person.isMe {
+                    Text("Dein Konto").font(.small).foregroundStyle(Theme.textTertiary)
+                }
+            } else if let guess {
+                Text("Vermutlich \(guess.login)").foregroundStyle(Theme.textBody)
+                Button("Bestätigen") { model.setGitHub(guess, for: person) }
+                    .buttonStyle(SecondaryButtonStyle())
+            } else {
+                Text("Nicht verknüpft").foregroundStyle(Theme.textTertiary)
+            }
+        }
+        .fixedSize()
+    }
+
+    @ViewBuilder
+    private var choose: some View {
+        if !person.isMe {
+            Button(person.github == nil ? "Konto wählen …" : "Ändern") { picking = true }
+                .buttonStyle(PlainPressStyle())
+                .font(.small)
+                .foregroundStyle(Theme.accent)
+                .fixedSize()
+                .dropdown(isPresented: $picking) { close in
+                    PickerList(
+                        placeholder: String(localized: "GitHub-Konto suchen …"),
+                        items: (person.github == nil ? [] : [PickerItem(id: "", title: String(localized: "Nicht verknüpft", comment: "a person without a GitHub account"), icon: AnyView(Image(systemName: "person.crop.circle.badge.xmark").foregroundStyle(Theme.textTertiary)))])
+                            + model.knownGitHubUsers.map { user in
+                                PickerItem(id: user.id, title: user.login, subtitle: user.name, selected: user.id == person.github?.id, icon: AnyView(GitHubAvatar(user: user, size: 18)))
+                            },
+                        width: 300,
+                        footer: model.knownGitHubUsers.isEmpty ? String(localized: "Noch keine Konten geladen – einmal „Nach GitHub“ öffnen", comment: "Nach GitHub is the button above a meeting's tasks") : nil,
+                        onPick: { id in model.setGitHub(model.knownGitHubUsers.first { $0.id == id }, for: person) },
+                        onClose: close
+                    )
+                }
         }
     }
 }

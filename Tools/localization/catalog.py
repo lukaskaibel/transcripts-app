@@ -2,7 +2,8 @@
 """The app's string catalog (Transcripts/Localizable.xcstrings): German is the source, written in the code; the other
 languages are translations kept here.
 
-  catalog.py sync <stringsdata folder>     add the texts the compiler found, drop the rest (extract.sh runs it)
+  catalog.py sync <stringsdata folder>…    add the texts the compiler found, drop the rest (extract.sh runs it with the
+                                           Mac's and the iPhone's folders: some texts exist on one platform only)
   catalog.py todo <language> <out.json>    what a language still lacks, with the code around each text
   catalog.py merge <language> <in.json>    take translations in: {"key": "text"} or {"key": {"one": …, "other": …}}
   catalog.py check                         format specifiers, plural forms and missing translations, per language
@@ -51,9 +52,10 @@ def unit(value):
     return {"stringUnit": {"state": "translated", "value": value}}
 
 
-def sync(folder):
+def sync(folders):
     found = {}
-    for path in sorted(glob.glob(os.path.join(folder, "*.stringsdata"))):
+    paths = sorted(path for folder in folders for path in glob.glob(os.path.join(folder, "*.stringsdata")))
+    for path in paths:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
         source = data.get("source", "")
@@ -68,8 +70,11 @@ def sync(folder):
             entry = found.setdefault(key, {"comment": "", "locations": []})
             if item.get("comment"):
                 entry["comment"] = item["comment"]
-            entry["locations"].append({"file": os.path.relpath(source, ROOT), "line": line,
-                                       "code": lines[line - 1].strip()[:240] if line <= len(lines) else ""})
+            location = {"file": os.path.relpath(source, ROOT), "line": line,
+                        "code": lines[line - 1].strip()[:240] if line <= len(lines) else ""}
+            # A shared file is in both folders; its texts count once.
+            if location not in entry["locations"]:
+                entry["locations"].append(location)
     catalog = load()
     strings = catalog["strings"]
     added = 0
@@ -190,7 +195,7 @@ def check():
 if __name__ == "__main__":
     command = sys.argv[1] if len(sys.argv) > 1 else ""
     if command == "sync":
-        sync(sys.argv[2])
+        sync(sys.argv[2:])
     elif command == "todo":
         todo(sys.argv[2], sys.argv[3])
     elif command == "merge":

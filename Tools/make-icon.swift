@@ -2,7 +2,11 @@
 // bubble with a voice in it, on a plain ground.
 //   Transcripts/AppIcon.icon      the app's icon: an indigo bubble on white, or on black in the dark appearance;
 //                                 the system makes the tinted and clear versions from the same layers
-//   Design/AppIcon-Indigo.icon    a white bubble on indigo, offered in Settings
+//   Transcripts/AppIcon-Light.icon, AppIcon-Dark.icon
+//                                 the same icon in one appearance only, offered in Settings
+//   Transcripts/AppIcon-Indigo.icon
+//                                 a white bubble on indigo, offered in Settings
+// The three in Settings are alternate icons on iPhone and iPad; the Mac shows them in the Dock while it runs.
 //   swift Tools/make-icon.swift
 // Then Tools/render-icons.sh renders them into the pictures the app and the README use.
 import AppKit
@@ -136,7 +140,8 @@ func document(at url: URL, ground: Shade, darkGround: Shade?, bubble bubbleImage
                 "translucency": ["enabled": bubbleTranslucency != nil, "value": bubbleTranslucency ?? 0.5],
             ],
         ],
-        "supported-platforms": ["squares": ["macOS"]],
+        // Mac, iPhone and iPad.
+        "supported-platforms": ["squares": "shared"],
     ]
     // Start from an empty document, so images of an earlier design don't linger.
     try? FileManager.default.removeItem(at: url)
@@ -151,23 +156,38 @@ let root = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 let indigo = Shade(top: 0x7C83FF, bottom: 0x4338CA)
 let white = Shade(top: 0xFFFFFF, bottom: 0xE9EAFB)
 
+let lightGround = Shade(top: 0xFFFFFF, bottom: 0xECEDF2)
+let darkGround = Shade(top: 0x2C2C30, bottom: 0x0B0B0D)
+// A touch brighter on black, so the bubble doesn't sink into the dark ground.
+let indigoOnBlack = Shade(top: 0x8A90FF, bottom: 0x4C42D6)
+let whiteVoice = Shade(top: 0xFFFFFF, bottom: 0xE4E5FF)
+
 try document(
     at: root.appendingPathComponent("Transcripts/AppIcon.icon"),
-    ground: Shade(top: 0xFFFFFF, bottom: 0xECEDF2), darkGround: Shade(top: 0x2C2C30, bottom: 0x0B0B0D),
+    ground: lightGround, darkGround: darkGround,
     bubble: .lightAndDark("bubble-light.png", "bubble-dark.png"), bubbleTranslucency: nil,
     voice: .one("voice.png"),
-    images: [
-        "bubble-light.png": bubble(indigo),
-        // A touch brighter on black, so the bubble doesn't sink into the dark ground.
-        "bubble-dark.png": bubble(Shade(top: 0x8A90FF, bottom: 0x4C42D6)),
-        "voice.png": voice(Shade(top: 0xFFFFFF, bottom: 0xE4E5FF)),
-    ]
+    images: ["bubble-light.png": bubble(indigo), "bubble-dark.png": bubble(indigoOnBlack), "voice.png": voice(whiteVoice)]
 )
 try document(
-    at: root.appendingPathComponent("Design/AppIcon-Indigo.icon"),
+    at: root.appendingPathComponent("Transcripts/AppIcon-Light.icon"),
+    ground: lightGround, darkGround: nil,
+    bubble: .one("bubble.png"), bubbleTranslucency: nil,
+    voice: .one("voice.png"),
+    images: ["bubble.png": bubble(indigo), "voice.png": voice(whiteVoice)]
+)
+try document(
+    at: root.appendingPathComponent("Transcripts/AppIcon-Dark.icon"),
+    ground: darkGround, darkGround: nil,
+    bubble: .one("bubble.png"), bubbleTranslucency: nil,
+    voice: .one("voice.png"),
+    images: ["bubble.png": bubble(indigoOnBlack), "voice.png": voice(whiteVoice)]
+)
+try document(
+    at: root.appendingPathComponent("Transcripts/AppIcon-Indigo.icon"),
     ground: indigo, darkGround: nil,
     bubble: .one("bubble.png"), bubbleTranslucency: 0.25,
     voice: .one("voice.png"),
     images: ["bubble.png": bubble(white), "voice.png": voice(indigo)]
 )
-print("Wrote AppIcon.icon and AppIcon-Indigo.icon")
+print("Wrote AppIcon.icon, AppIcon-Light.icon, AppIcon-Dark.icon and AppIcon-Indigo.icon")

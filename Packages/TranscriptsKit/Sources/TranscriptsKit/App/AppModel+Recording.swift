@@ -1,4 +1,3 @@
-import AppKit
 import Foundation
 
 extension AppModel {
@@ -11,7 +10,13 @@ extension AppModel {
             return
         }
         if isDemo {
+            #if os(macOS)
             showToast(String(localized: "Demo"), String(localized: "Im Demo-Modus wird nicht aufgenommen."))
+            #else
+            // A pretend recording, so the recording screen can be tried and photographed.
+            startDemoRecording()
+            request(.live)
+            #endif
             return
         }
         switch MicrophoneCapture.permission {
@@ -66,18 +71,30 @@ extension AppModel {
             showToast(String(localized: "Systemaudio wird nicht aufgenommen"), message, isError: true)
         }
         if engineState != .ready { prepareEngine() }
+        #if os(macOS)
         if settings.floatingRecorder { floatingRecorder?.show() }
         if settings.openLiveWindow { request(.live) }
+        #else
+        // On iPhone and iPad the recording screen is the place to see it's running, so it always comes up.
+        request(.live)
+        #endif
         startLiveSummary()
         Task { await rescheduleReminders() }
     }
 
     /// Stops the recording and hands it to the full transcription pass.
     public func stopRecording() async {
+        if isDemo, recording != nil {
+            stopDemoRecording()
+            showToast(String(localized: "Demo"), String(localized: "Im Demo-Modus wird nicht aufgenommen."))
+            return
+        }
         guard let session = recording, session.state == .recording || session.state == .paused else { return }
         await session.stop()
         recording = nil
+        #if os(macOS)
         floatingRecorder?.hide()
+        #endif
         liveSummaryTask?.cancel()
         liveSummaryTask = nil
         liveSummary = nil

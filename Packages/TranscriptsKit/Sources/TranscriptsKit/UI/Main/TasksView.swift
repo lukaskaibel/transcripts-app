@@ -61,31 +61,43 @@ struct TasksView: View {
         }
     }
 
-    /// Every open task, mine or all.
     private var openIds: Set<Int64> {
-        Set(model.rows.flatMap { row in row.actionItems.filter { !$0.done && (!onlyMine || isMine($0)) }.compactMap(\.id) })
+        model.openTaskIds(onlyMine: onlyMine)
     }
 
     private var groups: [(row: MeetingRow, items: [ActionItem])] {
-        model.rows.compactMap { row in
+        model.taskGroups(onlyMine: onlyMine, keeping: shown)
+    }
+}
+
+extension AppModel {
+    /// Every open task, the user's own or all.
+    func openTaskIds(onlyMine: Bool) -> Set<Int64> {
+        Set(rows.flatMap { row in row.actionItems.filter { !$0.done && (!onlyMine || isMine($0)) }.compactMap(\.id) })
+    }
+
+    /// The open tasks under their meetings, newest meetings first; tasks in `keeping` stay even when done, so a task
+    /// checked off on this screen doesn't jump away under the finger or the pointer.
+    func taskGroups(onlyMine: Bool, keeping: Set<Int64>) -> [(row: MeetingRow, items: [ActionItem])] {
+        rows.compactMap { row in
             let items = row.actionItems.filter { item in
                 guard let id = item.id, !onlyMine || isMine(item) else { return false }
-                return !item.done || shown.contains(id)
+                return !item.done || keeping.contains(id)
             }
             return items.isEmpty ? nil : (row, items)
         }
     }
 
-    private func isMine(_ item: ActionItem) -> Bool {
+    func isMine(_ item: ActionItem) -> Bool {
         guard let owner = item.owner?.trimmingCharacters(in: .whitespaces).lowercased(), !owner.isEmpty else { return false }
-        let name = model.myName.lowercased()
-        let first = (model.me?.firstName ?? name.split(separator: " ").first.map(String.init) ?? name).lowercased()
+        let name = myName.lowercased()
+        let first = (me?.firstName ?? name.split(separator: " ").first.map(String.init) ?? name).lowercased()
         return owner == name || owner == first
     }
 }
 
 /// A meeting's tasks under its name, which opens the meeting.
-private struct MeetingTasks: View {
+struct MeetingTasks: View {
     @Environment(AppModel.self) private var model
     var row: MeetingRow
     var items: [ActionItem]

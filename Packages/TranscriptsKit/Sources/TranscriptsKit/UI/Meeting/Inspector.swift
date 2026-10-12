@@ -1,10 +1,26 @@
-import AppKit
 import SwiftUI
 
-/// The column on the right of a meeting: facts, the voices and who they are.
+/// The column on the right of a meeting: facts, the voices and who they are. On the Mac and a wide iPad it stands
+/// beside the meeting; on the iPhone its content sits between the summary and the transcript.
 struct Inspector: View {
+    let detail: MeetingDetail
+
+    var body: some View {
+        ScrollView {
+            InspectorContent(detail: detail)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 22)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
+
+/// What the inspector shows. `showsTimeFacts` is off where the date, the length and the source already stand under
+/// the meeting's title.
+struct InspectorContent: View {
     @Environment(AppModel.self) private var model
     let detail: MeetingDetail
+    var showsTimeFacts = true
     /// Each speaker's lines grouped by voice, worked out in the background whenever the lines change.
     @State private var voiceGroups: [String: [SpeakerVoices.Group]] = [:]
 
@@ -25,61 +41,56 @@ struct Inspector: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                facts
-                if !detail.speakers.isEmpty {
-                    divider
-                    Text(String(localized: "Sprecher", comment: "heading over the list of the meeting's speakers (plural)")).font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.bottom, 12)
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(remoteSpeakers) { speaker in
-                            SpeakerRow(detail: detail, speaker: speaker, share: speaker.talkTime / totalTalk)
-                            let groups = otherVoices(of: speaker)
-                            if groups.count > 1 {
-                                SpeakerGroupsView(detail: detail, speaker: speaker, groups: groups)
-                            }
-                            let moved = detail.segments.filter { $0.speakerKey == speaker.key && $0.placement == .app }
-                            if !moved.isEmpty {
-                                MovedLinesNote(detail: detail, speaker: speaker, lines: moved)
-                            }
+        VStack(alignment: .leading, spacing: 0) {
+            facts
+            if !detail.speakers.isEmpty {
+                if showsTimeFacts || hasOtherFacts { divider }
+                Text(String(localized: "Sprecher", comment: "heading over the list of the meeting's speakers (plural)")).font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.bottom, 12)
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(remoteSpeakers) { speaker in
+                        SpeakerRow(detail: detail, speaker: speaker, share: speaker.talkTime / totalTalk)
+                        let groups = otherVoices(of: speaker)
+                        if groups.count > 1 {
+                            SpeakerGroupsView(detail: detail, speaker: speaker, groups: groups)
                         }
-                    }
-                    ForEach(detail.speakers.filter { $0.needsReview && (!detail.guesses(for: $0).isEmpty || $0.suggestedName != nil) }) { speaker in
-                        SuggestionCard(detail: detail, speaker: speaker)
-                            .padding(.top, 14)
-                    }
-                }
-                if !detail.markers.isEmpty {
-                    divider
-                    Text("Markierungen").font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.bottom, 10)
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(detail.markers) { marker in
-                            Button {
-                                Task { await model.player.play(meetingId: detail.meeting.id, from: max(0, marker.time - 5)) }
-                            } label: {
-                                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                    Image(systemName: "bookmark.fill").font(.system(size: 9)).foregroundStyle(Theme.accent)
-                                    Text(TimeFormat.clock(marker.time)).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
-                                    Text(marker.text.isEmpty ? String(localized: "Markierung") : marker.text).lineLimit(2)
-                                    Spacer(minLength: 0)
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(PlainPressStyle())
-                            .help("Hier abspielen")
+                        let moved = detail.segments.filter { $0.speakerKey == speaker.key && $0.placement == .app }
+                        if !moved.isEmpty {
+                            MovedLinesNote(detail: detail, speaker: speaker, lines: moved)
                         }
                     }
                 }
-                if let model = detail.meeting.transcriptionModel {
-                    Text("Lokal transkribiert · \(model)")
-                        .font(.small)
-                        .foregroundStyle(Theme.textTertiary)
-                        .padding(.top, 28)
+                ForEach(detail.speakers.filter { $0.needsReview && (!detail.guesses(for: $0).isEmpty || $0.suggestedName != nil) }) { speaker in
+                    SuggestionCard(detail: detail, speaker: speaker)
+                        .padding(.top, 14)
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 22)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            if !detail.markers.isEmpty {
+                divider
+                Text("Markierungen").font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.bottom, 10)
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(detail.markers) { marker in
+                        Button {
+                            Task { await model.player.play(meetingId: detail.meeting.id, from: max(0, marker.time - 5)) }
+                        } label: {
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                Image(systemName: "bookmark.fill").font(.system(size: 9)).foregroundStyle(Theme.accent)
+                                Text(TimeFormat.clock(marker.time)).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
+                                Text(marker.text.isEmpty ? String(localized: "Markierung") : marker.text).lineLimit(2)
+                                Spacer(minLength: 0)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(PlainPressStyle())
+                        .help("Hier abspielen")
+                    }
+                }
+            }
+            if let model = detail.meeting.transcriptionModel {
+                Text("Lokal transkribiert · \(model)")
+                    .font(.small)
+                    .foregroundStyle(Theme.textTertiary)
+                    .padding(.top, 28)
+            }
         }
         .task(id: linesSignature) {
             let segments = detail.segments
@@ -107,11 +118,18 @@ struct Inspector: View {
         Rectangle().fill(Theme.rowSeparator).frame(height: 1).padding(.vertical, 18)
     }
 
+    /// Facts that don't stand under the title: the language, the invitees, GitHub.
+    private var hasOtherFacts: Bool {
+        detail.meeting.language != nil || !detail.meeting.attendees.isEmpty || !detail.actionItems.isEmpty
+    }
+
     private var facts: some View {
         Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 14, verticalSpacing: 11) {
-            fact("Datum", TimeFormat.shortDate(detail.meeting.startedAt))
-            fact("Dauer", TimeFormat.duration(detail.meeting.duration))
-            if let source = detail.meeting.source { fact("Quelle", source) }
+            if showsTimeFacts {
+                fact("Datum", TimeFormat.shortDate(detail.meeting.startedAt))
+                fact("Dauer", TimeFormat.duration(detail.meeting.duration))
+                if let source = detail.meeting.source { fact("Quelle", source) }
+            }
             if let language = detail.meeting.language, let name = AppLocale.current.localizedString(forLanguageCode: language) {
                 fact("Sprache", name)
             }
@@ -239,7 +257,7 @@ struct SpeakerMenuItems: View {
                     }
                 }
             }
-            Button("Neue Person …", systemImage: "person.badge.plus") { NewPersonPrompt.ask(for: speaker, model: model) }
+            Button("Neue Person …", systemImage: "person.badge.plus") { NamePrompt.newPerson(for: speaker, model: model) }
             Button("Das bin ich", systemImage: "person.crop.circle") { model.assignToMe(speaker) }
             if speaker.personId != nil {
                 Divider()
@@ -258,25 +276,6 @@ struct SpeakerMenuItems: View {
         } else {
             model.assign(speaker, toNewPersonNamed: attendee.name, email: attendee.email)
         }
-    }
-}
-
-/// Asks for a name with a small panel and assigns the voice to a new person.
-enum NewPersonPrompt {
-    @MainActor
-    static func ask(for speaker: MeetingSpeaker, model: AppModel) {
-        let alert = NSAlert()
-        alert.messageText = String(localized: "Wer ist \(speaker.displayLabel)?")
-        alert.informativeText = String(localized: "Die Stimme wird gemerkt und in künftigen Meetings wiedererkannt.")
-        alert.addButton(withTitle: String(localized: "Speichern"))
-        alert.addButton(withTitle: String(localized: "Abbrechen"))
-        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 240, height: 24))
-        field.placeholderString = String(localized: "Name")
-        field.stringValue = speaker.suggestedName ?? ""
-        alert.accessoryView = field
-        alert.window.initialFirstResponder = field
-        guard alert.runModal() == .alertFirstButtonReturn else { return }
-        model.assign(speaker, toNewPersonNamed: field.stringValue)
     }
 }
 
@@ -473,7 +472,7 @@ private struct SpeakerGroupRow: View {
                     PersonChoices(attendees: detail.meeting.attendees) { personId in
                         model.assignLines(group.segmentIds, in: detail.meeting.id, to: personId)
                     } newPerson: {
-                        if let name = NamePrompt.ask(title: String(localized: "Wer ist das?"), message: String(localized: "Diese Zeilen werden der Person zugeordnet und ihre Stimme gemerkt.")) {
+                        NamePrompt.ask(title: String(localized: "Wer ist das?"), message: String(localized: "Diese Zeilen werden der Person zugeordnet und ihre Stimme gemerkt.")) { name in
                             model.assignLines(group.segmentIds, in: detail.meeting.id, toNewPersonNamed: name)
                         }
                     }

@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 
 /// What the "Nach GitHub" dropdown shows: the way to connect, or the composer once connected.
@@ -25,12 +24,16 @@ struct GitHubPopover: View {
                         ProgressView().controlSize(.small)
                         Text("Wird vorbereitet …").foregroundStyle(Theme.textSecondary)
                     }
-                    .frame(width: width, height: 120)
+                    .frame(width: Platform.isMobile ? nil : width, height: 120)
+                    .frame(maxWidth: Platform.isMobile ? .infinity : nil)
                 }
             } else {
                 GitHubConnectView()
             }
         }
+        #if os(iOS)
+        .presentationDetents(showsComposer ? [.large] : [.medium, .large])
+        #endif
         .task(id: showsComposer) {
             guard showsComposer else { return }
             if model.openComposer(meetingId: meetingId, only: only) == nil {
@@ -115,7 +118,11 @@ struct GitHubConnectView: View {
             }
         }
         .padding(16)
+        #if os(macOS)
         .frame(width: 340, alignment: .leading)
+        #else
+        .frame(maxWidth: .infinity, alignment: .leading)
+        #endif
         .font(.ui)
         .foregroundStyle(Theme.text)
     }
@@ -157,24 +164,21 @@ struct IssueComposerView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            if composer.drafts.isEmpty {
-                Text("Alle Aufgaben sind schon auf GitHub.")
-                    .foregroundStyle(Theme.textSecondary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 60)
-                    .overlay(alignment: .top) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
-            } else {
-                rows
-            }
-            if composer.target?.isPrivate == false {
-                notice(String(localized: "Öffentliches Repository – Zitate und Kontext aus dem Transkript bleiben draußen, nur Titel, Labels und Fälligkeit gehen rüber."), systemImage: "globe")
-            }
-            if let error = composer.error {
-                notice(error, systemImage: "exclamationmark.triangle")
-            }
+            #if os(macOS)
+            content
+            #else
+            // In a sheet on iPhone and iPad: the tasks scroll, the button to create them stays at the bottom.
+            ScrollView { content }
+                .scrollBounceBehavior(.basedOnSize)
+            #endif
             footer
         }
+        #if os(macOS)
         .frame(width: width)
+        #else
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(Theme.popover)
+        #endif
         .font(.ui)
         .foregroundStyle(Theme.text)
         .focusable()
@@ -190,7 +194,28 @@ struct IssueComposerView: View {
             // Back to the list once a picker closes, so the keys work again.
             if now == nil, case .title = focus {} else if now == nil { focus = .list }
         }
+        // A container of its own, so its controls keep their names.
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("github.composer")
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if composer.drafts.isEmpty {
+            Text("Alle Aufgaben sind schon auf GitHub.")
+                .foregroundStyle(Theme.textSecondary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 60)
+                .overlay(alignment: .top) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
+        } else {
+            rows
+        }
+        if composer.target?.isPrivate == false {
+            notice(String(localized: "Öffentliches Repository – Zitate und Kontext aus dem Transkript bleiben draußen, nur Titel, Labels und Fälligkeit gehen rüber."), systemImage: "globe")
+        }
+        if let error = composer.error {
+            notice(error, systemImage: "exclamationmark.triangle")
+        }
     }
 
     // MARK: Header
@@ -201,9 +226,14 @@ struct IssueComposerView: View {
                 .foregroundStyle(Theme.textBody)
             targetChip
             if let suggestion = composer.suggestion, composer.target?.key == suggestion.target.key {
-                HStack(spacing: 5) {
-                    SparkleMark(size: 9)
-                    Text(suggestion.short).lineLimit(1)
+                // Left out where there is no room for it, on a phone.
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 5) {
+                        SparkleMark(size: 9)
+                        Text(suggestion.short).lineLimit(1)
+                    }
+                    .fixedSize()
+                    Color.clear.frame(width: 0, height: 0)
                 }
                 .font(.small)
                 .foregroundStyle(Theme.textSecondary)
@@ -225,7 +255,7 @@ struct IssueComposerView: View {
         }
         .padding(.leading, 12)
         .padding(.trailing, 8)
-        .frame(height: 48)
+        .frame(height: Platform.isMobile ? 56 : 48)
         .animation(Theme.quick, value: composer.drafting)
     }
 
@@ -243,11 +273,13 @@ struct IssueComposerView: View {
             }
             .foregroundStyle(Theme.textBody)
             .padding(.horizontal, 9)
-            .frame(height: 26)
+            .frame(height: Platform.isMobile ? 34 : 26)
             .hoverFill(active: openPicker?.kind == .target, fill: Theme.controlActive)
             .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Theme.popoverBorder, lineWidth: 1))
         }
         .buttonStyle(PlainPressStyle())
+        // Where the tasks go comes before the suggestion's reason when room is short.
+        .layoutPriority(1)
         .help("Wohin die Aufgaben gehen (Z)")
         .accessibilityIdentifier("github.target")
         .debugFrame("github.target")
@@ -274,7 +306,105 @@ struct IssueComposerView: View {
         }
     }
 
+    @ViewBuilder
     private func row(_ draft: IssueDraft, index: Int) -> some View {
+        #if os(macOS)
+        wideRow(draft, index: index)
+        #else
+        narrowRow(draft)
+        #endif
+    }
+
+    /// On iPhone and iPad: the title on its own line, its labels and assignees in a line underneath.
+    private func narrowRow(_ draft: IssueDraft) -> some View {
+        let id = draft.itemId
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 10) {
+                includeBox(draft)
+                statusPart(draft)
+                    .opacity(draft.include ? 1 : 0.45)
+                titlePart(draft)
+            }
+            HStack(spacing: 10) {
+                if draft.include, !draft.isLink {
+                    labelsPart(draft)
+                } else if !draft.include, let note = draft.note {
+                    HStack(spacing: 4) {
+                        SparkleMark(size: 8)
+                        Text(note).lineLimit(2)
+                    }
+                    .font(.tiny)
+                    .foregroundStyle(Theme.textSecondary)
+                }
+                if draft.duplicate != nil, draft.include {
+                    linkToggle(draft)
+                }
+                Spacer(minLength: 0)
+                if let due = draft.due {
+                    Text(due).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1).fixedSize()
+                }
+                assigneePart(draft)
+                    .opacity(draft.include ? 1 : 0.45)
+            }
+            .padding(.leading, 34)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .overlay(alignment: .top) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("github.row.\(id)")
+    }
+
+    private func includeBox(_ draft: IssueDraft) -> some View {
+        let id = draft.itemId
+        return Button {
+            model.toggleInclude(id, in: composer)
+        } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(draft.include ? Theme.accentFill : .clear)
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .stroke(draft.include ? Theme.accentFill : Theme.textTertiary, lineWidth: 1.5)
+                if draft.include {
+                    Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)).foregroundStyle(.white)
+                }
+            }
+            .frame(width: 18, height: 18)
+            .frame(width: 24, height: 34)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainPressStyle())
+        .accessibilityLabel(draft.include ? "Übernehmen, an" : "Übernehmen, aus")
+        .accessibilityIdentifier("github.row.\(id).include")
+    }
+
+    @ViewBuilder
+    private func titlePart(_ draft: IssueDraft) -> some View {
+        let id = draft.itemId
+        if let ref = draft.linkedRef {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(ref.title).lineLimit(2)
+                HStack(spacing: 6) {
+                    Text("#\(ref.number)").monospacedDigit()
+                    Text("schon offen")
+                }
+                .font(.small)
+                .foregroundStyle(Theme.textTertiary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            TextField("Titel", text: titleBinding(id), axis: .vertical)
+                .textFieldStyle(.plain)
+                .lineLimit(1...3)
+                .foregroundStyle(draft.include ? Theme.text : Theme.textTertiary)
+                .focused($focus, equals: .title(id))
+                .accessibilityIdentifier("github.row.\(id).title")
+                .frame(maxWidth: .infinity)
+        }
+    }
+
+    private func wideRow(_ draft: IssueDraft, index: Int) -> some View {
         let active = index == composer.activeIndex
         let id = draft.itemId
         return HStack(spacing: 8) {
@@ -493,31 +623,61 @@ struct IssueComposerView: View {
 
     // MARK: Footer
 
+    @ViewBuilder
     private var footer: some View {
+        #if os(macOS)
+        wideFooter
+        #else
+        // On a phone: the switch above, the button across the whole width, no keyboard hints.
+        VStack(alignment: .leading, spacing: 12) {
+            contextToggle
+            Button(action: submit) {
+                HStack(spacing: 6) {
+                    if composer.creating { ProgressView().controlSize(.mini).tint(.white) }
+                    Text(composer.creating ? String(localized: "Wird angelegt …", comment: "button while GitHub issues are being created") : composer.createTitle)
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PrimaryButtonStyle())
+            .disabled(!composer.canCreate)
+            .accessibilityIdentifier("github.create")
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+        .overlay(alignment: .top) { Rectangle().fill(Theme.popoverBorder).frame(height: 1) }
+        #endif
+    }
+
+    private var contextToggle: some View {
         let isPublic = composer.target?.isPrivate == false
         let withContext = composer.includeContext && !isPublic
-        return HStack(spacing: 10) {
-            Button {
-                composer.includeContext.toggle()
-            } label: {
-                HStack(spacing: 7) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 4, style: .continuous).fill(withContext ? Theme.accentFill : .clear)
-                        RoundedRectangle(cornerRadius: 4, style: .continuous).stroke(withContext ? Theme.accentFill : Theme.textTertiary, lineWidth: 1.5)
-                        if withContext { Image(systemName: "checkmark").font(.system(size: 7, weight: .bold)).foregroundStyle(.white) }
-                    }
-                    .frame(width: 13, height: 13)
-                    Text("Kontext aus dem Transkript")
+        return Button {
+            composer.includeContext.toggle()
+        } label: {
+            HStack(spacing: 7) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 4, style: .continuous).fill(withContext ? Theme.accentFill : .clear)
+                    RoundedRectangle(cornerRadius: 4, style: .continuous).stroke(withContext ? Theme.accentFill : Theme.textTertiary, lineWidth: 1.5)
+                    if withContext { Image(systemName: "checkmark").font(.system(size: 7, weight: .bold)).foregroundStyle(.white) }
                 }
-                .font(.small)
-                .foregroundStyle(Theme.textSecondary)
-                .contentShape(Rectangle())
+                .frame(width: 13, height: 13)
+                Text("Kontext aus dem Transkript")
             }
-            .buttonStyle(PlainPressStyle())
-            .disabled(isPublic)
-            .help(isPublic ? "Bei öffentlichen Repositories nie" : "Zwei Sätze Beschreibung und ein Zitat mit Zeitstempel")
-            .accessibilityIdentifier("github.context")
-            .debugFrame("github.context")
+            .font(.small)
+            .foregroundStyle(Theme.textSecondary)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainPressStyle())
+        .disabled(isPublic)
+        .help(isPublic ? "Bei öffentlichen Repositories nie" : "Zwei Sätze Beschreibung und ein Zitat mit Zeitstempel")
+        .accessibilityIdentifier("github.context")
+        .debugFrame("github.context")
+    }
+
+    private var wideFooter: some View {
+        HStack(spacing: 10) {
+            contextToggle
             Spacer(minLength: 8)
             HStack(spacing: 5) {
                 hint("S", "Status")
@@ -656,11 +816,13 @@ struct IssueComposerView: View {
             if drafts.indices.contains(composer.activeIndex), !drafts[composer.activeIndex].isLink {
                 focus = .title(drafts[composer.activeIndex].itemId)
                 // A field that takes focus selects all its text; typing should add to the title, not replace it.
+                #if os(macOS)
                 DispatchQueue.main.async {
                     if let editor = NSApp.keyWindow?.firstResponder as? NSTextView {
                         editor.setSelectedRange(NSRange(location: (editor.string as NSString).length, length: 0))
                     }
                 }
+                #endif
             }
             return .handled
         case .escape:

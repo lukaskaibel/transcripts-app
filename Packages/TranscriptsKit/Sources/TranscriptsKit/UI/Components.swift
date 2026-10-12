@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 
 // MARK: - People
@@ -175,10 +174,16 @@ struct IconButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: Platform.isMobile ? 15 : 12, weight: .medium))
                 .foregroundStyle(tint)
-                .frame(width: size, height: size)
+                .frame(width: Platform.isMobile ? max(size, 30) : size, height: Platform.isMobile ? max(size, 30) : size)
                 .hoverFill(radius: 6)
+                #if os(iOS)
+                // A finger needs more room than the icon takes; the layout stays as it is.
+                .padding(7)
+                .contentShape(Rectangle())
+                .padding(-7)
+                #endif
         }
         .buttonStyle(PlainPressStyle())
         .help(label)
@@ -428,6 +433,7 @@ struct EditableText: View {
     }
 }
 
+#if os(macOS)
 /// Reads the window a view lives in.
 struct WindowReader: NSViewRepresentable {
     var onWindow: (NSWindow?) -> Void
@@ -457,3 +463,4 @@ struct WindowReader: NSViewRepresentable {
         }
     }
 }
+#endif

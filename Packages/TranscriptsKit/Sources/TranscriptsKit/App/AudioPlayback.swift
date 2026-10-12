@@ -89,6 +89,15 @@ public final class AudioPlayback {
         }
         guard longest > .zero else { return false }
 
+        #if os(iOS)
+        // Played out loud even with the ring switch on silent; while recording, the session is already set up to
+        // record and play.
+        let session = AVAudioSession.sharedInstance()
+        if session.category != .playAndRecord {
+            try? session.setCategory(.playback, mode: .spokenAudio)
+            try? session.setActive(true)
+        }
+        #endif
         let item = AVPlayerItem(asset: composition)
         let player = AVPlayer(playerItem: item)
         self.player = player
