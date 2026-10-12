@@ -193,6 +193,31 @@ import Testing
         #expect(try pending(database) == ["Meeting:m1", "Person:anna", "Person:\(me.id)"].sorted())
     }
 
+    /// Two devices hold the same lines under other row ids; they must learn the same voices from them, to the last
+    /// bit, or each would correct the other's guesses through iCloud forever.
+    @Test func voicesAreLearnedInTheSameOrderOnEveryDevice() throws {
+        func device(reversed: Bool) throws -> AppDatabase {
+            let database = try AppDatabase.inMemory()
+            try database.save(Person(id: "anna", name: "Anna"))
+            try database.save(Meeting(id: "m1", title: "Weekly", status: .ready))
+            var segments: [Segment] = []
+            for index in 0..<6 {
+                let start = Double(index) * 5
+                let embedding = [Float](repeating: Float(index) / 10, count: 4).embeddingData
+                segments.append(Segment(meetingId: "m1", speakerKey: "S1", channel: .microphone, start: start, end: start + 4,
+                                        text: "Zeile \(index)", embedding: embedding))
+            }
+            if reversed { segments.reverse() }
+            try database.replaceTranscript(meetingId: "m1", segments: segments, speakers: [
+                MeetingSpeaker(meetingId: "m1", key: "S1", label: "Sprecher 1", personId: "anna", assignment: .confirmed, channel: .microphone),
+            ])
+            return database
+        }
+        let mac = try device(reversed: false), phone = try device(reversed: true)
+        #expect(try mac.voiceSamples().map(\.start) == phone.voiceSamples().map(\.start))
+        #expect(VoiceRecheck.confidence(0.75510293) == VoiceRecheck.confidence(0.75510287))
+    }
+
     @Test func bookkeepingSurvivesAndResets() throws {
         let database = try AppDatabase.inMemory()
         let record = CKRecord(recordType: SyncRecordType.person, recordID: CKRecord.ID(recordName: "Person:anna", zoneID: CKRecordZone.ID(zoneName: "Test")))

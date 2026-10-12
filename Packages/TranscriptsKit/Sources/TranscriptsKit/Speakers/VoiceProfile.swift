@@ -186,8 +186,10 @@ public struct VoiceProfile: Sendable {
         func centroid(excluding meetingId: String?) -> [Float] {
             guard let meetingId, recognizedSums[meetingId] != nil else { return centroid }
             var sum = anchorSum
-            for (key, part) in recognizedSums where key != meetingId {
-                sum = vDSP.add(sum, part)
+            // In a fixed order: floats summed in another order differ in the last bit, and the same data has to
+            // give the same voice on every device (or iCloud sync would send the difference back and forth).
+            for key in recognizedSums.keys.sorted() where key != meetingId {
+                sum = vDSP.add(sum, recognizedSums[key]!)
             }
             return VoiceMath.normalized(sum)
         }
@@ -197,12 +199,12 @@ public struct VoiceProfile: Sendable {
             guard anchorSums[meetingId] != nil || recognizedSums[meetingId] != nil else { return centroid }
             var sum = [Float](repeating: 0, count: anchorSum.count)
             var any = false
-            for (key, part) in anchorSums where key != meetingId {
-                sum = vDSP.add(sum, part)
+            for key in anchorSums.keys.sorted() where key != meetingId {
+                sum = vDSP.add(sum, anchorSums[key]!)
                 any = true
             }
             guard any else { return nil }
-            for (key, part) in recognizedSums where key != meetingId { sum = vDSP.add(sum, part) }
+            for key in recognizedSums.keys.sorted() where key != meetingId { sum = vDSP.add(sum, recognizedSums[key]!) }
             return VoiceMath.normalized(sum)
         }
     }
@@ -291,7 +293,7 @@ public struct VoiceProfile: Sendable {
             let scale = recognizedWeight > anchorWeight / 2 ? anchorWeight / 2 / recognizedWeight : 1
             if scale < 1 { groups[index].recognizedSums = group.recognizedSums.mapValues { vDSP.multiply(scale, $0) } }
             var sum = groups[index].anchorSum
-            for part in groups[index].recognizedSums.values { sum = vDSP.add(sum, part) }
+            for key in groups[index].recognizedSums.keys.sorted() { sum = vDSP.add(sum, groups[index].recognizedSums[key]!) }
             groups[index].centroid = VoiceMath.normalized(sum)
         }
         self.groups = groups
@@ -347,6 +349,11 @@ public struct VoiceMatch: Equatable, Sendable {
     public var similarity: Float
     /// How many meetings the person's voice comes from; more make a match more trustworthy.
     public var meetings: Int
+
+    /// Best first; equally good ones by person, so every device ranks the same.
+    static func better(_ a: VoiceMatch, _ b: VoiceMatch) -> Bool {
+        a.similarity != b.similarity ? a.similarity > b.similarity : a.personId < b.personId
+    }
 }
 
 /// Compares voices against everyone the app has heard before.
@@ -391,7 +398,7 @@ public struct VoiceLibrary: Sendable {
             if boosted.contains(profile.personId) { score += 0.04 }
             return VoiceMatch(personId: profile.personId, similarity: score, meetings: max(profile.meetingCount, 1))
         }
-        .sorted { $0.similarity > $1.similarity }
+        .sorted(by: VoiceMatch.better)
     }
 
     /// Whom a voice of `meetingId` sounds like, judged only by what the other meetings taught the app.
@@ -400,7 +407,7 @@ public struct VoiceLibrary: Sendable {
             guard !excluding.contains(profile.personId), let score = profile.similarity(to: embedding, without: meetingId) else { return nil }
             return VoiceMatch(personId: profile.personId, similarity: score, meetings: max(profile.meetingCount, 1))
         }
-        .sorted { $0.similarity > $1.similarity }
+        .sorted(by: VoiceMatch.better)
     }
 
     /// Whom a voice may be when no one is clear: everyone about as close as the best match (within 0.12)

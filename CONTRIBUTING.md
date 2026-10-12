@@ -55,5 +55,9 @@ Every pull request is reviewed and merged by the maintainer; nothing lands on `m
 ## Releases
 
 Versions follow semantic versioning. The version lives in `Config/Base.xcconfig` (the app and its widget extension
-share it); each release gets an entry in
-`CHANGELOG.md` and a tag of the form `v0.1.0`.
+share it); each release gets an entry in `CHANGELOG.md` and a tag of the form `v0.1.0`.
+
+iCloud sync stores four record types (`Meeting`, `MeetingAudio`, `Person`, `Voiceprint`) in the container
+`iCloud.<bundle id>`. Debug builds create them in CloudKit's development environment as they save; before a release
+that changes them, deploy the schema to production in the CloudKit Console (icloud.developer.apple.com), or builds from
+the App Store and TestFlight can't save them.

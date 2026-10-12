@@ -22,7 +22,7 @@ extension AppModel {
                 DemoData.seed(database)
             }
             // Each folder its own settings, so two instances side by side don't share them.
-            let suite = copy.map { "Transcripts.demo.\($0.lastPathComponent)" } ?? "Transcripts.demo"
+            let suite = copy.map { "Transcripts.demo." + SyncCoding.digest(Data($0.standardizedFileURL.path.utf8)).prefix(8) } ?? "Transcripts.demo"
             let defaults = UserDefaults(suiteName: suite) ?? .standard
             defaults.removePersistentDomain(forName: suite)
             let settings = AppSettings(defaults: defaults)

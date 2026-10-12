@@ -20,6 +20,7 @@ extension AppDatabase {
             JOIN meeting ON meeting.id = segment.meetingId
             WHERE segment.embedding IS NOT NULL AND meetingSpeaker.personId IS NOT NULL
               AND meetingSpeaker.assignment IN ('confirmed', 'automatic')
+            ORDER BY meeting.startedAt, segment.meetingId, segment.start, segment.speakerKey
             """)
         var samples: [VoiceSample] = rows.compactMap { row in
             guard let data: Data = row["embedding"], let personId: String = row["personId"] else { return nil }
@@ -51,7 +52,8 @@ extension AppDatabase {
             let assignment = MeetingSpeaker.Assignment(rawValue: row["assignment"]) ?? .unknown
             if named[key] != .confirmed { named[key] = assignment }
         }
-        for print in try Voiceprint.fetchAll(db) {
+        // In an order every device shares (line ids differ between devices), so the same lines make the same voice.
+        for print in try Voiceprint.order(Column("id")).fetchAll(db) {
             var source = VoiceSample.Source.legacy
             if let meetingId = print.meetingId {
                 guard !embedded.contains(meetingId) else { continue }

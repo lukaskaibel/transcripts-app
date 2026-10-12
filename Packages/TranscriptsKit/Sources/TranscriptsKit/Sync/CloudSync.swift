@@ -30,6 +30,7 @@ actor CloudSync: CKSyncEngineDelegate {
 
     private static let stateKey = "engineState"
     private static let userKey = "user"
+    private static let zoneTokenKey = "zoneToken"
 
     private let database: AppDatabase
     private let container: CKContainer
@@ -49,7 +50,9 @@ actor CloudSync: CKSyncEngineDelegate {
         self.zoneID = CKRecordZone.ID(zoneName: zoneName, ownerName: CKCurrentUserDefaultName)
         self.includeAudio = includeAudio
         self.report = report
-        self.outbox = FileManager.default.temporaryDirectory.appendingPathComponent("Transcripts-iCloud-\(zoneName)", isDirectory: true)
+        // With the data it belongs to (each data folder has its own), and a file per upload: a record built again
+        // while the last one is still on its way must not take its file away.
+        self.outbox = AppPaths.applicationSupport.appendingPathComponent("iCloud Outbox", isDirectory: true)
     }
 
     // MARK: Control
@@ -100,10 +103,64 @@ actor CloudSync: CKSyncEngineDelegate {
         guard let engine else { return }
         do {
             try await engine.fetchChanges()
+            try await catchUp()
             try await engine.sendChanges()
             finished()
         } catch {
-            fail(error)
+            await fail(error)
+        }
+    }
+
+    /// Looks for changes the engine wasn't told about. The engine fetches only after a push, and a push can be
+    /// missed: it never comes to the device (or the push token) that made a change, and a device that was offline for
+    /// long gets only the last one. So the zone is asked directly, for the digests only, and whole records are fetched
+    /// where a digest differs from what this device has. Changes the engine also gets later are then the same and
+    /// cost nothing.
+    private func catchUp() async throws {
+        let cloud = container.privateCloudDatabase
+        let saved = (try? database.syncMeta(Self.zoneTokenKey)) ?? nil
+        var token = saved.flatMap { try? NSKeyedUnarchiver.unarchivedObject(ofClass: CKServerChangeToken.self, from: $0) }
+        var changed: [CKRecord.ID] = []
+        var deletions: [CKDatabase.RecordZoneChange.Deletion] = []
+        var more = true
+        while more {
+            let result: (modificationResultsByID: [CKRecord.ID: Result<CKDatabase.RecordZoneChange.Modification, any Error>], deletions: [CKDatabase.RecordZoneChange.Deletion], changeToken: CKServerChangeToken, moreComing: Bool)
+            do {
+                result = try await cloud.recordZoneChanges(inZoneWith: zoneID, since: token, desiredKeys: ["digest", "modifiedAt", "schema"], resultsLimit: 400)
+            } catch let error as CKError where error.code == .changeTokenExpired {
+                token = nil
+                continue
+            } catch let error as CKError where error.code == .zoneNotFound || error.code == .userDeletedZone {
+                // Before the first sync the zone may not be there yet; after it, someone deleted it.
+                if saved != nil, let engine { zoneDeleted(.deleted, engine: engine) }
+                return
+            }
+            for (id, modification) in result.modificationResultsByID {
+                guard case .success(let change) = modification, let (type, name) = split(id) else { continue }
+                if let digest = change.record["digest"] as? String, digest == (try? database.syncRecordInfo(type, name).digest) {
+                    // The same as here; only the change tag may be newer.
+                    try? database.syncSetRecordInfo(type, name, systemFields: Self.systemFields(of: change.record), digest: digest)
+                } else {
+                    changed.append(id)
+                }
+            }
+            deletions += result.deletions
+            token = result.changeToken
+            more = result.moreComing
+        }
+        var records: [CKRecord] = []
+        for start in stride(from: 0, to: changed.count, by: 100) {
+            let batch = Array(changed[start..<min(start + 100, changed.count)])
+            for (_, fetched) in try await cloud.records(for: batch) {
+                if case .success(let record) = fetched { records.append(record) }
+            }
+        }
+        if !records.isEmpty || !deletions.isEmpty, let engine {
+            Log.sync.info("caught up on \(records.map(\.recordID.recordName), privacy: .public), deleted \(deletions.map(\.recordID.recordName), privacy: .public)")
+            apply(records, deletions: deletions, engine: engine)
+        }
+        if let token, let data = try? NSKeyedArchiver.archivedData(withRootObject: token, requiringSecureCoding: true) {
+            try? database.syncSetMeta(Self.zoneTokenKey, data)
         }
     }
 
@@ -121,6 +178,7 @@ actor CloudSync: CKSyncEngineDelegate {
     /// Hands the changes in `syncPending` to the engine: meetings once they are finished, recordings if wanted.
     func enqueuePending() {
         guard let engine, let changes = try? database.syncPendingChanges() else { return }
+        defer { Log.sync.info("pending here \(changes.count), in the engine \(engine.state.pendingRecordZoneChanges.count)") }
         let ready = (try? database.syncFinishedMeetings()) ?? []
         let pending = Set(engine.state.pendingRecordZoneChanges)
         var add: [CKSyncEngine.PendingRecordZoneChange] = []
@@ -202,7 +260,7 @@ actor CloudSync: CKSyncEngineDelegate {
                 let data = try SyncCoding.encoder.encode(payload)
                 digest = SyncCoding.digest(data)
                 guard digest != info.digest || info.systemFields == nil else { return unchanged(id, type, local, changedAt, engine) }
-                let file = outbox.appendingPathComponent("\(name).json")
+                let file = outbox.appendingPathComponent("\(name)-\(UUID().uuidString).json")
                 try data.write(to: file)
                 record["content"] = CKAsset(fileURL: file)
                 record["title"] = payload.meeting.title
@@ -236,7 +294,7 @@ actor CloudSync: CKSyncEngineDelegate {
             stamps[id] = changedAt
             return record
         } catch {
-            Log.app.error("iCloud: building \(id.recordName) failed: \(error.localizedDescription)")
+            Log.sync.error("building \(id.recordName, privacy: .public) failed: \(error.localizedDescription)")
             return skip(id, engine)
         }
     }
@@ -275,7 +333,7 @@ actor CloudSync: CKSyncEngineDelegate {
             received(changes, engine: engine)
         case .sentDatabaseChanges(let sent):
             for failure in sent.failedZoneSaves {
-                Log.app.error("iCloud: saving the zone failed: \(failure.error.localizedDescription)")
+                Log.sync.error("saving the zone failed: \(failure.error.localizedDescription)")
                 lastError = failure.error.localizedDescription
             }
         case .sentRecordZoneChanges(let sent):
@@ -335,9 +393,15 @@ actor CloudSync: CKSyncEngineDelegate {
     // MARK: Receiving
 
     private func received(_ changes: CKSyncEngine.Event.FetchedRecordZoneChanges, engine: CKSyncEngine) {
+        Log.sync.info("received \(changes.modifications.map(\.record.recordID.recordName), privacy: .public), deleted \(changes.deletions.map(\.recordID.recordName), privacy: .public)")
+        apply(changes.modifications.map(\.record), deletions: changes.deletions, engine: engine)
+    }
+
+    /// Writes what came from iCloud: people first, then voices, meetings and recordings; then the deletions.
+    private func apply(_ fetched: [CKRecord], deletions: [CKDatabase.RecordZoneChange.Deletion], engine: CKSyncEngine) {
         var meetings = Set<String>()
         var voices = false
-        let records = changes.modifications.map(\.record).filter { $0.recordID.zoneID == zoneID }
+        let records = fetched.filter { $0.recordID.zoneID == zoneID }
         for type in SyncRecordType.applyOrder {
             for record in records where record.recordType == type {
                 do {
@@ -346,11 +410,11 @@ actor CloudSync: CKSyncEngineDelegate {
                         if type != SyncRecordType.audio { voices = true }
                     }
                 } catch {
-                    Log.app.error("iCloud: applying \(record.recordID.recordName) failed: \(error.localizedDescription)")
+                    Log.sync.error("applying \(record.recordID.recordName, privacy: .public) failed: \(error.localizedDescription)")
                 }
             }
         }
-        for deletion in changes.deletions where deletion.recordID.zoneID == zoneID {
+        for deletion in deletions where deletion.recordID.zoneID == zoneID {
             guard let (type, name) = split(deletion.recordID), !(type == SyncRecordType.person && name == SyncNames.me),
                   let local = try? localName(type, name) else { continue }
             do {
@@ -360,7 +424,7 @@ actor CloudSync: CKSyncEngineDelegate {
                 engine.state.remove(pendingRecordZoneChanges: [.saveRecord(deletion.recordID)])
                 voices = voices || type != SyncRecordType.audio
             } catch {
-                Log.app.error("iCloud: deleting \(deletion.recordID.recordName) failed: \(error.localizedDescription)")
+                Log.sync.error("deleting \(deletion.recordID.recordName, privacy: .public) failed: \(error.localizedDescription)")
             }
         }
         if !meetings.isEmpty || voices {
@@ -416,6 +480,7 @@ actor CloudSync: CKSyncEngineDelegate {
     // MARK: Results of sending
 
     private func sent(_ sent: CKSyncEngine.Event.SentRecordZoneChanges, engine: CKSyncEngine) {
+        Log.sync.info("sent \(sent.savedRecords.count) saved, \(sent.deletedRecordIDs.count) deleted, \(sent.failedRecordSaves.map { "\($0.record.recordID.recordName):\($0.error.code.rawValue)" }, privacy: .public) failed")
         for record in sent.savedRecords {
             guard let (type, name) = split(record.recordID) else { continue }
             try? database.syncSetRecordInfo(type, name, systemFields: Self.systemFields(of: record), digest: record["digest"] as? String)
@@ -458,7 +523,7 @@ actor CloudSync: CKSyncEngineDelegate {
                 // The engine tries these again by itself.
                 break
             default:
-                Log.app.error("iCloud: saving \(id.recordName) failed: \(failure.error.localizedDescription)")
+                Log.sync.error("saving \(id.recordName, privacy: .public) failed: \(failure.error.localizedDescription)")
                 lastError = failure.error.localizedDescription
             }
         }
@@ -488,9 +553,17 @@ actor CloudSync: CKSyncEngineDelegate {
         }
     }
 
-    private func fail(_ error: Error) {
-        if let error = error as? CKError, error.code == .notAuthenticated {
-            report(.state(.noAccount))
+    private func fail(_ error: Error) async {
+        if let error = error as? CKError, [.partialFailure, .batchRequestFailed, .serverRecordChanged].contains(error.code) {
+            // Some records didn't go up (another device was first); `sent` sorted them out and the engine sends again.
+            if engine?.state.pendingRecordZoneChanges.isEmpty == false { report(.state(.syncing)) } else { finished() }
+        } else if let error = error as? CKError, error.code == .notAuthenticated {
+            // Also when iCloud doesn't answer for the account for a moment (a new container does that for a minute).
+            if (try? await container.accountStatus()) == .available {
+                report(.state(.failed(String(localized: "Keine Verbindung zu iCloud."))))
+            } else {
+                report(.state(.noAccount))
+            }
         } else if (error as? CKError)?.code == .networkUnavailable || (error as? CKError)?.code == .networkFailure {
             report(.state(.failed(String(localized: "Keine Verbindung zu iCloud."))))
         } else {

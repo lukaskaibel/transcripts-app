@@ -64,7 +64,7 @@ public enum VoiceRecheck {
             result.suggestedPersonId = nil
             result.suggestedName = nil
             result.suggestionReason = nil
-            result.confidence = Double(min(best.similarity, 1))
+            result.confidence = confidence(best.similarity)
             result.candidatePersonIds = []
         } else if let best, best.similarity >= thresholds.suggestion {
             result.assignment = .suggested
@@ -72,7 +72,7 @@ public enum VoiceRecheck {
             result.suggestedPersonId = best.personId
             result.suggestedName = nil
             result.suggestionReason = SpeakerIdentifier.voiceReason(best)
-            result.confidence = Double(min(best.similarity, 1))
+            result.confidence = confidence(best.similarity)
             result.candidatePersonIds = VoiceLibrary.candidates(matches, thresholds: thresholds)
         } else {
             result.assignment = .unknown
@@ -84,6 +84,12 @@ public enum VoiceRecheck {
             result.candidatePersonIds = VoiceLibrary.candidates(matches, thresholds: thresholds)
         }
         return result
+    }
+
+    /// A similarity as stored with a voice: to four places, so what is the same on two devices stays the same in the
+    /// last bit too (iCloud sync would otherwise send the difference back and forth).
+    static func confidence(_ similarity: Float) -> Double {
+        (Double(min(similarity, 1)) * 10_000).rounded() / 10_000
     }
 
     // MARK: Lines in the wrong place
@@ -115,7 +121,7 @@ public enum VoiceRecheck {
                 try Segment.filter(keys: move.segmentIds).fetchAll(db).allSatisfy { $0.speakerKey == move.fromKey && $0.placement != .user }
             }
             guard still else { continue }
-            try database.moveLines(move.segmentIds, in: move.meetingId, toPerson: move.personId, byApp: true, confidence: Double(min(move.similarity, 1)))
+            try database.moveLines(move.segmentIds, in: move.meetingId, toPerson: move.personId, byApp: true, confidence: confidence(move.similarity))
             moved += 1
         }
         return moved
