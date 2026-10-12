@@ -121,7 +121,7 @@ public final class RecordingSession {
 
     private let database: AppDatabase
     private let engine: SpeechEngine
-    private let clock = RecordingClock()
+    let clock = RecordingClock()
     private let microphone: AudioSource
     private let system: AudioSource
     private var channelTasks: [Task<Void, Never>] = []

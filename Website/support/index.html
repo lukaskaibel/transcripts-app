@@ -71,10 +71,20 @@
       </details>
       <details>
         <summary>Does anything leave my Mac?</summary>
-        <p>Recordings, transcripts and voices stay on the Mac. Only if you turn on summaries with Anthropic, OpenAI or
+        <p>Recordings, transcripts and voices stay on the Mac, and in your own private iCloud if you turn on sync.
+          Only if you turn on summaries with Anthropic, OpenAI or
           Google does the meeting's text go to that service, with your own API key. With a local model in Ollama even
           that stays on the Mac. If you send action items to GitHub, the issues you create go there. The details are in
           the <a href="../privacy/">privacy policy</a>.</p>
+      </details>
+      <details>
+        <summary>Can I record on my iPhone and read on my Mac?</summary>
+        <p>Yes, with Settings › General › iCloud › <em>Sync with iCloud</em> on each device (the iPhone also offers it
+          when it starts the first time). Meetings, people and the voices the app learned are then the same everywhere,
+          and the recordings too unless you turn off <em>Include recordings</em>. They are kept in the private database
+          of your iCloud account, which only your devices can read. On the iPhone a recording shows on the Lock Screen
+          and in the Dynamic Island, and <em>Record a Meeting</em> can sit in Control Center or on the Action
+          Button.</p>
       </details>
       <details>
         <summary>Can my action items become GitHub issues?</summary>
@@ -132,7 +142,8 @@
         <summary>How do I remove my data?</summary>
         <p>Delete a meeting or a person in the app, or have recordings deleted after 30 days or right after
           transcribing (Settings › Recording). To remove everything, delete the app and its folders in
-          <code>~/Library/Application Support</code> (<code>Transcripts</code> and <code>FluidAudio</code>). More in
+          <code>~/Library/Application Support</code> (<code>Transcripts</code> and <code>FluidAudio</code>). With iCloud
+          sync on, <em>Delete from iCloud</em> under Settings › General › iCloud removes the copy in iCloud. More in
           the <a href="../privacy/">privacy policy</a>.</p>
       </details>
       <details>

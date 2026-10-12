@@ -191,6 +191,8 @@ struct GeneralSettings: View {
                 #endif
             }
 
+            ICloudSection()
+
             Section("Kalender") {
                 PermissionRow(title: "Kalenderzugriff", allowed: model.calendarAllowed, request: { Task { await model.requestCalendar() } }, pane: "Privacy_Calendars")
                 Toggle("Beim Start eines Meetings erinnern", isOn: $settings.calendarReminders)

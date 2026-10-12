@@ -1,0 +1,15 @@
+// Settings the app and its widget extension share. The app's own settings are in Shared.xcconfig, the extension's in
+// Widgets.xcconfig; both include Local.xcconfig (your signing team, not checked in) after this.
+
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+
+// The app's identifier; the widget extension's is the same with ".Widgets". Set your own in Local.xcconfig to keep
+// your build's data apart from an official one.
+TR_APP_BUNDLE_IDENTIFIER = com.lukaskbl.Transcripts
+
+// Without a team the app is signed to run on this Mac (or in the simulator) only. macOS remembers granted permissions
+// (microphone, system audio, calendar) per signature, so a stable team signature avoids being asked again after every
+// build.
+DEVELOPMENT_TEAM =
+CODE_SIGN_IDENTITY = -

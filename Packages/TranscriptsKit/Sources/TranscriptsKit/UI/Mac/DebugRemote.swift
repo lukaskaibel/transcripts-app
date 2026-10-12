@@ -221,11 +221,43 @@ final class DebugRemote {
             model.signOutGitHub()
         case "ghconnect":
             Task { await model.connectGitHubCLI() }
+        case "sync":
+            // sync status|now|on|off|audio on|audio off|wipe: iCloud sync, in the demo's own zone (-demo.sync <zone>).
+            switch argument {
+            case "now": model.syncNow()
+            case "on": model.setICloudSync(true)
+            case "off": model.setICloudSync(false)
+            case "audio on": model.setICloudAudio(true)
+            case "audio off": model.setICloudAudio(false)
+            case "wipe": Task { await model.deleteICloudData() }
+            default: logSync(model)
+            }
+        case "syncaudio":
+            // syncaudio <meeting>: a recording was put into the meeting's folder by hand.
+            try? model.database.syncAudioChanged(argument)
+        case "rename":
+            // rename <meeting> <title>
+            let bits = argument.split(separator: " ", maxSplits: 1).map(String.init)
+            if bits.count == 2 { model.rename(meetingId: bits[0], to: bits[1]) }
+        case "deletemeeting":
+            model.deleteMeeting(argument)
         case "quit":
             NSApp.terminate(nil)
         default:
             log("unknown command: \(line)")
         }
+    }
+
+    /// What iCloud sync is doing and what the database holds, for checking two instances against each other.
+    private func logSync(_ model: AppModel) {
+        let pending = (try? model.database.syncPendingChanges()) ?? []
+        let people = model.people.map { "\($0.isMe ? "*" : "")\($0.name)" }.sorted()
+        let voices = (try? model.database.voiceprints().count) ?? 0
+        let audio = model.rows.filter { !SyncAudio.files(of: $0.id).isEmpty }.map(\.id)
+        let meetings = model.rows.map { "\($0.id)=\($0.meeting.title)[\($0.meeting.status.rawValue),lines:\((try? model.database.detail(of: $0.id)?.segments.count) ?? 0)]" }
+        log("sync state=\(model.syncState) on=\(model.settings.iCloudSync) audio=\(model.settings.iCloudAudio) pending=\(pending.count) \(pending.prefix(6).map { "\($0.recordType):\($0.recordName.prefix(8))\($0.deleted ? "-" : "")" })")
+        log("sync meetings(\(meetings.count))=\(meetings.joined(separator: "; "))")
+        log("sync people(\(people.count))=\(people) voices=\(voices) audio=\(audio)")
     }
 
     /// What the composer and the meeting's tasks look like right now, for checking a UI run.

@@ -124,6 +124,54 @@ final class PhoneTests: AppTestCase {
         snapshot("Recording stopped")
     }
 
+    /// The recording shows outside the app: in the Dynamic Island and on the Lock Screen, with buttons that work.
+    func testRecordingShowsInTheDynamicIsland() {
+        launch()
+        element("record").tap()
+        wait(element("live.stop"))
+        XCUIDevice.shared.press(.home)
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        // The system draws the Live Activity in its own language, whatever the app's.
+        func button(_ names: String...) -> XCUIElement {
+            springboard.buttons.matching(NSPredicate(format: "label IN %@", names)).firstMatch
+        }
+        Thread.sleep(forTimeInterval: 3)
+        snapshot("Dynamic Island")
+
+        // A long press opens it.
+        let island = springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0)).withOffset(CGVector(dx: 0, dy: 22))
+        island.press(forDuration: 1.2)
+        let pause = button("Pause")
+        XCTAssertTrue(pause.waitForExistence(timeout: 5), "No pause button in the island")
+        snapshot("Dynamic Island, expanded")
+        pause.tap()
+        Thread.sleep(forTimeInterval: 2)
+        snapshot("Dynamic Island, paused")
+        island.press(forDuration: 1.2)
+        let resume = button("Weiter", "Resume")
+        XCTAssertTrue(resume.waitForExistence(timeout: 5), "The recording didn't pause")
+        snapshot("Dynamic Island, paused, expanded")
+        resume.tap()
+        Thread.sleep(forTimeInterval: 1)
+
+        // The Lock Screen's view, as Notification Center shows it.
+        let top = springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0)).withOffset(CGVector(dx: 0, dy: 4))
+        top.press(forDuration: 0.1, thenDragTo: springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.7)))
+        let stop = button("Beenden", "Stop")
+        XCTAssertTrue(stop.waitForExistence(timeout: 5), "No recording on the Lock Screen")
+        snapshot("Lock Screen")
+        stop.tap()
+        Thread.sleep(forTimeInterval: 1.5)
+        snapshot("Lock Screen, stopped")
+        XCUIDevice.shared.press(.home)
+
+        // Stopped in the app too.
+        app.activate()
+        wait(element("record"))
+        XCTAssertFalse(element("live.stop").exists)
+        snapshot("Recording stopped from the island")
+    }
+
     // MARK: Inbox, tasks, people
 
     func testInboxListsSummariesTasksAndVoices() {

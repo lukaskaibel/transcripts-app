@@ -133,6 +133,12 @@ public final class AppModel {
     #if os(macOS)
     @ObservationIgnored var floatingRecorder: FloatingRecorderController?
     #endif
+    @ObservationIgnored var cloudSync: CloudSync?
+    @ObservationIgnored var syncObservation: AnyDatabaseCancellable?
+    @ObservationIgnored var syncTasks: [Task<Void, Never>] = []
+    @ObservationIgnored var syncEnqueue: Task<Void, Never>?
+    /// The zone in iCloud: another one for trying sync out (`-demo.sync <name>`), so tests never meet real meetings.
+    @ObservationIgnored var syncZone = "Transcripts"
 
     // MARK: Data
 
@@ -178,6 +184,10 @@ public final class AppModel {
     public internal(set) var liveSummary: LiveSummary?
     public internal(set) var liveSummaryError: String?
     public internal(set) var engineState: SpeechEngineState = .idle
+
+    // MARK: iCloud
+
+    public internal(set) var syncState: SyncState = .off
 
     // MARK: AI
 
@@ -233,6 +243,7 @@ public final class AppModel {
         self.githubTokens = tokens
         self.github = github ?? (isDemo ? DemoGitHubService() : LiveGitHubService(tokens: tokens))
         startObserving()
+        observeRecordingForRemote()
         if !isDemo {
             notifications.onAction = { [weak self] action in self?.handle(action) }
             notifications.activate()
@@ -249,6 +260,7 @@ public final class AppModel {
         refreshPermissions()
         refreshVoices()
         if settings.githubLogin != nil { Task { await refreshGitHubCatalog() } }
+        startSyncIfWanted()
         guard !isDemo else { return }
         recoverInterruptedMeetings()
         applyRetention()
@@ -609,6 +621,7 @@ public final class AppModel {
             return
         }
         await finishAudio(of: meetingId)
+        try? database.syncAudioChanged(meetingId)
         refreshVoices()
         promptForVoices(in: meetingId)
         if settings.autoSummarize, summaryProviderReady {
@@ -653,7 +666,10 @@ public final class AppModel {
         guard settings.audioRetention == .month else { return }
         let cutoff = Date().addingTimeInterval(-30 * 24 * 3600)
         for row in rows where row.meeting.startedAt < cutoff && row.meeting.status == .ready {
+            let before = SyncAudio.files(of: row.meeting.id)
             AudioArchiver.deleteAudio(meetingId: row.meeting.id)
+            // The copy in iCloud goes too: the setting says how long a recording is kept, wherever it is.
+            if SyncAudio.files(of: row.meeting.id) != before { try? database.syncAudioChanged(row.meeting.id) }
         }
     }
 

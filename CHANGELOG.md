@@ -17,7 +17,19 @@ All notable changes to this project are recorded here. The format follows
   meeting beside it, the inspector when there is room and the live summary beside the live transcript, and the Mac's
   keyboard shortcuts. *Who is this?*, *Send to GitHub*, the summary, the speakers and the settings are the Mac's own
   views laid out for a narrow screen. A phone call interrupts a recording, which carries on afterwards, and on iOS 26
-  a meeting goes on being processed with the screen locked. Meetings and voices don't move between devices yet.
+  a meeting goes on being processed with the screen locked.
+- **iCloud sync.** Settings › General › iCloud keeps meetings, people and the voices the app learned the same on your
+  Mac, iPhone and iPad: record on the phone, read on the Mac, and a voice named on one device is known on the others.
+  The recordings come along too (*Include recordings*, on by default; about 20 to 60 MB of iCloud storage per hour). It
+  uses the private database of your iCloud account through CloudKit, works offline and catches up later, sends a
+  meeting once it is finished, and when two devices changed the same thing the later change wins. Someone met on two
+  devices before the sync becomes one person. Off until you turn it on; the iPhone offers it when it starts the first
+  time. *Delete from iCloud* removes everything there and leaves the devices' data alone. Needs a build signed with a
+  team that has iCloud (`TR_ICLOUD = YES` in `Config/Local.xcconfig`).
+- **The recording on the Lock Screen and in the Dynamic Island.** On iPhone and iPad a running recording shows as a
+  Live Activity: its title, a clock that keeps running, the markers, and buttons to pause, mark a moment and stop,
+  without opening the app. *Record a Meeting* starts a recording from Control Center, the Lock Screen, the Action
+  Button, Siri or Shortcuts.
 - **A sidebar that plans your day.** Below *Inbox*, *All Meetings* and *Action Items*, the sidebar shows today: the
   calendar's meetings and your recordings in one list from the morning on, a quiet line for now, the next meeting set
   apart with how long until it starts, and meetings you didn't record greyed out. Tomorrow folds away below, then the

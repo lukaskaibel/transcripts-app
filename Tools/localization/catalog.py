@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""The app's string catalog (Transcripts/Localizable.xcstrings): German is the source, written in the code; the other
-languages are translations kept here.
+"""The string catalogs: German is the source, written in the code; the other languages are translations kept here.
+The app's catalog (Transcripts/Localizable.xcstrings) has the texts of TranscriptsKit, the app target and Shared/; the
+widget extension's (TranscriptsWidgets/Localizable.xcstrings) those of TranscriptsWidgets/ and Shared/.
 
   catalog.py sync <stringsdata folder>…    add the texts the compiler found, drop the rest (extract.sh runs it with the
                                            Mac's and the iPhone's folders: some texts exist on one platform only)
   catalog.py todo <language> <out.json>    what a language still lacks, with the code around each text
   catalog.py merge <language> <in.json>    take translations in: {"key": "text"} or {"key": {"one": …, "other": …}}
   catalog.py check                         format specifiers, plural forms and missing translations, per language
+  (todo, merge and check work on the app's catalog; with --widgets on the widget extension's)
 
 Texts whose comment starts with "plural:" get plural forms (one/other; Polish, Russian and Ukrainian also few/many).
 """
@@ -17,8 +19,21 @@ import re
 import sys
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
-CATALOG = os.path.join(ROOT, "Transcripts", "Localizable.xcstrings")
+# Each catalog with the folders its texts come from.
+FOLDER = lambda *path: os.path.join(ROOT, *path) + os.sep
+CATALOGS = {
+    "app": (os.path.join(ROOT, "Transcripts", "Localizable.xcstrings"),
+            [FOLDER("Packages", "TranscriptsKit", "Sources", "TranscriptsKit"), FOLDER("Transcripts"), FOLDER("Shared")]),
+    "widgets": (os.path.join(ROOT, "TranscriptsWidgets", "Localizable.xcstrings"), [FOLDER("TranscriptsWidgets"), FOLDER("Shared")]),
+}
+CATALOG, SOURCES = CATALOGS["app"]
 CONTEXT = os.path.join(ROOT, "build", "localization", "context.json")
+
+
+def use(name):
+    global CATALOG, SOURCES, CONTEXT
+    CATALOG, SOURCES = CATALOGS[name]
+    CONTEXT = os.path.join(ROOT, "build", "localization", "context.json" if name == "app" else f"context-{name}.json")
 SOURCE = "de"
 LANGUAGES = ["en", "fr", "es", "it", "pt-BR", "nl", "pl", "ru", "uk"]
 PLURAL_FORMS = {"pl": ["one", "few", "many", "other"], "ru": ["one", "few", "many", "other"],
@@ -59,7 +74,7 @@ def sync(folders):
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
         source = data.get("source", "")
-        if "/Sources/TranscriptsKit/" not in source:
+        if not any(os.path.realpath(source).startswith(os.path.realpath(folder) + os.sep) for folder in SOURCES):
             continue
         lines = open(source, encoding="utf-8").read().split("\n")
         for item in data.get("tables", {}).get("Localizable", []):
@@ -193,9 +208,15 @@ def check():
 
 
 if __name__ == "__main__":
+    if "--widgets" in sys.argv:
+        sys.argv.remove("--widgets")
+        use("widgets")
     command = sys.argv[1] if len(sys.argv) > 1 else ""
     if command == "sync":
-        sync(sys.argv[2:])
+        for name in CATALOGS:
+            use(name)
+            print(name + ": ", end="")
+            sync(sys.argv[2:])
     elif command == "todo":
         todo(sys.argv[2], sys.argv[3])
     elif command == "merge":

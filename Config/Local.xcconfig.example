@@ -4,8 +4,13 @@
 DEVELOPMENT_TEAM = YOUR_TEAM_ID
 CODE_SIGN_IDENTITY = Apple Development
 
-// Use your own identifier if you want your build to keep its data separate from an official one.
-// PRODUCT_BUNDLE_IDENTIFIER = com.example.Transcripts
+// iCloud sync between your Mac, iPhone and iPad. Needs the team above; automatic signing adds iCloud (CloudKit) and
+// push notifications to the App ID and creates the container iCloud.<bundle id> (xcodebuild: -allowProvisioningUpdates).
+// TR_ICLOUD = YES
+
+// Use your own identifier if you want your build to keep its data separate from an official one (the widget extension
+// gets the same with ".Widgets").
+// TR_APP_BUNDLE_IDENTIFIER = com.example.Transcripts
 
 // Client ID of a GitHub OAuth app (github.com › Settings › Developer settings › OAuth Apps, with "Device Flow"
 // turned on) for "Im Browser anmelden". Without it, Transcripts signs in to GitHub through the GitHub CLI.

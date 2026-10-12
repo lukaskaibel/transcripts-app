@@ -50,8 +50,9 @@
 
 Meeting assistants usually join your call as a bot or upload the recording to a server. This one does neither. It
 records the call and your microphone on your Mac, transcribes both there, and learns the voices of the people you
-talk to, so the transcript says who said what. Audio, transcripts and voices never leave the Mac; only the transcript
-text goes to the summary service you choose, and with a local model not even that. Action items you send to GitHub
+talk to, so the transcript says who said what. Audio, transcripts and voices never leave your devices (and, if you turn
+on sync, your own private iCloud); only the transcript text goes to the summary service you choose, and with a local
+model not even that. Action items you send to GitHub
 yourself take their title, labels and due day along, and in private repositories a line of context with a quote.
 
 ## A quick tour
@@ -138,13 +139,20 @@ the device; only the transcript text goes to the summary service you choose.
 - **iPad like the Mac.** A sidebar, the list with the meeting beside it, and the facts and the voices in a column on the
   right when there is room. The live window shows the live summary and the markers beside the transcript. With a
   keyboard: ⌘R records, ⇧⌘P pauses, ⇧⌘M marks, ⌘K searches, ⌘1–⌘4 switch, ⌘[ goes back.
+- **On the Lock Screen and in the Dynamic Island.** A running recording shows its title, a clock and the markers there,
+  with buttons to pause, mark a moment and stop without opening the app. *Record a Meeting* starts one from Control
+  Center, the Lock Screen, the Action Button, Siri or Shortcuts.
 - **Finished in the background.** After the recording the meeting is processed on the device; iOS 26 lets that go on
   with the screen locked and shows its progress.
 - **Shared views.** *Who is this?*, *Send to GitHub*, the speakers, the summary and the settings are the Mac's own views,
   laid out for a narrow screen, so a change shows on every device.
 
-Not there yet: meetings and voices don't travel between the Mac and the iPhone; each device keeps its own archive and
-learns the voices it hears. Summaries use Anthropic, OpenAI or Google (Ollama runs on the Mac only).
+- **The same meetings everywhere.** With Settings › General › iCloud on, meetings, people and the voices the app
+  learned are the same on your Mac, iPhone and iPad, and the recordings too if you like: record on the phone, read on the
+  Mac, and a voice named on one device is known on the others. It goes through the private database of your iCloud
+  account, which only your devices can read, works offline and catches up later. Off until you turn it on.
+
+Summaries use Anthropic, OpenAI or Google (Ollama runs on the Mac only).
 
 ## What it does
 
@@ -246,7 +254,11 @@ open Transcripts.xcodeproj
    the speech models once (about 700 MB, to `~/Library/Application Support/FluidAudio/Models`). macOS asks for
    *system audio recording* the first time you record.
 4. For summaries, open Settings › AI and enter an API key, or point it at Ollama.
-5. For GitHub, click *Send to GitHub* above a meeting's action items, or open Settings › GitHub. Transcripts uses the login
+5. For iCloud sync between your devices, add `TR_ICLOUD = YES` to `Config/Local.xcconfig`. Xcode's automatic signing
+   then adds iCloud (CloudKit) and push notifications to your App ID and creates the container `iCloud.<bundle id>`
+   (on the command line: `xcodebuild -allowProvisioningUpdates`). Without it the app builds without iCloud and doesn't
+   offer sync.
+6. For GitHub, click *Send to GitHub* above a meeting's action items, or open Settings › GitHub. Transcripts uses the login
    of the GitHub CLI (`gh auth login`; scopes `repo`, `project` and `read:org`), as Issues for GitHub does. To sign in
    on github.com with a code instead, set `GITHUB_CLIENT_ID` in `Config/Local.xcconfig` to a GitHub OAuth app with the
    device flow turned on.
@@ -329,7 +341,10 @@ memory). The live transcript keeps up with several times real time.
 ## For contributors
 
 ```
-Transcripts/                  App target for Mac, iPhone and iPad: entry point, icons, the string catalogs
+Transcripts/                  App target for Mac, iPhone and iPad: entry point, icons, the string catalogs, the Live
+                              Activity and App Shortcuts
+TranscriptsWidgets/           Widget extension (iPhone and iPad): the Live Activity's views, the Control Center control
+Shared/                       Compiled into both: the Live Activity's attributes and the recording's intents
 TranscriptsUITests/           UI tests of the iPhone and iPad app (Tools/test-ios.sh)
 Packages/TranscriptsKit/      Everything else, as a Swift package
   Sources/TranscriptsKit/
@@ -341,6 +356,7 @@ Packages/TranscriptsKit/      Everything else, as a Swift package
     Calendar/                 Calendar, reminders, call detection
     AI/                       Summary providers and prompts
     Model/  Store/            Records and the GRDB database with full-text search
+    Sync/                     iCloud sync with CKSyncEngine: change tracking, records, conflicts
     App/                      App model, settings, demo data
     UI/                       SwiftUI views every platform shares: the meeting, people, GitHub, settings, live transcript
     UI/Mac/                   The Mac's windows: sidebar, menu bar, floating recorder, command palette, dropdowns
@@ -355,8 +371,10 @@ Design/                       Icon, README pictures, social preview
 Website/                      The website on GitHub Pages: home, privacy policy, terms, support, Impressum
 ```
 
-The interface texts are written in German in the code and translated in `Transcripts/Localizable.xcstrings`. After
-changing texts, `Tools/localization/extract.sh` brings the catalog up to date; `Tools/localization/catalog.py` lists
+The interface texts are written in German in the code and translated in `Transcripts/Localizable.xcstrings` (the
+widget extension's in `TranscriptsWidgets/Localizable.xcstrings`, the Siri phrases in
+`Transcripts/AppShortcuts.xcstrings`). After changing texts, `Tools/localization/extract.sh` brings the catalogs up to
+date; `Tools/localization/catalog.py` lists
 what a language lacks, takes translations in and checks placeholders and plural forms. The pictures in this README are
 made by `Tools/readme-images.sh`: the app renders its own windows in demo mode, in light and dark,
 `Tools/readme-images/build.py` lays them out, and `Tools/readme-images/website.py` makes the website's pictures from
@@ -370,7 +388,9 @@ python3 -m http.server --directory Website
 ```
 
 Data lives in `~/Library/Application Support/Transcripts` (the database and the recordings, compressed to AAC after
-processing; keep them forever, for 30 days, or not at all). API keys are in the Keychain.
+processing; keep them forever, for 30 days, or not at all). API keys are in the Keychain. With iCloud sync on, a copy
+is in the private database of the user's iCloud account, in the zone `Transcripts` of the container
+`iCloud.<bundle id>`; `-demo YES -demo.sync <zone> -demo.data <folder>` tries sync out in a zone and folder of its own.
 
 ## Good to know
 

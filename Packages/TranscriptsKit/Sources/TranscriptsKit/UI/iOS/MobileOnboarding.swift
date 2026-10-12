@@ -50,6 +50,10 @@ struct MobileOnboarding: View {
                     )
                     divider
                     modelStep
+                    if model.iCloudAvailable {
+                        divider
+                        iCloudStep
+                    }
                 }
                 .cardStyle(radius: 16)
                 .padding(.top, 24)
@@ -159,6 +163,21 @@ struct MobileOnboarding: View {
             }
         }
         .padding(16)
+    }
+
+    private var iCloudStep: some View {
+        Toggle(isOn: Binding(get: { model.settings.iCloudSync }, set: { model.setICloudSync($0) })) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Mit iCloud abgleichen").font(.uiMedium).foregroundStyle(Theme.text)
+                Text("Holt Meetings, Personen und Stimmen von deinen anderen Geräten, etwa vom Mac, und hält sie überall gleich.")
+                    .font(.small)
+                    .foregroundStyle(Theme.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .tint(Theme.accent)
+        .padding(16)
+        .accessibilityIdentifier("onboarding.icloud")
     }
 
     private var modelStep: some View {

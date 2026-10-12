@@ -158,6 +158,9 @@ public final class AppDatabase: Sendable {
                 t.uniqueKey(["kind", "key", "targetKey"])
             }
         }
+        migrator.registerMigration("v5-sync") { db in
+            try SyncSchema.create(db)
+        }
         return migrator
     }
 }

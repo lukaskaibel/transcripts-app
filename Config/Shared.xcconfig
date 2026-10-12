@@ -1,19 +1,29 @@
-// Settings shared by every build. Personal settings (your signing team) go in Local.xcconfig,
-// which is not checked in; copy Local.xcconfig.example to get started.
+// Settings of the app target. Personal settings (your signing team) go in Local.xcconfig, which is not checked in;
+// copy Local.xcconfig.example to get started.
 
-MARKETING_VERSION = 0.1.0
-CURRENT_PROJECT_VERSION = 1
+#include "Base.xcconfig"
 
-PRODUCT_BUNDLE_IDENTIFIER = com.lukaskbl.Transcripts
+PRODUCT_BUNDLE_IDENTIFIER = $(TR_APP_BUNDLE_IDENTIFIER)
 
-// Without a team the app is signed to run on this Mac only. macOS remembers granted permissions
-// (microphone, system audio, calendar) per signature, so a stable team signature avoids being asked
-// again after every build.
-DEVELOPMENT_TEAM =
-CODE_SIGN_IDENTITY = -
+// The intents in Shared/ run here; the widget extension only names them.
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) TRANSCRIPTS_APP
 
 // A GitHub OAuth app's client ID for signing in on github.com with a code. Empty: sign in through the GitHub CLI.
 GITHUB_CLIENT_ID =
+
+// iCloud sync needs a team whose App ID has iCloud (CloudKit, container iCloud.<bundle id>) and push notifications;
+// Xcode sets them up with automatic signing. Set TR_ICLOUD = YES in Local.xcconfig for it. Without it the app has no
+// iCloud entitlements and doesn't offer sync.
+TR_ICLOUD = NO
+TR_MAC_ENTITLEMENTS_NO = Config/Transcripts.entitlements
+TR_MAC_ENTITLEMENTS_YES = Config/Transcripts-iCloud.entitlements
+TR_IOS_ENTITLEMENTS_NO =
+TR_IOS_ENTITLEMENTS_YES = Config/Transcripts-iOS-iCloud.entitlements
+CODE_SIGN_ENTITLEMENTS[sdk=macosx*] = $(TR_MAC_ENTITLEMENTS_$(TR_ICLOUD))
+CODE_SIGN_ENTITLEMENTS[sdk=iphone*] = $(TR_IOS_ENTITLEMENTS_$(TR_ICLOUD))
+TR_CLOUDKIT_CONTAINER_NO =
+TR_CLOUDKIT_CONTAINER_YES = iCloud.$(PRODUCT_BUNDLE_IDENTIFIER)
+TR_CLOUDKIT_CONTAINER = $(TR_CLOUDKIT_CONTAINER_$(TR_ICLOUD))
 
 // iPhone and iPad (one app target for every platform, as in Issues for GitHub). The simulator needs no team; a
 // device does (Local.xcconfig).
@@ -22,6 +32,8 @@ INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphone*] = YES
 INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone[sdk=iphone*] = UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
 INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad[sdk=iphone*] = UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
 INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO
+// The running recording on the Lock Screen and in the Dynamic Island.
+INFOPLIST_KEY_NSSupportsLiveActivities[sdk=iphone*] = YES
 // The icons offered in Settings › Allgemein, as alternate Home Screen icons.
 ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=iphone*] = AppIcon-Light AppIcon-Dark AppIcon-Indigo
 ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS[sdk=iphone*] = YES

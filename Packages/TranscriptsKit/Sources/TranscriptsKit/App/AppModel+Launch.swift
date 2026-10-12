@@ -2,6 +2,9 @@ import Foundation
 
 extension AppModel {
     /// The model the app runs on: the user's own data, or made-up meetings with `-demo YES`.
+    ///
+    /// `-demo.sync <zone>` tries iCloud sync out in a zone of its own, with `-demo.data <folder>` per instance (a new
+    /// folder starts empty, or with the made-up meetings with `-demo.seed YES`).
     @MainActor
     static func makeForLaunch() -> AppModel {
         let arguments = UserDefaults.standard
@@ -13,13 +16,18 @@ extension AppModel {
             let database: AppDatabase
             if let copy, let opened = try? AppDatabase.openShared(at: copy) {
                 database = opened
+                if arguments.bool(forKey: "demo.seed"), (try? opened.meetingRows().isEmpty) == true { DemoData.seed(opened) }
             } else {
                 database = (try? AppDatabase.inMemory())!
                 DemoData.seed(database)
             }
-            let defaults = UserDefaults(suiteName: "Transcripts.demo") ?? .standard
-            defaults.removePersistentDomain(forName: "Transcripts.demo")
+            // Each folder its own settings, so two instances side by side don't share them.
+            let suite = copy.map { "Transcripts.demo.\($0.lastPathComponent)" } ?? "Transcripts.demo"
+            let defaults = UserDefaults(suiteName: suite) ?? .standard
+            defaults.removePersistentDomain(forName: suite)
             let settings = AppSettings(defaults: defaults)
+            let syncZone = arguments.string(forKey: "demo.sync")
+            settings.iCloudSync = syncZone != nil
             settings.onboardingDone = !arguments.bool(forKey: "demo.onboarding")
             settings.summaryProvider = .anthropic
             settings.setModel("claude-opus-5-5", for: .anthropic)
@@ -33,6 +41,7 @@ extension AppModel {
             let secrets = MemorySecretStore(["anthropic": "sk-ant-demo-key-0000"])
             let github: GitHubService? = githubMode == "live" ? LiveGitHubService(tokens: GitHubTokenStore(secrets: secrets, method: .githubCLI)) : nil
             let model = AppModel(database: database, settings: settings, secrets: secrets, isDemo: true, github: github)
+            if let syncZone { model.syncZone = syncZone }
             model.loadDemoState()
             return model
         }

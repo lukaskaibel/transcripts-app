@@ -9209,6 +9209,72 @@
         }
       }
     },
+    "Aktuell · %@" : {
+      "extractionState" : "manual",
+      "comment" : "iCloud sync: up to date, with the time of the last sync",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuell · %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to date · %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À jour · %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al día · %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiornato · %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizado · %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bijgewerkt · %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktualne · %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Актуально · %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Актуально · %@"
+          }
+        }
+      }
+    },
     "Alle" : {
       "extractionState" : "manual",
       "comment" : "target picker section: every project and repository",
@@ -9856,6 +9922,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zapomnieć wszystkie głosy?"
+          }
+        }
+      }
+    },
+    "Alles aus iCloud löschen?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles aus iCloud löschen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete everything from iCloud?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout supprimer d’iCloud ?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar todo de iCloud?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminare tutto da iCloud?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagar tudo do iCloud?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles uit iCloud verwijderen?"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usunąć wszystko z iCloud?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить всё из iCloud?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалити все з iCloud?"
           }
         }
       }
@@ -12948,6 +13079,71 @@
         }
       }
     },
+    "Aufnahme pausieren oder fortsetzen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme pausieren oder fortsetzen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause or Resume Recording"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mettre en pause ou reprendre l’enregistrement"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausar o reanudar la grabación"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metti in pausa o riprendi la registrazione"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausar ou retomar a gravação"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opname pauzeren of hervatten"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wstrzymaj lub wznów nagrywanie"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приостановить или продолжить запись"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Призупинити або продовжити запис"
+          }
+        }
+      }
+    },
     "Aufnahme starten" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13143,6 +13339,71 @@
         }
       }
     },
+    "Aufnahmen mitnehmen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahmen mitnehmen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Include recordings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inclure les enregistrements"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir las grabaciones"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Includi le registrazioni"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir as gravações"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opnames meenemen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronizuj nagrania"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизировать записи"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронізувати записи"
+          }
+        }
+      }
+    },
     "Aufnehmen" : {
       "extractionState" : "manual",
       "comment" : "notification button: start recording",
@@ -13272,7 +13533,8 @@
             "value" : "Вимк."
           }
         }
-      }
+      },
+      "comment" : "iCloud sync: off"
     },
     "Aus dem Gesprächsverlauf" : {
       "extractionState" : "manual",
@@ -13401,6 +13663,201 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Со встречи %@ от %@"
+          }
+        }
+      }
+    },
+    "Aus iCloud gelöscht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus iCloud gelöscht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleted from iCloud"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimé d’iCloud"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminado de iCloud"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminato da iCloud"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagado do iCloud"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uit iCloud verwijderd"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usunięto z iCloud"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалено из iCloud"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалено з iCloud"
+          }
+        }
+      }
+    },
+    "Aus iCloud löschen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus iCloud löschen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete from iCloud"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer d’iCloud"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar de iCloud"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina da iCloud"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagar do iCloud"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijder uit iCloud"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuń z iCloud"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить из iCloud"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалити з iCloud"
+          }
+        }
+      }
+    },
+    "Aus iCloud löschen …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus iCloud löschen …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete from iCloud…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer d’iCloud…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar de iCloud…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina da iCloud…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagar do iCloud…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijder uit iCloud…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuń z iCloud…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить из iCloud…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Видалити з iCloud…"
           }
         }
       }
@@ -16466,6 +16923,71 @@
         }
       }
     },
+    "Dein iCloud-Speicher ist voll." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein iCloud-Speicher ist voll."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iCloud storage is full."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre stockage iCloud est plein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu almacenamiento de iCloud está lleno."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo spazio di iCloud è pieno."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu armazenamento do iCloud está cheio."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je iCloud-opslag is vol."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Twój iCloud jest pełny."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хранилище iCloud заполнено."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сховище iCloud заповнене."
+          }
+        }
+      }
+    },
     "Dein Konto" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17831,6 +18353,71 @@
         }
       }
     },
+    "Die Daten in iCloud wurden auf einem anderen Gerät gelöscht. Schalte den Abgleich wieder ein, um mit dem Stand dieses Geräts neu anzufangen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Daten in iCloud wurden auf einem anderen Gerät gelöscht. Schalte den Abgleich wieder ein, um mit dem Stand dieses Geräts neu anzufangen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The data in iCloud was deleted on another device. Turn syncing back on to start over from what’s on this device."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données dans iCloud ont été supprimées sur un autre appareil. Réactivez la synchronisation pour repartir de ce qui se trouve sur cet appareil."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los datos de iCloud se eliminaron en otro dispositivo. Vuelve a activar la sincronización para empezar de nuevo con lo que hay en este dispositivo."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I dati in iCloud sono stati eliminati su un altro dispositivo. Riattiva la sincronizzazione per ripartire da ciò che c’è su questo dispositivo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dados no iCloud foram apagados em outro dispositivo. Ative a sincronização novamente para recomeçar a partir do que está neste dispositivo."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De gegevens in iCloud zijn op een ander apparaat verwijderd. Zet synchronisatie weer aan om opnieuw te beginnen met wat op dit apparaat staat."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dane w iCloud zostały usunięte na innym urządzeniu. Włącz synchronizację ponownie, aby zacząć od nowa ze stanem tego urządzenia."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Данные в iCloud были удалены на другом устройстве. Включите синхронизацию снова, чтобы начать заново с данными этого устройства."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дані в iCloud було видалено на іншому пристрої. Увімкніть синхронізацію знову, щоб почати спочатку з даними цього пристрою."
+          }
+        }
+      }
+    },
     "Die Datenbank ließ sich nicht öffnen" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18022,6 +18609,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Вход в GitHub CLI не выполнен. Запустите «gh auth login» в Терминале и повторите попытку."
+          }
+        }
+      }
+    },
+    "Die Meetings auf diesem Gerät bleiben." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Meetings auf diesem Gerät bleiben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The meetings on this device stay."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les réunions de cet appareil sont conservées."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las reuniones de este dispositivo se conservan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le riunioni su questo dispositivo restano."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As reuniões neste dispositivo continuam aqui."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De vergaderingen op dit apparaat blijven."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spotkania na tym urządzeniu zostają."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Встречи на этом устройстве остаются."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зустрічі на цьому пристрої залишаються."
           }
         }
       }
@@ -24281,6 +24933,71 @@
         }
       }
     },
+    "Gleicht ab …" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gleicht ab …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Syncing…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisation…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizando…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizzazione…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizando…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchroniseren…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronizacja…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизация…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронізація…"
+          }
+        }
+      }
+    },
     "Großzügig" : {
       "extractionState" : "manual",
       "comment" : "how readily voices are matched to people: generous",
@@ -24804,6 +25521,71 @@
         }
       }
     },
+    "Holt Meetings, Personen und Stimmen von deinen anderen Geräten, etwa vom Mac, und hält sie überall gleich." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Holt Meetings, Personen und Stimmen von deinen anderen Geräten, etwa vom Mac, und hält sie überall gleich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brings meetings, people and voices over from your other devices, such as your Mac, and keeps them the same everywhere."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupère les réunions, les personnes et les voix de vos autres appareils, comme votre Mac, et les garde identiques partout."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trae reuniones, personas y voces de tus otros dispositivos, como tu Mac, y las mantiene iguales en todas partes."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recupera riunioni, persone e voci dagli altri tuoi dispositivi, come il Mac, e le mantiene uguali ovunque."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traz reuniões, pessoas e vozes dos seus outros dispositivos, como o Mac, e as mantém iguais em todos."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haalt vergaderingen, personen en stemmen van je andere apparaten, zoals je Mac, en houdt ze overal gelijk."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pobiera spotkania, osoby i głosy z twoich innych urządzeń, np. z Maca, i utrzymuje je wszędzie takie same."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Загружает встречи, людей и голоса с ваших других устройств, например с Mac, и поддерживает их одинаковыми везде."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завантажує зустрічі, людей і голоси з ваших інших пристроїв, наприклад з Mac, і підтримує їх однаковими всюди."
+          }
+        }
+      }
+    },
     "http://localhost:11434" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -24871,7 +25653,7 @@
     },
     "Ich" : {
       "extractionState" : "manual",
-      "comment" : "the user's name until they set one",
+      "comment" : "the user's own name when macOS knows none",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -25787,6 +26569,71 @@
         }
       }
     },
+    "In diesem Build nicht verfügbar: iCloud braucht eine Signatur mit einem Apple-Developer-Team (siehe Config/Local.xcconfig.example)." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In diesem Build nicht verfügbar: iCloud braucht eine Signatur mit einem Apple-Developer-Team (siehe Config/Local.xcconfig.example)."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not available in this build: iCloud needs signing with an Apple Developer team (see Config/Local.xcconfig.example)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non disponible dans cette version : iCloud nécessite une signature avec une équipe Apple Developer (voir Config/Local.xcconfig.example)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No disponible en esta compilación: iCloud requiere firmar con un equipo de Apple Developer (consulta Config/Local.xcconfig.example)."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non disponibile in questa build: iCloud richiede la firma con un team Apple Developer (vedi Config/Local.xcconfig.example)."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indisponível nesta build: o iCloud exige assinatura com uma equipe do Apple Developer (veja Config/Local.xcconfig.example)."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet beschikbaar in deze build: iCloud vereist ondertekening met een Apple Developer-team (zie Config/Local.xcconfig.example)."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niedostępne w tej kompilacji: iCloud wymaga podpisu zespołu Apple Developer (zob. Config/Local.xcconfig.example)."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Недоступно в этой сборке: для iCloud нужна подпись командой Apple Developer (см. Config/Local.xcconfig.example)."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Недоступно в цій збірці: для iCloud потрібен підпис командою Apple Developer (див. Config/Local.xcconfig.example)."
+          }
+        }
+      }
+    },
     "In dieser Aufnahme wurde nicht gesprochen." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -26310,6 +27157,71 @@
         }
       }
     },
+    "Jetzt abgleichen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt abgleichen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync Now"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchroniser maintenant"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar ahora"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizza ora"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar agora"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nu synchroniseren"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronizuj teraz"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизировать"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронізувати"
+          }
+        }
+      }
+    },
     "Jetzt neu starten" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -26764,6 +27676,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mapa próbek głosu"
+          }
+        }
+      }
+    },
+    "Kein iCloud-Account angemeldet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein iCloud-Account angemeldet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not signed in to iCloud"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun compte iCloud connecté"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay ninguna cuenta de iCloud"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun account iCloud connesso"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma conta do iCloud conectada"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niet ingelogd bij iCloud"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brak zalogowanego konta iCloud"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вход в iCloud не выполнен"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вхід в iCloud не виконано"
           }
         }
       }
@@ -28133,6 +29110,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Нет совпадений"
+          }
+        }
+      }
+    },
+    "Keine Verbindung zu iCloud." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Verbindung zu iCloud."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No connection to iCloud."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de connexion à iCloud."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin conexión con iCloud."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuna connessione a iCloud."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem conexão com o iCloud."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geen verbinding met iCloud."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brak połączenia z iCloud."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет связи с iCloud."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Немає з’єднання з iCloud."
           }
         }
       }
@@ -31233,6 +32275,71 @@
         }
       }
     },
+    "Löschen in iCloud fehlgeschlagen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen in iCloud fehlgeschlagen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deleting from iCloud failed"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de la suppression dans iCloud"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo eliminar de iCloud"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminazione da iCloud non riuscita"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falha ao apagar do iCloud"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verwijderen uit iCloud mislukt"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie udało się usunąć z iCloud"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось удалить из iCloud"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося видалити з iCloud"
+          }
+        }
+      }
+    },
     "Löschen …" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -31824,6 +32931,71 @@
         }
       }
     },
+    "Meeting aufnehmen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeting aufnehmen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record a Meeting"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer une réunion"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grabar una reunión"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra una riunione"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravar uma reunião"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergadering opnemen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nagraj spotkanie"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записать встречу"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записати зустріч"
+          }
+        }
+      }
+    },
     "Meeting erkannt" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -32345,6 +33517,71 @@
         }
       }
     },
+    "Meetings, Personen und Stimmen auf all deinen Geräten: auf dem iPhone aufnehmen, auf dem Mac nachlesen. Sie liegen in deinem privaten iCloud, nur du hast Zugriff darauf." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meetings, Personen und Stimmen auf all deinen Geräten: auf dem iPhone aufnehmen, auf dem Mac nachlesen. Sie liegen in deinem privaten iCloud, nur du hast Zugriff darauf."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meetings, people and voices on all your devices: record on your iPhone, read on your Mac. They’re kept in your private iCloud, and only you have access to them."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réunions, personnes et voix sur tous vos appareils : enregistrez sur l’iPhone, relisez sur le Mac. Elles sont stockées dans votre iCloud privé, vous seul y avez accès."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reuniones, personas y voces en todos tus dispositivos: graba en el iPhone y léelo en el Mac. Se guardan en tu iCloud privado y solo tú tienes acceso."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riunioni, persone e voci su tutti i tuoi dispositivi: registra sull’iPhone, rileggi sul Mac. Restano nel tuo iCloud privato e solo tu puoi accedervi."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reuniões, pessoas e vozes em todos os seus dispositivos: grave no iPhone, leia no Mac. Elas ficam no seu iCloud privado, e só você tem acesso."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergaderingen, personen en stemmen op al je apparaten: neem op met je iPhone, lees na op je Mac. Ze staan in je privé-iCloud en alleen jij hebt er toegang toe."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spotkania, osoby i głosy na wszystkich twoich urządzeniach: nagrywaj na iPhonie, czytaj na Macu. Są przechowywane w twoim prywatnym iCloud i tylko ty masz do nich dostęp."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Встречи, люди и голоса на всех ваших устройствах: записывайте на iPhone, читайте на Mac. Они хранятся в вашем личном iCloud, доступ есть только у вас."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зустрічі, люди й голоси на всіх ваших пристроях: записуйте на iPhone, читайте на Mac. Вони зберігаються у вашому приватному iCloud, доступ маєте лише ви."
+          }
+        }
+      }
+    },
     "Meetings, Personen, Gesagtes" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -32406,6 +33643,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Зустрічі, люди, сказане"
+          }
+        }
+      }
+    },
+    "Meetings, Personen, Stimmen und Aufnahmen verschwinden aus iCloud, und deine anderen Geräte gleichen nicht mehr ab. Was auf diesem %@ liegt, bleibt." : {
+      "extractionState" : "manual",
+      "comment" : "Mac, iPhone or iPad",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meetings, Personen, Stimmen und Aufnahmen verschwinden aus iCloud, und deine anderen Geräte gleichen nicht mehr ab. Was auf diesem %@ liegt, bleibt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meetings, people, voices and recordings are removed from iCloud, and your other devices stop syncing. What’s on this %@ stays."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les réunions, personnes, voix et enregistrements disparaissent d’iCloud, et vos autres appareils ne se synchronisent plus. Ce qui se trouve sur cet appareil (%@) est conservé."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las reuniones, personas, voces y grabaciones desaparecen de iCloud, y tus otros dispositivos dejan de sincronizarse. Lo que hay en este %@ se conserva."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riunioni, persone, voci e registrazioni spariscono da iCloud e gli altri tuoi dispositivi non si sincronizzano più. Ciò che c’è su questo %@ resta."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reuniões, pessoas, vozes e gravações somem do iCloud, e seus outros dispositivos deixam de sincronizar. O que está neste %@ continua aqui."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergaderingen, personen, stemmen en opnames verdwijnen uit iCloud en je andere apparaten synchroniseren niet meer. Wat op deze %@ staat, blijft."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spotkania, osoby, głosy i nagrania znikną z iCloud, a twoje pozostałe urządzenia przestaną się synchronizować. To, co jest na tym urządzeniu (%@), zostaje."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Встречи, люди, голоса и записи исчезнут из iCloud, а другие ваши устройства перестанут синхронизироваться. То, что есть на этом устройстве (%@), останется."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зустрічі, люди, голоси й записи зникнуть з iCloud, а інші ваші пристрої перестануть синхронізуватися. Те, що є на цьому пристрої (%@), залишиться."
           }
         }
       }
@@ -32927,6 +34230,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подключите GitHub"
+          }
+        }
+      }
+    },
+    "Mit iCloud abgleichen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit iCloud abgleichen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync with iCloud"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchroniser avec iCloud"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar con iCloud"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizza con iCloud"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizar com o iCloud"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchroniseren met iCloud"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronizuj z iCloud"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронизировать с iCloud"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Синхронізувати з iCloud"
           }
         }
       }
@@ -33578,6 +34946,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wczytywanie modeli…"
+          }
+        }
+      }
+    },
+    "Moment markieren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moment markieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Marker"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter un marqueur"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir marcador"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi marcatore"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar marcador"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plaats markering"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dodaj znacznik"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поставить метку"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поставити позначку"
           }
         }
       }
@@ -41625,6 +43058,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Почніть запис за допомогою ⌘R, зі смуги меню або зі сповіщення календаря."
+          }
+        }
+      }
+    },
+    "Startet eine Aufnahme in Transcripts. Läuft schon eine, läuft sie weiter." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startet eine Aufnahme in Transcripts. Läuft schon eine, läuft sie weiter."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts a recording in Transcripts. If one is already running, it keeps running."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lance un enregistrement dans Transcripts. Si un enregistrement est déjà en cours, il continue."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia una grabación en Transcripts. Si ya hay una en curso, sigue grabando."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avvia una registrazione in Transcripts. Se ce n’è già una in corso, continua."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia uma gravação no Transcripts. Se já houver uma em andamento, ela continua."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start een opname in Transcripts. Loopt er al een, dan loopt die door."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rozpoczyna nagrywanie w Transcripts. Jeśli nagranie już trwa, jest kontynuowane."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начинает запись в Transcripts. Если запись уже идёт, она продолжается."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Починає запис у Transcripts. Якщо запис уже йде, він триває."
           }
         }
       }
@@ -50670,6 +52168,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "W chwili rozpoczęcia"
+          }
+        }
+      }
+    },
+    "Zum Nachhören und neu Transkribieren auf jedem Gerät. Belegt etwa 20 bis 60 MB iCloud-Speicher pro Stunde Meeting." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Nachhören und neu Transkribieren auf jedem Gerät. Belegt etwa 20 bis 60 MB iCloud-Speicher pro Stunde Meeting."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To listen back and transcribe again on any device. Uses about 20 to 60 MB of iCloud storage per hour of meeting."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour réécouter et retranscrire sur chaque appareil. Occupe environ 20 à 60 Mo de stockage iCloud par heure de réunion."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para volver a escuchar y transcribir en cualquier dispositivo. Ocupa unos 20 a 60 MB de iCloud por hora de reunión."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per riascoltare e trascrivere di nuovo su ogni dispositivo. Occupa circa 20–60 MB di spazio iCloud per ora di riunione."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para ouvir de novo e transcrever outra vez em qualquer dispositivo. Usa cerca de 20 a 60 MB do iCloud por hora de reunião."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Om op elk apparaat terug te luisteren en opnieuw te transcriberen. Neemt ongeveer 20 tot 60 MB iCloud-opslag per uur vergadering in beslag."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aby odsłuchiwać i ponownie transkrybować na każdym urządzeniu. Zajmuje ok. 20–60 MB w iCloud na godzinę spotkania."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чтобы переслушивать и заново расшифровывать на любом устройстве. Занимает около 20–60 МБ в iCloud на час встречи."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Щоб переслуховувати й заново транскрибувати на будь-якому пристрої. Займає приблизно 20–60 МБ в iCloud на годину зустрічі."
           }
         }
       }

@@ -24,9 +24,12 @@ Every pull request is reviewed and merged by the maintainer; nothing lands on `m
 
 ## What to keep in mind
 
-- **Nothing leaves the device** except the transcript text that goes to the summary service the user picked, and the
-  issues the user sends to GitHub themselves (never with transcript quotes for a public repository). No analytics,
-  no uploads, no servers of our own.
+- **Nothing leaves the device** except the transcript text that goes to the summary service the user picked, the
+  issues the user sends to GitHub themselves (never with transcript quotes for a public repository), and, when the user
+  turns on iCloud sync, their own data to their own private iCloud. No analytics, no servers of our own.
+- **What belongs to a meeting, a person or a voice syncs.** A new table or column for them needs a trigger in
+  `Sync/SyncSchema.swift` (so a change is noticed) and a place in the payloads of `Sync/SyncStore.swift` (so it travels);
+  `SyncTests` checks that a meeting arrives whole on another device.
 - **One view for every platform.** A view the Mac, the iPhone and the iPad all show lives once, in `UI/` by topic,
   and adapts where it must (`Platform.isMobile`, `#if os(macOS)`), so a change shows everywhere. Only window chrome is
   per platform: `UI/Mac/` (sidebar, menu bar, floating recorder, command palette) and `UI/iOS/` (tabs, the iPad's
@@ -36,9 +39,10 @@ Every pull request is reviewed and merged by the maintainer; nothing lands on `m
   one, and a correction must be able to undo what followed from a mistake. `Speakers/VoiceProfile.swift` and
   `Speakers/VoiceRecheck.swift` explain how.
 - **Every text is translated.** The interface is written in German in the code and translated into nine more
-  languages in `Transcripts/Localizable.xcstrings`. After changing texts, run `Tools/localization/extract.sh` (it
-  compiles for the Mac and for iOS, since some texts exist on one of them only); then
-  `Tools/localization/catalog.py todo <language> <file>` lists what a language lacks, `catalog.py merge` takes
+  languages in `Transcripts/Localizable.xcstrings` (the widget extension's texts in
+  `TranscriptsWidgets/Localizable.xcstrings`). After changing texts, run `Tools/localization/extract.sh` (it compiles
+  for the Mac and for iOS, since some texts exist on one of them only); then
+  `Tools/localization/catalog.py todo <language> <file>` (with `--widgets` for the extension) lists what a language lacks, `catalog.py merge` takes
   translations in and `catalog.py check` checks placeholders and plural forms. Texts stored with a meeting (a voice's
   label, the reason for a suggestion) stay German and are shown through `Strings.label` and `Strings.reason`.
 - **Colours and fonts come from `UI/Theme.swift`.** Every colour needs a light and a dark value.
@@ -50,5 +54,6 @@ Every pull request is reviewed and merged by the maintainer; nothing lands on `m
 
 ## Releases
 
-Versions follow semantic versioning. The version lives in `Config/Shared.xcconfig`; each release gets an entry in
+Versions follow semantic versioning. The version lives in `Config/Base.xcconfig` (the app and its widget extension
+share it); each release gets an entry in
 `CHANGELOG.md` and a tag of the form `v0.1.0`.

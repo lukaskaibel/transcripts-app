@@ -1,0 +1,6 @@
+// The widget extension (iPhone and iPad): the recording's Live Activity and the "Meeting aufnehmen" control.
+
+#include "Base.xcconfig"
+#include? "Local.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = $(TR_APP_BUNDLE_IDENTIFIER).Widgets

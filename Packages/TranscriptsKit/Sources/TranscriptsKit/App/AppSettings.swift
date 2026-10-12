@@ -109,6 +109,8 @@ public final class AppSettings {
         githubSuggestLabels = defaults.object(forKey: Keys.githubSuggestLabels) as? Bool ?? true
         githubIncludeContext = defaults.object(forKey: Keys.githubIncludeContext) as? Bool ?? true
         githubAskAfterSummary = defaults.object(forKey: Keys.githubAskAfterSummary) as? Bool ?? true
+        iCloudSync = defaults.bool(forKey: Keys.iCloudSync)
+        iCloudAudio = defaults.object(forKey: Keys.iCloudAudio) as? Bool ?? true
         if let since = defaults.object(forKey: Keys.inboxSince) as? Date {
             inboxSince = since
         } else {
@@ -158,6 +160,8 @@ public final class AppSettings {
         static let githubSuggestLabels = "githubSuggestLabels"
         static let githubIncludeContext = "githubIncludeContext"
         static let githubAskAfterSummary = "githubAskAfterSummary"
+        static let iCloudSync = "iCloudSync"
+        static let iCloudAudio = "iCloudAudio"
     }
 
     public var onboardingDone: Bool { didSet { defaults.set(onboardingDone, forKey: Keys.onboardingDone) } }
@@ -211,6 +215,11 @@ public final class AppSettings {
     public var githubIncludeContext: Bool { didSet { defaults.set(githubIncludeContext, forKey: Keys.githubIncludeContext) } }
     /// After a summary, offer to create the tasks in their remembered place with a notification.
     public var githubAskAfterSummary: Bool { didSet { defaults.set(githubAskAfterSummary, forKey: Keys.githubAskAfterSummary) } }
+    /// Keep meetings, people and voices the same on every device of the user's iCloud account. Off until the user
+    /// turns it on: everything stays on the device otherwise.
+    public var iCloudSync: Bool { didSet { defaults.set(iCloudSync, forKey: Keys.iCloudSync) } }
+    /// With `iCloudSync`: the recordings too, so they can be played and processed again on the other devices.
+    public var iCloudAudio: Bool { didSet { defaults.set(iCloudAudio, forKey: Keys.iCloudAudio) } }
 
     /// The recordings made before the call track was read at the device's rate were checked and repaired
     /// (see `CallTrackRepair`). Not observed: only the one-time maintenance reads it.
