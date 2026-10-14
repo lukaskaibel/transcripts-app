@@ -11,6 +11,7 @@ public struct SpeakerNameHint: Equatable, Sendable {
 public struct SummaryOutcome: Sendable {
     public var title: String
     public var overview: String
+    public var topics: [SummaryTopic]
     public var decisions: [String]
     public var actionItems: [(text: String, owner: String?, due: String?)]
     public var openQuestions: [String]
@@ -31,14 +32,30 @@ public enum Summarizer {
         "type": "object",
         "properties": [
             "title": ["type": "string", "description": "A short, specific title for the meeting, at most six words."],
-            "overview": ["type": "string", "description": "Two to four sentences: what the meeting was about and what came out of it."],
+            "overview": ["type": "string", "description": "Three to five sentences: what the meeting was about, what came out of it and what happens next."],
+            "topics": [
+                "type": "array",
+                "description": "Every subject the meeting spent time on, in the order they came up.",
+                "items": [
+                    "type": "object",
+                    "properties": [
+                        "title": ["type": "string", "description": "A few words naming the subject."],
+                        "points": [
+                            "type": "array", "items": ["type": "string"],
+                            "description": "Two to six full sentences: what was reported, the arguments, who will do what, and where it landed.",
+                        ],
+                    ],
+                    "required": ["title", "points"],
+                    "additionalProperties": false,
+                ],
+            ],
             "decisions": ["type": "array", "items": ["type": "string"], "description": "Decisions that were actually made."],
             "actionItems": [
                 "type": "array",
                 "items": [
                     "type": "object",
                     "properties": [
-                        "text": ["type": "string", "description": "The task, short and concrete."],
+                        "text": ["type": "string", "description": "The task in one concrete sentence that makes sense without the meeting."],
                         "owner": ["type": "string", "description": "Who will do it, as named in the transcript, or an empty string."],
                         "due": ["type": "string", "description": "When, as said in the meeting (\"Mittwoch\", \"14. Oktober\"), or an empty string."],
                     ],
@@ -62,7 +79,7 @@ public enum Summarizer {
                 ],
             ],
         ],
-        "required": ["title", "overview", "decisions", "actionItems", "openQuestions", "speakerNames"],
+        "required": ["title", "overview", "topics", "decisions", "actionItems", "openQuestions", "speakerNames"],
         "additionalProperties": false,
     ]
 
@@ -86,10 +103,11 @@ public enum Summarizer {
         app has a guess, it follows in brackets ("\(guess)"): use the conversation to decide, and if it stays open, \
         name the candidates rather than picking one.
 
-        Write every field in the language the meeting was held in (a German meeting gets a German summary). Be brief \
-        and factual and stay with what was said: no assumptions, no advice, no filler. Use the names from the \
-        transcript for owners. Leave lists empty when there is nothing for them. Speech recognition makes small \
-        mistakes; read past them.
+        Write every field in the language the meeting was held in (a German meeting gets a German summary). Stay \
+        with what was said: no assumptions, no advice, no filler. Be specific: keep the numbers, dates, names, \
+        reasons and results that came up, so the summary still makes sense to someone who wasn't there. The \
+        overview stays short; the topics carry the detail. Use the names from the transcript for owners. Leave \
+        lists empty when there is nothing for them. Speech recognition makes small mistakes; read past them.
 
         Answer with a single JSON object that follows the schema, and nothing else.\(languageRule(language))
         """
@@ -164,6 +182,11 @@ public enum Summarizer {
             guard let text = optional(item["text"]) else { return nil }
             return (text, optional(item["owner"]), optional(item["due"]))
         }
+        let topics = (json["topics"]?.array ?? []).compactMap { item -> SummaryTopic? in
+            guard let title = optional(item["title"]) else { return nil }
+            let points = (item["points"]?.array ?? []).compactMap { $0.string?.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+            return SummaryTopic(title: title, points: points)
+        }
         let names = (json["speakerNames"]?.array ?? []).compactMap { item -> SpeakerNameHint? in
             guard let label = optional(item["speaker"]), let name = optional(item["name"]) else { return nil }
             return SpeakerNameHint(speakerLabel: label, name: name, evidence: optional(item["evidence"]) ?? "")
@@ -172,6 +195,7 @@ public enum Summarizer {
         return SummaryOutcome(
             title: optional(json["title"]) ?? "",
             overview: overview,
+            topics: topics,
             decisions: strings("decisions"),
             actionItems: items.map { (text: $0.0, owner: $0.1, due: $0.2) },
             openQuestions: strings("openQuestions"),
@@ -182,6 +206,7 @@ public enum Summarizer {
     private static func encode(_ outcome: SummaryOutcome) -> String {
         let value: JSONValue = [
             "overview": .string(outcome.overview),
+            "topics": .array(outcome.topics.map { ["title": .string($0.title), "points": .array($0.points.map { .string($0) })] }),
             "decisions": .array(outcome.decisions.map { .string($0) }),
             "actionItems": .array(outcome.actionItems.map { ["text": .string($0.text), "owner": .string($0.owner ?? ""), "due": .string($0.due ?? "")] }),
             "openQuestions": .array(outcome.openQuestions.map { .string($0) }),

@@ -45,8 +45,7 @@ struct MeetingDetailView: View {
             }
         }
         .onKeyPress(.escape) {
-            // SwiftUI hands this view key presses meant for an open dropdown too; Escape belongs to the dropdown.
-            guard model.overlay == nil, !Dropdown.isOpen else { return .ignored }
+            guard model.overlay == nil else { return .ignored }
             model.goBack()
             return .handled
         }
@@ -92,7 +91,7 @@ struct MeetingDetailView: View {
                 }
                 if detail.summary != nil {
                     Button("Zusammenfassung kopieren", systemImage: "text.quote") {
-                        model.copyToClipboard(model.summaryText(for: detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
+                        model.copyToClipboard(SummaryText.markdown(detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
                     }
                 }
                 Button("Als Markdown sichern …", systemImage: "square.and.arrow.down") { model.exportMarkdown(detail) }

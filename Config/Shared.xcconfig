@@ -8,9 +8,6 @@ PRODUCT_BUNDLE_IDENTIFIER = $(TR_APP_BUNDLE_IDENTIFIER)
 // The intents in Shared/ run here; the widget extension only names them.
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) TRANSCRIPTS_APP
 
-// A GitHub OAuth app's client ID for signing in on github.com with a code. Empty: sign in through the GitHub CLI.
-GITHUB_CLIENT_ID =
-
 // iCloud sync needs a team whose App ID has iCloud (CloudKit, container iCloud.<bundle id>) and push notifications;
 // Xcode sets them up with automatic signing. Set TR_ICLOUD = YES in Local.xcconfig for it. Without it the app has no
 // iCloud entitlements and doesn't offer sync.

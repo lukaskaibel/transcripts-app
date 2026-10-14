@@ -1,8 +1,8 @@
 #if os(iOS)
 import SwiftUI
 
-/// What waits after the meetings, as on the Mac: new summaries, tasks for GitHub, voices without a name. A tap
-/// opens the meeting (beside the list on a wide iPad); a swipe marks a summary read or ignores the tasks.
+/// What waits after the meetings, as on the Mac: new summaries and voices without a name. A tap opens the meeting
+/// (beside the list on a wide iPad); a swipe marks a summary read.
 struct InboxScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(MobileNavigation.self) private var navigation
@@ -18,7 +18,7 @@ struct InboxScreen: View {
                 MobileEmptyState(
                     systemImage: "tray",
                     title: String(localized: "Alles erledigt", comment: "empty inbox"),
-                    message: String(localized: "Neue Zusammenfassungen, Aufgaben für GitHub und Stimmen ohne Namen landen hier.")
+                    message: String(localized: "Neue Zusammenfassungen und Stimmen ohne Namen landen hier.")
                 )
             } else {
                 list(inbox)
@@ -39,15 +39,6 @@ struct InboxScreen: View {
                     }
                 } header: {
                     MobileSectionHeader(title: String(localized: "Neue Zusammenfassungen"), count: inbox.summaries.count)
-                }
-            }
-            if !inbox.github.isEmpty {
-                Section {
-                    ForEach(inbox.github) { row in
-                        githubRow(row)
-                    }
-                } header: {
-                    MobileSectionHeader(title: String(localized: "Aufgaben für GitHub"), count: inbox.github.count)
                 }
             }
             if !inbox.voices.isEmpty {
@@ -120,37 +111,6 @@ struct InboxScreen: View {
             }
         }
         .accessibilityIdentifier("inbox.summary.\(row.id)")
-    }
-
-    private func githubRow(_ row: MeetingRow) -> some View {
-        Button {
-            model.requestComposer(for: row.id)
-        } label: {
-            InboxRowLabel(
-                title: row.meeting.title,
-                detail: String(localized: "\(row.unsentTasks) Aufgaben noch nicht auf GitHub", comment: "plural: inbox, open tasks of a meeting that are not on GitHub"),
-                lines: 1
-            ) {
-                GitHubMark(size: 15).foregroundStyle(Theme.textSecondary)
-            }
-        }
-        .buttonStyle(RowButtonStyle())
-        .listRowInsets(EdgeInsets())
-        .listRowBackground(Theme.panel)
-        .listRowSeparator(.hidden)
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button {
-                model.dismissGitHubTasks(row.id)
-            } label: {
-                Label("Ignorieren", systemImage: "xmark")
-            }
-            .tint(Theme.textTertiary)
-        }
-        .contextMenu {
-            Button("Nach GitHub …", systemImage: "arrow.up.forward.app") { model.requestComposer(for: row.id) }
-            Button("Ignorieren", systemImage: "xmark") { model.dismissGitHubTasks(row.id) }
-        }
-        .accessibilityIdentifier("inbox.github.\(row.id)")
     }
 
     private func summaryDetail(_ row: MeetingRow) -> String {

@@ -165,6 +165,60 @@ import Testing
         #expect(try database.meetingsWithoutLineVoices().map(\.id) == ["m"])
     }
 
+    @Test func whatGitHubAddedGoesAndSummariesGainTopics() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v5-sync")
+        try queue.write { db in
+            try db.execute(sql: "INSERT INTO meeting (id, title, startedAt, status, origin, createdAt) VALUES ('m', 'Alt', '2026-10-06 08:00:00', 'ready', 'recording', '2026-10-06 08:00:00')")
+            try db.execute(sql: "INSERT INTO summary (meetingId, overview, decisions, openQuestions, model, provider, createdAt) VALUES ('m', 'Kurz', '[]', '[]', 'x', 'y', '2026-10-06 09:00:00')")
+            try db.execute(sql: "INSERT INTO actionItem (meetingId, text, done, position, issue) VALUES ('m', 'Angebot schicken', 1, 0, '{\"number\":7}')")
+            try db.execute(sql: "INSERT INTO person (id, name, isMe, createdAt, github) VALUES ('anna', 'Anna', 0, '2026-10-06 08:00:00', '{\"login\":\"anna\"}')")
+            try db.execute(sql: "INSERT INTO githubRoute (kind, key, label, target, targetKey, lastUsedAt) VALUES ('title', 'alt', 'Alt', '{}', 'r', '2026-10-06 08:00:00')")
+        }
+        let database = try AppDatabase(queue)
+        let (routes, taskColumns, personColumns) = try queue.read { db in
+            (try db.tableExists("githubRoute"), try db.columns(in: "actionItem").map(\.name), try db.columns(in: "person").map(\.name))
+        }
+        #expect(!routes)
+        #expect(!taskColumns.contains("issue"))
+        #expect(!personColumns.contains("github"))
+        let detail = try #require(try database.detail(of: "m"))
+        #expect(detail.summary?.topics == [])
+        #expect(detail.actionItems.map(\.text) == ["Angebot schicken"])
+        #expect(detail.actionItems.first?.done == true)
+        #expect(try database.people().map(\.name).contains("Anna"))
+    }
+
+    @Test func topicsAreKept() throws {
+        let database = try AppDatabase.inMemory()
+        try makeMeeting(database)
+        let topics = [SummaryTopic(title: "Release 2.4", points: ["Verschoben auf den 14.", "Puffer für QA"])]
+        try database.save(summary: MeetingSummary(meetingId: "m1", overview: "Kurz", topics: topics, decisions: [], openQuestions: [], model: "x", provider: "y"), actionItems: [])
+        #expect(try database.detail(of: "m1")?.summary?.topics == topics)
+    }
+
+    @Test func aTaskCheckedOffStaysCheckedOffInANewSummary() throws {
+        let database = try AppDatabase.inMemory()
+        try makeMeeting(database)
+        let summary = MeetingSummary(meetingId: "m1", overview: "Kurz", decisions: [], openQuestions: [], model: "x", provider: "y")
+        try database.save(summary: summary, actionItems: [
+            ActionItem(meetingId: "m1", text: "Tabellen-Rendering im PDF-Export beheben"),
+            ActionItem(meetingId: "m1", text: "Mail an die Kunden"),
+        ])
+        let first = try #require(try database.detail(of: "m1")?.actionItems.first?.id)
+        try database.setActionItem(first, done: true)
+
+        // Written again, in other words and another order, with one task more.
+        try database.save(summary: summary, actionItems: [
+            ActionItem(meetingId: "m1", text: "Kunden per Mail informieren"),
+            ActionItem(meetingId: "m1", text: "Das Tabellen-Rendering beim PDF-Export beheben"),
+            ActionItem(meetingId: "m1", text: "QA-Plan schreiben"),
+        ])
+        let items = try #require(try database.detail(of: "m1")?.actionItems)
+        #expect(items.map(\.done) == [false, true, false])
+        #expect(items.map(\.position) == [0, 1, 2])
+    }
+
     @Test func peopleStatsAndReviews() throws {
         let database = try AppDatabase.inMemory()
         try makeMeeting(database, lines: [("S1", "Hallo"), ("S2", "Hi")])

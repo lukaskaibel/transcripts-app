@@ -53,6 +53,7 @@ enum DemoData {
             summary: MeetingSummary(
                 meetingId: sync.id,
                 overview: t.overview,
+                topics: t.topics,
                 decisions: t.decisions,
                 openQuestions: t.openQuestions,
                 model: "Claude Opus 5.5",
@@ -63,22 +64,6 @@ enum DemoData {
             }
         )
         _ = try? database.addMarker(Marker(meetingId: sync.id, time: 1205, text: t.marker))
-
-        // Where earlier meetings' tasks went on GitHub, so the app has something to suggest.
-        let web = GitHubTarget(repository: DemoGitHubService.webApp, project: DemoGitHubService.webProject)
-        let pdf = GitHubTarget(repository: DemoGitHubService.pdf, project: DemoGitHubService.webProject)
-        let support = GitHubTarget(repoId: DemoGitHubService.support.id, repo: DemoGitHubService.support.nameWithOwner, isPrivate: true, projectId: "P-support", projectTitle: "Support")
-        let group = [anna.id, miriam.id, thomas.id].sorted()
-        try? database.writer.write { db in
-            var routes = [
-                GitHubRoute(kind: .series, key: "e-weekly-sync", label: t.syncTitle, target: web, count: 3, lastUsedAt: at(-7, 10, 45)),
-                GitHubRoute(kind: .title, key: TargetSuggester.normalizedTitle(t.syncTitle), label: t.syncTitle, target: web, count: 3, lastUsedAt: at(-7, 10, 45)),
-                GitHubRoute(kind: .people, key: group.joined(separator: ","), label: TargetSuggester.names([anna.name, thomas.name, miriam.name]), members: group, target: web, count: 4, lastUsedAt: at(-5, 9, 50)),
-                GitHubRoute(kind: .people, key: [anna.id, thomas.id].sorted().joined(separator: ","), label: TargetSuggester.names([thomas.name, anna.name]), members: [anna.id, thomas.id].sorted(), target: pdf, count: 1, lastUsedAt: at(-8, 14)),
-                GitHubRoute(kind: .title, key: TargetSuggester.normalizedTitle(t.titles[6]), label: t.titles[6], target: support, count: 2, lastUsedAt: at(-6, 15, 40)),
-            ]
-            for index in routes.indices { try routes[index].insert(db) }
-        }
 
         // More meetings for the list.
         let others: [(String, String, Date, Double, [MeetingSpeaker.Assignment], [Person?], Bool)] = [
@@ -161,6 +146,7 @@ enum DemoData {
         var syncLines: [String]
         var goodIdea: String
         var overview: String
+        var topics: [SummaryTopic]
         var decisions: [String]
         var openQuestions: [String]
         var tasks: [String]
@@ -198,6 +184,25 @@ enum DemoData {
             ],
             goodIdea: "Gute Idee, Jonas.",
             overview: "Release 2.4 wird auf den 14. Oktober verschoben, damit der PDF-Export bei langen Dokumenten vorher behoben ist. Fürs Onboarding entsteht ein kürzeres Formular. Lukas übernimmt diese Woche die technischen Interviews.",
+            topics: [
+                SummaryTopic(title: "Release 2.4", points: [
+                    "Das Release ist feature-complete, nur der PDF-Export hängt noch bei langen Dokumenten.",
+                    "Lukas hat die Ursache gefunden: Es liegt am Rendering der Tabellen, nicht am Export selbst. Er schätzt zwei Tage.",
+                    "Das Release wandert vom 9. auf den 14. Oktober. Thomas hält das für realistisch, so bleibt Puffer für die QA.",
+                ]),
+                SummaryTopic(title: "Onboarding", points: [
+                    "Fast jeder Dritte bricht im zweiten Schritt ab, weil das Formular zu lang ist.",
+                    "Jonas schlägt vor, die Firmendaten optional zu machen und erst später abzufragen.",
+                    "Miriam macht bis Mittwoch einen Entwurf für das kürzere Formular.",
+                ]),
+                SummaryTopic(title: "Backend-Stelle", points: [
+                    "Drei Kandidaten sind in der finalen Runde; Lukas führt diese Woche die technischen Interviews.",
+                ]),
+                SummaryTopic(title: "Sync-Engine und Excel-Export", points: [
+                    "Die Migration der Sync-Engine braucht noch eine Woche; die alten Endpunkte laufen bis Ende des Monats parallel.",
+                    "Ein Kunde fragt, ob der Export auch als Excel geht. Das wird bis Freitag mit dem Vertrieb geklärt.",
+                ]),
+            ],
             decisions: ["Release 2.4 am 14. statt am 9. Oktober", "Firmendaten im Onboarding werden optional"],
             openQuestions: ["Wer informiert die Kunden über die Verschiebung?"],
             tasks: ["Tabellen-Rendering im PDF-Export beheben", "Entwurf für ein kürzeres Onboarding-Formular", "Technische Interviews mit drei Kandidaten", "QA-Plan für Release 2.4"],
@@ -240,6 +245,25 @@ enum DemoData {
             ],
             goodIdea: "Good idea, Jonas.",
             overview: "Release 2.4 moves to October 14 so the PDF export can be fixed for long documents first. Onboarding gets a shorter form. Lukas takes the technical interviews this week.",
+            topics: [
+                SummaryTopic(title: "Release 2.4", points: [
+                    "The release is feature-complete; only the PDF export still hangs on long documents.",
+                    "Lukas found the cause: it's the table rendering, not the export itself. He estimates two days.",
+                    "The release moves from October 9 to October 14. Thomas thinks that's realistic and leaves some buffer for QA.",
+                ]),
+                SummaryTopic(title: "Onboarding", points: [
+                    "Almost one in three people drop off at the second step because the form is too long.",
+                    "Jonas suggests making the company details optional and asking for them later.",
+                    "Miriam drafts the shorter form by Wednesday.",
+                ]),
+                SummaryTopic(title: "Backend role", points: [
+                    "Three candidates are in the final round; Lukas does the technical interviews this week.",
+                ]),
+                SummaryTopic(title: "Sync engine and Excel export", points: [
+                    "Migrating the sync engine needs another week; the old endpoints keep running until the end of the month.",
+                    "A customer asked whether the export works with Excel. Sales gets back on that by Friday.",
+                ]),
+            ],
             decisions: ["Release 2.4 on October 14 instead of October 9", "Company details become optional in onboarding"],
             openQuestions: ["Who tells the customers about the delay?"],
             tasks: ["Fix table rendering in the PDF export", "Draft a shorter onboarding form", "Technical interviews with three candidates", "QA plan for release 2.4"],
@@ -331,33 +355,6 @@ extension DemoData {
                                    attendees: team + [Attendee(name: "Jonas Weber")], joinURL: URL(string: "https://zoom.us/j/987654321"), app: "Zoom",
                                    calendarId: "c-work", calendarTitle: t.calendars[0], calendarColor: [0.20, 0.47, 0.96], isRecurring: true)
         return ([daily(0), sync, daily(1)] + upcoming()).sorted { $0.start < $1.start }
-    }
-
-    /// What the language model would propose for the sample tasks (by their place in the weekly's list).
-    static func issueSuggestions(for tasks: [ActionItem], labels: [GitHubLabel]) -> [IssueSuggestion] {
-        let has = Set(labels.map(\.name))
-        let german = AppLanguage.current == .german
-        return tasks.enumerated().map { index, task in
-            func pick(_ names: [String]) -> [String] { names.filter(has.contains) }
-            switch task.position {
-            case 0:
-                return IssueSuggestion(index: index, labels: pick(["bug", "pdf-export"]),
-                                       context: german ? "Beim Export langer Dokumente bricht das Tabellen-Rendering ab. Das muss vor Release 2.4 behoben sein, das deshalb auf den 14. Oktober verschoben wird." : "Table rendering breaks when long documents are exported. It has to be fixed before release 2.4, which moves to October 14 for it.",
-                                       quote: german ? "Es liegt am Rendering der Tabellen, nicht am Export selbst." : "It's the table rendering, not the export itself.", quoteSpeaker: "Lukas Kaibel", quoteTime: "02:41")
-            case 1:
-                return IssueSuggestion(index: index, labels: pick(["enhancement", "onboarding"]),
-                                       context: german ? "Fast jeder Dritte bricht das Onboarding im zweiten Schritt ab. Die Firmendaten werden optional und erst später abgefragt." : "Almost one in three people drop off at the second onboarding step. Company details become optional and are asked for later.",
-                                       quote: german ? "Ich mach bis Mittwoch einen Entwurf dafür." : "I'll have a draft ready by Wednesday.", quoteSpeaker: "Miriam Okafor", quoteTime: "15:07")
-            case 2:
-                return IssueSuggestion(index: index, include: false, reason: german ? "Eher kein Repo-Thema" : "Not really repo work")
-            case 3:
-                return IssueSuggestion(index: index, labels: pick(["qa"]),
-                                       context: german ? "Nach der Verschiebung auf den 14. Oktober bleibt Puffer für die Qualitätssicherung." : "Moving to October 14 leaves some buffer for QA.",
-                                       quote: german ? "Dann bleibt noch Puffer für QA." : "That still leaves some buffer for QA.", quoteSpeaker: "Thomas Klein", quoteTime: "03:12")
-            default:
-                return IssueSuggestion(index: index)
-            }
-        }
     }
 }
 

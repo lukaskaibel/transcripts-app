@@ -34,7 +34,6 @@ final class DebugRemote {
 
     private func start() {
         DebugFrames.isActive = true
-        Dropdown.trace = { [weak self] message in self?.log("dropdown: \(message)") }
         try? FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
         timer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.poll() }
@@ -192,35 +191,12 @@ final class DebugRemote {
         case "responder":
             let key = NSApp.keyWindow
             let first = key?.firstResponder.map { String(describing: type(of: $0)) } ?? "nil"
-            log("responder: key=\(key.map { String(describing: type(of: $0)) } ?? "nil")#\(key?.windowNumber ?? 0) first=\(first.prefix(60)) panels=\(Dropdown.isOpen) selected=\(model.selectedMeetingId ?? "-")")
-        case "composer":
-            // composer <meeting> [task id] | composer close
-            let bits = argument.split(separator: " ").map(String.init)
-            if argument == "close" { Dropdown.close() } else if let meeting = bits.first { model.requestComposer(for: meeting, item: bits.count > 1 ? Int64(bits[1]) : nil) }
+            log("responder: key=\(key.map { String(describing: type(of: $0)) } ?? "nil")#\(key?.windowNumber ?? 0) first=\(first.prefix(60)) selected=\(model.selectedMeetingId ?? "-")")
         case "dump":
             dump(model)
-        case "ghclose":
-            if let demo = model.github as? DemoGitHubService { Task { await demo.close(argument) } }
-        case "ghrefresh":
-            Task { await model.refreshLinkedIssues(of: argument, force: true) }
-        case "ghtarget":
-            // ghtarget <owner/repo>: points the open composer at that repository (in its first project, if any).
-            if let composer = model.composer,
-               let target = model.githubCatalog?.targets.first(where: { $0.repo == argument && $0.projectId != nil }) ?? model.githubCatalog?.targets.first(where: { $0.repo == argument }) {
-                model.setTarget(target, in: composer)
-            } else {
-                log("ghtarget: no composer or no target \(argument); targets: \(model.githubCatalog?.targets.map(\.title).prefix(12).joined(separator: ", ") ?? "-")")
-            }
-        case "ghmeta":
-            // ghmeta <owner/repo>: what the app knows about a repository.
-            if let target = model.githubCatalog?.targets.first(where: { $0.repo == argument }) {
-                let meta = model.githubRepoMeta[target.repoId]
-                log("ghmeta \(argument): labels=\(meta?.labels.map(\.name) ?? []) people=\(meta?.assignableUsers.map(\.login) ?? []) open=\(model.githubOpenIssues[target.repoId]?.prefix(5).map { "#\($0.number) \($0.title) \($0.statuses.values.first ?? "-")" } ?? [])")
-            }
-        case "ghsignout":
-            model.signOutGitHub()
-        case "ghconnect":
-            Task { await model.connectGitHubCLI() }
+        case "clipboard":
+            // What the last copy button put on the pasteboard.
+            log("clipboard:\n\(NSPasteboard.general.string(forType: .string) ?? "-")")
         case "sync":
             // sync status|now|on|off|audio on|audio off|wipe: iCloud sync, in the demo's own zone (-demo.sync <zone>).
             switch argument {
@@ -260,29 +236,16 @@ final class DebugRemote {
         log("sync people(\(people.count))=\(people) voices=\(voices) audio=\(audio)")
     }
 
-    /// What the composer and the meeting's tasks look like right now, for checking a UI run.
+    /// What the meeting's tasks look like right now, for checking a UI run.
     private func dump(_ model: AppModel) {
         var lines: [String] = []
-        if let composer = model.composer {
-            lines.append("composer meeting=\(composer.meetingId) only=\(composer.only.map(String.init) ?? "-") target=\(composer.target?.title ?? "-") reason=\(composer.suggestion?.short ?? "-") active=\(composer.activeIndex) context=\(composer.includeContext) loading=\(composer.loadingMeta) drafting=\(composer.drafting) creating=\(composer.creating) button=\"\(composer.createTitle)\" canCreate=\(composer.canCreate) error=\(composer.error ?? "-")")
-            let statuses = model.statusOptions(for: composer.target)
-            let labels = model.labels(for: composer.target)
-            for draft in composer.drafts {
-                let status = statuses.first { $0.id == draft.statusId }?.name ?? "-"
-                let names = draft.labelIds.compactMap { id in labels.first { $0.id == id }?.name }
-                let mode = draft.linkedRef.map { "link #\($0.number)" } ?? "create"
-                lines.append("  [\(draft.include ? "x" : " ")] \(draft.itemId) \"\(draft.title)\" status=\(status) labels=\(names) suggested=\(draft.labelsAreSuggested) assignees=\(draft.assignees.map(\.login)) mode=\(mode) note=\(draft.note ?? "-")")
-            }
-        } else {
-            lines.append("composer: none")
-        }
         if let detail = model.detail {
+            lines.append("summary topics=\(detail.summary?.topics.count ?? 0) decisions=\(detail.summary?.decisions.count ?? 0) questions=\(detail.summary?.openQuestions.count ?? 0)")
             for item in detail.actionItems {
-                lines.append("  task \(item.id ?? 0) done=\(item.done) \"\(item.text)\" issue=\(item.issue.map { "\($0.reference) \($0.status ?? "-") \($0.state)" } ?? "-")")
+                lines.append("  task \(item.id ?? 0) done=\(item.done) \"\(item.text)\" owner=\(item.owner ?? "-") due=\(item.due ?? "-")")
             }
         }
-        lines.append("github=\(model.githubConnection) routes=\(model.githubRoutes.count) people=\(model.people.compactMap { p in p.github.map { "\(p.firstName)=\($0.login)" } })")
-        lines.append("toasts=\(model.toasts.map(\.title)) panels=\(Dropdown.isOpen) key=\(NSApp.keyWindow.map { String(describing: type(of: $0)) } ?? "nil")")
+        lines.append("toasts=\(model.toasts.map(\.title)) key=\(NSApp.keyWindow.map { String(describing: type(of: $0)) } ?? "nil")")
         log(lines.joined(separator: "\n"))
     }
 
@@ -302,10 +265,8 @@ final class DebugRemote {
     }
 
     private func sendKey(characters: String, code: UInt16, modifiers: NSEvent.ModifierFlags = []) {
-        // To the key window, as a real key press would go: a dropdown if one is open.
-        let numbers = NSWindow.windowNumbers(options: []) ?? []
-        let front = numbers.lazy.compactMap { NSApp.window(withWindowNumber: $0.intValue) }.first { $0 is DropdownPanel && $0.isVisible }
-        guard let window = NSApp.keyWindow ?? front ?? NSApp.windows.first(where: { $0.isVisible }) else { return }
+        // To the key window, as a real key press would go.
+        guard let window = NSApp.keyWindow ?? NSApp.windows.first(where: { $0.isVisible }) else { return }
         for type in [NSEvent.EventType.keyDown, .keyUp] {
             if let event = NSEvent.keyEvent(
                 with: type, location: .zero, modifierFlags: modifiers, timestamp: ProcessInfo.processInfo.systemUptime,
@@ -337,7 +298,7 @@ final class DebugRemote {
         switch name {
         case "main": window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("main") == true || $0.title == "Transcripts" && $0.styleMask.contains(.titled) && $0.frame.width > 800 }
         case "live": window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("live") == true || $0.title == "Aufnahme" }
-        case "settings": window = NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true || $0.identifier?.rawValue.contains("settings") == true || $0.title.contains("Allgemein") || $0.title.contains("KI") || $0.title.contains("Aufnahme") && $0.frame.width < 800 || $0.title.contains("Transkription") || $0.title.contains("Stimmen") || $0.title == "GitHub" }
+        case "settings": window = NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true || $0.identifier?.rawValue.contains("settings") == true || $0.title.contains("Allgemein") || $0.title.contains("KI") || $0.title.contains("Aufnahme") && $0.frame.width < 800 || $0.title.contains("Transkription") || $0.title.contains("Stimmen") }
         case "floating": window = NSApp.windows.first { $0 is NSPanel && $0.frame.width == FloatingRecorderController.size.width }
         case "sheet": window = NSApp.windows.first { $0.isSheet && $0.isVisible }
         default: window = NSApp.windows.first { $0.title == name }

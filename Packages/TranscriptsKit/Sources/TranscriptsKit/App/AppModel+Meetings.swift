@@ -100,19 +100,7 @@ extension AppModel {
         let names = detail.speakers.map { $0.isMe ? myName : detail.textName(for: $0.key) }
         if !names.isEmpty { lines.append(String(localized: "Teilnehmer: \(names.joined(separator: ", "))")) }
         if let summary = detail.summary {
-            lines += ["", "## " + String(localized: "Zusammenfassung"), "", summary.overview]
-            if !summary.decisions.isEmpty {
-                lines += ["", "### " + String(localized: "Entscheidungen"), ""] + summary.decisions.map { "- \($0)" }
-            }
-            if !detail.actionItems.isEmpty {
-                lines += ["", "### " + String(localized: "Aufgaben"), ""] + detail.actionItems.map { item in
-                    let extra = [item.owner, item.due].compactMap { $0 }.joined(separator: ", ")
-                    return "- [\(item.done ? "x" : " ")] \(item.text)\(extra.isEmpty ? "" : " (\(extra))")"
-                }
-            }
-            if !summary.openQuestions.isEmpty {
-                lines += ["", "### " + String(localized: "Offene Fragen"), ""] + summary.openQuestions.map { "- \($0)" }
-            }
+            lines += ["", "## " + String(localized: "Zusammenfassung"), "", SummaryText.sections(summary, tasks: detail.actionItems, level: 3)]
         }
         if !detail.markers.isEmpty {
             lines += ["", "## " + String(localized: "Markierungen", comment: "markers set during a recording"), ""] + detail.markers.map { "- \(TimeFormat.clock($0.time)) \($0.text.isEmpty ? String(localized: "Markierung", comment: "a marker set during a recording, without a text") : $0.text)" }
@@ -128,24 +116,22 @@ extension AppModel {
         return lines.joined(separator: "\n")
     }
 
-    public func summaryText(for detail: MeetingDetail) -> String {
-        guard let summary = detail.summary else { return "" }
-        var lines = [summary.overview]
-        if !summary.decisions.isEmpty { lines += ["", String(localized: "Entscheidungen:")] + summary.decisions.map { "• \($0)" } }
-        if !detail.actionItems.isEmpty {
-            lines += ["", String(localized: "Aufgaben:")] + detail.actionItems.map { item in
-                let extra = [item.owner, item.due].compactMap { $0 }.joined(separator: ", ")
-                return "• \(item.text)\(extra.isEmpty ? "" : " (\(extra))")"
-            }
-        }
-        if !summary.openQuestions.isEmpty { lines += ["", String(localized: "Offene Fragen:")] + summary.openQuestions.map { "• \($0)" } }
-        return lines.joined(separator: "\n")
-    }
-
     /// Puts `text` on the clipboard and says so with `toast` ("Zusammenfassung kopiert").
     public func copyToClipboard(_ text: String, toast: String) {
         Platform.copy(text)
         showToast(toast)
+    }
+
+    /// The meeting's summary as Markdown, for pasting into a chat, a ticket or a note.
+    public func copySummary(of meetingId: String) {
+        guard let detail = try? database.detail(of: meetingId), detail.summary != nil else { return }
+        copyToClipboard(SummaryText.markdown(detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
+    }
+
+    /// The meeting's tasks as a Markdown checklist.
+    public func copyTasks(of meetingId: String) {
+        guard let detail = try? database.detail(of: meetingId), !detail.actionItems.isEmpty else { return }
+        copyToClipboard(SummaryText.tasks(detail.actionItems), toast: String(localized: "Aufgaben kopiert", comment: "toast"))
     }
 
     #if os(macOS)

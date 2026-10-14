@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// What waits for the user after their meetings: new summaries, tasks for GitHub, voices without a name.
+/// What waits for the user after their meetings: new summaries and voices without a name.
 struct InboxView: View {
     @Environment(AppModel.self) private var model
     @State private var allVoices = false
@@ -21,7 +21,7 @@ struct InboxView: View {
 
             if inbox.isEmpty {
                 EmptyState(systemImage: "tray", title: String(localized: "Alles erledigt", comment: "empty inbox"),
-                           message: String(localized: "Neue Zusammenfassungen, Aufgaben für GitHub und Stimmen ohne Namen landen hier."))
+                           message: String(localized: "Neue Zusammenfassungen und Stimmen ohne Namen landen hier."))
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -29,14 +29,9 @@ struct InboxView: View {
                             SectionHeader(title: String(localized: "Neue Zusammenfassungen"), count: inbox.summaries.count)
                             separated(inbox.summaries) { SummaryEntry(row: $0) }
                         }
-                        if !inbox.github.isEmpty {
-                            SectionHeader(title: String(localized: "Aufgaben für GitHub"), count: inbox.github.count)
-                                .padding(.top, inbox.summaries.isEmpty ? 0 : 14)
-                            separated(inbox.github) { GitHubEntry(row: $0) }
-                        }
                         if !inbox.voices.isEmpty {
                             voicesHeader(count: inbox.voices.count)
-                                .padding(.top, inbox.summaries.isEmpty && inbox.github.isEmpty ? 0 : 14)
+                                .padding(.top, inbox.summaries.isEmpty ? 0 : 14)
                             let shown = allVoices ? inbox.voices : Array(inbox.voices.prefix(Self.voicesShown))
                             separated(shown) { ReviewRow(review: $0) }
                             if shown.count < inbox.voices.count {
@@ -138,26 +133,5 @@ private struct SummaryEntry: View {
         let when = "\(TimeFormat.compactDay(row.meeting.startedAt)), \(TimeFormat.time(row.meeting.startedAt))"
         guard let overview = row.summaryOverview?.trimmingCharacters(in: .whitespacesAndNewlines), !overview.isEmpty else { return when }
         return "\(when) · \(overview)"
-    }
-}
-
-private struct GitHubEntry: View {
-    @Environment(AppModel.self) private var model
-    var row: MeetingRow
-
-    var body: some View {
-        InboxEntry(title: row.meeting.title,
-                   detail: String(localized: "\(row.unsentTasks) Aufgaben noch nicht auf GitHub", comment: "plural: inbox, open tasks of a meeting that are not on GitHub")) {
-            model.select(row.id)
-        } lead: {
-            GitHubMark(size: 13).foregroundStyle(Theme.textSecondary)
-        } actions: {
-            Button("Nach GitHub …") { model.requestComposer(for: row.id) }
-                .buttonStyle(PrimaryButtonStyle())
-            IconButton(systemName: "xmark", label: String(localized: "Ignorieren")) {
-                model.dismissGitHubTasks(row.id)
-            }
-        }
-        .debugFrame("inbox.github.\(row.id)")
     }
 }

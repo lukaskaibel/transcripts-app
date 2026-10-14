@@ -57,17 +57,12 @@ struct SettingsScreen: View {
         case .transcription: TranscriptionSettings()
         case .ai: AISettings()
         case .voices: VoiceSettings()
-        case .github: GitHubSettings()
         }
     }
 
     @ViewBuilder
     private func icon(_ tab: AppModel.SettingsTab) -> some View {
-        if tab == .github {
-            GitHubMark(size: 18).foregroundStyle(Theme.accent)
-        } else {
-            Image(systemName: tab.systemImage).foregroundStyle(Theme.accent)
-        }
+        Image(systemName: tab.systemImage).foregroundStyle(Theme.accent)
     }
 
     private var version: String {

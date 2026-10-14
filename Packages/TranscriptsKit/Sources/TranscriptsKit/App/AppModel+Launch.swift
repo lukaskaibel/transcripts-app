@@ -34,13 +34,8 @@ extension AppModel {
             if let appearance = arguments.string(forKey: "demo.appearance").flatMap(Appearance.init(rawValue:)) {
                 settings.appearance = appearance
             }
-            // `-demo.github signedout` starts without GitHub; `-demo.github live` reads the real GitHub through
-            // the GitHub CLI (for checking the queries on real projects), everything else is made up.
-            let githubMode = arguments.string(forKey: "demo.github")
-            settings.githubLogin = githubMode == "signedout" ? nil : (githubMode == "live" ? .githubCLI : .token)
             let secrets = MemorySecretStore(["anthropic": "sk-ant-demo-key-0000"])
-            let github: GitHubService? = githubMode == "live" ? LiveGitHubService(tokens: GitHubTokenStore(secrets: secrets, method: .githubCLI)) : nil
-            let model = AppModel(database: database, settings: settings, secrets: secrets, isDemo: true, github: github)
+            let model = AppModel(database: database, settings: settings, secrets: secrets, isDemo: true)
             if let syncZone { model.syncZone = syncZone }
             model.loadDemoState()
             return model

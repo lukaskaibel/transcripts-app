@@ -356,7 +356,7 @@ private struct FlowLayout: Layout {
 
 // MARK: - A person
 
-/// One person: their name, GitHub account, voice and meetings; merge, forget the voice or delete in the menu.
+/// One person: their name, voice and meetings; merge, forget the voice or delete in the menu.
 struct PersonScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(MobileNavigation.self) private var navigation
@@ -420,9 +420,6 @@ struct PersonScreen: View {
                     .font(.small)
                     .foregroundStyle(Theme.textSecondary)
                     .padding(.top, 10)
-
-                PersonGitHubRow(person: stats.person)
-                    .padding(.top, 16)
 
                 VoiceProfileSection(person: stats.person)
                     .padding(.top, 24)

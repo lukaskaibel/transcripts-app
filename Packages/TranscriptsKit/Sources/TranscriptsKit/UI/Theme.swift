@@ -26,8 +26,6 @@ enum Theme {
     static let popoverActiveRow = Color(light: 0xF7F8FA, dark: 0x202227)
     static let keycapBorder = Color(light: 0xD0D2D8, dark: 0x3A3E46)
     /// Behind a small icon or avatar under the pointer.
-    static let partHover = Color(light: 0xE4E5E9, dark: 0x2A2D33)
-    static let started = Color(light: 0xD29A0A, dark: 0xF0B429)
     static let noticeFill = Color(light: 0xFBF6EC, dark: 0x2A2216)
     static let noticeText = Color(light: 0x7A4E0E, dark: 0xE5C48B)
 
@@ -65,50 +63,6 @@ enum Theme {
         Color(hex: 0x5AB0D8), Color(hex: 0xD98BC4), Color(hex: 0xC792EA),
     ]
     static let meColor = Color(hex: 0xB4B8C0)
-
-    /// GitHub's eight option colours, tuned for each ground (as in Issues for GitHub).
-    static func optionColor(_ name: String) -> Color? {
-        switch name {
-        case "BLUE": Color(light: 0x2F86B5, dark: 0x5AB0D8)
-        case "GREEN": Color(light: 0x2F9B67, dark: 0x4CB782)
-        case "YELLOW": Color(light: 0xD29A0A, dark: 0xF0B429)
-        case "ORANGE": Color(light: 0xE07B2A, dark: 0xF2994A)
-        case "RED": Color(light: 0xD64545, dark: 0xEB6A6A)
-        case "PINK": Color(light: 0xC45FA6, dark: 0xD98BC4)
-        case "PURPLE": Color(light: 0x5B63D3, dark: 0x8F96F2)
-        default: nil
-        }
-    }
-
-    static func statusColor(_ option: GitHubStatusOption?) -> Color {
-        guard let option else { return textTertiary }
-        if let color = optionColor(option.color) { return color }
-        switch option.category {
-        case .backlog, .canceled: return textTertiary
-        case .unstarted: return textBody
-        case .started: return started
-        case .completed: return accent
-        }
-    }
-
-    /// Label colours come from GitHub as hex. Very dark ones are lifted on the dark ground and very light ones
-    /// deepened on the light ground, so a label never disappears.
-    static func labelColor(_ hex: String) -> Color {
-        guard let value = UInt32(hex, radix: 16) else { return textSecondary }
-        let r = Double((value >> 16) & 0xFF) / 255, g = Double((value >> 8) & 0xFF) / 255, b = Double(value & 0xFF) / 255
-        let luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
-        return Color(platformColor: .dynamic { isDark in
-            if isDark, luminance < 0.25 {
-                let lift = 0.45
-                return PlatformColor(srgbRed: r + (1 - r) * lift, green: g + (1 - g) * lift, blue: b + (1 - b) * lift, alpha: 1)
-            }
-            if !isDark, luminance > 0.7 {
-                let keep = 0.62
-                return PlatformColor(srgbRed: r * keep, green: g * keep, blue: b * keep, alpha: 1)
-            }
-            return PlatformColor(srgbRed: r, green: g, blue: b, alpha: 1)
-        })
-    }
 
     static func color(for name: String) -> Color {
         let hash = name.lowercased().unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }

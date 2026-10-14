@@ -39,7 +39,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="Design/screenshots/meeting-dark.webp">
-  <img alt="A meeting with its summary, action items, the transcript and the speakers, one of them with a name suggestion" src="Design/screenshots/meeting-light.webp">
+  <img alt="A meeting with its summary: the overview, decisions, action items with a copy button, open questions and the first topic in detail, beside the speakers, one of them with a name suggestion" src="Design/screenshots/meeting-light.webp">
 </picture>
 
 > **Status: early.** Version 0.1.0 records, transcribes, names and summarises meetings every day on the maintainer's
@@ -52,20 +52,21 @@ Meeting assistants usually join your call as a bot or upload the recording to a 
 records the call and your microphone on your Mac, transcribes both there, and learns the voices of the people you
 talk to, so the transcript says who said what. Audio, transcripts and voices never leave your devices (and, if you turn
 on sync, your own private iCloud); only the transcript text goes to the summary service you choose, and with a local
-model not even that. Action items you send to GitHub
-yourself take their title, labels and due day along, and in private repositories a line of context with a quote.
+model not even that.
 
 ## A quick tour
 
 ### A meeting, finished when it ends
 
 About half a minute after a call, the meeting is transcribed again in a careful second pass, the voices are told apart
-and named, and the summary is written: an overview, decisions, action items with owner and due day, and open
-questions. Play any line, set markers while recording, export as Markdown, or search every transcript with ⌘K.
+and named, and the summary is written: a short overview, the decisions, action items with owner and due day, open
+questions, and below them every topic of the meeting with what was said about it. Each part copies with one click, the
+action items as a checklist, ready to paste into a chat, a ticket or a note. Play any line, set markers while
+recording, export as Markdown, or search every transcript with ⌘K.
 
 The sidebar plans your day: today's calendar meetings and recordings in one list with a line for now, the next
-meeting set apart, and the latest meetings below. The inbox collects what a meeting leaves behind: a new summary,
-action items not on GitHub yet, voices without a name.
+meeting set apart, and the latest meetings below. The inbox collects what a meeting leaves behind: a new summary and
+voices without a name.
 
 ### It learns the voices
 
@@ -99,22 +100,6 @@ with names after a few seconds, a live summary if you like, and markers with a n
   <img alt="The live window with the running transcript and a marker, the menu bar menu during a recording, and the floating recorder" src="Design/screenshots/recording-light.webp">
 </picture>
 
-### Action items into GitHub
-
-*Send to GitHub* turns a meeting's action items into issues, in a popover that works like a new issue in
-[Issues for GitHub](https://github.com/lukaskaibel/issues-for-github): the project and repository on top, and for each
-task its status, assignees and labels, each picked from a search field that has the keyboard at once (S, A, L, then
-⌘Return). The app remembers where a calendar series, a meeting title or a group of people sent their tasks and
-proposes that place next time; it finds people's GitHub accounts by their names, and links a task to the issue that is
-already open instead of creating it twice. The summary's model picks labels from the repository's own and leaves out
-tasks that aren't work for it. Back in the meeting, each task shows its issue's number and status, is checked off when
-the issue is closed, and closes the issue when you check it off.
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="Design/screenshots/github-dark.webp">
-  <img alt="A meeting's action items on their way to GitHub: the remembered project and repository, status, labels and assignee per task, one task left out and one linked to the issue that already exists" src="Design/screenshots/github-light.webp">
-</picture>
-
 ### In your language
 
 The interface speaks English, German, French, Spanish, Italian, Portuguese, Dutch, Polish, Russian and Ukrainian:
@@ -144,8 +129,8 @@ the device; only the transcript text goes to the summary service you choose.
   Center, the Lock Screen, the Action Button, Siri or Shortcuts.
 - **Finished in the background.** After the recording the meeting is processed on the device; iOS 26 lets that go on
   with the screen locked and shows its progress.
-- **Shared views.** *Who is this?*, *Send to GitHub*, the speakers, the summary and the settings are the Mac's own views,
-  laid out for a narrow screen, so a change shows on every device.
+- **Shared views.** *Who is this?*, the speakers, the summary and the settings are the Mac's own views, laid out for a
+  narrow screen, so a change shows on every device.
 
 - **The same meetings everywhere.** With Settings › General › iCloud on, meetings, people and the voices the app
   learned are the same on your Mac, iPhone and iPad, and the recordings too if you like: record on the phone, read on the
@@ -172,12 +157,11 @@ Summaries use Anthropic, OpenAI or Google (Ollama runs on the Mac only).
   a notification with a *Record* button. Calls without a calendar event are noticed too, and you're reminded to stop
   when the call is over. Events of shared calendars that you aren't invited to stay out, and *Not my meeting* hides
   any other series or a whole calendar.
-- **Summarises, if you want.** Overview, decisions, action items and open questions from Anthropic, OpenAI, Google or
-  a local model in Ollama, automatically after each meeting or on request, plus an optional live summary while
-  recording. In the meeting's language or one you choose. API keys stay in the Keychain.
-- **Sends action items to GitHub.** As issues in the project and repository the meeting's series or people used
-  before, with status, assignees and labels, linked instead of duplicated, and kept in step: closed there, checked
-  off here. Signs in through the GitHub CLI, like Issues for GitHub.
+- **Summarises, if you want.** An overview, decisions, action items, open questions and the topics in detail, from
+  Anthropic, OpenAI, Google or a local model in Ollama, automatically after each meeting or on request, plus an
+  optional live summary while recording. In the meeting's language or one you choose. API keys stay in the Keychain.
+- **Copies what you need.** The whole summary as Markdown (⇧⌘C), one part of it, the action items as a checklist or a
+  single task, to take into a chat, a ticket or a note.
 - **Keeps an archive you can search.** Meetings grouped by day, full-text search through every transcript, playback
   from any line, Markdown export, and import of audio or video files (voice memos, Zoom recordings, a meeting recorded
   in a room).
@@ -258,10 +242,6 @@ open Transcripts.xcodeproj
    then adds iCloud (CloudKit) and push notifications to your App ID and creates the container `iCloud.<bundle id>`
    (on the command line: `xcodebuild -allowProvisioningUpdates`). Without it the app builds without iCloud and doesn't
    offer sync.
-6. For GitHub, click *Send to GitHub* above a meeting's action items, or open Settings › GitHub. Transcripts uses the login
-   of the GitHub CLI (`gh auth login`; scopes `repo`, `project` and `read:org`), as Issues for GitHub does. To sign in
-   on github.com with a code instead, set `GITHUB_CLIENT_ID` in `Config/Local.xcconfig` to a GitHub OAuth app with the
-   device flow turned on.
 
 Tip: set the notification style for Transcripts to *Persistent* in System Settings › Notifications, so the "… is
 starting. Start recording?" reminder stays until you click it.
@@ -289,9 +269,8 @@ interface is German. Add `-AppleLanguages "(fr)"` to see it in another language.
 | Space | Play or pause the recording |
 | ⌘I | Import an audio or video file |
 | 1–9, Return, M, X, → | In *Who Is This?*: pick a name, the most likely one, you, nobody in particular, skip |
-| ⇧⌘G | Send the meeting's action items to GitHub |
+| ⇧⌘C | Copy the meeting's summary |
 | ⌘[ | On the iPad: back |
-| ↑↓, Space, S, A, L, Z, Return, ⌘Return | In *Send to GitHub*: move between the tasks, include one or not, its status, assignees, labels, where they go, edit the title, create |
 
 ## Testing
 
@@ -299,13 +278,13 @@ interface is German. Add `-AppleLanguages "(fr)"` to see it in another language.
 cd Packages/TranscriptsKit && swift test
 ```
 
-191 tests with Swift Testing: transcript assembly, voice grouping, profiles, the re-check after corrections and moving
+188 tests with Swift Testing: transcript assembly, voice grouping, profiles, the re-check after corrections and moving
 misplaced lines, voice refinement, name evidence in all ten languages, the live line check, echo removal and the repair
-of old call tracks (on synthetic speech), the summary providers (with mocked HTTP), the database, audio files and the
+of old call tracks (on synthetic speech), the summary providers (with mocked HTTP), the summary's copied text, the database, audio files and the
 app's actions.
 
 The iPhone and iPad app has UI tests that run on the demo data in the simulator, on an iPhone and an iPad of their own
-(created on first use): every screen, recording and stopping, naming a voice, sending tasks to GitHub, renaming,
+(created on first use): every screen, recording and stopping, naming a voice, copying the action items, renaming,
 checking off a task, the settings, the first start. Each step leaves a screenshot in `build/test-results/`.
 
 ```bash
@@ -358,8 +337,8 @@ Packages/TranscriptsKit/      Everything else, as a Swift package
     Model/  Store/            Records and the GRDB database with full-text search
     Sync/                     iCloud sync with CKSyncEngine: change tracking, records, conflicts
     App/                      App model, settings, demo data
-    UI/                       SwiftUI views every platform shares: the meeting, people, GitHub, settings, live transcript
-    UI/Mac/                   The Mac's windows: sidebar, menu bar, floating recorder, command palette, dropdowns
+    UI/                       SwiftUI views every platform shares: the meeting, people, settings, live transcript
+    UI/Mac/                   The Mac's windows: sidebar, menu bar, floating recorder, command palette
     UI/iOS/                   iPhone and iPad: tabs and the iPad's sidebar, the screens around the shared views
     Support/                  Paths, formatting, the languages the app speaks
   Sources/transcripts-cli/    The pipeline on the command line
@@ -393,8 +372,6 @@ is in the private database of the user's iCloud account, in the zone `Transcript
 `iCloud.<bundle id>`; `-demo YES -demo.sync <zone> -demo.data <folder>` tries sync out in a zone and folder of its own.
 
 ## Good to know
-
-- Issues in public repositories never get context or quotes from the transcript, only title, labels and due day.
 
 - The speaker names in the live window are provisional; similar voices can share a name until the pass after the
   meeting sorts them out.

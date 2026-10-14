@@ -161,6 +161,17 @@ public final class AppDatabase: Sendable {
         migrator.registerMigration("v5-sync") { db in
             try SyncSchema.create(db)
         }
+        migrator.registerMigration("v6-summary-topics") { db in
+            try db.alter(table: "summary") { t in
+                t.add(column: "topics", .jsonText).notNull().defaults(to: "[]")
+            }
+        }
+        // Sending tasks to GitHub left the app again; what v4 added for it goes.
+        migrator.registerMigration("v7-without-github") { db in
+            try db.drop(table: "githubRoute")
+            try db.alter(table: "actionItem") { t in t.drop(column: "issue") }
+            try db.alter(table: "person") { t in t.drop(column: "github") }
+        }
         return migrator
     }
 }
@@ -227,9 +238,6 @@ public struct MeetingRow: Equatable, Identifiable, Sendable {
     public var actionItems: [ActionItem]
 
     public var id: String { meeting.id }
-
-    /// Open tasks that are on GitHub neither as a new nor as a linked issue.
-    public var unsentTasks: Int { actionItems.filter { !$0.done && $0.issue == nil }.count }
 
     public init(meeting: Meeting, speakers: [MeetingSpeaker] = [], hasSummary: Bool = false, pendingVoices: Int = 0,
                 summaryCreatedAt: Date? = nil, summaryOverview: String? = nil, actionItems: [ActionItem] = []) {
@@ -400,7 +408,6 @@ extension AppDatabase {
             try db.execute(sql: "UPDATE meetingSpeaker SET personId = ? WHERE personId = ?", arguments: [targetId, sourceId])
             try db.execute(sql: "UPDATE meetingSpeaker SET suggestedPersonId = ? WHERE suggestedPersonId = ?", arguments: [targetId, sourceId])
             try db.execute(sql: "UPDATE voiceprint SET personId = ? WHERE personId = ?", arguments: [targetId, sourceId])
-            try db.execute(sql: "UPDATE person SET github = COALESCE(github, (SELECT github FROM person WHERE id = ?)) WHERE id = ?", arguments: [sourceId, targetId])
             _ = try Person.deleteOne(db, key: sourceId)
         }
     }
@@ -412,30 +419,18 @@ extension AppDatabase {
     public func save(summary: MeetingSummary, actionItems: [ActionItem]) throws {
         try writer.write { db in
             try summary.save(db)
-            // Tasks already on GitHub keep their issue: a new summary that names the same task again takes the link
-            // over, and the others stay at the end of the list.
-            var linked = try ActionItem.filter(Column("meetingId") == summary.meetingId && Column("issue") != nil).order(Column("position")).fetchAll(db)
+            // A task checked off before stays checked off when a new summary names it again.
+            var done = try ActionItem.filter(Column("meetingId") == summary.meetingId && Column("done") == true).fetchAll(db)
             try ActionItem.filter(Column("meetingId") == summary.meetingId).deleteAll(db)
-            var items: [ActionItem] = []
-            for item in actionItems {
+            for (index, item) in actionItems.enumerated() {
                 var item = item
                 item.id = nil
-                if item.issue == nil, let match = linked.indices.max(by: { IssueMatching.similarity(linked[$0].text, item.text) < IssueMatching.similarity(linked[$1].text, item.text) }),
-                   IssueMatching.similarity(linked[match].text, item.text) >= 0.6 {
-                    item.issue = linked[match].issue
-                    item.done = item.done || linked[match].done
-                    linked.remove(at: match)
-                }
-                items.append(item)
-            }
-            for old in linked {
-                var old = old
-                old.id = nil
-                items.append(old)
-            }
-            for (index, item) in items.enumerated() {
-                var item = item
                 item.position = index
+                if !item.done, let match = done.indices.max(by: { TaskMatching.similarity(done[$0].text, item.text) < TaskMatching.similarity(done[$1].text, item.text) }),
+                   TaskMatching.similarity(done[match].text, item.text) >= 0.6 {
+                    item.done = true
+                    done.remove(at: match)
+                }
                 try item.insert(db)
             }
         }

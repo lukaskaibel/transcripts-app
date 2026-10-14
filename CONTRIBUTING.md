@@ -24,9 +24,8 @@ Every pull request is reviewed and merged by the maintainer; nothing lands on `m
 
 ## What to keep in mind
 
-- **Nothing leaves the device** except the transcript text that goes to the summary service the user picked, the
-  issues the user sends to GitHub themselves (never with transcript quotes for a public repository), and, when the user
-  turns on iCloud sync, their own data to their own private iCloud. No analytics, no servers of our own.
+- **Nothing leaves the device** except the transcript text that goes to the summary service the user picked and, when
+  the user turns on iCloud sync, their own data to their own private iCloud. No analytics, no servers of our own.
 - **What belongs to a meeting, a person or a voice syncs.** A new table or column for them needs a trigger in
   `Sync/SyncSchema.swift` (so a change is noticed) and a place in the payloads of `Sync/SyncStore.swift` (so it travels);
   `SyncTests` checks that a meeting arrives whole on another device.

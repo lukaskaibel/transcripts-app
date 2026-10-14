@@ -50,7 +50,7 @@ final class MockURLProtocol: URLProtocol, @unchecked Sendable {
 }
 
 private let summaryJSON = """
-{"title":"Release-Planung","overview":"Das Release wird verschoben.","decisions":["Release am 14."],"actionItems":[{"text":"PDF-Export fixen","owner":"Lukas","due":"Mittwoch"},{"text":"Mail an Kunden","owner":"","due":""}],"openQuestions":[],"speakerNames":[{"speaker":"Sprecher 4","name":"Jonas","evidence":"Gute Idee, Jonas."}]}
+{"title":"Release-Planung","overview":"Das Release wird verschoben.","topics":[{"title":"Release 2.4","points":["Der PDF-Export hängt bei langen Dokumenten."," Es liegt am Tabellen-Rendering. ",""]},{"title":"","points":["Ohne Titel"]},{"title":"Onboarding","points":[]}],"decisions":["Release am 14."],"actionItems":[{"text":"PDF-Export fixen","owner":"Lukas","due":"Mittwoch"},{"text":"Mail an Kunden","owner":"","due":""}],"openQuestions":[],"speakerNames":[{"speaker":"Sprecher 4","name":"Jonas","evidence":"Gute Idee, Jonas."}]}
 """
 
 @Suite(.serialized) struct ProviderTests {
@@ -196,6 +196,11 @@ extension ProviderTests {
         let outcome = try Summarizer.parse(summaryJSON)
         #expect(outcome.title == "Release-Planung")
         #expect(outcome.decisions == ["Release am 14."])
+        // A topic without a title is dropped; empty points too.
+        #expect(outcome.topics == [
+            SummaryTopic(title: "Release 2.4", points: ["Der PDF-Export hängt bei langen Dokumenten.", "Es liegt am Tabellen-Rendering."]),
+            SummaryTopic(title: "Onboarding", points: []),
+        ])
         #expect(outcome.actionItems.count == 2)
         #expect(outcome.actionItems[0].owner == "Lukas")
         #expect(outcome.actionItems[1].owner == nil)
@@ -208,6 +213,8 @@ extension ProviderTests {
         let outcome = try Summarizer.parse(messy)
         #expect(outcome.overview == "Ein {kleiner} Test")
         #expect(outcome.actionItems.first?.text == "Nur Text")
+        // A model without structured output may leave the topics out.
+        #expect(outcome.topics.isEmpty)
     }
 
     @Test func missingOverviewIsAnError() {

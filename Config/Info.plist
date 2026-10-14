@@ -4,10 +4,6 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
-	<!-- Client ID of a GitHub OAuth app for "Im Browser anmelden" (device flow). Set GITHUB_CLIENT_ID in
-	     Local.xcconfig; without it, signing in to GitHub works through the GitHub CLI only. -->
-	<key>GitHubClientID</key>
-	<string>$(GITHUB_CLIENT_ID)</string>
 	<!-- The iCloud container for sync; empty in builds without iCloud (TR_ICLOUD in Config/Shared.xcconfig). -->
 	<key>TranscriptsCloudKitContainer</key>
 	<string>$(TR_CLOUDKIT_CONTAINER)</string>

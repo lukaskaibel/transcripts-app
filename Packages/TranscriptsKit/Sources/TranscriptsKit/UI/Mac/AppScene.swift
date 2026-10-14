@@ -122,11 +122,16 @@ struct AppCommands: Commands {
             Divider()
             Button("Audiodatei importieren …") { importFiles() }
                 .keyboardShortcut("i", modifiers: .command)
-            Button("Aufgaben nach GitHub …") {
-                if let id = model.selectedMeetingId { model.requestComposer(for: id) }
+            Divider()
+            Button("Zusammenfassung kopieren") {
+                if let id = model.selectedMeetingId { model.copySummary(of: id) }
             }
-            .keyboardShortcut("g", modifiers: [.command, .shift])
-            .disabled(model.selectedMeetingId == nil || model.section != .meetings)
+            .keyboardShortcut("c", modifiers: [.command, .shift])
+            .disabled(model.section != .meetings || model.detail?.summary == nil)
+            Button("Aufgaben kopieren") {
+                if let id = model.selectedMeetingId { model.copyTasks(of: id) }
+            }
+            .disabled(model.section != .meetings || model.detail?.actionItems.isEmpty != false)
         }
         CommandMenu("Gehe zu") {
             Button("Suchen …") { model.overlay = model.overlay == .palette ? nil : .palette }

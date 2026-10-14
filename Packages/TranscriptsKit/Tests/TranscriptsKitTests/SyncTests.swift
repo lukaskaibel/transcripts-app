@@ -102,6 +102,22 @@ import Testing
         #expect(SyncCoding.digest(try SyncCoding.encoder.encode(echo)) == SyncCoding.digest(try SyncCoding.encoder.encode(payload)))
     }
 
+    @Test func aSummaryFromADeviceWithoutTopicsArrives() throws {
+        let mac = try AppDatabase.inMemory()
+        try makeMeeting(mac, anna: Person(id: "anna", name: "Anna"))
+        guard case .ready(let payload) = try mac.syncMeetingPayload("m1") else { Issue.record("no payload"); return }
+        // What an older version sends: the same, without "topics".
+        var json = try #require(try JSONSerialization.jsonObject(with: SyncCoding.encoder.encode(payload)) as? [String: Any])
+        var summary = try #require(json["summary"] as? [String: Any])
+        summary.removeValue(forKey: "topics")
+        json["summary"] = summary
+        let older = try SyncCoding.decoder.decode(MeetingPayload.self, from: JSONSerialization.data(withJSONObject: json))
+        let phone = try AppDatabase.inMemory()
+        try phone.syncApply(meeting: older)
+        #expect(try phone.detail(of: "m1")?.summary?.overview == "Kurz")
+        #expect(try phone.detail(of: "m1")?.summary?.topics == [])
+    }
+
     @Test func applyingAgainReplacesTheContent() throws {
         let mac = try AppDatabase.inMemory()
         try makeMeeting(mac, anna: Person(id: "anna", name: "Anna"))
@@ -123,7 +139,7 @@ import Testing
         try makeMeeting(phone, anna: Person(id: "zz-anna", name: "Anna"))
         try clearPending(phone)
         // Anna as the Mac knows her, with another id.
-        let payload = PersonPayload(name: "Anna", email: nil, isMe: false, createdAt: Date(), github: nil)
+        let payload = PersonPayload(name: "Anna", email: nil, isMe: false, createdAt: Date())
         let (local, twin) = try phone.syncApply(person: payload, recordName: "aa-anna")
         #expect(local == "aa-anna")
         #expect(twin == "zz-anna")
@@ -140,7 +156,7 @@ import Testing
         let phone = try AppDatabase.inMemory()
         let me = try phone.mePerson(defaultName: "Ich")
         try clearPending(phone)
-        let payload = PersonPayload(name: "Lukas Kaibel", email: "l@example.com", isMe: true, createdAt: Date(), github: nil)
+        let payload = PersonPayload(name: "Lukas Kaibel", email: "l@example.com", isMe: true, createdAt: Date())
         let (local, twin) = try phone.syncApply(person: payload, recordName: SyncNames.me)
         #expect(local == me.id)
         #expect(twin == nil)

@@ -178,7 +178,8 @@ import Testing
             MeetingSpeaker(meetingId: "a", key: "S1", label: "Sprecher 1", personId: anna.id, assignment: .confirmed, talkTime: 4),
             MeetingSpeaker(meetingId: "a", key: "me", label: Strings.meLabel, talkTime: 5, channel: .microphone),
         ])
-        try database.save(summary: MeetingSummary(meetingId: "a", overview: "Das Release wird verschoben.", decisions: ["Release am 14. Oktober"],
+        try database.save(summary: MeetingSummary(meetingId: "a", overview: "Das Release wird verschoben.",
+                                                  topics: [SummaryTopic(title: "Release 2.4", points: ["Der PDF-Export hängt noch."])], decisions: ["Release am 14. Oktober"],
                                                   openQuestions: ["Wer informiert die Kunden?"], model: "m", provider: "p"),
                           actionItems: [ActionItem(meetingId: "a", text: "Interviews führen", owner: "Lukas", due: "Donnerstag")])
         _ = try database.addMarker(Marker(meetingId: "a", time: 62, text: "Budget klären"))
@@ -188,6 +189,7 @@ import Testing
 
         #expect(markdown.hasPrefix("# Weekly Produkt-Sync\n"))
         #expect(markdown.contains("## Zusammenfassung\n\nDas Release wird verschoben."))
+        #expect(markdown.contains("### Themen\n\n#### Release 2.4\n\n- Der PDF-Export hängt noch."))
         #expect(markdown.contains("### Entscheidungen\n\n- Release am 14. Oktober"))
         #expect(markdown.contains("- [ ] Interviews führen (Lukas, Donnerstag)"))
         #expect(markdown.contains("### Offene Fragen\n\n- Wer informiert die Kunden?"))

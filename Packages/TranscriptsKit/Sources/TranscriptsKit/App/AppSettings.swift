@@ -105,10 +105,6 @@ public final class AppSettings {
         learnVoices = defaults.object(forKey: Keys.learnVoices) as? Bool ?? true
         audioRetention = AudioRetention(rawValue: defaults.string(forKey: Keys.audioRetention) ?? "") ?? .forever
         hideDockIcon = defaults.object(forKey: Keys.hideDockIcon) as? Bool ?? true
-        githubLogin = GitHubLoginMethod(rawValue: defaults.string(forKey: Keys.githubLogin) ?? "")
-        githubSuggestLabels = defaults.object(forKey: Keys.githubSuggestLabels) as? Bool ?? true
-        githubIncludeContext = defaults.object(forKey: Keys.githubIncludeContext) as? Bool ?? true
-        githubAskAfterSummary = defaults.object(forKey: Keys.githubAskAfterSummary) as? Bool ?? true
         iCloudSync = defaults.bool(forKey: Keys.iCloudSync)
         iCloudAudio = defaults.object(forKey: Keys.iCloudAudio) as? Bool ?? true
         if let since = defaults.object(forKey: Keys.inboxSince) as? Date {
@@ -120,7 +116,6 @@ public final class AppSettings {
             inboxSince = now
         }
         openedSummaries = defaults.data(forKey: Keys.openedSummaries).flatMap { try? JSONDecoder().decode([String: Date].self, from: $0) } ?? [:]
-        inboxDismissed = Set(defaults.stringArray(forKey: Keys.inboxDismissed) ?? [])
         if let data = defaults.data(forKey: Keys.models), let models = try? JSONDecoder().decode([String: String].self, from: data) {
             summaryModels = models
         } else {
@@ -149,17 +144,12 @@ public final class AppSettings {
         static let hiddenMeetings = "hiddenMeetings"
         static let inboxSince = "inboxSince"
         static let openedSummaries = "openedSummaries"
-        static let inboxDismissed = "inboxDismissed"
         static let voiceStrictness = "voiceStrictness"
         static let learnVoices = "learnVoices"
         static let audioRetention = "audioRetention"
         static let hideDockIcon = "hideDockIcon"
         static let models = "summaryModels"
         static let callTracksChecked = "callTracksChecked"
-        static let githubLogin = "githubLogin"
-        static let githubSuggestLabels = "githubSuggestLabels"
-        static let githubIncludeContext = "githubIncludeContext"
-        static let githubAskAfterSummary = "githubAskAfterSummary"
         static let iCloudSync = "iCloudSync"
         static let iCloudAudio = "iCloudAudio"
     }
@@ -200,21 +190,11 @@ public final class AppSettings {
     public var openedSummaries: [String: Date] {
         didSet { defaults.set(try? JSONEncoder().encode(openedSummaries), forKey: Keys.openedSummaries) }
     }
-    /// Inbox entries the user put aside ("github:<meeting id>").
-    public var inboxDismissed: Set<String> { didSet { defaults.set(Array(inboxDismissed).sorted(), forKey: Keys.inboxDismissed) } }
     public var voiceStrictness: VoiceStrictness { didSet { defaults.set(voiceStrictness.rawValue, forKey: Keys.voiceStrictness) } }
     public var learnVoices: Bool { didSet { defaults.set(learnVoices, forKey: Keys.learnVoices) } }
     public var audioRetention: AudioRetention { didSet { defaults.set(audioRetention.rawValue, forKey: Keys.audioRetention) } }
     /// Without an open window the app lives only in the menu bar.
     public var hideDockIcon: Bool { didSet { defaults.set(hideDockIcon, forKey: Keys.hideDockIcon) } }
-    /// How the app signs in to GitHub; nil until connected.
-    public var githubLogin: GitHubLoginMethod? { didSet { defaults.set(githubLogin?.rawValue, forKey: Keys.githubLogin) } }
-    /// Let the summary's language model pick labels and write a short description for new issues.
-    public var githubSuggestLabels: Bool { didSet { defaults.set(githubSuggestLabels, forKey: Keys.githubSuggestLabels) } }
-    /// New issues get context and a quote from the transcript (never in public repositories).
-    public var githubIncludeContext: Bool { didSet { defaults.set(githubIncludeContext, forKey: Keys.githubIncludeContext) } }
-    /// After a summary, offer to create the tasks in their remembered place with a notification.
-    public var githubAskAfterSummary: Bool { didSet { defaults.set(githubAskAfterSummary, forKey: Keys.githubAskAfterSummary) } }
     /// Keep meetings, people and voices the same on every device of the user's iCloud account. Off until the user
     /// turns it on: everything stays on the device otherwise.
     public var iCloudSync: Bool { didSet { defaults.set(iCloudSync, forKey: Keys.iCloudSync) } }
@@ -226,6 +206,15 @@ public final class AppSettings {
     @ObservationIgnored public var callTracksChecked: Bool {
         get { defaults.bool(forKey: Keys.callTracksChecked) }
         set { defaults.set(newValue, forKey: Keys.callTracksChecked) }
+    }
+
+    /// Removes what sending tasks to GitHub kept in the settings; true when there was something, so its token can
+    /// go too.
+    func removeGitHubLeftovers() -> Bool {
+        let keys = ["githubLogin", "githubSuggestLabels", "githubIncludeContext", "githubAskAfterSummary", "inboxDismissed"]
+        let found = keys.contains { defaults.object(forKey: $0) != nil }
+        keys.forEach(defaults.removeObject(forKey:))
+        return found
     }
 
     public func model(for provider: ProviderKind) -> String? {

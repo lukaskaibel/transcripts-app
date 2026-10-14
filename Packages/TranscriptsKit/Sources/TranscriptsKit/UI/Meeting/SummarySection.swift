@@ -78,9 +78,11 @@ struct SummarySection: View {
                     Task { await model.generateSummary(detail.meeting.id) }
                 }
                 .disabled(!model.summaryProviderReady)
-                IconButton(systemName: "doc.on.doc", label: String(localized: "Kopieren")) {
-                    model.copyToClipboard(model.summaryText(for: detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
+                IconButton(systemName: "doc.on.doc", label: String(localized: "Zusammenfassung kopieren")) {
+                    model.copyToClipboard(SummaryText.markdown(detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
                 }
+                .accessibilityIdentifier("summary.copy")
+                .debugFrame("summary.copy")
             }))
             Text(summary.overview)
                 .font(.reading)
@@ -91,18 +93,27 @@ struct SummarySection: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             if !summary.decisions.isEmpty {
-                subheading("Entscheidungen")
-                BulletList(items: summary.decisions)
+                SummaryPart(title: String(localized: "Entscheidungen"), id: "decisions", text: SummaryText.bullets(summary.decisions)) {
+                    BulletList(items: summary.decisions)
+                }
             }
             if !detail.actionItems.isEmpty {
                 TasksHeader(detail: detail)
                     .padding(.top, 14)
-                ActionItemList(detail: detail, items: detail.actionItems, people: Array(detail.people.values) + model.people)
+                ActionItemList(items: detail.actionItems, people: Array(detail.people.values) + model.people)
                     .padding(.top, 4)
             }
             if !summary.openQuestions.isEmpty {
-                subheading("Offene Fragen")
-                BulletList(items: summary.openQuestions)
+                SummaryPart(title: String(localized: "Offene Fragen"), id: "questions", text: SummaryText.bullets(summary.openQuestions)) {
+                    BulletList(items: summary.openQuestions)
+                }
+            }
+            // The details last, so decisions and tasks stay at the top however long the meeting was.
+            if !summary.topics.isEmpty {
+                SummaryPart(title: String(localized: "Themen", comment: "the subjects a meeting went through, in its summary"), id: "topics",
+                            text: SummaryText.topics(summary.topics)) {
+                    TopicList(topics: summary.topics)
+                }
             }
         }
     }
@@ -115,13 +126,6 @@ struct SummarySection: View {
             trailing
         }
         .frame(height: 26)
-    }
-
-    private func subheading(_ title: LocalizedStringKey) -> some View {
-        Text(title)
-            .font(.smallSemibold)
-            .foregroundStyle(Theme.textSecondary)
-            .padding(.top, 20)
     }
 }
 
@@ -187,14 +191,64 @@ struct BulletList: View {
     }
 }
 
-/// "Aufgaben 1 von 4" and the button that sends them to GitHub.
+/// A part of the summary under its heading, with a button that copies it (on the Mac when the pointer is over it).
+struct SummaryPart<Content: View>: View {
+    @Environment(AppModel.self) private var model
+    let title: String
+    let id: String
+    /// What the button puts on the clipboard.
+    let text: String
+    @ViewBuilder let content: Content
+    @State private var hovering = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Text(title).font(.smallSemibold).foregroundStyle(Theme.textSecondary)
+                Spacer(minLength: 8)
+                IconButton(systemName: "doc.on.doc", label: String(localized: "\(title) kopieren", comment: "button: copy one part of the summary, e.g. Entscheidungen kopieren"), size: 22, tint: Theme.textTertiary) {
+                    model.copyToClipboard(text, toast: String(localized: "\(title) kopiert", comment: "toast: one part of the summary was copied, e.g. Entscheidungen kopiert"))
+                }
+                .opacity(hovering || Platform.isMobile ? 1 : 0)
+                .accessibilityIdentifier("summary.\(id).copy")
+                .debugFrame("summary.\(id).copy")
+            }
+            .frame(height: 22)
+            content
+        }
+        .padding(.top, 17)
+        .contentShape(Rectangle())
+        .onHover { hovering = $0 }
+    }
+}
+
+/// The subjects the meeting went through, each with its points.
+struct TopicList: View {
+    let topics: [SummaryTopic]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            ForEach(Array(topics.enumerated()), id: \.offset) { _, topic in
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(topic.title)
+                        .font(.reading.weight(.semibold))
+                        .foregroundStyle(Theme.text)
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if !topic.points.isEmpty {
+                        BulletList(items: topic.points)
+                    }
+                }
+            }
+        }
+        .padding(.top, 6)
+    }
+}
+
+/// "Aufgaben 1 von 4" and the button that copies them as a checklist.
 struct TasksHeader: View {
     @Environment(AppModel.self) private var model
     let detail: MeetingDetail
-    @State private var open = false
-    @State private var width: CGFloat = 640
-
-    private var unsent: Int { detail.actionItems.filter { $0.issue == nil && !$0.done }.count }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -203,54 +257,30 @@ struct TasksHeader: View {
                 .font(.small)
                 .foregroundStyle(Theme.textTertiary)
             Spacer(minLength: 8)
-            if unsent > 0 || open {
-                Button {
-                    open.toggle()
-                } label: {
-                    HStack(spacing: 6) {
-                        GitHubMark(size: 13)
-                        Text("Nach GitHub")
-                    }
-                    .font(.small)
-                    .foregroundStyle(Theme.textBody)
-                    .padding(.horizontal, 9)
-                    .frame(height: 26)
-                    .hoverFill(active: open, fill: Theme.controlActive)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(PlainPressStyle())
-                .help("Offene Aufgaben als GitHub-Issues anlegen (⇧⌘G)")
-                .accessibilityIdentifier("github.open")
-                .debugFrame("github.open")
-            } else if detail.actionItems.contains(where: { $0.issue != nil }) {
+            Button {
+                model.copyToClipboard(SummaryText.tasks(detail.actionItems), toast: String(localized: "Aufgaben kopiert", comment: "toast"))
+            } label: {
                 HStack(spacing: 5) {
-                    GitHubMark(size: 12)
-                    Text("Alle auf GitHub")
+                    Image(systemName: "doc.on.doc").font(.system(size: 11, weight: .medium))
+                    Text("Kopieren")
                 }
                 .font(.small)
-                .foregroundStyle(Theme.textTertiary)
+                .foregroundStyle(Theme.textSecondary)
+                .padding(.horizontal, 9)
+                .frame(height: 26)
+                .hoverFill()
+                .contentShape(Rectangle())
             }
+            .buttonStyle(PlainPressStyle())
+            .help("Alle Aufgaben als Checkliste kopieren")
+            .accessibilityIdentifier("summary.tasks.copy")
+            .debugFrame("summary.tasks.copy")
         }
         .frame(height: 28)
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
-        .dropdown(isPresented: $open) { close in
-            GitHubPopover(meetingId: detail.meeting.id, only: nil, width: max(620, width + 8), close: close)
-        }
-        .onChange(of: model.composerRequestCount, initial: true) {
-            guard model.composerRequest == detail.meeting.id, model.composerRequestItem == nil else { return }
-            model.consumeComposerRequest()
-            // Give the window a moment to come up after a notification.
-            Task {
-                try? await Task.sleep(for: .milliseconds(350))
-                open = true
-            }
-        }
     }
 }
 
 struct ActionItemList: View {
-    @Environment(AppModel.self) private var model
-    let detail: MeetingDetail
     let items: [ActionItem]
     let people: [Person]
 
@@ -264,9 +294,6 @@ struct ActionItemList: View {
             }
         }
         .cardStyle()
-        .task(id: detail.meeting.id) {
-            await model.refreshLinkedIssues(of: detail.meeting.id)
-        }
     }
 }
 
@@ -275,8 +302,6 @@ struct ActionItemRow: View {
     let item: ActionItem
     let people: [Person]
     @State private var hovering = false
-    @State private var open = false
-    @State private var width: CGFloat = 640
 
     var body: some View {
         HStack(spacing: 12) {
@@ -302,7 +327,6 @@ struct ActionItemRow: View {
             }
             .buttonStyle(PlainPressStyle())
             .accessibilityLabel(item.done ? "Als offen markieren" : "Als erledigt markieren")
-            .help(item.issue == nil ? "" : (item.done ? "Als offen markieren – öffnet das Issue wieder" : "Als erledigt markieren – schließt das Issue auf GitHub") as LocalizedStringKey)
             .accessibilityIdentifier("task.\(item.id ?? 0).done")
             .debugFrame("task.\(item.id ?? 0).done")
             Text(item.text)
@@ -311,25 +335,12 @@ struct ActionItemRow: View {
                 .lineLimit(2)
                 .textSelection(.enabled)
             Spacer(minLength: 8)
-            if let issue = item.issue {
-                IssuePill(issue: issue)
-            } else if !item.done, !Platform.isMobile || open {
-                // On iPhone and iPad the button's place is the row's menu (a long press), as there is no pointer
-                // to show it on; it stays while its sheet is open, which hangs on it.
-                Button {
-                    open = true
-                } label: {
-                    GitHubMark(size: 13)
-                        .foregroundStyle(Theme.textSecondary)
-                        .frame(width: 22, height: 22)
-                        .background(RoundedRectangle(cornerRadius: 5, style: .continuous).fill(open ? Theme.partHover : .clear))
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(PlainPressStyle())
-                .opacity(hovering || open ? 1 : 0)
-                .help("Diese Aufgabe nach GitHub …")
-                .accessibilityIdentifier("task.\(item.id ?? 0).github")
-                .debugFrame("task.\(item.id ?? 0).github")
+            if !Platform.isMobile {
+                // On iPhone and iPad copying is in the row's menu (a long press), as there is no pointer to show it on.
+                IconButton(systemName: "doc.on.doc", label: String(localized: "Aufgabe kopieren"), size: 22, tint: Theme.textTertiary, action: copy)
+                    .opacity(hovering ? 1 : 0)
+                    .accessibilityIdentifier("task.\(item.id ?? 0).copy")
+                    .debugFrame("task.\(item.id ?? 0).copy")
             }
             if let due = item.due {
                 Text(due).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1)
@@ -344,30 +355,16 @@ struct ActionItemRow: View {
         .frame(minHeight: Platform.isMobile ? 46 : 38)
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
-        .dropdown(isPresented: $open) { close in
-            GitHubPopover(meetingId: item.meetingId, only: item.id, width: max(620, width + 8), close: close)
-        }
-        .onChange(of: model.composerRequestCount) {
-            guard model.composerRequest == item.meetingId, let id = item.id, model.composerRequestItem == id else { return }
-            model.consumeComposerRequest()
-            Task {
-                try? await Task.sleep(for: .milliseconds(350))
-                open = true
-            }
-        }
         .contextMenu {
-            if let issue = item.issue {
-                Button("Auf GitHub öffnen", systemImage: "arrow.up.right.square") { model.openIssue(issue) }
-                Button("Link kopieren", systemImage: "link") {
-                    Platform.copy(issue.url)
-                }
-                Divider()
-                Button("Verknüpfung mit \(issue.reference) lösen", systemImage: "xmark.circle") { model.unlinkIssue(item) }
-            } else if !item.done {
-                Button("Nach GitHub …", systemImage: "arrow.up.forward.app") { open = true }
+            Button("Kopieren", systemImage: "doc.on.doc", action: copy)
+            Button(item.done ? "Als offen markieren" : "Als erledigt markieren", systemImage: item.done ? "circle" : "checkmark.circle") {
+                model.toggleActionItem(item)
             }
         }
+    }
+
+    private func copy() {
+        model.copyToClipboard(SummaryText.task(item), toast: String(localized: "Aufgabe kopiert", comment: "toast"))
     }
 
     private func kind(for owner: String) -> Avatar.Kind {

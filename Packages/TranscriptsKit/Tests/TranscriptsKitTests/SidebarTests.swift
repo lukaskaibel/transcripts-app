@@ -73,24 +73,8 @@ struct SidebarTests {
             row("none", at(0, 8)),
         ]
         let opened = ["read": at(-1, 11), "rewritten": at(-1, 15)]
-        let inbox = Inbox(rows: rows, voices: [], since: since, opened: opened, dismissed: [], githubConnected: false)
+        let inbox = Inbox(rows: rows, voices: [], since: since, opened: opened)
         #expect(inbox.summaries.map(\.id) == ["unread", "rewritten"])
-    }
-
-    @Test func tasksForGitHubOnlyWhenConnectedAndNotPutAside() {
-        let since = at(-2, 0)
-        let open = ActionItem(id: 1, meetingId: "a", text: "Fix it")
-        let done = ActionItem(id: 2, meetingId: "b", text: "Done", done: true)
-        let linked = ActionItem(id: 3, meetingId: "c", text: "Linked", issue: LinkedIssue(id: "I1", number: 1, url: "https://github.com/o/r/issues/1", title: "Linked", repo: "o/r", repoId: "R1"))
-        let rows = [
-            row("a", at(0, 10), summary: at(0, 11), items: [open]),
-            row("b", at(0, 12), summary: at(0, 13), items: [done]),
-            row("c", at(0, 14), summary: at(0, 15), items: [linked]),
-            row("d", at(0, 16), summary: at(0, 17), items: [ActionItem(id: 4, meetingId: "d", text: "Later")]),
-        ]
-        let connected = Inbox(rows: rows, voices: [], since: since, opened: [:], dismissed: [Inbox.githubKey("d")], githubConnected: true)
-        #expect(connected.github.map(\.id) == ["a"])
-        #expect(Inbox(rows: rows, voices: [], since: since, opened: [:], dismissed: [], githubConnected: false).github.isEmpty)
     }
 
     @Test func readingASummaryTakesItOutOfTheInbox() throws {
@@ -101,8 +85,6 @@ struct SidebarTests {
         // An older version doesn't count as the newest being read.
         model.markSummaryRead("m1", written: at(0, 9))
         #expect(model.settings.openedSummaries["m1"] == written)
-        model.dismissGitHubTasks("m1")
-        #expect(model.settings.inboxDismissed.contains(Inbox.githubKey("m1")))
     }
 
     @Test func theInboxStartsWhenItCameToTheApp() {
@@ -122,7 +104,6 @@ struct SidebarTests {
         #expect(row.summaryCreatedAt == written)
         #expect(row.summaryOverview == "Release moves.")
         #expect(row.actionItems.map(\.text) == ["One", "Two"])
-        #expect(row.unsentTasks == 2)
     }
 
     // MARK: Navigation

@@ -48,7 +48,6 @@ struct PersonPayload: Codable, Equatable, Sendable {
     var email: String?
     var isMe: Bool
     var createdAt: Date
-    var github: GitHubUser?
 }
 
 /// A voice sample as it travels, with its person's name for the case it arrives first.
@@ -275,7 +274,7 @@ extension AppDatabase {
     func syncPersonPayload(_ personId: String) throws -> PersonPayload? {
         try reader.read { db in
             try Person.fetchOne(db, key: personId).map {
-                PersonPayload(name: $0.name, email: $0.email, isMe: $0.isMe, createdAt: $0.createdAt, github: $0.github)
+                PersonPayload(name: $0.name, email: $0.email, isMe: $0.isMe, createdAt: $0.createdAt)
             }
         }
     }
@@ -369,7 +368,6 @@ extension AppDatabase {
             guard var person = try Person.fetchOne(db, key: id) else { return (id, nil) }
             person.name = payload.name
             person.email = payload.email
-            person.github = payload.github ?? person.github
             if !person.isMe { person.createdAt = payload.createdAt }
             try person.update(db)
             guard !person.isMe else { return (id, nil) }

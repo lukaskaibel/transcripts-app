@@ -118,9 +118,9 @@ struct InspectorContent: View {
         Rectangle().fill(Theme.rowSeparator).frame(height: 1).padding(.vertical, 18)
     }
 
-    /// Facts that don't stand under the title: the language, the invitees, GitHub.
+    /// Facts that don't stand under the title: the language and the invitees.
     private var hasOtherFacts: Bool {
-        detail.meeting.language != nil || !detail.meeting.attendees.isEmpty || !detail.actionItems.isEmpty
+        detail.meeting.language != nil || !detail.meeting.attendees.isEmpty
     }
 
     private var facts: some View {
@@ -141,39 +141,7 @@ struct InspectorContent: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            githubFact
         }
-    }
-
-    /// Where the tasks went on GitHub, or where the app would send them.
-    @ViewBuilder
-    private var githubFact: some View {
-        let linked = detail.actionItems.compactMap(\.issue)
-        if let last = linked.last {
-            GridRow {
-                Text("GitHub").foregroundStyle(Theme.textTertiary)
-                VStack(alignment: .leading, spacing: 3) {
-                    TargetLabel(target: model.linkedTarget(of: detail) ?? GitHubTarget(repoId: last.repoId, repo: last.repo, isPrivate: true), font: .ui, stacked: true)
-                    Text(linkedSummary(linked)).font(.small).foregroundStyle(Theme.textTertiary)
-                }
-            }
-        } else if model.settings.githubLogin != nil, !detail.actionItems.isEmpty, let suggestion = model.targetSuggestions(for: detail).first {
-            GridRow {
-                Text("GitHub").foregroundStyle(Theme.textTertiary)
-                VStack(alignment: .leading, spacing: 3) {
-                    TargetLabel(target: suggestion.target, font: .ui, stacked: true)
-                    Text("Vorschlag · \(suggestion.short)", comment: "inspector: where the app proposes to send the tasks, and why").font(.small).foregroundStyle(Theme.textTertiary).lineLimit(2)
-                }
-                .help(suggestion.reason)
-            }
-        }
-    }
-
-    private func linkedSummary(_ issues: [LinkedIssue]) -> String {
-        let closed = issues.filter(\.isClosed).count
-        let linked = String(localized: "\(issues.count) Aufgaben verknüpft", comment: "plural: tasks of a meeting linked to GitHub issues")
-        guard closed > 0 else { return linked }
-        return linked + " · " + String(localized: "\(closed) erledigt", comment: "plural: linked tasks whose issue is closed")
     }
 
     private func fact(_ label: LocalizedStringKey, _ value: String) -> some View {

@@ -58,7 +58,7 @@ public final class AppModel {
     }
 
     public enum SettingsTab: String, CaseIterable, Identifiable, Sendable {
-        case general, recording, transcription, ai, voices, github
+        case general, recording, transcription, ai, voices
         public var id: String { rawValue }
         public var title: String {
             switch self {
@@ -67,7 +67,6 @@ public final class AppModel {
             case .transcription: String(localized: "Transkription")
             case .ai: String(localized: "KI")
             case .voices: String(localized: "Stimmen", comment: "settings tab: people's voices")
-            case .github: "GitHub"
             }
         }
         public var systemImage: String {
@@ -77,7 +76,6 @@ public final class AppModel {
             case .transcription: "waveform"
             case .ai: "sparkle"
             case .voices: "person.2"
-            case .github: "arrow.up.forward.app"
             }
         }
     }
@@ -100,13 +98,11 @@ public final class AppModel {
     /// A button in a toast.
     public enum ToastAction: Equatable, Sendable {
         case nameVoices(meetingId: String)
-        case openURL(URL)
         case unhide(HiddenCalendarItem)
 
         public var title: String {
             switch self {
             case .nameVoices: String(localized: "Wer ist das?")
-            case .openURL: String(localized: "Auf GitHub öffnen")
             case .unhide: String(localized: "Rückgängig")
             }
         }
@@ -203,45 +199,12 @@ public final class AppModel {
     public internal(set) var persistentAlerts = false
     public internal(set) var launchAtLogin = false
 
-    // MARK: GitHub
-
-    public internal(set) var githubConnection: GitHubConnection = .signedOut
-    /// The user's projects and repositories, loaded once connected.
-    public internal(set) var githubCatalog: GitHubCatalog?
-    public internal(set) var githubRepoMeta: [String: GitHubRepoMeta] = [:]
-    /// Open issues per repository, for linking instead of creating duplicates.
-    public internal(set) var githubOpenIssues: [String: [GitHubIssueRef]] = [:]
-    /// Where earlier meetings' tasks went.
-    public internal(set) var githubRoutes: [GitHubRoute] = []
-    /// While signing in on github.com: the code to enter there.
-    public internal(set) var githubDeviceCode: GitHubDeviceFlow.Code?
-    /// The open "Nach GitHub" popover.
-    public var composer: IssueComposer?
-    /// Asks the meeting screen to open the popover for a meeting (from a notification or the menu).
-    public internal(set) var composerRequest: String?
-    /// With `composerRequest`: open it for this task only.
-    public internal(set) var composerRequestItem: Int64?
-    public internal(set) var composerRequestCount = 0
-    @ObservationIgnored var github: GitHubService
-    @ObservationIgnored let githubTokens: GitHubTokenStore
-    @ObservationIgnored var githubCatalogLoadedAt: Date?
-    @ObservationIgnored var githubCatalogTask: Task<Void, Never>?
-    @ObservationIgnored var githubMetaLoadedAt: [String: Date] = [:]
-    @ObservationIgnored var githubStatesCheckedAt: [String: Date] = [:]
-    @ObservationIgnored var githubSuggestions: [String: [IssueSuggestion]] = [:]
-    @ObservationIgnored var githubDeviceFlowTask: Task<Void, Never>?
-    /// Composers prepared after a summary, waiting for "Anlegen" in a notification.
-    @ObservationIgnored var preparedComposers: [String: IssueComposer] = [:]
-
-    public init(database: AppDatabase, settings: AppSettings, secrets: SecretStore = KeychainStore(), engine: SpeechEngine = .shared, isDemo: Bool = false, github: GitHubService? = nil) {
+    public init(database: AppDatabase, settings: AppSettings, secrets: SecretStore = KeychainStore(), engine: SpeechEngine = .shared, isDemo: Bool = false) {
         self.database = database
         self.settings = settings
         self.secrets = secrets
         self.engine = engine
         self.isDemo = isDemo
-        let tokens = GitHubTokenStore(secrets: secrets, method: settings.githubLogin)
-        self.githubTokens = tokens
-        self.github = github ?? (isDemo ? DemoGitHubService() : LiveGitHubService(tokens: tokens))
         startObserving()
         observeRecordingForRemote()
         if !isDemo {
@@ -259,9 +222,9 @@ public final class AppModel {
         #endif
         refreshPermissions()
         refreshVoices()
-        if settings.githubLogin != nil { Task { await refreshGitHubCatalog() } }
         startSyncIfWanted()
         guard !isDemo else { return }
+        if settings.removeGitHubLeftovers() { try? secrets.setSecret(nil, for: "github") }
         recoverInterruptedMeetings()
         applyRetention()
         for provider in ProviderKind.allCases where isConfigured(provider) {
@@ -299,15 +262,6 @@ public final class AppModel {
                 MainActor.assumeIsolated {
                     self?.peopleStats = value.0
                     self?.reviews = value.1
-                }
-            }
-        ))
-        observations.append(ValueObservation.tracking { db in try AppDatabase.fetchRoutes(db) }.start(
-            in: database.reader, scheduling: .immediate,
-            onError: { error in Log.app.error("Route observation failed: \(error.localizedDescription)") },
-            onChange: { [weak self] routes in
-                MainActor.assumeIsolated {
-                    self?.githubRoutes = routes
                 }
             }
         ))
@@ -397,8 +351,6 @@ public final class AppModel {
             openMainWindow()
             select(meetingId)
             overlay = .naming(meetingId: meetingId)
-        case .openURL(let url):
-            Platform.open(url)
         case .unhide(let item):
             unhide(item)
         }

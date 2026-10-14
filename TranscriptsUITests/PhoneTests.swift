@@ -48,18 +48,19 @@ final class PhoneTests: AppTestCase {
         snapshot("Upcoming meeting")
     }
 
-    func testTasksGoToGitHubFromTheMeeting() {
+    func testTheSummaryGoesThroughTheTopicsAndCopiesTheTasks() {
         launch()
         element("meeting-m-sync").tap()
-        let open = element("github.open")
-        scrollTo(open)
-        open.tap()
-        wait(element("github.composer"), 10)
-        wait(element("github.create"))
-        snapshot("GitHub composer")
-        element("github.target").tap()
-        wait(element("picker.search"))
-        snapshot("GitHub target picker")
+        let copy = element("summary.tasks.copy")
+        scrollTo(copy)
+        copy.tap()
+        wait(labelled("Aufgaben kopiert"))
+        // Every part has its own button on the phone, where there is no pointer to show it; the topics come last.
+        wait(element("summary.decisions.copy"))
+        let topics = element("summary.topics.copy")
+        scrollTo(topics)
+        wait(labelled("Sync-Engine und Excel-Export"))
+        snapshot("Meeting, topics")
     }
 
     func testAMeetingCanBeRenamed() {
@@ -222,7 +223,7 @@ final class PhoneTests: AppTestCase {
         element("settings").tap()
         wait(element("settings.general"))
         snapshot("Settings")
-        for page in ["general", "recording", "transcription", "ai", "voices", "github"] {
+        for page in ["general", "recording", "transcription", "ai", "voices"] {
             element("settings.\(page)").tap()
             Thread.sleep(forTimeInterval: 0.6)
             snapshot("Settings, \(page)")

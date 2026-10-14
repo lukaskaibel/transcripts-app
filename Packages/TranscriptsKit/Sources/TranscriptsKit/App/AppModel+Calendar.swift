@@ -122,10 +122,6 @@ extension AppModel {
             Task { await stopRecording() }
         case .open:
             openMainWindow()
-        case .createIssues(let meetingId):
-            Task { await createPreparedIssues(meetingId) }
-        case .reviewIssues(let meetingId):
-            requestComposer(for: meetingId)
         }
     }
 }

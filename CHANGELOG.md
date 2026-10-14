@@ -15,8 +15,8 @@ All notable changes to this project are recorded here. The format follows
   and the buttons to mark, pause and stop. Inbox, Meetings with today's day plan, Action Items, People with the voice
   map, and Search; a planned meeting offers to record it. The iPad has a sidebar like the Mac, the list with the
   meeting beside it, the inspector when there is room and the live summary beside the live transcript, and the Mac's
-  keyboard shortcuts. *Who is this?*, *Send to GitHub*, the summary, the speakers and the settings are the Mac's own
-  views laid out for a narrow screen. A phone call interrupts a recording, which carries on afterwards, and on iOS 26
+  keyboard shortcuts. *Who is this?*, the summary, the speakers and the settings are the Mac's own views laid out for
+  a narrow screen. A phone call interrupts a recording, which carries on afterwards, and on iOS 26
   a meeting goes on being processed with the screen locked.
 - **iCloud sync.** Settings › General › iCloud keeps meetings, people and the voices the app learned the same on your
   Mac, iPhone and iPad: record on the phone, read on the Mac, and a voice named on one device is known on the others.
@@ -33,21 +33,10 @@ All notable changes to this project are recorded here. The format follows
 - **A sidebar that plans your day.** Below *Inbox*, *All Meetings* and *Action Items*, the sidebar shows today: the
   calendar's meetings and your recordings in one list from the morning on, a quiet line for now, the next meeting set
   apart with how long until it starts, and meetings you didn't record greyed out. Tomorrow folds away below, then the
-  latest meetings; one click opens a recording. *Inbox* gathers what waits after a meeting: new summaries, action items
-  that aren't on GitHub yet and voices without a name. *Action Items* lists the open tasks of every meeting, all or
+  latest meetings; one click opens a recording. *Inbox* gathers what waits after a meeting: new summaries and voices
+  without a name. *Action Items* lists the open tasks of every meeting, all or
   only yours. People moved to the bottom, next to Settings, and ⌘1–⌘4 go to Inbox, All Meetings, Action Items and
   People. A meeting opened from the inbox, the action items or People goes back there.
-- **Action items into GitHub.** *Send to GitHub* above a meeting's action items (or ⇧⌘G) turns them into issues, in a
-  popover like a new issue in Issues for GitHub: project and repository on top, and per task status, assignees and
-  labels, each from a search field that has the keyboard at once (S, A, L, Z for the place, Space, Return, ⌘Return).
-  The app remembers where a calendar series, a meeting title or a group of people sent their tasks and proposes it
-  next time, finds people's GitHub accounts by their names (and lets you set one on the person), links a task to an
-  issue that is already open instead of creating it twice, and has the summary's model pick labels from the
-  repository's own and leave out tasks that aren't work for it. Linked tasks show their issue's number and status,
-  are checked off when the issue is closed and close it when checked off. After a summary, a notification offers to
-  create the tasks in their remembered place. Settings › GitHub lists what the app remembered. Signs in through the
-  GitHub CLI like Issues for GitHub, or with a code on github.com when the build has an OAuth client ID. Public
-  repositories never get context or quotes from the transcript.
 - **Only your meetings.** Calendar events with guests that you're neither among nor organizing (a team's shared
   calendar, a colleague's) no longer show up in the sidebar or remind you. *Not my meeting* in an event's popover,
   its context menu or the reminder hides a series or everything from its calendar; Settings › General lists what's
@@ -58,11 +47,13 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- **Summaries go into detail.** Below the overview, decisions, action items and open questions, the summary now goes
+  through every topic of the meeting with what was reported, the arguments, who does what and where it landed. Each part has a button that copies it (on the Mac when the pointer is over it), the action items copy as a
+  checklist with owner and due day, a single task from its row, and the whole summary as Markdown with ⇧⌘C or from a
+  meeting's menu. A task you checked off stays checked off when the summary is written again. Summaries written
+  before have no topics until you write them again.
+
 - The app asks for the microphone in words that fit the Mac, the iPhone and the iPad alike.
-
-### Fixed
-
-- Escape in a dropdown no longer also leaves the meeting behind it.
 
 ## [0.1.0] - 2026-10-07
 

@@ -402,4 +402,9 @@ struct MobileToasts: View {
         .animation(Theme.overlay, value: model.toasts)
     }
 }
+
+extension View {
+    /// The Mac's debug remote clicks controls by these names; iPhone and iPad are tested with UI tests instead.
+    func debugFrame(_ id: String) -> some View { self }
+}
 #endif

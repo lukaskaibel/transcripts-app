@@ -264,16 +264,13 @@ public struct Person: Codable, Hashable, Identifiable, Sendable, FetchableRecord
     /// The user of this Mac. Their voice comes from the microphone.
     public var isMe: Bool
     public var createdAt: Date
-    /// Their GitHub account, for assigning issues: chosen by the user or learned from an assignment.
-    public var github: GitHubUser?
 
-    public init(id: String = UUID().uuidString, name: String, email: String? = nil, isMe: Bool = false, createdAt: Date = Date(), github: GitHubUser? = nil) {
+    public init(id: String = UUID().uuidString, name: String, email: String? = nil, isMe: Bool = false, createdAt: Date = Date()) {
         self.id = id
         self.name = name
         self.email = email
         self.isMe = isMe
         self.createdAt = createdAt
-        self.github = github
     }
 
     public var initials: String {
@@ -319,6 +316,8 @@ public struct MeetingSummary: Codable, Hashable, Sendable, FetchableRecord, Pers
 
     public var meetingId: String
     public var overview: String
+    /// What the meeting went through, one subject after another, with the details.
+    public var topics: [SummaryTopic]
     public var decisions: [String]
     public var openQuestions: [String]
     /// "Claude Opus 5.5", "qwen3:8b" — shown under the summary.
@@ -326,14 +325,39 @@ public struct MeetingSummary: Codable, Hashable, Sendable, FetchableRecord, Pers
     public var provider: String
     public var createdAt: Date
 
-    public init(meetingId: String, overview: String, decisions: [String], openQuestions: [String], model: String, provider: String, createdAt: Date = Date()) {
+    public init(meetingId: String, overview: String, topics: [SummaryTopic] = [], decisions: [String], openQuestions: [String], model: String, provider: String, createdAt: Date = Date()) {
         self.meetingId = meetingId
         self.overview = overview
+        self.topics = topics
         self.decisions = decisions
         self.openQuestions = openQuestions
         self.model = model
         self.provider = provider
         self.createdAt = createdAt
+    }
+
+    /// Summaries written before topics existed, and those from devices that don't know them yet, have none.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        meetingId = try container.decode(String.self, forKey: .meetingId)
+        overview = try container.decode(String.self, forKey: .overview)
+        topics = try container.decodeIfPresent([SummaryTopic].self, forKey: .topics) ?? []
+        decisions = try container.decode([String].self, forKey: .decisions)
+        openQuestions = try container.decode([String].self, forKey: .openQuestions)
+        model = try container.decode(String.self, forKey: .model)
+        provider = try container.decode(String.self, forKey: .provider)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+    }
+}
+
+/// A subject a meeting spent time on: "Release 2.4" and what was said about it.
+public struct SummaryTopic: Codable, Hashable, Sendable {
+    public var title: String
+    public var points: [String]
+
+    public init(title: String, points: [String]) {
+        self.title = title
+        self.points = points
     }
 }
 
@@ -347,10 +371,8 @@ public struct ActionItem: Codable, Hashable, Identifiable, Sendable, FetchableRe
     public var due: String?
     public var done: Bool
     public var position: Int
-    /// The GitHub issue the task became, or was linked to.
-    public var issue: LinkedIssue?
 
-    public init(id: Int64? = nil, meetingId: String, text: String, owner: String? = nil, due: String? = nil, done: Bool = false, position: Int = 0, issue: LinkedIssue? = nil) {
+    public init(id: Int64? = nil, meetingId: String, text: String, owner: String? = nil, due: String? = nil, done: Bool = false, position: Int = 0) {
         self.id = id
         self.meetingId = meetingId
         self.text = text
@@ -358,7 +380,6 @@ public struct ActionItem: Codable, Hashable, Identifiable, Sendable, FetchableRe
         self.due = due
         self.done = done
         self.position = position
-        self.issue = issue
     }
 
     public mutating func didInsert(_ inserted: InsertionSuccess) {

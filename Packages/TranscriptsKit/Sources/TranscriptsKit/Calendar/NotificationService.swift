@@ -10,10 +10,6 @@ public enum NotificationAction: Equatable, Sendable {
     case notMine(eventId: String, title: String)
     case stopRecording
     case open
-    /// "Anlegen" on the tasks of a summary: create them where they were prepared to go.
-    case createIssues(meetingId: String)
-    /// A click on that notification: show the tasks in the composer.
-    case reviewIssues(meetingId: String)
 }
 
 /// Reminders when a calendar meeting starts, and the "meeting detected" and "call ended" prompts.
@@ -24,9 +20,6 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
     nonisolated static let meetingCategory = "MEETING_START"
     nonisolated static let detectedCategory = "MEETING_DETECTED"
     nonisolated static let endedCategory = "MEETING_ENDED"
-    nonisolated static let issuesCategory = "GITHUB_ISSUES"
-    nonisolated static let createIssuesAction = "CREATE_ISSUES"
-    nonisolated static let reviewIssuesAction = "REVIEW_ISSUES"
     nonisolated static let recordAction = "RECORD"
     nonisolated static let laterAction = "LATER"
     nonisolated static let ignoreAction = "IGNORE"
@@ -49,13 +42,10 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
         let notMine = UNNotificationAction(identifier: Self.notMineAction, title: String(localized: "Nicht mein Meeting", comment: "notification button: this calendar meeting isn't the user's, don't remind again"), options: [])
         let ignore = UNNotificationAction(identifier: Self.ignoreAction, title: String(localized: "Ignorieren", comment: "notification button: ignore the detected meeting"), options: [.destructive])
         let stop = UNNotificationAction(identifier: Self.stopAction, title: String(localized: "Aufnahme beenden"), options: [])
-        let create = UNNotificationAction(identifier: Self.createIssuesAction, title: String(localized: "Anlegen", comment: "notification button: create the prepared GitHub issues"), options: [])
-        let review = UNNotificationAction(identifier: Self.reviewIssuesAction, title: String(localized: "Vorher ansehen", comment: "notification button: look at the GitHub issues before creating them"), options: [.foreground])
         center.setNotificationCategories([
             UNNotificationCategory(identifier: Self.meetingCategory, actions: [record, later, notMine], intentIdentifiers: []),
             UNNotificationCategory(identifier: Self.detectedCategory, actions: [record, ignore], intentIdentifiers: []),
             UNNotificationCategory(identifier: Self.endedCategory, actions: [stop], intentIdentifiers: []),
-            UNNotificationCategory(identifier: Self.issuesCategory, actions: [create, review], intentIdentifiers: []),
         ])
     }
 
@@ -130,17 +120,6 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
         try? await center.add(UNNotificationRequest(identifier: "ended-\(UUID().uuidString)", content: content, trigger: nil))
     }
 
-    /// The tasks of a summary are ready for their remembered place on GitHub.
-    public func notifyIssuesReady(meetingId: String, title: String, body: String) async {
-        guard let center else { return }
-        let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = body
-        content.categoryIdentifier = Self.issuesCategory
-        content.userInfo = ["meetingId": meetingId]
-        try? await center.add(UNNotificationRequest(identifier: "issues-\(meetingId)", content: content, trigger: nil))
-    }
-
     public func notify(title: String, body: String) async {
         guard let center else { return }
         let content = UNMutableNotificationContent()
@@ -171,10 +150,6 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
             action = eventId.map { .notMine(eventId: $0, title: title) }
         case Self.stopAction:
             action = .stopRecording
-        case Self.createIssuesAction:
-            action = (info["meetingId"] as? String).map { .createIssues(meetingId: $0) }
-        case Self.reviewIssuesAction:
-            action = (info["meetingId"] as? String).map { .reviewIssues(meetingId: $0) }
         case Self.ignoreAction, UNNotificationDismissActionIdentifier:
             action = nil
         default:
@@ -183,8 +158,6 @@ public final class NotificationService: NSObject, UNUserNotificationCenterDelega
                 action = .record(eventId: eventId, start: start)
             } else if category == Self.endedCategory {
                 action = .open
-            } else if category == Self.issuesCategory, let meetingId = info["meetingId"] as? String {
-                action = .reviewIssues(meetingId: meetingId)
             } else {
                 action = .open
             }
