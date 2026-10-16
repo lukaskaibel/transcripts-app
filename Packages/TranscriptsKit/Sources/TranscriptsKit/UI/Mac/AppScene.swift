@@ -7,8 +7,12 @@ public struct TranscriptsScene: Scene {
     @State private var model: AppModel
 
     public init() {
-        _model = State(initialValue: AppModel.makeForLaunch())
+        _model = State(initialValue: Self.launchModel)
     }
+
+    /// The app's one model. SwiftUI creates the scene more than once at launch; each extra model would open the
+    /// database again, start its own observers and, in the demo, wipe and seed its data once more.
+    @MainActor private static let launchModel = AppModel.makeForLaunch()
 
     public var body: some Scene {
         Window("Transcripts", id: "main") {
