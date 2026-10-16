@@ -402,13 +402,15 @@ extension AppDatabase {
         }
     }
 
-    /// Moves everything of `source` over to `target` and deletes `source`.
+    /// Moves everything of `source` over to `target` and deletes `source`. Where both spoke in one meeting, their
+    /// voices there become one.
     public func mergePerson(_ sourceId: String, into targetId: String) throws {
         try writer.write { db in
             try db.execute(sql: "UPDATE meetingSpeaker SET personId = ? WHERE personId = ?", arguments: [targetId, sourceId])
             try db.execute(sql: "UPDATE meetingSpeaker SET suggestedPersonId = ? WHERE suggestedPersonId = ?", arguments: [targetId, sourceId])
             try db.execute(sql: "UPDATE voiceprint SET personId = ? WHERE personId = ?", arguments: [targetId, sourceId])
             _ = try Person.deleteOne(db, key: sourceId)
+            try Self.joinVoicesOfSamePerson(db)
         }
     }
 

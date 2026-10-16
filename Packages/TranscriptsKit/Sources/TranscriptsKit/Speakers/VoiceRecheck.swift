@@ -9,7 +9,8 @@ import GRDB
 /// everything that followed from it follows the correction. Confirmed voices are never touched, and
 /// suggestions that come from a spoken name stay until the user decides.
 public enum VoiceRecheck {
-    /// Judges every unsettled voice again. Returns how many changed.
+    /// Judges every unsettled voice again; a voice that now gets the name of someone already speaking in its
+    /// meeting joins their voice there. Returns how many changed.
     @discardableResult
     public static func run(database: AppDatabase, library: VoiceLibrary, thresholds: VoiceThresholds) throws -> Int {
         let (meetings, speakers, people) = try database.reader.read { db in
@@ -38,6 +39,9 @@ public enum VoiceRecheck {
                 guard try MeetingSpeaker.fetchOne(db, key: ["meetingId": change.before.meetingId, "key": change.before.key]) == change.before else { continue }
                 try change.after.update(db)
                 written += 1
+            }
+            for meetingId in Set(changes.compactMap { $0.after.personId == nil ? nil : $0.after.meetingId }) {
+                try AppDatabase.joinVoicesOfSamePerson(db, meetingId: meetingId)
             }
             return written
         }

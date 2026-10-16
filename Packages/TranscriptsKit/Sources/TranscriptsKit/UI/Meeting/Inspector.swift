@@ -336,7 +336,8 @@ struct MovedLinesNote: View {
     }
 
     private var origins: String {
-        let from = Set(lines.compactMap(\.movedFromKey)).map { detail.displayName(for: $0) }.sorted()
+        // A voice the lines left entirely is gone, and with it its label.
+        let from = Set(lines.compactMap(\.movedFromKey)).filter { detail.speaker(for: $0) != nil }.map { detail.displayName(for: $0) }.sorted()
         let quote = lines.max { $0.duration < $1.duration }.map { Strings.quote(String($0.text.prefix(60))) } ?? ""
         return from.isEmpty ? quote : String(localized: "Vorher bei \(from.joined(separator: ", ")) · \(quote)", comment: "the speakers the lines were with before, then a quote of the longest line")
     }
