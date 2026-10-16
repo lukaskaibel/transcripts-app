@@ -1,8 +1,8 @@
 # Makes the website's pictures from the windows Tools/readme-images.sh had the app render, and from the app icon.
 #   python3 Tools/readme-images/website.py <captures folder>
-# Writes Website/images: the meeting window and the floating recorder with rounded corners on a transparent ground
-# (the page draws the shadows), in light and dark, and the icons. Tools/readme-images.sh runs it after the README
-# images.
+# Writes Website/images: the meeting window with rounded corners and the iPhone's recording screen in a drawn iPhone,
+# on a transparent ground (the page draws the shadows), in light and dark, and the icons. Tools/readme-images.sh runs it
+# after the README images and Tools/iphone-images.sh.
 import os
 import subprocess
 import sys
@@ -11,7 +11,7 @@ import tempfile
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from compose import THEMES, opaque, rounded, scaled
+from compose import THEMES, phone, rounded, scaled
 
 raw = sys.argv[1] if len(sys.argv) > 1 else "build/readme-images/raw"
 icons = "Packages/TranscriptsKit/Sources/TranscriptsKit/Resources"
@@ -31,7 +31,7 @@ def capture(name):
 for theme in ["light", "dark"]:
     border = THEMES[theme]["border"]
     save(scaled(rounded(capture(f"meeting-{theme}"), 30, border), 0.72), f"mac-{theme}.webp", quality=86, method=6)
-    save(rounded(opaque(capture(f"floating-{theme}")), 48, border), f"recorder-{theme}.webp", quality=90, method=6)
+    save(scaled(phone(capture(f"iphone-recording-{theme}"), theme), 0.5), f"iphone-{theme}.webp", quality=88, method=6)
 
 for theme in ["light", "dark"]:
     icon = Image.open(f"{icons}/icon-{theme}.png").convert("RGBA")

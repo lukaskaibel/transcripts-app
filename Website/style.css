@@ -188,9 +188,9 @@ a { color: inherit; }
   --copy: clamp(380px, 22vw + 172px, 580px);
   --footer: 64px;
   /* The window's width: what is left beside the text, unless the window is too short for it, and at most about its
-     real size. It runs off the right edge by 8 %, and the recorder stands out 6 % on its left. */
-  --mac: min(calc((100vw - var(--pad) - var(--copy) - 40px) / 0.98), calc((100vh - var(--footer) - 150px) * 1.56), 1320px);
-  --mac: min(calc((100vw - var(--pad) - var(--copy) - 40px) / 0.98), calc((100svh - var(--footer) - 150px) * 1.56), 1320px);
+     real size. It runs off the right edge by 8 %, and the iPhone stands out 10 % on its left. */
+  --mac: min(calc((100vw - var(--pad) - var(--copy) - 40px) / 1.02), calc((100vh - var(--footer) - 150px) * 1.39), 1320px);
+  --mac: min(calc((100vw - var(--pad) - var(--copy) - 40px) / 1.02), calc((100svh - var(--footer) - 150px) * 1.39), 1320px);
   display: grid;
   grid-template-rows: 1fr auto;
   min-height: 100vh;
@@ -276,16 +276,16 @@ a { color: inherit; }
 .glyph svg { width: 15px; height: 15px; fill: none; stroke: var(--body-text); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .glyph rect { fill: var(--body-text); stroke: none; }
 
-/* The Mac: the meeting window runs off the right edge, the floating recorder hovers over its lower left corner, as
-   it does over any window while a meeting is recorded. */
+/* The Mac and the iPhone: the meeting window runs off the right edge, and the iPhone, recording a meeting around a
+   table, stands in front of its lower left corner. */
 
 .screens {
   position: absolute;
   z-index: 1;
   top: 50%;
   right: calc(var(--mac) * -0.08);
-  width: calc(var(--mac) * 1.06);
-  height: calc(var(--mac) * 0.676);
+  width: calc(var(--mac) * 1.1);
+  height: calc(var(--mac) * 0.72);
   transform: translateY(-50%);
   pointer-events: none;
 }
@@ -300,12 +300,12 @@ a { color: inherit; }
   filter: drop-shadow(0 calc(var(--mac) * 0.025) calc(var(--mac) * 0.04) var(--window-shadow));
 }
 
-.screens .recorder {
+.screens .phone {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: calc(var(--mac) * 0.34);
-  filter: drop-shadow(0 calc(var(--mac) * 0.016) calc(var(--mac) * 0.024) var(--window-shadow));
+  width: calc(var(--mac) * 0.25);
+  filter: drop-shadow(0 calc(var(--mac) * 0.02) calc(var(--mac) * 0.03) var(--window-shadow));
 }
 
 /* The speaker grille behind it all: the icon's perforated metal, its holes fading out before the text and towards the
@@ -347,7 +347,7 @@ a { color: inherit; }
 }
 
 /* Narrow windows and phones: the text on top, and below it the whole window, as large as the space allows, with
-   the recorder over its lower edge, big enough to read. */
+   the iPhone in front of its right side, big enough to read. */
 @media (max-width: 900px), (max-aspect-ratio: 1/1) {
   .home { --copy: min(560px, 100%); }
 
@@ -382,14 +382,15 @@ a { color: inherit; }
 
   .screens { container-type: size; }
 
-  /* --m is the window's width, --r the recorder's; together they are about 0.75 window widths high. */
+  /* --m is the window's width, --p the iPhone's; the iPhone starts a fifth of a window width down and reaches below
+     it, so together they are about 0.84 window widths high. */
   .screens > * {
-    --m: min(calc(100cqw - 8px), calc(100cqh / 0.75), 760px);
-    --r: min(calc(var(--m) * 0.8), 340px);
+    --m: min(calc(100cqw - 8px), calc(100cqh / 0.86), 760px);
+    --p: calc(var(--m) * 0.3);
   }
 
   .screens .mac {
-    top: calc(50% - var(--m) * 0.375);
+    top: calc(50% - var(--m) * 0.42);
     right: auto;
     left: 50%;
     width: var(--m);
@@ -397,13 +398,12 @@ a { color: inherit; }
     filter: drop-shadow(0 calc(var(--m) * 0.03) calc(var(--m) * 0.05) var(--window-shadow));
   }
 
-  .screens .recorder {
-    top: calc(50% - var(--m) * 0.375 + var(--m) * 0.641 - var(--r) * 0.11);
+  .screens .phone {
+    top: calc(50% - var(--m) * 0.22);
     bottom: auto;
-    left: 50%;
-    width: var(--r);
-    transform: translateX(-50%);
-    filter: drop-shadow(0 calc(var(--r) * 0.04) calc(var(--r) * 0.06) var(--window-shadow));
+    left: calc(50% + var(--m) * 0.5 - var(--p) * 0.8);
+    width: var(--p);
+    filter: drop-shadow(0 calc(var(--p) * 0.05) calc(var(--p) * 0.08) var(--window-shadow));
   }
 
   .grille {
