@@ -367,9 +367,10 @@ widget extension's in `TranscriptsWidgets/Localizable.xcstrings`, the Siri phras
 `Transcripts/AppShortcuts.xcstrings`). After changing texts, `Tools/localization/extract.sh` brings the catalogs up to
 date; `Tools/localization/catalog.py` lists
 what a language lacks, takes translations in and checks placeholders and plural forms. The pictures in this README are
-made by `Tools/readme-images.sh`: the app renders its own windows in demo mode, in light and dark,
-`Tools/readme-images/build.py` lays them out, and `Tools/readme-images/website.py` makes the website's pictures from
-the same windows. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose changes.
+made by `Tools/readme-images.sh`: the app runs in demo mode, in light and dark, its windows are captured from the
+screen (it needs Screen Recording permission for the terminal and an awake screen), `Tools/readme-images/build.py`
+lays them out, `Tools/iphone-images.sh` takes the iPhone's screens in the simulator (`PictureTests`), and
+`Tools/readme-images/website.py` makes the website's pictures from both, the iPhone in a drawn frame. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose changes.
 
 The app icon is drawn by `Tools/AppIcon/dictaphone.py`. After changing it, run the script below: it writes
 `Transcripts/AppIcon.icon` and the presets' icons (`AppIcon-*.icon`, alternate icons on iPhone and iPad), renders, with

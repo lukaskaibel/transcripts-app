@@ -96,6 +96,35 @@ def opaque(img, threshold=200):
     return img.crop(box) if box else img
 
 
+def phone(img, theme):
+    """An iPhone 17 Pro around a simulator screenshot (402 points wide): the screen's rounded corners, a black border,
+    a thin titanium band and the Dynamic Island, which the screenshot leaves out."""
+    s = img.width / 402
+    radius, border, band = 55 * s, round(5.5 * s), round(3 * s)
+    edge = border + band
+    w, h = img.width + 2 * edge, img.height + 2 * edge
+    out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(out)
+    # The band: lit along its top, as a frame is under a ceiling light.
+    top, bottom = ((214, 212, 207), (168, 166, 161)) if theme == "light" else ((92, 92, 96), (52, 52, 55))
+    band_img = Image.new("RGBA", (w, h))
+    for y in range(h):
+        t = y / (h - 1)
+        band_img.paste(tuple(round(a + (b - a) * t) for a, b in zip(top, bottom)) + (255,), (0, y, w, y + 1))
+    mask = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, w - 1, h - 1), radius + edge, fill=255)
+    out.paste(band_img, (0, 0), mask)
+    draw.rounded_rectangle((band, band, w - 1 - band, h - 1 - band), radius + border, fill=(8, 8, 9, 255))
+    screen = img.convert("RGBA")
+    screen_mask = Image.new("L", screen.size, 0)
+    ImageDraw.Draw(screen_mask).rounded_rectangle((0, 0, screen.width - 1, screen.height - 1), radius, fill=255)
+    out.paste(screen, (edge, edge), screen_mask)
+    island_w, island_h, island_y = 125 * s, 37 * s, 11 * s
+    x0 = edge + (screen.width - island_w) / 2
+    draw.rounded_rectangle((x0, edge + island_y, x0 + island_w, edge + island_y + island_h), island_h / 2, fill=(0, 0, 0, 255))
+    return out
+
+
 def window(img, radius=30):
     """A window rendered by the app itself (square corners) with the rounded corners of a macOS window."""
     return rounded(img, radius)

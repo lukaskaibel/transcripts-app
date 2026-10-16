@@ -48,5 +48,7 @@ done
 
 echo "Laying out…"
 python3 Tools/readme-images/build.py "$raw"
+echo "The iPhone's pictures…"
+zsh Tools/iphone-images.sh > /dev/null
 echo "The website's pictures…"
 python3 Tools/readme-images/website.py "$raw"
