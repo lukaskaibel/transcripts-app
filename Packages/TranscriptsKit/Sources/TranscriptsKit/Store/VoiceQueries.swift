@@ -143,8 +143,63 @@ extension AppDatabase {
             }
             try Self.move(lines, to: target.key, placement: byApp ? .app : .user, db)
             try Self.refreshSpeakers(db, meetingId: meetingId)
+            try Self.joinVoicesOfSamePerson(db, meetingId: meetingId)
             return target.key
         }
+    }
+
+    /// One person, one voice per meeting. The voice separation now and then splits someone in two (a short
+    /// answer, a different microphone), and naming both halves, the app recognising one of them, or merging two
+    /// people then leaves that person twice in the meeting. Their lines go to one speaker: yours to the
+    /// microphone's, otherwise to the named one that spoke most. Lines of a voice the app only recognised come as
+    /// moved by the app, so they still count as recognised speech and can be sent back. Meetings still being
+    /// recorded or processed are left alone. Returns how many speakers were folded into another.
+    @discardableResult
+    public func joinVoicesOfSamePerson(in meetingId: String? = nil) throws -> Int {
+        try writer.write { db in try Self.joinVoicesOfSamePerson(db, meetingId: meetingId) }
+    }
+
+    @discardableResult
+    static func joinVoicesOfSamePerson(_ db: Database, meetingId: String? = nil) throws -> Int {
+        var sql = """
+            SELECT meetingSpeaker.* FROM meetingSpeaker
+            JOIN meeting ON meeting.id = meetingSpeaker.meetingId
+            WHERE meetingSpeaker.personId IS NOT NULL AND meetingSpeaker.assignment IN ('confirmed', 'automatic')
+              AND meeting.status NOT IN ('recording', 'processing')
+            """
+        var arguments = StatementArguments()
+        if let meetingId {
+            sql += " AND meetingSpeaker.meetingId = ?"
+            arguments = [meetingId]
+        }
+        let named = try MeetingSpeaker.fetchAll(db, sql: sql, arguments: arguments)
+        var joined = 0
+        var meetings = Set<String>()
+        for voices in Dictionary(grouping: named, by: { "\($0.meetingId)/\($0.personId ?? "")" }).values where voices.count > 1 {
+            let ordered = voices.sorted { lhs, rhs in
+                if lhs.isMe != rhs.isMe { return lhs.isMe }
+                if (lhs.assignment == .confirmed) != (rhs.assignment == .confirmed) { return lhs.assignment == .confirmed }
+                if lhs.talkTime != rhs.talkTime { return lhs.talkTime > rhs.talkTime }
+                return lhs.key < rhs.key
+            }
+            var keep = ordered[0]
+            for other in ordered.dropFirst() {
+                if other.assignment == .confirmed {
+                    // Named by the user: the lines are theirs as they are, wherever they were placed.
+                    try db.execute(sql: "UPDATE segment SET speakerKey = ? WHERE meetingId = ? AND speakerKey = ?",
+                                   arguments: [keep.key, other.meetingId, other.key])
+                } else {
+                    let lines = try Segment.filter(Column("meetingId") == other.meetingId && Column("speakerKey") == other.key).fetchAll(db)
+                    try move(lines, to: keep.key, placement: .app, db)
+                }
+                keep.rejectedPersonIds += other.rejectedPersonIds.filter { $0 != keep.personId && !keep.rejectedPersonIds.contains($0) }
+                joined += 1
+            }
+            try keep.update(db, columns: ["rejectedPersonIds"])
+            meetings.insert(keep.meetingId)
+        }
+        for meetingId in meetings { try refreshSpeakers(db, meetingId: meetingId) }
+        return joined
     }
 
     /// Keeps lines the app moved where they are now, as if the user had put them there.
@@ -166,7 +221,9 @@ extension AppDatabase {
             for (origin, group) in Dictionary(grouping: lines, by: { $0.movedFromKey ?? "" }) {
                 var key = origin
                 if origin.isEmpty || !speakers.contains(where: { $0.key == origin }) {
-                    let fresh = Self.newSpeaker(meetingId: meetingId, existing: speakers, channel: group[0].channel)
+                    var fresh = Self.newSpeaker(meetingId: meetingId, existing: speakers, channel: group[0].channel)
+                    // Not whom the app took them for, so it doesn't name them that and join them up again.
+                    fresh.rejectedPersonIds = Array(Set(group.compactMap { line in speakers.first { $0.key == line.speakerKey }?.personId })).sorted()
                     try fresh.save(db)
                     speakers.append(fresh)
                     key = fresh.key
@@ -261,7 +318,8 @@ extension AppDatabase {
             if let voice = SpeakerVoices.mainVoice(of: own) {
                 speaker.embedding = voice.embeddingData
             }
-            speaker.channel = own[0].channel
+            // Yours is the microphone's voice, even with lines of yours that came through the call.
+            speaker.channel = speaker.isMe ? .microphone : own[0].channel
             try speaker.update(db)
         }
     }

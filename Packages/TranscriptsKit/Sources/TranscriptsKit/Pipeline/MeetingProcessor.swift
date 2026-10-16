@@ -348,9 +348,10 @@ public final class MeetingProcessor: @unchecked Sendable {
         guard let previous else { return CarriedOver() }
         let nobody = ""
         var stretches: [String: [(Double, Double)]] = [:]
-        let confirmed = Dictionary(uniqueKeysWithValues: previous.speakers.filter { $0.assignment == .confirmed && !$0.isMe }.map { ($0.key, $0) })
+        let confirmed = Dictionary(uniqueKeysWithValues: previous.speakers.filter { $0.assignment == .confirmed }.map { ($0.key, $0) })
         for segment in previous.segments {
-            guard let speaker = confirmed[segment.speakerKey] else { continue }
+            // The microphone is you anyway; lines of yours that came through the call are carried over like any name.
+            guard let speaker = confirmed[segment.speakerKey], !speaker.isMe || (segment.channel == .system && speaker.personId != nil) else { continue }
             stretches[speaker.personId ?? nobody, default: []].append((segment.start, segment.end))
         }
         let ignored = previous.segments.filter(\.voiceIgnored).map { ($0.start, $0.end) }

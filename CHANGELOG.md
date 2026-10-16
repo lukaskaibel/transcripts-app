@@ -82,6 +82,13 @@ All notable changes to this project are recorded here. The format follows
 
 - The app asks for the microphone in words that fit the Mac, the iPhone and the iPad alike.
 
+### Fixed
+
+- **Each person is in a meeting once.** The voice separation now and then splits one person into two voices, and
+  naming both, the app recognising one of them, or merging two people left that person twice among the meeting's
+  people. Their voices now become one, in meetings from before too; your lines that came through the call join your
+  microphone's. What the app only recognised waits behind the ⓘ as lines the app moved, to keep or send back.
+
 ## [0.1.0] - 2026-10-07
 
 The first version: everything below is new.

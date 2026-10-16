@@ -259,6 +259,8 @@ extension AppModel {
                 func load() -> VoiceLibrary {
                     VoiceLibrary(samples: ((try? database.voiceSamples()) ?? []).filter { learn || $0.source != .automatic })
                 }
+                // One person twice in a meeting (named on another device, from before this was done) is one voice.
+                _ = try? database.joinVoicesOfSamePerson()
                 // Names first, then lines in the wrong place; a move can make a name clearer, so twice at most.
                 var library = load()
                 for _ in 0..<2 {

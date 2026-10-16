@@ -187,6 +187,22 @@ private func sample(_ person: String, _ embedding: [Float], seconds: Double = 8,
         #expect(carried.assignments["S2"] == nil)
         #expect(carried.ignoredLines == [1])
     }
+
+    @Test func yourLinesFromTheCallStayYours() {
+        let previous = MeetingDetail(
+            meeting: Meeting(id: "m", title: "M"),
+            segments: [
+                Segment(meetingId: "m", speakerKey: "me", channel: .system, start: 0, end: 10, text: "a"),
+                Segment(meetingId: "m", speakerKey: "me", channel: .microphone, start: 20, end: 30, text: "b"),
+            ],
+            speakers: [MeetingSpeaker(meetingId: "m", key: "me", label: Strings.meLabel, personId: "me", assignment: .confirmed, channel: .microphone)],
+            people: [:], summary: nil, actionItems: [], markers: []
+        )
+        var lines = [line("S1", 0, 10), DraftLine(speakerKey: "me", channel: .microphone, start: 20, end: 30, words: [TimedWord(text: "x", start: 20, end: 30)])]
+        let carried = MeetingProcessor.carriedOver(from: previous, to: &lines)
+        #expect(carried.assignments["S1"] == .some("me"))
+        #expect(carried.assignments["me"] == nil)
+    }
 }
 
 @Suite struct LiveEchoTests {
@@ -266,8 +282,11 @@ private func sample(_ person: String, _ embedding: [Float], seconds: Double = 8,
         let key = try database.moveLines([line], in: "a", toPerson: "anna")
         let detail = try #require(try database.detail(of: "a"))
         #expect(key != "S1")
-        #expect(detail.speaker(for: "S1")?.assignment == .automatic)
         #expect(detail.speaker(for: key ?? "")?.assignment == .confirmed)
+        // The voice the app took for Anna joins hers, as lines the app moved: still only recognised.
+        #expect(detail.speakers.map(\.key) == [key ?? ""])
+        #expect(detail.segments.first?.placement == .app)
+        #expect(detail.segments.first?.movedFromKey == "S1")
     }
 
     @Test func rejectionsAndSeparatedMicrophoneVoicesSurviveReprocessing() {
@@ -293,5 +312,106 @@ private func sample(_ person: String, _ embedding: [Float], seconds: Double = 8,
         #expect(carried.rejections["S1"] == ["jonas"])
         #expect(lines.map(\.speakerKey) == ["S1", "me", "S2"])
         #expect(carried.assignments["S2"] == .some("hai"))
+    }
+}
+
+/// One person is one voice in a meeting, however they came to be named twice.
+@Suite struct OnePersonOneVoiceTests {
+    func segment(_ key: String, _ start: Double, _ end: Double, _ embedding: [Float]? = nil, meeting: String = "m") -> Segment {
+        Segment(meetingId: meeting, speakerKey: key, channel: key == "me" ? .microphone : .system, start: start, end: end, text: key, embedding: embedding?.embeddingData)
+    }
+
+    @Test func namingTheOtherHalfOfSomeoneJoinsThem() throws {
+        let database = try AppDatabase.inMemory()
+        try database.save(Person(id: "jos", name: "Jos"))
+        try database.save(Person(id: "alex", name: "Alex"))
+        try database.save(Meeting(id: "m", title: "Projekttreffen", status: .ready))
+        let jos = voice(90), alex = voice(91)
+        try database.replaceTranscript(meetingId: "m", segments: [
+            segment("S1", 0, 10, line(of: jos, seed: 1)),
+            segment("S2", 10, 12, line(of: jos, seed: 2)),
+            segment("S3", 12, 20, line(of: alex, seed: 3)),
+            segment("S4", 20, 40, line(of: alex, seed: 4)),
+        ], speakers: [
+            MeetingSpeaker(meetingId: "m", key: "S1", label: "Sprecher 1", personId: "jos", assignment: .confirmed, talkTime: 10),
+            MeetingSpeaker(meetingId: "m", key: "S2", label: "Sprecher 2", talkTime: 2),
+            MeetingSpeaker(meetingId: "m", key: "S3", label: "Sprecher 3", personId: "alex", assignment: .automatic, talkTime: 8),
+            MeetingSpeaker(meetingId: "m", key: "S4", label: "Sprecher 4", personId: "alex", assignment: .confirmed, talkTime: 20),
+        ])
+        let half = try #require(try database.detail(of: "m")?.speaker(for: "S2"))
+        try database.assign(half, to: "jos")
+
+        let detail = try #require(try database.detail(of: "m"))
+        #expect(detail.speakers.map(\.key).sorted() == ["S1", "S4"])
+        #expect(detail.segments.map(\.speakerKey) == ["S1", "S1", "S4", "S4"])
+        #expect(detail.speaker(for: "S1")?.talkTime == 12)
+        #expect(detail.speaker(for: "S4")?.talkTime == 28)
+        // What the user named stays their word; what the app only recognised stays the app's.
+        #expect(detail.segments[1].placement == nil)
+        #expect(detail.segments[2].placement == .app)
+        #expect(detail.segments[2].movedFromKey == "S3")
+        #expect(try database.voiceSamples().map(\.source) == [.confirmed, .confirmed, .automatic, .confirmed])
+
+        // Sent back, those lines are a voice of their own again, and the app won't take it for Alex again.
+        try database.returnMovedLines([try #require(detail.segments[2].id)], in: "m")
+        let back = try #require(try database.detail(of: "m"))
+        let fresh = try #require(back.speaker(for: back.segments[2].speakerKey))
+        #expect(fresh.key != "S4")
+        #expect(fresh.personId == nil)
+        #expect(fresh.rejectedPersonIds == ["alex"])
+        #expect(try database.joinVoicesOfSamePerson() == 0)
+    }
+
+    @Test func youThroughTheCallJoinYourMicrophone() throws {
+        let database = try AppDatabase.inMemory()
+        let me = try database.mePerson(defaultName: "Lukas")
+        try database.save(Meeting(id: "m", title: "Weekly", status: .ready))
+        try database.replaceTranscript(meetingId: "m", segments: [segment("S1", 0, 4), segment("me", 5, 20)], speakers: [
+            MeetingSpeaker(meetingId: "m", key: "S1", label: "Sprecher 1", talkTime: 4),
+            MeetingSpeaker(meetingId: "m", key: "me", label: Strings.meLabel, personId: me.id, assignment: .confirmed, talkTime: 15, channel: .microphone),
+        ])
+        let call = try #require(try database.detail(of: "m")?.speaker(for: "S1"))
+        try database.assign(call, to: me.id)
+        let detail = try #require(try database.detail(of: "m"))
+        #expect(detail.speakers.map(\.key) == ["me"])
+        #expect(detail.speakers.first?.channel == .microphone)
+        #expect(detail.speakers.first?.talkTime == 19)
+        #expect(detail.segments.map(\.speakerKey) == ["me", "me"])
+    }
+
+    @Test func mergingTwoPeopleWhoBothSpokeLeavesOneVoice() throws {
+        let database = try AppDatabase.inMemory()
+        try database.save(Person(id: "hai", name: "Hai"))
+        try database.save(Person(id: "hai2", name: "Hai N."))
+        for (id, status) in [("m", Meeting.Status.ready), ("live", .recording)] {
+            try database.save(Meeting(id: id, title: id, status: status))
+            try database.replaceTranscript(meetingId: id, segments: [segment("S1", 0, 10, meeting: id), segment("S2", 10, 13, meeting: id)], speakers: [
+                MeetingSpeaker(meetingId: id, key: "S1", label: "Sprecher 1", personId: "hai", assignment: .confirmed, talkTime: 10),
+                MeetingSpeaker(meetingId: id, key: "S2", label: "Sprecher 2", personId: "hai2", assignment: .confirmed, talkTime: 3),
+            ])
+        }
+        try database.mergePerson("hai2", into: "hai")
+        let detail = try #require(try database.detail(of: "m"))
+        #expect(detail.speakers.map(\.key) == ["S1"])
+        #expect(detail.speakers.first?.personId == "hai")
+        #expect(detail.speakers.first?.talkTime == 13)
+        // A meeting still being recorded is left as it is until it is processed.
+        #expect(try database.detail(of: "live")?.speakers.count == 2)
+    }
+
+    @Test func aVoiceTheAppRecognisesJoinsTheNamedOne() throws {
+        let database = try AppDatabase.inMemory()
+        try database.save(Person(id: "anna", name: "Anna"))
+        try database.save(Meeting(id: "m", title: "Weekly", status: .ready))
+        let anna = voice(92)
+        try database.replaceTranscript(meetingId: "m", segments: [segment("S1", 0, 10), segment("S2", 10, 14)], speakers: [
+            MeetingSpeaker(meetingId: "m", key: "S1", label: "Sprecher 1", personId: "anna", assignment: .confirmed, talkTime: 10),
+            MeetingSpeaker(meetingId: "m", key: "S2", label: "Sprecher 2", talkTime: 4, embedding: line(of: anna, alike: 0.95, seed: 9).embeddingData),
+        ])
+        let library = VoiceLibrary(samples: (0..<6).map { sample("anna", line(of: anna, alike: 0.95, seed: 10 + $0), meeting: "earlier") })
+        #expect(try VoiceRecheck.run(database: database, library: library, thresholds: .standard) == 1)
+        let detail = try #require(try database.detail(of: "m"))
+        #expect(detail.speakers.map(\.key) == ["S1"])
+        #expect(detail.segments.last?.placement == .app)
     }
 }

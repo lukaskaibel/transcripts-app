@@ -167,7 +167,8 @@ extension AppDatabase {
 
 extension AppDatabase {
     /// Names a voice for good: the speaker is confirmed as `personId`. Its lines then count for that
-    /// person's voice, so later meetings recognise them.
+    /// person's voice, so later meetings recognise them. If the person already has a voice in the meeting,
+    /// the two become one.
     public func assign(_ speaker: MeetingSpeaker, to personId: String) throws {
         try writer.write { db in
             guard var speaker = try MeetingSpeaker.fetchOne(db, key: ["meetingId": speaker.meetingId, "key": speaker.key]) else { return }
@@ -179,6 +180,7 @@ extension AppDatabase {
             speaker.candidatePersonIds = []
             speaker.confidence = 1
             try speaker.update(db)
+            try Self.joinVoicesOfSamePerson(db, meetingId: speaker.meetingId)
         }
     }
 
