@@ -32,7 +32,7 @@
     <p class="intro">Transcripts has no server, no accounts of its own, no analytics and no advertising. Your
       recordings, transcripts and the voices it learns stay on your devices, and in your own private iCloud if you turn
       on sync. The developer receives none of it, and this website collects nothing about you either.</p>
-    <p class="updated">Last updated 13 October 2026</p>
+    <p class="updated">Last updated 16 October 2026</p>
 
     <h2>Who is responsible</h2>
     <address>
@@ -47,27 +47,34 @@
     <h2>The app</h2>
 
     <h3>What it stores, and where</h3>
-    <p>Everything stays in your user account on your Mac, most of it in
-      <code>~/Library/Application Support/Transcripts</code>.</p>
+    <p>Everything stays on the device you use it on: on the Mac in your user account, most of it in
+      <code>~/Library/Application Support/Transcripts</code>; on iPhone and iPad inside the app, where other apps can't
+      read it.</p>
     <ul>
-      <li><strong>Recordings</strong> of your microphone and of the sound of the call, as two tracks. After a meeting
-        they are compressed; under Settings › Recording you choose whether they are kept, kept for 30 days or deleted
-        once the meeting is transcribed.</li>
-      <li><strong>Transcripts, summaries, action items and markers</strong>, in a database on the Mac.</li>
+      <li><strong>Recordings:</strong> on the Mac, of your microphone and of the sound of the call, as two tracks; on
+        iPhone and iPad, of the room through the built-in microphone. After a meeting they are compressed; under
+        Settings › Recording you choose whether they are kept, kept for 30 days or deleted once the meeting is
+        transcribed.</li>
+      <li><strong>Transcripts, summaries, action items and markers</strong>, in a database on the device.</li>
       <li><strong>People and their voices:</strong> the names you give and, for the voices you confirm, voice
         fingerprints. These are lists of numbers that describe how a voice sounds; the app uses them only to recognise
         the voice in your later meetings, and they can't be turned back into a recording.</li>
-      <li><strong>Calendar:</strong> with your permission, the app reads your calendars through macOS to name meetings
+      <li><strong>Calendar:</strong> with your permission, the app reads your calendars through the system to name meetings
         after their event, know who was invited and remind you to record. It keeps the title, time and invitees with
         each recorded meeting and never changes your calendar. The meetings and calendars you mark as <em>Not my
         meeting</em> are kept as a list in the app's preferences.</li>
-      <li><strong>Calls:</strong> to notice a call without a calendar event, the app checks which apps are using the
-        microphone. This happens on the Mac and isn't stored.</li>
-      <li><strong>API keys</strong> for summary services are kept in the macOS Keychain.</li>
+      <li><strong>Calls:</strong> on the Mac, to notice a call without a calendar event, the app checks which apps are
+        using the microphone. This happens on the Mac and isn't stored. iPhone and iPad don't look at other apps; a phone
+        call only pauses the recording.</li>
+      <li><strong>Lock Screen:</strong> while you record on iPhone or iPad, the meeting's title, its time and your
+        markers show on the Lock Screen and in the Dynamic Island. The system shows them on the device; nothing is sent
+        for it.</li>
+      <li><strong>API keys</strong> for summary services are kept in the keychain of the device (on the Mac, the macOS
+        Keychain). They aren't synced to your other devices or to iCloud.</li>
       <li><strong>Preferences</strong> such as your name, the microphone, the appearance and the language stay on the
-        Mac.</li>
-      <li><strong>Speech models</strong> (about 700 MB) are kept in
-        <code>~/Library/Application Support/FluidAudio/Models</code>.</li>
+        device.</li>
+      <li><strong>Speech models</strong> (about 700 MB) are kept on the Mac in
+        <code>~/Library/Application Support/FluidAudio/Models</code>, on iPhone and iPad inside the app.</li>
     </ul>
 
     <h3>What it sends, and to whom</h3>
@@ -85,8 +92,8 @@
         <a href="https://www.anthropic.com/legal/privacy">Anthropic</a>,
         <a href="https://openai.com/policies/privacy-policy/">OpenAI</a>,
         <a href="https://policies.google.com/privacy">Google</a>.</li>
-      <li><strong>With Ollama</strong>, the summary is written by a model on your Mac, or on the server whose address you
-        enter, and nothing goes anywhere else.</li>
+      <li><strong>With Ollama</strong> (on the Mac only), the summary is written by a model on your Mac, or on the server
+        whose address you enter, and nothing goes anywhere else.</li>
       <li><strong>iCloud, if you turn it on</strong> under Settings › General › iCloud (it is off until you do). To keep
         your Mac, iPhone and iPad the same, the app keeps your meetings (with their transcripts, summaries, action items
         and markers), the people and their voice fingerprints, and, unless you turn off <em>Include recordings</em>, the
@@ -99,14 +106,14 @@
         own iCloud.</li>
       <li>Nothing is sent to the developer or to any party other than those above. The app contains no analytics,
         advertising or crash-reporting code.</li>
-      <li>Once the app is in the Mac App Store: if you turned on <em>Share with app developers</em> on your Mac, Apple
-        passes on anonymous crash reports. That is Apple's feature and in your hands, under System Settings › Privacy
-        &amp; Security › Analytics &amp; Improvements.</li>
+      <li>Once the app is in the App Store: if you turned on <em>Share with app developers</em>, Apple passes on
+        anonymous crash reports. That is Apple's feature and in your hands, under Privacy &amp; Security › Analytics
+        &amp; Improvements in System Settings on the Mac, and in Settings on iPhone and iPad.</li>
     </ul>
 
     <h3>The people you record</h3>
-    <p>The app keeps what other people say in your meetings, and fingerprints of their voices, on your Mac and under
-      your control. Telling them that you record, and asking for their consent where the law requires it, is up to
+    <p>The app keeps what other people say in your meetings, and fingerprints of their voices, on your devices and
+      under your control. Telling them that you record, and asking for their consent where the law requires it, is up to
       you; in Germany, for example, recording a conversation that isn't public needs everyone's consent. If you use the
       app at work, your organisation's rules may apply too.</p>
 
@@ -116,12 +123,16 @@
         <strong>person</strong> removes their name and their voice fingerprints.</li>
       <li>Under Settings › Recording › Storage, recordings can be kept for 30 days only, or deleted once the meeting is
         transcribed.</li>
-      <li>To remove everything, delete the app and the folders <code>~/Library/Application Support/Transcripts</code>
-        and <code>~/Library/Application Support/FluidAudio</code>. API keys can be removed under Settings › AI.</li>
+      <li>To remove everything on the Mac, delete the app and the folders
+        <code>~/Library/Application Support/Transcripts</code> and <code>~/Library/Application Support/FluidAudio</code>.
+        On iPhone and iPad, deleting the app removes everything it keeps there.</li>
+      <li>API keys are removed under Settings › AI. On iPhone and iPad do that before you delete the app: the system
+        can keep keychain entries after an app is gone.</li>
       <li>With iCloud sync on, deleting a meeting or a person on one device deletes it on the others and in iCloud.
         <em>Delete from iCloud</em> under Settings › General › iCloud removes everything the app keeps there and stops
         the other devices from syncing; what is on the device stays. You can also delete it in your iCloud settings
-        (on the Mac: System Settings › Apple Account › iCloud › Manage).</li>
+        (on the Mac: System Settings › Apple Account › iCloud › Manage; on iPhone and iPad: Settings › your name ›
+        iCloud).</li>
     </ul>
 
     <h2>This website</h2>
