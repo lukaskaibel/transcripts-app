@@ -13,7 +13,9 @@ final class PictureTests: AppTestCase {
         ProcessInfo.processInfo.environment["TR_APPEARANCE"].map { ["-demo.appearance", $0] } ?? []
     }
 
-    /// The demo on its meetings. Now and then a launch lands on the onboarding instead; another launch doesn't.
+    /// The demo on its meetings. In a run of this one test, Xcode can still be installing the app when the test
+    /// launches it; the system then opens the app without the test's arguments, on its own empty data and so on the
+    /// onboarding. Another launch gets the arguments.
     private func launchOnTheMeetings() {
         for _ in 0..<3 {
             launch(appearance)
