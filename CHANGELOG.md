@@ -8,6 +8,14 @@ All notable changes to this project are recorded here. The format follows
 
 ### Added
 
+- **A dictaphone as the app icon, and Settings › App-Icon to make it yours.** The icon is a black dictaphone with a
+  silver speaker grille and a red record button, standing on warm stone, light or dark with the system and tinted or
+  clear as the system shows icons. On the Mac, Settings › App-Icon lets you choose the body, the speaker grille, the
+  record button and the background, from swatches or any colour, or start from a preset (silver, titanium, white,
+  midnight); the Dock shows your dictaphone while the app runs, in light or dark with your Mac. On iPhone and iPad
+  the presets are icons of their own for the Home Screen. It replaces the speech bubble and the light, dark and indigo
+  icons.
+
 - **iPhone and iPad.** The same app for the meetings around a table: put the phone in the middle, tap *Record* and lock
   the screen. It records the room through the built-in microphone, with a live transcript, tells the voices apart
   afterwards and names the ones it knows, all on the device. On the iPhone, *Record* sits above the tab bar on every

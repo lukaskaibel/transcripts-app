@@ -242,7 +242,7 @@ final class PhoneTests: AppTestCase {
         element("settings").tap()
         wait(element("settings.general"))
         snapshot("Settings")
-        for page in ["general", "recording", "transcription", "ai", "voices"] {
+        for page in ["general", "recording", "transcription", "ai", "voices", "icon"] {
             element("settings.\(page)").tap()
             Thread.sleep(forTimeInterval: 0.6)
             snapshot("Settings, \(page)")

@@ -31,8 +31,8 @@ INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad[sdk=iphone*] = UIInterfaceOr
 INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO
 // The running recording on the Lock Screen and in the Dynamic Island.
 INFOPLIST_KEY_NSSupportsLiveActivities[sdk=iphone*] = YES
-// The icons offered in Settings › Allgemein, as alternate Home Screen icons.
-ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=iphone*] = AppIcon-Light AppIcon-Dark AppIcon-Indigo
+// The presets offered in Settings › App-Icon, as alternate Home Screen icons.
+ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=iphone*] = AppIcon-Silver AppIcon-Titanium AppIcon-White AppIcon-Midnight
 ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS[sdk=iphone*] = YES
 
 #include? "Local.xcconfig"
