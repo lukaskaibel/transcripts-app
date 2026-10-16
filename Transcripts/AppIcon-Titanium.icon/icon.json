@@ -1,0 +1,82 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "srgb:0.92549,0.90980,0.88235,1.00000",
+          "srgb:0.81569,0.80000,0.77255,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.27843,0.27451,0.27059,1.00000",
+          "srgb:0.15294,0.15294,0.14902,1.00000"
+        ],
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 1
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Dictaphone",
+      "layers": [
+        {
+          "name": "recorder",
+          "glass": false,
+          "image-name": "recorder.png"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.3
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.4
+      }
+    },
+    {
+      "name": "Contact shadow",
+      "layers": [
+        {
+          "name": "shadow",
+          "glass": false,
+          "image-name": "shadow.png"
+        }
+      ],
+      "shadow": {
+        "kind": "none",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0.4
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}

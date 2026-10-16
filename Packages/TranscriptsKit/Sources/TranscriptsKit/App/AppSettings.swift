@@ -85,7 +85,7 @@ public final class AppSettings {
         self.defaults = defaults
         onboardingDone = defaults.bool(forKey: Keys.onboardingDone)
         appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "") ?? .system
-        appIcon = AppIconChoice(rawValue: defaults.string(forKey: Keys.appIcon) ?? "") ?? .automatic
+        appIcon = defaults.data(forKey: Keys.appIcon).flatMap { try? JSONDecoder().decode(AppIconLook.self, from: $0) } ?? .standard
         autoSummarize = defaults.object(forKey: Keys.autoSummarize) as? Bool ?? true
         summaryProvider = ProviderKind(rawValue: defaults.string(forKey: Keys.summaryProvider) ?? "")
         summaryLanguage = SummaryLanguage(rawValue: defaults.string(forKey: Keys.summaryLanguage) ?? "") ?? .meeting
@@ -126,7 +126,8 @@ public final class AppSettings {
     enum Keys {
         static let onboardingDone = "onboardingDone"
         static let appearance = "appearance"
-        static let appIcon = "appIcon"
+        // The dictaphone's colours; "appIcon" held the earlier icons' names.
+        static let appIcon = "appIconLook"
         static let autoSummarize = "autoSummarize"
         static let summaryProvider = "summaryProvider"
         static let summaryLanguage = "summaryLanguage"
@@ -156,7 +157,7 @@ public final class AppSettings {
 
     public var onboardingDone: Bool { didSet { defaults.set(onboardingDone, forKey: Keys.onboardingDone) } }
     public var appearance: Appearance { didSet { defaults.set(appearance.rawValue, forKey: Keys.appearance) } }
-    public var appIcon: AppIconChoice { didSet { defaults.set(appIcon.rawValue, forKey: Keys.appIcon) } }
+    public var appIcon: AppIconLook { didSet { defaults.set(try? JSONEncoder().encode(appIcon), forKey: Keys.appIcon) } }
     /// Write a summary as soon as a transcript is ready.
     public var autoSummarize: Bool { didSet { defaults.set(autoSummarize, forKey: Keys.autoSummarize) } }
     /// The service that writes summaries; nil until one is set up.

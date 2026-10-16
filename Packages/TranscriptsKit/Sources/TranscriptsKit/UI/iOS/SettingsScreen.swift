@@ -1,7 +1,7 @@
 #if os(iOS)
 import SwiftUI
 
-/// Settings on iPhone and iPad: the Mac's six pages as a list, each the same form the Mac shows (without what only
+/// Settings on iPhone and iPad: the Mac's pages as a list, each the same form the Mac shows (without what only
 /// a Mac can do, such as the menu bar or the call's sound).
 struct SettingsScreen: View {
     @Environment(AppModel.self) private var model
@@ -57,6 +57,7 @@ struct SettingsScreen: View {
         case .transcription: TranscriptionSettings()
         case .ai: AISettings()
         case .voices: VoiceSettings()
+        case .icon: AppIconSettings()
         }
     }
 
