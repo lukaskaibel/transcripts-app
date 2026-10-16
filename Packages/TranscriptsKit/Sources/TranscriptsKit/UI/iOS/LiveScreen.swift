@@ -29,11 +29,9 @@ struct LiveScreen: View {
     private func content(_ session: RecordingSession) -> some View {
         VStack(spacing: 0) {
             topBar(session)
-            header(session)
             if let problem = session.microphoneProblem {
                 warning(problem.message)
             }
-            Rectangle().fill(Theme.rowSeparator).frame(height: 1)
             if wide {
                 HStack(spacing: 0) {
                     LiveTranscriptView(session: session)
@@ -44,7 +42,7 @@ struct LiveScreen: View {
             } else {
                 LiveTranscriptView(session: session)
             }
-            controls(session)
+            bottom(session)
         }
         .sheet(isPresented: $showsSummary) {
             LiveSidePane(session: session)
@@ -114,34 +112,26 @@ struct LiveScreen: View {
         .padding(.horizontal, 6)
     }
 
-    private func header(_ session: RecordingSession) -> some View {
+    /// As in Voice Memos: the time, the sound of the last seconds, and the buttons in reach of the thumb.
+    private func bottom(_ session: RecordingSession) -> some View {
         VStack(spacing: 10) {
-            HStack(spacing: 12) {
-                if session.state == .paused {
-                    Image(systemName: "pause.fill").font(.title3.weight(.bold)).foregroundStyle(Theme.textSecondary)
-                } else {
-                    RecordingDot(size: 12)
-                }
-                Text(TimeFormat.clock(session.elapsed))
-                    .font(.system(size: 44, weight: .medium, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(session.state == .paused ? Theme.textSecondary : Theme.text)
-                    .contentTransition(.numericText())
-            }
-            HStack(spacing: 8) {
-                Image(systemName: "mic").font(.footnote).foregroundStyle(Theme.textTertiary)
-                LevelBars(level: session.microphoneLevel, color: Theme.textSecondary, height: 16)
-                Text(session.state == .paused ? String(localized: "Pausiert", comment: "the recording is paused") : String(localized: "Nimmt den Raum auf", comment: "the phone records everyone in the room"))
-                    .font(.small)
-                    .foregroundStyle(Theme.textTertiary)
-            }
+            Text(TimeFormat.clock(session.elapsed))
+                .font(.system(size: 46, weight: .light))
+                .monospacedDigit()
+                .foregroundStyle(session.state == .paused ? Theme.textSecondary : Theme.text)
+                .contentTransition(.numericText())
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(session.state == .paused ? Text("Pausiert", comment: "the recording is paused") : Text("Aufnahme läuft"))
+                .accessibilityValue(TimeFormat.clock(session.elapsed))
+            LevelWaveform(level: { session.waveformLevel(microphoneOnly: true) }, bars: 60, height: 54, running: session.state != .paused)
+                .frame(maxWidth: .infinity)
+                .clipped()
+            controls(session)
         }
-        .padding(.top, 6)
-        .padding(.bottom, 16)
+        .padding(.top, 16)
         .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(session.state == .paused ? Text("Pausiert", comment: "the recording is paused") : Text("Aufnahme läuft"))
-        .accessibilityValue(TimeFormat.clock(session.elapsed))
+        .background(Theme.groupHeader.opacity(0.6).ignoresSafeArea(edges: .bottom))
+        .overlay(alignment: .top) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
     }
 
     private func warning(_ text: String) -> some View {
@@ -158,70 +148,49 @@ struct LiveScreen: View {
     }
 
     private func controls(_ session: RecordingSession) -> some View {
-        HStack(spacing: 0) {
-            controlButton(systemImage: "bookmark", title: String(localized: "Markieren", comment: "button: mark this moment of the recording")) {
+        HStack(spacing: 40) {
+            roundButton(systemImage: "bookmark", label: Text("Markieren", comment: "button: mark this moment of the recording")) {
                 if session.addMarker("") != nil { marked += 1 }
             }
             .accessibilityIdentifier("live.mark")
-            .frame(maxWidth: .infinity)
-            Button {
-                model.togglePause()
-            } label: {
-                Image(systemName: session.state == .paused ? "play.fill" : "pause.fill")
-                    .font(.title2)
-                    .foregroundStyle(Theme.text)
-                    .frame(width: 64, height: 64)
-                    .background(Circle().fill(Theme.control))
-                    .contentShape(Circle())
-            }
-            .buttonStyle(PlainPressStyle())
-            .accessibilityLabel(session.state == .paused ? Text("Fortsetzen") : Text("Pause"))
-            .accessibilityIdentifier("live.pause")
-            .frame(maxWidth: .infinity)
             Button {
                 Task { await model.stopRecording() }
             } label: {
-                VStack(spacing: 5) {
-                    RoundedRectangle(cornerRadius: 5, style: .continuous).fill(.white).frame(width: 20, height: 20)
-                        .frame(width: 64, height: 64)
-                        .background(Circle().fill(Theme.recordingFill))
-                }
-                .contentShape(Circle())
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(Theme.recordingFill)
+                    .frame(width: 30, height: 30)
+                    .frame(width: 78, height: 78)
+                    .background(Circle().strokeBorder(Theme.textTertiary.opacity(0.4), lineWidth: 4))
+                    .contentShape(Circle())
             }
             .buttonStyle(PlainPressStyle())
             .accessibilityLabel(Text("Aufnahme beenden"))
             .accessibilityIdentifier("live.stop")
-            .frame(maxWidth: .infinity)
+            roundButton(systemImage: session.state == .paused ? "play.fill" : "pause.fill", label: session.state == .paused ? Text("Fortsetzen") : Text("Pause")) {
+                model.togglePause()
+            }
+            .accessibilityIdentifier("live.pause")
         }
-        .padding(.horizontal, 12)
-        .padding(.top, 14)
-        .padding(.bottom, 8)
-        .frame(maxWidth: 520)
-        .frame(maxWidth: .infinity)
-        .background(Theme.panel)
-        .overlay(alignment: .top) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
+        .padding(.top, 8)
+        .padding(.bottom, 10)
     }
 
-    private func controlButton(systemImage: String, title: String, action: @escaping () -> Void) -> some View {
+    private func roundButton(systemImage: String, label: Text, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 4) {
-                Image(systemName: systemImage)
-                    .font(.title3)
-                    .frame(width: 44, height: 32)
-                Text(title).font(.tiny)
-            }
-            .foregroundStyle(Theme.textSecondary)
-            .frame(minWidth: 64, minHeight: 64)
-            .contentShape(Rectangle())
+            Image(systemName: systemImage)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(Theme.text)
+                .frame(width: 56, height: 56)
+                .glassEffect(.regular.interactive(), in: Circle())
+                .contentShape(Circle())
         }
         .buttonStyle(PlainPressStyle())
+        .accessibilityLabel(label)
     }
 
     private func subtitle(_ session: RecordingSession) -> String {
-        var parts: [String] = []
-        if let source = session.source { parts.append(source) }
-        parts.append(String(localized: "\(session.voices.count) Stimmen", comment: "plural: voices heard so far in the recording"))
-        return parts.joined(separator: " · ")
+        if session.state == .paused { return String(localized: "Pausiert", comment: "the recording is paused") }
+        return session.source ?? String(localized: "Nimmt den Raum auf", comment: "the phone records everyone in the room")
     }
 }
 #endif

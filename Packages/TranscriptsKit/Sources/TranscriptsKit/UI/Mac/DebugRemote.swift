@@ -299,7 +299,7 @@ final class DebugRemote {
         case "main": window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("main") == true || $0.title == "Transcripts" && $0.styleMask.contains(.titled) && $0.frame.width > 800 }
         case "live": window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("live") == true || $0.title == "Aufnahme" }
         case "settings": window = NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true || $0.identifier?.rawValue.contains("settings") == true || $0.title.contains("Allgemein") || $0.title.contains("KI") || $0.title.contains("Aufnahme") && $0.frame.width < 800 || $0.title.contains("Transkription") || $0.title.contains("Stimmen") }
-        case "floating": window = NSApp.windows.first { $0 is NSPanel && $0.frame.width == FloatingRecorderController.size.width }
+        case "floating": window = NSApp.windows.first { $0.identifier == FloatingRecorderController.identifier }
         case "sheet": window = NSApp.windows.first { $0.isSheet && $0.isVisible }
         default: window = NSApp.windows.first { $0.title == name }
         }

@@ -20,7 +20,7 @@ public struct TranscriptsScene: Scene {
                 .task { model.launch() }
                 .preferredColorScheme(model.settings.appearance.colorScheme)
         }
-        .windowStyle(.hiddenTitleBar)
+        .windowToolbarStyle(.unified)
         .defaultSize(width: 1280, height: 820)
         .commands { AppCommands(model: model) }
 
@@ -29,8 +29,8 @@ public struct TranscriptsScene: Scene {
                 .environment(model)
                 .preferredColorScheme(model.settings.appearance.colorScheme)
         }
-        .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 1120, height: 720)
+        .windowToolbarStyle(.unified)
+        .defaultSize(width: 1000, height: 720)
 
         MenuBarExtra {
             MenuBarContent()
@@ -133,6 +133,7 @@ struct AppCommands: Commands {
             }
             .disabled(model.section != .meetings || model.detail?.actionItems.isEmpty != false)
         }
+        SidebarCommands()
         CommandMenu("Gehe zu") {
             Button("Suchen …") { model.overlay = model.overlay == .palette ? nil : .palette }
                 .keyboardShortcut("k", modifiers: .command)
@@ -145,6 +146,14 @@ struct AppCommands: Commands {
                 .keyboardShortcut("3", modifiers: .command)
             Button(AppModel.Section.people.title) { model.show(.people) }
                 .keyboardShortcut("4", modifiers: .command)
+            Divider()
+            Button("Vorheriges Meeting") { model.stepMeeting(by: -1) }
+                .keyboardShortcut(.upArrow, modifiers: .command)
+                .disabled(model.section != .meetings || model.selectedMeetingId == nil)
+            Button("Nächstes Meeting") { model.stepMeeting(by: 1) }
+                .keyboardShortcut(.downArrow, modifiers: .command)
+                .disabled(model.section != .meetings || model.selectedMeetingId == nil)
+            Divider()
             Button("Live-Fenster") { model.request(.live) }
                 .keyboardShortcut("l", modifiers: .command)
             Button("Alle Meetings öffnen") { model.openMainWindow() }

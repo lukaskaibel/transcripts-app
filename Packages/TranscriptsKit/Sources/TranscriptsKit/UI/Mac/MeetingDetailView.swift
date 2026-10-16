@@ -2,48 +2,64 @@
 import AppKit
 import SwiftUI
 
+/// A meeting as a page, like a note in Notebook: the title, then the summary or the transcript (switched in the
+/// toolbar), and the facts and the people in the inspector.
 struct MeetingDetailView: View {
     @Environment(AppModel.self) private var model
     let detail: MeetingDetail
     @State private var deleting = false
+    @State private var tab: MeetingTab
+    @AppStorage("showsMeetingInspector") private var showsInspector = true
+
+    init(detail: MeetingDetail) {
+        self.detail = detail
+        _tab = State(initialValue: MeetingTab.initial(for: detail))
+    }
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            HStack(spacing: 0) {
-                VStack(spacing: 0) {
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 0) {
-                                titleBlock
-                                StatusBanner(detail: detail)
-                                VoicesBanner(detail: detail)
-                                SummarySection(detail: detail)
-                                TranscriptSection(detail: detail)
-                            }
-                            .padding(.horizontal, 44)
-                            .padding(.top, 30)
-                            .padding(.bottom, 40)
-                            .frame(maxWidth: 760, alignment: .leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .onChange(of: model.focusedSegmentId, initial: true) { _, id in
-                            guard let id else { return }
-                            Task {
-                                try? await Task.sleep(for: .milliseconds(250))
-                                withAnimation(Theme.spring) { proxy.scrollTo(id, anchor: .center) }
-                            }
-                        }
-                    }
-                    if model.player.meetingId == detail.meeting.id {
-                        PlayerBar()
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    titleBlock
+                    StatusBanner(detail: detail)
+                    VoicesBanner(detail: detail)
+                    switch tab {
+                    case .summary:
+                        SummarySection(detail: detail)
+                    case .transcript:
+                        TranscriptSection(detail: detail)
                     }
                 }
-                Rectangle().fill(Theme.rowSeparator).frame(width: 1)
-                Inspector(detail: detail)
-                    .frame(width: Theme.inspectorWidth)
+                .padding(.horizontal, 64)
+                .padding(.top, 30)
+                .padding(.bottom, 96)
+                .frame(maxWidth: 800, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .onChange(of: model.focusedSegmentId, initial: true) { _, id in
+                guard let id else { return }
+                tab = .transcript
+                Task {
+                    try? await Task.sleep(for: .milliseconds(250))
+                    withAnimation(Theme.spring) { proxy.scrollTo(id, anchor: .center) }
+                }
             }
         }
+        .overlay(alignment: .bottom) {
+            if model.player.meetingId == detail.meeting.id {
+                PlayerBar()
+                    .padding(.bottom, 18)
+                    .transition(.opacity.combined(with: .offset(y: 10)))
+            }
+        }
+        .animation(Theme.overlay, value: model.player.meetingId)
+        .inspector(isPresented: $showsInspector) {
+            Inspector(detail: detail)
+                .inspectorColumnWidth(min: 220, ideal: 260, max: 380)
+        }
+        .toolbar { toolbar }
+        .toolbar(removing: .title)
+        .navigationTitle(detail.meeting.title)
         .onKeyPress(.escape) {
             guard model.overlay == nil else { return .ignored }
             model.goBack()
@@ -52,6 +68,7 @@ struct MeetingDetailView: View {
         .onChange(of: detail.summary?.createdAt, initial: true) { _, written in
             if let written { model.markSummaryRead(detail.meeting.id, written: written) }
         }
+        .showsSummaryWhenItArrives(detail, tab: $tab)
         .confirmationDialog("„\(detail.meeting.title)“ löschen?", isPresented: $deleting) {
             Button("Löschen", role: .destructive) { model.deleteMeeting(detail.meeting.id) }
             Button("Abbrechen", role: .cancel) {}
@@ -60,31 +77,21 @@ struct MeetingDetailView: View {
         }
     }
 
-    private var index: Int? { model.rows.firstIndex { $0.id == detail.meeting.id } }
-
-    private var header: some View {
-        HStack(spacing: 6) {
-            IconButton(systemName: "chevron.left", label: model.backSection == nil ? String(localized: "Zurück zu den Meetings (Esc)") : String(localized: "Zurück (Esc)")) {
+    @ToolbarContentBuilder
+    private var toolbar: some ToolbarContent {
+        ToolbarItem(placement: .navigation) {
+            Button {
                 model.goBack()
+            } label: {
+                Label("Zurück", systemImage: "chevron.left")
             }
-            Button((model.backSection ?? .meetings).title) { model.goBack() }
-                .buttonStyle(PlainPressStyle())
-                .foregroundStyle(Theme.textSecondary)
-            Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold)).foregroundStyle(Theme.textTertiary)
-            Text(detail.meeting.title).font(.uiSemibold).lineLimit(1)
-            Spacer(minLength: 12)
-            if let index {
-                Text("\(index + 1) / \(model.rows.count)")
-                    .font(.small)
-                    .monospacedDigit()
-                    .foregroundStyle(Theme.textTertiary)
-                IconButton(systemName: "chevron.up", label: String(localized: "Vorheriges Meeting (⌘↑)")) { step(-1) }
-                    .disabled(index == 0)
-                    .keyboardShortcut(.upArrow, modifiers: .command)
-                IconButton(systemName: "chevron.down", label: String(localized: "Nächstes Meeting (⌘↓)")) { step(1) }
-                    .disabled(index + 1 >= model.rows.count)
-                    .keyboardShortcut(.downArrow, modifiers: .command)
-            }
+            .help(model.backSection == nil ? String(localized: "Zurück zu den Meetings (Esc)") : String(localized: "Zurück (Esc)"))
+        }
+        ToolbarItem(placement: .principal) {
+            MeetingTabPicker(tab: $tab)
+        }
+        ToolbarSpacer(.flexible)
+        ToolbarItemGroup {
             Menu {
                 Button("Als Markdown kopieren", systemImage: "doc.on.doc") {
                     model.copyToClipboard(model.markdown(for: detail), toast: String(localized: "Meeting kopiert", comment: "toast: the whole meeting was copied as Markdown"))
@@ -96,58 +103,41 @@ struct MeetingDetailView: View {
                 }
                 Button("Als Markdown sichern …", systemImage: "square.and.arrow.down") { model.exportMarkdown(detail) }
             } label: {
-                HStack(spacing: 5) {
-                    Text("Exportieren")
-                    Image(systemName: "chevron.down").font(.system(size: 8, weight: .bold))
-                }
-                .font(.smallMedium)
-                .padding(.horizontal, 10)
-                .frame(height: 26)
-                .overlay(RoundedRectangle(cornerRadius: 7, style: .continuous).stroke(Theme.chipBorder, lineWidth: 1))
-                .contentShape(Rectangle())
+                Label("Exportieren", systemImage: "square.and.arrow.up")
             }
-            .menuStyle(.button)
-            .buttonStyle(.plain)
             .menuIndicator(.hidden)
-            .fixedSize()
+            .help("Exportieren")
             .disabled(detail.segments.isEmpty)
-            .padding(.leading, 6)
             Menu {
                 MeetingMenuItems(meetingId: detail.meeting.id) { deleting = true }
             } label: {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Theme.textSecondary)
-                    .frame(width: 26, height: 26)
-                    .contentShape(Rectangle())
+                Label("Mehr", systemImage: "ellipsis")
             }
-            .menuStyle(.button)
-            .buttonStyle(.plain)
             .menuIndicator(.hidden)
-            .fixedSize()
             .help("Mehr")
         }
-        .padding(.leading, 10)
-        .padding(.trailing, 10)
-        .frame(height: Theme.headerHeight)
-        .overlay(alignment: .bottom) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
-    }
-
-    private func step(_ offset: Int) {
-        guard let index else { return }
-        let target = index + offset
-        guard model.rows.indices.contains(target) else { return }
-        model.selectedMeetingId = model.rows[target].id
+        ToolbarSpacer(.fixed)
+        SearchToolbarItem(model: model)
+        ToolbarSpacer(.fixed)
+        ToolbarItem {
+            Button {
+                withAnimation(Theme.spring) { showsInspector.toggle() }
+            } label: {
+                Label(showsInspector ? String(localized: "Informationen ausblenden") : String(localized: "Informationen einblenden"), systemImage: "sidebar.right")
+            }
+            .help(showsInspector ? String(localized: "Informationen ausblenden (⌃⌘I)") : String(localized: "Informationen einblenden (⌃⌘I)"))
+            .keyboardShortcut("i", modifiers: [.command, .control])
+        }
     }
 
     private var titleBlock: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             EditableText(text: detail.meeting.title, font: .pageTitle) { model.rename(meetingId: detail.meeting.id, to: $0) }
             Text(metaLine)
                 .font(.ui)
                 .foregroundStyle(Theme.textSecondary)
         }
-        .padding(.bottom, 24)
+        .padding(.bottom, 22)
     }
 
     private var metaLine: String {
@@ -155,6 +145,16 @@ struct MeetingDetailView: View {
         if let source = detail.meeting.source { parts.append(source) }
         if detail.meeting.origin == .importedFile { parts.append(String(localized: "Importiert", comment: "the meeting comes from an imported audio file")) }
         return parts.joined(separator: " · ")
+    }
+}
+
+extension AppModel {
+    /// The meeting before or after the one on screen, in the list's order.
+    func stepMeeting(by offset: Int) {
+        guard let id = selectedMeetingId, let index = rows.firstIndex(where: { $0.id == id }) else { return }
+        let target = index + offset
+        guard rows.indices.contains(target) else { return }
+        selectedMeetingId = rows[target].id
     }
 }
 #endif

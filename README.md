@@ -39,7 +39,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="Design/screenshots/meeting-dark.webp">
-  <img alt="A meeting with its summary: the overview, decisions, action items with a copy button, open questions and the first topic in detail, beside the speakers, one of them with a name suggestion" src="Design/screenshots/meeting-light.webp">
+  <img alt="A meeting as a page: the overview, decisions, action items as a checklist and open questions, below a quiet bar about two voices without a name; the sidebar with today's meetings on the left and the meeting's details and people on the right" src="Design/screenshots/meeting-light.webp">
 </picture>
 
 > **Status: early.** Version 0.1.0 records, transcribes, names and summarises meetings every day on the maintainer's
@@ -61,12 +61,13 @@ model not even that.
 About half a minute after a call, the meeting is transcribed again in a careful second pass, the voices are told apart
 and named, and the summary is written: a short overview, the decisions, action items with owner and due day, open
 questions, and below them every topic of the meeting with what was said about it. Each part copies with one click, the
-action items as a checklist, ready to paste into a chat, a ticket or a note. Play any line, set markers while
-recording, export as Markdown, or search every transcript with ⌘K.
+action items as a checklist, ready to paste into a chat, a ticket or a note. *Summary* and *Transcript* in the toolbar
+switch between the two; play any line, set markers while recording, export as Markdown, or search every transcript
+with ⌘K.
 
-The sidebar plans your day: today's calendar meetings and recordings in one list with a line for now, the next
-meeting set apart, and the latest meetings below. The inbox collects what a meeting leaves behind: a new summary and
-voices without a name.
+The window is built like the Mac's own apps: a sidebar with today's calendar meetings and recordings, tomorrow's folded
+away and the latest meetings below; the meeting as a page; and its details and people in the inspector on the right
+(⌃⌘I). The inbox collects what a meeting leaves behind: a new summary and voices without a name.
 
 ### It learns the voices
 
@@ -80,24 +81,29 @@ microphone), and which lines fit nobody.
   <img alt="The People screen: the voice map with a cluster of dots per person, and the voices waiting for confirmation below" src="Design/screenshots/people-light.webp">
 </picture>
 
-### "Who is this?"
+### "Is this Jonas?"
 
-After a meeting the app asks about the voices it doesn't know, one after another, with a sample playing and its
-likely names first. A number key or Return names the voice; M is you, X nobody in particular.
+After a meeting a quiet bar above the summary says how many voices have no name yet. *Name Voices…* asks about them
+one at a time, the way Photos asks about a face: a sample plays, with what the voice said, and the app says whom it
+thinks it is. *Yes* settles it (or Return); *Someone Else* lists the other guesses, the invitees and everyone known, a
+new name, you, or nobody in particular. To fix a single passage, click the speaker's name in the transcript: the menu
+names the voice, or with *Only This Passage* gives just those lines to someone else.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="Design/screenshots/naming-dark.webp">
-  <img alt="The Who Is This? panel over a meeting: a speaker's sample with two quotes, Jonas Weber as the most likely name and the invitees below" src="Design/screenshots/naming-light.webp">
+  <img alt="Naming voices over a meeting: Speaker 4's sample with two quotes, and the question Is this Jonas Weber? with the reason, Someone Else and Yes, It's Jonas" src="Design/screenshots/naming-light.webp">
 </picture>
 
 ### While you record
 
-A menu bar item and a small floating recorder you can put anywhere; the live window when you want to read along,
-with names after a few seconds, a live summary if you like, and markers with a note.
+A menu bar item and a small glass recorder you can put anywhere, with the time, the sound coming in, pause and stop;
+point at it for the last words it heard. Neither names anyone: who is talking is settled after the meeting, from the
+whole recording. The live window shows the transcript as it is spoken, your own lines marked, a live summary if you
+like, and markers.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="Design/screenshots/recording-dark.webp">
-  <img alt="The live window with the running transcript and a marker, the menu bar menu during a recording, and the floating recorder" src="Design/screenshots/recording-light.webp">
+  <img alt="The live window with a large timer, the sound of the last seconds and the running transcript with a marker, the menu bar menu during a recording, and the floating recorder" src="Design/screenshots/recording-light.webp">
 </picture>
 
 ### In your language
@@ -115,8 +121,8 @@ afterwards and names the ones it knows, just like the Mac. Speech recognition, v
 the device; only the transcript text goes to the summary service you choose.
 
 - **Record from anywhere.** On the iPhone, *Record* sits above the tab bar on every screen. While it records, that bar
-  shows the time, the level, pause and stop; a tap opens the live transcript with the time, the level and buttons to
-  mark a moment, pause and stop in reach of the thumb. On the iPad the record button sits at the top of the sidebar,
+  shows the time, the level, pause and stop; a tap opens the live transcript with the time, the sound of the last
+  seconds and buttons to mark a moment, stop and pause in reach of the thumb. On the iPad the record button sits at the top of the sidebar,
   as on the Mac. A phone call pauses the recording, and it carries on when the call ends.
 - **The same screens.** Inbox, Meetings (today as a day plan with a line for now, then every meeting by day), Action
   Items, People with the voice map, and Search through every transcript. A planned meeting offers to record it, with
@@ -129,8 +135,9 @@ the device; only the transcript text goes to the summary service you choose.
   Center, the Lock Screen, the Action Button, Siri or Shortcuts.
 - **Finished in the background.** After the recording the meeting is processed on the device; iOS 26 lets that go on
   with the screen locked and shows its progress.
-- **Shared views.** *Who is this?*, the speakers, the summary and the settings are the Mac's own views, laid out for a
-  narrow screen, so a change shows on every device.
+- **Shared views.** *Name Voices*, the people, the summary and the settings are the Mac's own views, laid out for a
+  narrow screen, so a change shows on every device. A meeting switches between *Summary* and *Transcript* under its
+  title, and the recording screen has the time, the sound and the buttons at the bottom, as in Voice Memos.
 
 - **The same meetings everywhere.** With Settings › General › iCloud on, meetings, people and the voices the app
   learned are the same on your Mac, iPhone and iPad, and the recordings too if you like: record on the phone, read on the
@@ -194,13 +201,14 @@ Summaries use Anthropic, OpenAI or Google (Ollama runs on the Mac only).
    lines sound like two voices shows both in the meeting; each can be played and given to someone on its own, which
    splits the speaker in the transcript.
 6. **Lines in the wrong place move.** When some lines of one speaker sound as clearly like another known person as an
-   automatic name needs, the app moves them there, marked, with *Keep* and *Move Back*. Moved lines count only as
-   recognised speech, so a wrong move teaches nothing.
-7. **Unsure is said out loud.** A voice that may be one of a few people is shown as "Hai or Julian?", with a button for
-   each, and the summary reads "Speaker 2 (maybe Hai or Julian)", so nothing is lost and nothing is named wrongly.
+   automatic name needs, the app moves them there; the ⓘ next to the person in the meeting's inspector keeps them or
+   moves them back. Moved lines count only as recognised speech, so a wrong move teaches nothing.
+7. **Unsure is said out loud.** A voice that may be one of a few people keeps its label until you settle it: *Name
+   Voices* asks about the likeliest and lists the others first under *Someone Else*, and the summary reads "Speaker 2
+   (maybe Hai or Julian)", so nothing is lost and nothing is named wrongly.
 
-During the recording the same happens in small: known voices are named after a few seconds, and each line is checked
-on its own. The pass after the meeting sees the whole recording and is more accurate.
+During the recording the app doesn't name anyone: a guess made from a few seconds is wrong too often to show. The pass
+after the meeting sees the whole recording and names the voices then.
 
 ## Languages
 
@@ -268,7 +276,8 @@ interface is German. Add `-AppleLanguages "(fr)"` to see it in another language.
 | ⌘F | Find in the transcript |
 | Space | Play or pause the recording |
 | ⌘I | Import an audio or video file |
-| 1–9, Return, M, X, → | In *Who Is This?*: pick a name, the most likely one, you, nobody in particular, skip |
+| Return, Space, →, Esc | In *Name Voices*: yes, play the voice again, skip it, stop for now |
+| ⌃⌘I | Show or hide a meeting's details and people |
 | ⇧⌘C | Copy the meeting's summary |
 | ⌘[ | On the iPad: back |
 
@@ -373,8 +382,8 @@ is in the private database of the user's iCloud account, in the zone `Transcript
 
 ## Good to know
 
-- The speaker names in the live window are provisional; similar voices can share a name until the pass after the
-  meeting sorts them out.
+- The live window and the floating recorder name nobody; who said what is worked out after the meeting, from the whole
+  recording, and the transcript shows it then.
 - Without any known voices, two people who sound very much alike can end up as one voice. Confirming a few voices
   fixes that for later meetings.
 - Local summaries need a model that fits into memory next to everything else. On a 24 GB Mac a 27B model is far too

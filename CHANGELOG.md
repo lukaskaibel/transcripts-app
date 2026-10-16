@@ -30,13 +30,12 @@ All notable changes to this project are recorded here. The format follows
   Live Activity: its title, a clock that keeps running, the markers, and buttons to pause, mark a moment and stop,
   without opening the app. *Record a Meeting* starts a recording from Control Center, the Lock Screen, the Action
   Button, Siri or Shortcuts.
-- **A sidebar that plans your day.** Below *Inbox*, *All Meetings* and *Action Items*, the sidebar shows today: the
-  calendar's meetings and your recordings in one list from the morning on, a quiet line for now, the next meeting set
-  apart with how long until it starts, and meetings you didn't record greyed out. Tomorrow folds away below, then the
-  latest meetings; one click opens a recording. *Inbox* gathers what waits after a meeting: new summaries and voices
-  without a name. *Action Items* lists the open tasks of every meeting, all or
-  only yours. People moved to the bottom, next to Settings, and ⌘1–⌘4 go to Inbox, All Meetings, Action Items and
-  People. A meeting opened from the inbox, the action items or People goes back there.
+- **A sidebar for your day.** Below *Inbox*, *All Meetings*, *Action Items* and *People*, the sidebar shows today: the
+  calendar's meetings and your recordings in one list from the morning on, with their times, and meetings you didn't
+  record greyed out. Tomorrow folds away below, then the latest meetings; one click opens a recording. *Inbox* gathers
+  what waits after a meeting: new summaries and voices without a name. *Action Items* lists the open tasks of every
+  meeting, all or only yours. ⌘1–⌘4 go to Inbox, All Meetings, Action Items and People. A meeting opened from the
+  inbox, the action items or People goes back there.
 - **Only your meetings.** Calendar events with guests that you're neither among nor organizing (a team's shared
   calendar, a colleague's) no longer show up in the sidebar or remind you. *Not my meeting* in an event's popover,
   its context menu or the reminder hides a series or everything from its calendar; Settings › General lists what's
@@ -46,6 +45,26 @@ All notable changes to this project are recorded here. The format follows
   policy, terms of use, support with common questions, and the Impressum.
 
 ### Changed
+
+- **A Mac app like Apple's own.** The main window is built like Notebook and the Mac's own apps: the system's sidebar,
+  glass buttons in the toolbar with search, and the inspector on the right (⌃⌘I). A meeting reads like a note:
+  a large title, the summary with headings and its action items as a checklist, and *Summary* and *Transcript* in the
+  toolbar to switch between them. The inspector lists the meeting's details and its people as Contacts would, with how
+  long each one spoke, instead of bars and percentages. Buttons are capsules, the command palette floats like
+  Spotlight, playback is a bar floating over the page, and the menu bar's menu looks like the system's menus.
+- **Nobody is named while you record.** The floating recorder is a small glass capsule with the time, the sound coming
+  in, pause and stop; with the pointer over it, it shows the last words it heard, and it says when no sound comes from
+  the call. The live window has a large timer, the sound of the last seconds, the transcript in paragraphs (only your
+  own lines are marked) and pause, stop and a marker floating at the bottom. Who is talking is settled after the
+  meeting, from the whole recording, where it is right far more often. On the iPhone the recording screen has the time,
+  the sound and the buttons at the bottom, as in Voice Memos.
+- **Naming a voice is one question.** A quiet bar above the summary says how many voices have no name.
+  *Name Voices…* asks about them one at a time, the way Photos asks about a face: the voice plays and the app says
+  whom it thinks it is, *Is this Jonas Weber?*, answered with *Yes* (Return) or *Someone Else* (the other guesses,
+  the invitees, everyone known, a new name, you, or nobody in particular). The suggestion cards, the name chips in the
+  transcript and the numbered list are gone. A click on a speaker's name in the transcript names the voice, or with
+  *Only This Passage* gives just those lines to someone else; lines the app moved and a speaker who sounds like two
+  voices wait behind the ⓘ next to the person in the inspector.
 
 - **Summaries go into detail.** Below the overview, decisions, action items and open questions, the summary now goes
   through every topic of the meeting with what was reported, the arguments, who does what and where it landed. Each part has a button that copies it (on the Mac when the pointer is over it), the action items copy as a

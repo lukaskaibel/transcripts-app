@@ -1,15 +1,16 @@
 import SwiftUI
 
-/// The column on the right of a meeting: facts, the voices and who they are. On the Mac and a wide iPad it stands
-/// beside the meeting; on the iPhone its content sits between the summary and the transcript.
+/// The column on the right of a meeting, as Notebook's outline: the facts, the people who spoke, the bookmarks. On
+/// the Mac and a wide iPad it stands beside the meeting; on the iPhone its content sits under the summary.
 struct Inspector: View {
     let detail: MeetingDetail
 
     var body: some View {
         ScrollView {
             InspectorContent(detail: detail)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 22)
+                .padding(.horizontal, 18)
+                .padding(.top, 14)
+                .padding(.bottom, 22)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -29,44 +30,34 @@ struct InspectorContent: View {
         detail.segments.map { "\($0.id ?? 0)\($0.speakerKey)\($0.voiceIgnored ? "-" : "")\($0.embedding == nil ? "" : "v")" }
     }
 
-    private var remoteSpeakers: [MeetingSpeaker] {
+    /// The people with a name first, longest talkers first; the voices without a name after them; you last.
+    private var speakers: [MeetingSpeaker] {
         detail.speakers.sorted { lhs, rhs in
             if lhs.isMe != rhs.isMe { return !lhs.isMe }
+            if lhs.needsReview != rhs.needsReview { return !lhs.needsReview }
             return lhs.talkTime > rhs.talkTime
         }
     }
 
-    private var totalTalk: Double {
-        max(detail.speakers.reduce(0) { $0 + $1.talkTime }, 1)
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            facts
+            if showsTimeFacts || hasOtherFacts {
+                heading(String(localized: "Details", comment: "inspector: heading over a meeting's date, length, source and language"))
+                facts
+            }
             if !detail.speakers.isEmpty {
-                if showsTimeFacts || hasOtherFacts { divider }
-                Text(String(localized: "Sprecher", comment: "heading over the list of the meeting's speakers (plural)")).font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.bottom, 12)
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(remoteSpeakers) { speaker in
-                        SpeakerRow(detail: detail, speaker: speaker, share: speaker.talkTime / totalTalk)
+                heading(String(localized: "Personen"))
+                    .padding(.top, showsTimeFacts || hasOtherFacts ? 22 : 0)
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(speakers) { speaker in
                         let groups = otherVoices(of: speaker)
-                        if groups.count > 1 {
-                            SpeakerGroupsView(detail: detail, speaker: speaker, groups: groups)
-                        }
                         let moved = detail.segments.filter { $0.speakerKey == speaker.key && $0.placement == .app }
-                        if !moved.isEmpty {
-                            MovedLinesNote(detail: detail, speaker: speaker, lines: moved)
-                        }
+                        PersonLine(detail: detail, speaker: speaker, groups: groups, moved: moved)
                     }
-                }
-                ForEach(detail.speakers.filter { $0.needsReview && (!detail.guesses(for: $0).isEmpty || $0.suggestedName != nil) }) { speaker in
-                    SuggestionCard(detail: detail, speaker: speaker)
-                        .padding(.top, 14)
                 }
             }
             if !detail.markers.isEmpty {
-                divider
-                Text("Markierungen").font(.smallSemibold).foregroundStyle(Theme.textSecondary).padding(.bottom, 10)
+                heading(String(localized: "Markierungen")).padding(.top, 22)
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(detail.markers) { marker in
                         Button {
@@ -87,9 +78,9 @@ struct InspectorContent: View {
             }
             if let model = detail.meeting.transcriptionModel {
                 Text("Lokal transkribiert · \(model)")
-                    .font(.small)
+                    .font(.tiny)
                     .foregroundStyle(Theme.textTertiary)
-                    .padding(.top, 28)
+                    .padding(.top, 26)
             }
         }
         .task(id: linesSignature) {
@@ -98,6 +89,15 @@ struct InspectorContent: View {
             guard !Task.isCancelled else { return }
             voiceGroups = groups
         }
+    }
+
+    /// A heading as the sidebar's: small, grey, semibold.
+    private func heading(_ title: String) -> some View {
+        Text(title)
+            .font(.tinySemibold)
+            .foregroundStyle(Theme.textTertiary)
+            .padding(.bottom, 8)
+            .accessibilityAddTraits(.isHeader)
     }
 
     /// The groups of a speaker's lines worth naming on their own: the main one, and those that sound
@@ -114,17 +114,13 @@ struct InspectorContent: View {
         return others.isEmpty ? [] : [groups[0]] + others
     }
 
-    private var divider: some View {
-        Rectangle().fill(Theme.rowSeparator).frame(height: 1).padding(.vertical, 18)
-    }
-
     /// Facts that don't stand under the title: the language and the invitees.
     private var hasOtherFacts: Bool {
         detail.meeting.language != nil || !detail.meeting.attendees.isEmpty
     }
 
     private var facts: some View {
-        Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 14, verticalSpacing: 11) {
+        Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 7) {
             if showsTimeFacts {
                 fact("Datum", TimeFormat.shortDate(detail.meeting.startedAt))
                 fact("Dauer", TimeFormat.duration(detail.meeting.duration))
@@ -137,11 +133,12 @@ struct InspectorContent: View {
                 GridRow {
                     Text("Eingeladen").foregroundStyle(Theme.textTertiary)
                     Text(detail.meeting.attendees.map(\.name).joined(separator: ", "))
-                        .lineLimit(3)
+                        .lineLimit(4)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
+        .font(.small)
     }
 
     private func fact(_ label: LocalizedStringKey, _ value: String) -> some View {
@@ -152,86 +149,144 @@ struct InspectorContent: View {
     }
 }
 
-struct SpeakerRow: View {
+/// One person in the meeting, as a contact: the picture, the name and how long they spoke. A voice without a name
+/// shows its label in grey. A click opens the menu that names it; what the app isn't sure about (lines it moved,
+/// a voice that sounds like two) waits behind the ⓘ.
+struct PersonLine: View {
     @Environment(AppModel.self) private var model
     let detail: MeetingDetail
     let speaker: MeetingSpeaker
-    let share: Double
+    let groups: [SpeakerVoices.Group]
+    let moved: [Segment]
+    @State private var showsDetails = false
 
     var body: some View {
-        Menu {
-            SpeakerMenuItems(detail: detail, speaker: speaker)
-        } label: {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 8) {
-                    Avatar(kind: detail.avatarKind(for: speaker.key), size: 18)
-                    Text(detail.displayName(for: speaker.key)).lineLimit(1)
-                    if speaker.assignment == .automatic {
-                        Image(systemName: "waveform")
-                            .font(.system(size: 9, weight: .semibold))
+        HStack(spacing: 10) {
+            Menu {
+                SpeakerMenuItems(detail: detail, speaker: speaker)
+            } label: {
+                HStack(spacing: 10) {
+                    Avatar(kind: detail.avatarKind(for: speaker.key), size: Platform.isMobile ? 32 : 26)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(detail.settledName(for: speaker.key))
+                            .font(.ui)
+                            .foregroundStyle(speaker.needsReview ? Theme.textSecondary : Theme.text)
+                            .lineLimit(1)
+                        Text(subtitle)
+                            .font(.tiny)
                             .foregroundStyle(Theme.textTertiary)
-                            .help("An der Stimme erkannt")
+                            .lineLimit(1)
                     }
-                    Spacer(minLength: 4)
-                    Text(share.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current))).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
+                    Spacer(minLength: 0)
                 }
-                ThinBar(fraction: share, color: barColor)
-                    .padding(.leading, 26)
+                .contentShape(Rectangle())
             }
-            .contentShape(Rectangle())
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .menuIndicator(.hidden)
+            .help(speaker.isMe ? "Du (Mikrofon)" : "Klicken, um die Stimme zuzuordnen")
+            if !groups.isEmpty || !moved.isEmpty {
+                Button {
+                    showsDetails = true
+                } label: {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: Platform.isMobile ? 17 : 13))
+                        .foregroundStyle(Theme.warning)
+                        .frame(width: 24, height: 24)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(PlainPressStyle())
+                .help(detailsHelp)
+                .accessibilityLabel(detailsHelp)
+                .popover(isPresented: $showsDetails, arrowEdge: .leading) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        if groups.count > 1 {
+                            SpeakerGroupsView(detail: detail, speaker: speaker, groups: groups)
+                        }
+                        if !moved.isEmpty {
+                            MovedLinesNote(detail: detail, speaker: speaker, lines: moved)
+                        }
+                    }
+                    .padding(16)
+                    .frame(width: 320, alignment: .leading)
+                }
+            }
         }
-        .menuStyle(.button)
-        .buttonStyle(.plain)
-        .menuIndicator(.hidden)
-        .help(speaker.isMe ? "Du (Mikrofon)" : "Klicken, um die Stimme zuzuordnen")
+        .frame(minHeight: Platform.isMobile ? 48 : 38)
     }
 
-    private var barColor: Color {
-        switch detail.avatarKind(for: speaker.key) {
-        case .person(let name): Theme.color(for: name)
-        case .me: Theme.meColor
-        case .unknown: Theme.textTertiary
-        }
+    private var subtitle: String {
+        let time = TimeFormat.duration(speaker.talkTime)
+        return speaker.isMe ? "\(Strings.me) · \(time)" : time
+    }
+
+    private var detailsHelp: String {
+        groups.count > 1
+            ? String(localized: "Klingt nach \(groups.count) Stimmen", comment: "plural: one speaker's lines sound like this many voices")
+            : String(localized: "\(moved.count) Zeilen von der App hierher verschoben", comment: "plural: lines the app moved to this speaker")
     }
 }
 
-/// Everything you can say about a voice: who it is, or that it's you, or play it back.
+/// Everything you can say about a voice: who it is (the app's guesses first), that it's you, or play it back.
 struct SpeakerMenuItems: View {
     @Environment(AppModel.self) private var model
     let detail: MeetingDetail
     let speaker: MeetingSpeaker
 
     var body: some View {
+        if !speaker.isMe {
+            let guesses = guessed
+            Section(speaker.personId == nil ? String(localized: "Stimme benennen", comment: "menu section: name a voice") : String(localized: "Andere Person", comment: "menu section: give a named voice to someone else")) {
+                ForEach(guesses) { person in
+                    Button {
+                        model.assign(speaker, to: person.id)
+                    } label: {
+                        Text(person.name)
+                        Text(person.id == speaker.suggestedPersonId ? (speaker.displayReason ?? String(localized: "Vorschlag")) : String(localized: "Stimme ähnlich"))
+                    }
+                }
+                if speaker.suggestedPersonId == nil, let name = speaker.suggestedName, speaker.personId == nil {
+                    Button {
+                        model.confirmSuggestion(speaker)
+                    } label: {
+                        Text(name)
+                        Text(speaker.displayReason ?? String(localized: "Vorschlag"))
+                    }
+                }
+                let invited = invitees.filter { attendee in !guesses.contains { $0.name == attendee.name } }
+                ForEach(invited, id: \.name) { attendee in
+                    Button(attendee.name) { assign(attendee) }
+                }
+                let known = model.people.filter { person in
+                    !person.isMe && !invitees.map(\.name).contains(person.name) && !guesses.contains { $0.id == person.id } && person.id != speaker.personId
+                }
+                if !known.isEmpty {
+                    Menu("Bekannt") {
+                        ForEach(known) { person in
+                            Button(person.name) { model.assign(speaker, to: person.id) }
+                        }
+                    }
+                }
+                Button("Neue Person …", systemImage: "person.badge.plus") { NamePrompt.newPerson(for: speaker, model: model) }
+                Button("Das bin ich", systemImage: "person.crop.circle") { model.assignToMe(speaker) }
+            }
+            if speaker.personId != nil {
+                Button("Zuordnung entfernen", systemImage: "xmark") { model.unassign(speaker) }
+            } else if speaker.needsReview {
+                Button("Niemand Bestimmtes", systemImage: "person.slash") { model.ignoreVoice(speaker) }
+            }
+        }
         if let start = speaker.sampleStart, let end = speaker.sampleEnd, AudioArchiver.hasAudio(meetingId: detail.meeting.id) {
+            Divider()
             Button("Stimmprobe anhören", systemImage: "play") {
                 Task { await model.player.play(meetingId: detail.meeting.id, from: start, until: end) }
             }
-            Divider()
         }
-        if !speaker.isMe {
-            let invited = invitees
-            if !invited.isEmpty {
-                Section("Eingeladen") {
-                    ForEach(invited, id: \.name) { attendee in
-                        Button(attendee.name) { assign(attendee) }
-                    }
-                }
-            }
-            let known = model.people.filter { !$0.isMe && !invited.map(\.name).contains($0.name) }
-            if !known.isEmpty {
-                Section("Bekannt") {
-                    ForEach(known) { person in
-                        Button(person.name) { model.assign(speaker, to: person.id) }
-                    }
-                }
-            }
-            Button("Neue Person …", systemImage: "person.badge.plus") { NamePrompt.newPerson(for: speaker, model: model) }
-            Button("Das bin ich", systemImage: "person.crop.circle") { model.assignToMe(speaker) }
-            if speaker.personId != nil {
-                Divider()
-                Button("Zuordnung entfernen", systemImage: "xmark") { model.unassign(speaker) }
-            }
-        }
+    }
+
+    /// The people the app thinks the voice is, while it isn't settled.
+    private var guessed: [Person] {
+        speaker.personId == nil ? detail.guesses(for: speaker) : []
     }
 
     private var invitees: [Attendee] {
@@ -244,97 +299,6 @@ struct SpeakerMenuItems: View {
         } else {
             model.assign(speaker, toNewPersonNamed: attendee.name, email: attendee.email)
         }
-    }
-}
-
-/// "Wer ist Sprecher 4?" with the people the app guesses (one or a few), why, and one click each.
-struct SuggestionCard: View {
-    @Environment(AppModel.self) private var model
-    let detail: MeetingDetail
-    let speaker: MeetingSpeaker
-
-    private var guesses: [Person] {
-        detail.guesses(for: speaker)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top) {
-                Text(guesses.count > 1 ? "Wer ist \(speaker.displayLabel)?" : "\(speaker.displayLabel) ist vermutlich").font(.small).foregroundStyle(Theme.textSecondary)
-                Spacer(minLength: 4)
-                IconButton(systemName: "xmark", label: guesses.count > 1 ? String(localized: "Keiner davon") : String(localized: "Vorschlag verwerfen"), size: 20) { model.rejectGuesses(speaker) }
-                    .padding(.top, -3)
-                    .padding(.trailing, -4)
-            }
-            VStack(alignment: .leading, spacing: 4) {
-                ForEach(guesses) { person in
-                    guessRow(name: person.name, reason: reason(for: person.id)) { model.assign(speaker, to: person.id) }
-                }
-                if speaker.suggestedPersonId == nil, let name = speaker.suggestedName {
-                    guessRow(name: name, reason: speaker.displayReason, isNew: true) { model.confirmSuggestion(speaker) }
-                }
-            }
-            .padding(.top, 6)
-            HStack(spacing: 6) {
-                if guesses.count + (speaker.suggestedPersonId == nil && speaker.suggestedName != nil ? 1 : 0) == 1 {
-                    Button("Bestätigen") { model.confirmSuggestion(speaker) }
-                        .buttonStyle(PrimaryButtonStyle())
-                        .fixedSize()
-                }
-                Menu {
-                    SpeakerMenuItems(detail: detail, speaker: speaker)
-                } label: {
-                    Text("Andere Person")
-                        .font(.small)
-                        .foregroundStyle(Theme.textBody)
-                        .padding(.horizontal, 10)
-                        .frame(height: 26)
-                        .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Theme.card))
-                        .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Theme.chipBorder, lineWidth: 1))
-                        .contentShape(Rectangle())
-                }
-                .menuStyle(.button)
-                .buttonStyle(.plain)
-                .menuIndicator(.hidden)
-                .fixedSize()
-                Spacer(minLength: 0)
-            }
-            .padding(.top, 10)
-        }
-        .padding(12)
-        .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Theme.selectionFill))
-        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Theme.selectionBorder, lineWidth: 1))
-    }
-
-    private func reason(for personId: String) -> String? {
-        if personId == speaker.suggestedPersonId { return speaker.displayReason }
-        return String(localized: "Stimme ähnlich")
-    }
-
-    private func guessRow(name: String, reason: String?, isNew: Bool = false, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(alignment: .top, spacing: 8) {
-                Avatar(kind: .person(name: name), size: 18)
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text(name).font(.uiSemibold).lineLimit(1)
-                        if isNew { Text(String(localized: "neu", comment: "badge next to a suggested name: this person isn't known yet")).font(.tiny).foregroundStyle(Theme.textTertiary) }
-                    }
-                    if let reason {
-                        Text(reason)
-                            .font(.small)
-                            .foregroundStyle(Theme.textSecondary)
-                            .lineLimit(3)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(.vertical, 3)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(PlainPressStyle())
-        .help("\(name) zuordnen")
     }
 }
 
@@ -369,8 +333,6 @@ struct MovedLinesNote: View {
             .font(.small.weight(.medium))
             .foregroundStyle(Theme.accent)
         }
-        .padding(.leading, 26)
-        .padding(.top, -4)
     }
 
     private var origins: String {
@@ -399,8 +361,6 @@ struct SpeakerGroupsView: View {
                 SpeakerGroupRow(detail: detail, speaker: speaker, group: group, number: index + 1)
             }
         }
-        .padding(.leading, 26)
-        .padding(.top, -4)
     }
 }
 

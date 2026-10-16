@@ -15,6 +15,7 @@ struct MeetingScreen: View {
     /// The title in the bar only once the big one has scrolled away, as in Apple's own apps.
     @State private var scrolledPastTitle = false
     @State private var width: CGFloat = 0
+    @State private var tab: MeetingTab?
 
     /// The facts and the voices beside the meeting where there is room for both, as on the Mac.
     private var inspectorBeside: Bool { wide && width >= 760 }
@@ -87,14 +88,26 @@ struct MeetingScreen: View {
                     titleBlock(detail)
                     StatusBanner(detail: detail)
                     VoicesBanner(detail: detail)
-                    SummarySection(detail: detail)
-                    if !inspectorBeside, !detail.speakers.isEmpty || !detail.markers.isEmpty || !detail.meeting.attendees.isEmpty {
-                        InspectorContent(detail: detail, showsTimeFacts: false)
-                            .padding(16)
-                            .cardStyle(radius: 14)
-                            .padding(.bottom, 32)
+                    Picker("Ansicht", selection: tabBinding(detail)) {
+                        Text("Zusammenfassung").tag(MeetingTab.summary)
+                        Text("Transkript").tag(MeetingTab.transcript)
                     }
-                    TranscriptSection(detail: detail)
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .accessibilityIdentifier("meeting.tab")
+                    .padding(.bottom, 22)
+                    switch tabBinding(detail).wrappedValue {
+                    case .summary:
+                        SummarySection(detail: detail)
+                        if !inspectorBeside, !detail.speakers.isEmpty || !detail.markers.isEmpty || !detail.meeting.attendees.isEmpty {
+                            InspectorContent(detail: detail, showsTimeFacts: false)
+                                .padding(16)
+                                .cardStyle(radius: 16)
+                                .padding(.bottom, 32)
+                        }
+                    case .transcript:
+                        TranscriptSection(detail: detail)
+                    }
                 }
                 .padding(.horizontal, wide ? 36 : 20)
                 .padding(.top, 12)
@@ -109,6 +122,7 @@ struct MeetingScreen: View {
             }
             .onChange(of: model.focusedSegmentId, initial: true) { _, id in
                 guard let id else { return }
+                tab = .transcript
                 Task {
                     try? await Task.sleep(for: .milliseconds(350))
                     withAnimation(Theme.spring) { proxy.scrollTo(id, anchor: .center) }
@@ -125,6 +139,12 @@ struct MeetingScreen: View {
         .onChange(of: detail.summary?.createdAt, initial: true) { _, written in
             if let written { model.markSummaryRead(detail.meeting.id, written: written) }
         }
+        .showsSummaryWhenItArrives(detail, tab: tabBinding(detail))
+    }
+
+    /// The tab chosen here, or until then the one the meeting starts on.
+    private func tabBinding(_ detail: MeetingDetail) -> Binding<MeetingTab> {
+        Binding(get: { tab ?? MeetingTab.initial(for: detail) }, set: { tab = $0 })
     }
 
     private func titleBlock(_ detail: MeetingDetail) -> some View {
@@ -139,7 +159,7 @@ struct MeetingScreen: View {
                 .font(.ui)
                 .foregroundStyle(Theme.textSecondary)
         }
-        .padding(.bottom, 24)
+        .padding(.bottom, 20)
     }
 
     private func metaLine(_ detail: MeetingDetail) -> String {
@@ -171,7 +191,7 @@ struct MeetingScreen: View {
                     renaming = true
                 }
                 if let detail, detail.meeting.status == .ready, detail.speakers.contains(where: { $0.needsReview }) {
-                    Button("Wer ist das?", systemImage: "person.wave.2") { model.startNaming(meetingId) }
+                    Button(String(localized: "Stimmen benennen …", comment: "button: name the voices of a meeting one after another"), systemImage: "person.wave.2") { model.startNaming(meetingId) }
                 }
                 Divider()
                 MeetingMenuItems(meetingId: meetingId) { deleting = true }

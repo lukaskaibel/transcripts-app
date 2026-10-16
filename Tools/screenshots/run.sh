@@ -21,15 +21,30 @@ pkill -f "$app/Contents/MacOS/Transcripts -demo YES" 2>/dev/null || true
 sleep 0.5
 cmd=build/screens/cmd
 : > "$cmd"
+# Without the windows of the last run (a live window left open would end up in the pictures).
 open ${BACKGROUND:+-g} -n "$app" --args -demo YES -debugCommandFile "$PWD/$cmd" -debugOutput "$PWD/$out" ${=DEMO_ARGS} \
-  "-NSWindow Frame MainWindow" "100 80 1280 820 0 0 1512 949"
+  -ApplePersistenceIgnoreState YES "-NSWindow Frame MainWindow" "100 80 1280 820 0 0 1512 949"
 sleep 3
 
 send() { echo "$1" >> "$cmd"; sleep ${2:-1.2}; }
 
+# capture shot|second <name>: the windows as the screen shows them (the sidebar's and the toolbar's materials, which
+# the app can't draw into an image itself), with ScreenCaptureKit. Needs Screen Recording permission for the terminal
+# and an awake screen.
+capture_tool=build/screens/capture
+if [ ! -x "$capture_tool" ] || [ Tools/screenshots/capture.swift -nt "$capture_tool" ]; then
+  swiftc -O Tools/screenshots/capture.swift -o "$capture_tool" 2>&1 | grep -E "error" || true
+fi
+capture() {
+  sleep 0.6
+  local pid=$(pgrep -f "$app/Contents/MacOS/Transcripts -demo YES" | head -1)
+  "$capture_tool" "$1" "$pid" "$out/$2.png" || echo "capture $2 failed" >&2
+}
+
 if [ -n "$1" ]; then
   while IFS= read -r line; do
     [[ "$line" == wait* ]] && { sleep ${line#wait }; continue; }
+    [[ "$line" == capture* ]] && { capture ${=line#capture }; continue; }
     send "$line"
   done < "$1"
 else

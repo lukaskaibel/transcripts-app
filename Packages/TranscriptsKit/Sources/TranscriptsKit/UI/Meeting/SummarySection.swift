@@ -22,8 +22,7 @@ struct SummarySection: View {
     // MARK: States
 
     private var generating: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            header(trailing: AnyView(EmptyView()))
+        VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 10) {
                 ProgressView().controlSize(.small)
                 Text(model.settings.summaryProvider.flatMap { model.modelName(for: $0) }.map { String(localized: "Wird mit \($0) zusammengefasst …") } ?? String(localized: "Wird mit dem Modell zusammengefasst …"))
@@ -60,36 +59,18 @@ struct SummarySection: View {
             }
         }
         .padding(.leading, 14)
-        .padding(.trailing, 8)
-        .frame(height: 46)
-        .cardStyle()
+        .padding(.trailing, 10)
+        .frame(minHeight: 46)
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.suggestion))
     }
 
     private func content(_ summary: MeetingSummary) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            header(trailing: AnyView(HStack(spacing: 2) {
-                // On a phone there is no room for it next to the buttons.
-                ViewThatFits(in: .horizontal) {
-                    Text(summary.model).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1).fixedSize()
-                    Color.clear.frame(width: 0, height: 0)
-                }
-                .padding(.trailing, 4)
-                IconButton(systemName: "arrow.clockwise", label: String(localized: "Neu erstellen")) {
-                    Task { await model.generateSummary(detail.meeting.id) }
-                }
-                .disabled(!model.summaryProviderReady)
-                IconButton(systemName: "doc.on.doc", label: String(localized: "Zusammenfassung kopieren")) {
-                    model.copyToClipboard(SummaryText.markdown(detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
-                }
-                .accessibilityIdentifier("summary.copy")
-                .debugFrame("summary.copy")
-            }))
             Text(summary.overview)
                 .font(.reading)
-                .lineSpacing(4)
-                .foregroundStyle(Theme.textBody)
+                .lineSpacing(5)
+                .foregroundStyle(Theme.text)
                 .textSelection(.enabled)
-                .padding(.top, 10)
                 .fixedSize(horizontal: false, vertical: true)
 
             if !summary.decisions.isEmpty {
@@ -99,7 +80,7 @@ struct SummarySection: View {
             }
             if !detail.actionItems.isEmpty {
                 TasksHeader(detail: detail)
-                    .padding(.top, 14)
+                    .padding(.top, 26)
                 ActionItemList(items: detail.actionItems, people: Array(detail.people.values) + model.people)
                     .padding(.top, 4)
             }
@@ -115,17 +96,28 @@ struct SummarySection: View {
                     TopicList(topics: summary.topics)
                 }
             }
+            footer(summary)
         }
     }
 
-    private func header(trailing: AnyView) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "sparkle").font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.accent)
-            Text("Zusammenfassung").font(.uiSemibold)
-            Spacer(minLength: 8)
-            trailing
+    /// Which model wrote it, and the ways to write it again or copy it, quietly under the summary.
+    private func footer(_ summary: MeetingSummary) -> some View {
+        HStack(spacing: 14) {
+            Text("Zusammengefasst mit \(summary.model)", comment: "under a summary: the language model that wrote it")
+                .lineLimit(1)
+            Button("Neu erstellen") { Task { await model.generateSummary(detail.meeting.id) } }
+                .disabled(!model.summaryProviderReady)
+            Button("Kopieren") {
+                model.copyToClipboard(SummaryText.markdown(detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
+            }
+            .accessibilityIdentifier("summary.copy")
+            .debugFrame("summary.copy")
+            Spacer(minLength: 0)
         }
-        .frame(height: 26)
+        .buttonStyle(PlainPressStyle())
+        .font(.small)
+        .foregroundStyle(Theme.textTertiary)
+        .padding(.top, 32)
     }
 }
 
@@ -204,7 +196,8 @@ struct SummaryPart<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                Text(title).font(.smallSemibold).foregroundStyle(Theme.textSecondary)
+                Text(title).font(.pageHeading).foregroundStyle(Theme.text)
+                    .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 8)
                 IconButton(systemName: "doc.on.doc", label: String(localized: "\(title) kopieren", comment: "button: copy one part of the summary, e.g. Entscheidungen kopieren"), size: 22, tint: Theme.textTertiary) {
                     model.copyToClipboard(text, toast: String(localized: "\(title) kopiert", comment: "toast: one part of the summary was copied, e.g. Entscheidungen kopiert"))
@@ -213,10 +206,10 @@ struct SummaryPart<Content: View>: View {
                 .accessibilityIdentifier("summary.\(id).copy")
                 .debugFrame("summary.\(id).copy")
             }
-            .frame(height: 22)
+            .frame(minHeight: 26)
             content
         }
-        .padding(.top, 17)
+        .padding(.top, 28)
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
     }
@@ -251,10 +244,11 @@ struct TasksHeader: View {
     let detail: MeetingDetail
 
     var body: some View {
-        HStack(spacing: 8) {
-            Text("Aufgaben").font(.smallSemibold).foregroundStyle(Theme.textSecondary)
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text("Aufgaben").font(.pageHeading).foregroundStyle(Theme.text)
+                .accessibilityAddTraits(.isHeader)
             Text("\(detail.actionItems.filter(\.done).count) von \(detail.actionItems.count)")
-                .font(.small)
+                .font(.ui)
                 .foregroundStyle(Theme.textTertiary)
             Spacer(minLength: 8)
             Button {
@@ -276,24 +270,30 @@ struct TasksHeader: View {
             .accessibilityIdentifier("summary.tasks.copy")
             .debugFrame("summary.tasks.copy")
         }
-        .frame(height: 28)
+        .frame(minHeight: 28)
     }
 }
 
+/// A meeting's tasks as a checklist, as Notebook draws one: on the Mac plain lines on the page, on iPhone and iPad
+/// in a group of their own.
 struct ActionItemList: View {
     let items: [ActionItem]
     let people: [Person]
 
     var body: some View {
-        VStack(spacing: 0) {
+        let list = VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 ActionItemRow(item: item, people: people)
                     .overlay(alignment: .top) {
-                        if index > 0 { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
+                        if index > 0 && Platform.isMobile { Rectangle().fill(Theme.rowSeparator).frame(height: 1).padding(.leading, 46) }
                     }
             }
         }
-        .cardStyle()
+        if Platform.isMobile {
+            list.cardStyle(radius: 14)
+        } else {
+            list.padding(.horizontal, -14)
+        }
     }
 }
 
@@ -309,15 +309,15 @@ struct ActionItemRow: View {
                 model.toggleActionItem(item)
             } label: {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    RoundedRectangle(cornerRadius: 5, style: .continuous)
                         .fill(item.done ? Theme.accent : .clear)
-                    RoundedRectangle(cornerRadius: 4, style: .continuous)
-                        .stroke(item.done ? Theme.accent : Theme.textTertiary, lineWidth: 1.5)
+                    RoundedRectangle(cornerRadius: 5, style: .continuous)
+                        .strokeBorder(item.done ? Theme.accent : Theme.textTertiary.opacity(0.7), lineWidth: 1.5)
                     if item.done {
-                        Image(systemName: "checkmark").font(.system(size: 8, weight: .bold)).foregroundStyle(Theme.onColor)
+                        Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)).foregroundStyle(.white)
                     }
                 }
-                .frame(width: 14, height: 14)
+                .frame(width: 17, height: 17)
                 #if os(iOS)
                 // Big enough for a finger, without moving the box.
                 .frame(width: 34, height: 34)
@@ -330,6 +330,7 @@ struct ActionItemRow: View {
             .accessibilityIdentifier("task.\(item.id ?? 0).done")
             .debugFrame("task.\(item.id ?? 0).done")
             Text(item.text)
+                .font(.reading)
                 .strikethrough(item.done, color: Theme.textTertiary)
                 .foregroundStyle(item.done ? Theme.textTertiary : Theme.text)
                 .lineLimit(2)
@@ -342,17 +343,13 @@ struct ActionItemRow: View {
                     .accessibilityIdentifier("task.\(item.id ?? 0).copy")
                     .debugFrame("task.\(item.id ?? 0).copy")
             }
-            if let due = item.due {
-                Text(due).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1)
-            }
-            if let owner = item.owner {
-                Avatar(kind: kind(for: owner), size: 18)
-                    .help(owner)
+            if let who = ownerAndDue {
+                Text(who).font(.ui).foregroundStyle(Theme.textTertiary).lineLimit(1)
             }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, Platform.isMobile ? 9 : 0)
-        .frame(minHeight: Platform.isMobile ? 46 : 38)
+        .frame(minHeight: Platform.isMobile ? 46 : 32)
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
         .contextMenu {
@@ -367,11 +364,13 @@ struct ActionItemRow: View {
         model.copyToClipboard(SummaryText.task(item), toast: String(localized: "Aufgabe kopiert", comment: "toast"))
     }
 
-    private func kind(for owner: String) -> Avatar.Kind {
-        let lowered = owner.lowercased()
-        if let person = people.first(where: { $0.name.lowercased() == lowered || $0.firstName.lowercased() == lowered }) {
-            return person.isMe ? .me(name: person.name) : .person(name: person.name)
+    /// "Lukas · Mi.": whose task it is, by first name, and when it is due.
+    private var ownerAndDue: String? {
+        let owner = item.owner.map { owner in
+            let lowered = owner.lowercased()
+            return people.first(where: { $0.name.lowercased() == lowered || $0.firstName.lowercased() == lowered })?.firstName ?? owner
         }
-        return .person(name: owner)
+        let parts = [owner, item.due].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 }

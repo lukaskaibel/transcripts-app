@@ -2,12 +2,16 @@
 import AppKit
 import SwiftUI
 
-/// The small recorder that floats above every window while a meeting is recorded.
+/// The small recorder that floats above every window while a meeting is recorded: a glass capsule with the time,
+/// the sound coming in, pause and stop. It names nobody (who is talking right now is only guessed during the
+/// meeting and settled afterwards); with the pointer over it, it shows the last words it heard.
 @MainActor
 final class FloatingRecorderController {
-    static let size = NSSize(width: 300, height: 72)
-    /// A new name, so the larger recorder's old place at the top centre is forgotten once.
-    private static let frameName = "FloatingRecorder.compact"
+    static let compact = NSSize(width: 252, height: 64)
+    static let expanded = NSSize(width: 372, height: 104)
+    static let identifier = NSUserInterfaceItemIdentifier("FloatingRecorder")
+    /// A new name, so the dark recorder's old place is forgotten once.
+    private static let frameName = "FloatingRecorder.glass"
 
     private weak var model: AppModel?
     private var panel: NSPanel?
@@ -22,29 +26,38 @@ final class FloatingRecorderController {
         guard let model else { return }
         if panel == nil {
             let panel = RecorderPanel(
-                contentRect: NSRect(origin: .zero, size: Self.size),
+                contentRect: NSRect(origin: .zero, size: Self.compact),
                 styleMask: [.borderless, .nonactivatingPanel],
                 backing: .buffered,
                 defer: false
             )
+            panel.identifier = Self.identifier
             panel.isFloatingPanel = true
             panel.level = .floating
             panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
             panel.backgroundColor = .clear
             panel.isOpaque = false
-            panel.hasShadow = true
+            // The capsule draws its own shadow; the window's would follow the transparent margin.
+            panel.hasShadow = false
             panel.hidesOnDeactivate = false
             panel.isReleasedWhenClosed = false
-            panel.appearance = NSAppearance(named: .darkAqua)
-            let hosting = NSHostingView(rootView: FloatingRecorderView().environment(model))
-            hosting.frame = NSRect(origin: .zero, size: Self.size)
+            let hosting = NSHostingView(rootView: FloatingRecorderView { [weak self] expanded in
+                self?.setExpanded(expanded)
+            }.environment(model))
+            hosting.frame = NSRect(origin: .zero, size: Self.compact)
+            hosting.autoresizingMask = [.width, .height]
             panel.contentView = hosting
             panel.setFrameAutosaveName(Self.frameName)
             let restored = panel.setFrameUsingName(Self.frameName)
+            var frame = panel.frame
+            frame.origin.y = frame.maxY - Self.compact.height
+            frame.origin.x = frame.maxX - Self.compact.width
+            frame.size = Self.compact
+            panel.setFrame(frame, display: false)
             // Out of the way of the call: the top right corner, unless it was moved somewhere that is still on screen.
             if !restored || !NSScreen.screens.contains(where: { $0.visibleFrame.intersects(panel.frame) }), let screen = NSScreen.main {
-                let frame = screen.visibleFrame
-                panel.setFrameOrigin(NSPoint(x: frame.maxX - Self.size.width - 16, y: frame.maxY - Self.size.height - 16))
+                let visible = screen.visibleFrame
+                panel.setFrameOrigin(NSPoint(x: visible.maxX - Self.compact.width - 8, y: visible.maxY - Self.compact.height - 8))
             }
             self.panel = panel
         }
@@ -53,6 +66,18 @@ final class FloatingRecorderController {
 
     func hide() {
         panel?.orderOut(nil)
+    }
+
+    /// Grows down and to the left from the top right corner, so the buttons stay under the pointer.
+    func setExpanded(_ expanded: Bool) {
+        guard let panel else { return }
+        let size = expanded ? Self.expanded : Self.compact
+        guard panel.frame.size != size else { return }
+        var frame = panel.frame
+        frame.origin.x = frame.maxX - size.width
+        frame.origin.y = frame.maxY - size.height
+        frame.size = size
+        panel.setFrame(frame, display: true, animate: false)
     }
 }
 
@@ -63,44 +88,59 @@ private final class RecorderPanel: NSPanel {
 
 struct FloatingRecorderView: View {
     @Environment(AppModel.self) private var model
+    /// Asks the panel to make room for a second line, or to shrink back.
+    var expand: (Bool) -> Void
+    @State private var hovering = false
 
     var body: some View {
-        if let session = model.recording {
-            content(session)
-        } else {
-            Color.clear
+        Group {
+            if let session = model.recording {
+                content(session)
+            } else {
+                Color.clear
+            }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+        .padding(8)
     }
 
     private func content(_ session: RecordingSession) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
+        let problem = problem(session)
+        let expanded = hovering || problem != nil
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 10) {
                 if session.state == .paused {
-                    Image(systemName: "pause.fill")
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundStyle(Color(hex: 0x9A9FA8))
-                        .frame(width: 8)
+                    Circle().fill(Theme.textTertiary).frame(width: 8, height: 8)
                 } else {
                     RecordingDot()
                 }
                 Text(TimeFormat.clock(session.elapsed))
-                    .font(.system(size: 12, design: .monospaced))
+                    .font(.system(size: 15, weight: .semibold))
                     .monospacedDigit()
-                    .foregroundStyle(Color(hex: 0xE8E9EB))
-                Text(session.title)
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(Color(hex: 0x9A9FA8))
-                    .lineLimit(1)
-                Spacer(minLength: 4)
-                LevelBars(level: max(session.systemLevel, session.microphoneLevel), color: Color(hex: 0x9A9FA8), height: 11)
+                    .foregroundStyle(session.state == .paused ? Theme.textSecondary : Theme.text)
+                if expanded {
+                    Text(session.title)
+                        .font(.small)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else if session.state == .paused {
+                    Text(String(localized: "Pausiert", comment: "the recording is paused"))
+                        .font(.small)
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    LevelWaveform(level: { session.waveformLevel() }, bars: 9, height: 20, barWidth: 3, spacing: 2, running: session.state != .paused)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
                 Button {
                     model.togglePause()
                 } label: {
                     Image(systemName: session.state == .paused ? "play.fill" : "pause.fill")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundStyle(Color(hex: 0xE8E9EB))
-                        .frame(width: 24, height: 24)
-                        .background(Circle().fill(Color(hex: 0x2A2D33)))
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Theme.text)
+                        .frame(width: 32, height: 32)
+                        .background(Circle().fill(Theme.text.opacity(0.08)))
                 }
                 .buttonStyle(PlainPressStyle())
                 .help(session.state == .paused ? "Fortsetzen" : "Pausieren")
@@ -108,73 +148,79 @@ struct FloatingRecorderView: View {
                 Button {
                     Task { await model.stopRecording() }
                 } label: {
-                    RoundedRectangle(cornerRadius: 2)
+                    RoundedRectangle(cornerRadius: 2.5)
                         .fill(.white)
-                        .frame(width: 9, height: 9)
-                        .frame(width: 24, height: 24)
+                        .frame(width: 10, height: 10)
+                        .frame(width: 32, height: 32)
                         .background(Circle().fill(Theme.recordingFill))
                 }
                 .buttonStyle(PlainPressStyle())
                 .help("Aufnahme beenden")
                 .accessibilityLabel("Aufnahme beenden")
             }
-            .frame(height: 24)
-
-            lastLine(session)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            if expanded {
+                secondLine(session, problem: problem)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .frame(width: FloatingRecorderController.size.width, height: FloatingRecorderController.size.height, alignment: .top)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color(hex: 0x17181B)))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color(hex: 0x2C2F36), lineWidth: 1))
-        .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .padding(.leading, 16)
+        .padding(.trailing, 8)
+        .padding(.vertical, 8)
+        .background {
+            // Glass shows what lies behind the panel, which a capture of the window alone doesn't have: the demo's
+            // pictures get the colour glass has over a plain desktop.
+            if model.isDemo {
+                RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Theme.popover.opacity(0.96))
+                    .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Theme.popoverBorder, lineWidth: 0.5))
+            }
+        }
+        .glassEffect(model.isDemo ? .identity : .regular, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+        .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         // Drag it anywhere by its background; the buttons keep their clicks.
         .gesture(WindowDragGesture())
         .onTapGesture(count: 2) { model.request(.live) }
+        .onHover { inside in
+            withAnimation(Theme.quick) { hovering = inside }
+        }
+        .onChange(of: expanded, initial: true) { _, wanted in expand(wanted) }
         .help("Ziehen zum Verschieben, Doppelklick öffnet das Live-Fenster")
-        .environment(\.colorScheme, .dark)
     }
 
+    /// What is wrong with the sound, if anything: the recorder shows it until it is fixed.
+    private func problem(_ session: RecordingSession) -> (text: String, pane: String)? {
+        if let problem = session.microphoneProblem { return (problem.shortMessage, "Privacy_Microphone") }
+        if session.systemAudioSeemsBlocked { return (String(localized: "Vom Call kommt nichts an"), "Privacy_ScreenCapture") }
+        return nil
+    }
+
+    /// The last words heard, without a name; or the problem with a way to fix it.
     @ViewBuilder
-    private func lastLine(_ session: RecordingSession) -> some View {
-        if let problem = session.microphoneProblem {
-            warning(problem.shortMessage)
-        } else if session.systemAudioSeemsBlocked {
-            warning(String(localized: "Vom Call kommt nichts an"))
-        } else if let line = session.partials.values.sorted(by: { $0.start > $1.start }).first ?? session.lines.last {
-            HStack(spacing: 7) {
-                Avatar(kind: avatar(for: line.speakerKey, in: session), size: 16)
-                Text(session.displayName(for: line.speakerKey))
-                    .font(.system(size: 11.5, weight: .semibold))
-                    .foregroundStyle(Color(hex: 0xE8E9EB))
-                    .lineLimit(1)
-                    .layoutPriority(1)
-                Text(line.text)
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(Color(hex: line.isPartial ? 0x9A9FA8 : 0xC9CCD1))
-                    .lineLimit(1)
-                    .truncationMode(.head)
+    private func secondLine(_ session: RecordingSession, problem: (text: String, pane: String)?) -> some View {
+        if let problem {
+            HStack(spacing: 8) {
+                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Theme.warning)
+                Text(problem.text).font(.small).foregroundStyle(Theme.text).lineLimit(1)
+                Spacer(minLength: 4)
+                Button(String(localized: "Beheben …", comment: "floating recorder: opens the privacy settings that block the sound")) {
+                    model.openPrivacySettings(problem.pane)
+                }
+                .buttonStyle(SecondaryButtonStyle())
+                .controlSize(.small)
             }
+            .padding(.trailing, 6)
+        } else if let line = session.partials.values.sorted(by: { $0.start > $1.start }).first ?? session.lines.last {
+            Text(line.text)
+                .font(.small)
+                .foregroundStyle(Theme.textSecondary)
+                .lineLimit(1)
+                .truncationMode(.head)
+                .padding(.trailing, 10)
         } else {
             Text(model.engineState == .ready ? "Warte auf Sprache …" : "Spracherkennung wird geladen …")
-                .font(.system(size: 11.5))
-                .foregroundStyle(Color(hex: 0x7C818A))
+                .font(.small)
+                .foregroundStyle(Theme.textTertiary)
         }
-    }
-
-    private func warning(_ text: String) -> some View {
-        Label(text, systemImage: "exclamationmark.triangle.fill")
-            .font(.system(size: 11.5))
-            .foregroundStyle(Color(hex: 0xE5A84B))
-            .lineLimit(1)
-    }
-
-    private func avatar(for key: String, in session: RecordingSession) -> Avatar.Kind {
-        guard let voice = session.voices[key] else { return key == MeetingSpeaker.meKey ? .me(name: model.myName) : .unknown(label: "?") }
-        if key == MeetingSpeaker.meKey { return .me(name: model.myName) }
-        if let name = voice.name { return .person(name: name) }
-        return .unknown(label: voice.label)
     }
 }
 #endif

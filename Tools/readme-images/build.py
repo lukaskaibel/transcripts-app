@@ -8,7 +8,7 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(__file__))
-from compose import backdrop, finish, layout, place, rounded, scaled, shadow_onto, window
+from compose import backdrop, finish, layout, opaque, place, rounded, scaled, shadow_onto, window
 
 raw = sys.argv[1]
 out = "Design/screenshots"
@@ -31,7 +31,7 @@ for theme in ["light", "dark"]:
 
     # While recording: the live window, with the floating recorder and the menu bar item beside it.
     live = window(capture(f"live-{theme}"))
-    floating = rounded(capture(f"floating-{theme}"), 26)
+    floating = rounded(opaque(capture(f"floating-{theme}")), 48)
     menubar = rounded(capture(f"menubar-{theme}"), 22)
     live = scaled(live, 0.86)
     gap, px, py = 90, 150, 120

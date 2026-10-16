@@ -40,7 +40,7 @@ public final class AppModel {
 
     public enum Overlay: Equatable, Sendable {
         case palette
-        /// "Wer ist das?": the voices still without a name, one after another; those of one meeting first.
+        /// Naming the voices still without a name, one after another; those of one meeting first.
         case naming(meetingId: String?)
     }
 
@@ -102,7 +102,7 @@ public final class AppModel {
 
         public var title: String {
             switch self {
-            case .nameVoices: String(localized: "Wer ist das?")
+            case .nameVoices: String(localized: "Stimmen benennen …", comment: "button: name the voices of a meeting one after another")
             case .unhide: String(localized: "Rückgängig")
             }
         }

@@ -107,6 +107,8 @@ public final class RecordingSession {
     public private(set) var elapsed: TimeInterval = 0
     public private(set) var microphoneLevel: Float = 0
     public private(set) var systemLevel: Float = 0
+    /// When the demo's made-up conversation started, for its waveform.
+    @ObservationIgnored private(set) var demoSpeechSince: Date?
     public private(set) var lines: [LiveLine] = []
     public private(set) var partials: [Channel: LiveLine] = [:]
     public private(set) var voices: [String: LiveVoice] = [:]
@@ -614,6 +616,16 @@ public final class RecordingSession {
 }
 
 extension RecordingSession {
+    /// The sound for a waveform: the louder track, or for the demo made-up speech that rises and falls with syllables
+    /// and short pauses, worked out when it is read (a timer would nap with a demo started in the background).
+    public func waveformLevel(microphoneOnly: Bool = false) -> Float {
+        guard let since = demoSpeechSince else { return microphoneOnly ? microphoneLevel : max(systemLevel, microphoneLevel) }
+        let time = Date().timeIntervalSince(since)
+        guard Int(time * 1.6) % 9 != 0 else { return 0.08 }
+        let envelope = 0.55 + 0.3 * sin(time * 0.9) * cos(time * 0.33)
+        return Float(envelope * Double.random(in: 0.45...1))
+    }
+
     /// For the demo mode's screenshots of the warnings.
     func showMicrophoneProblem(_ problem: MicrophoneProblem?) {
         microphoneProblem = problem
@@ -625,6 +637,7 @@ extension RecordingSession {
         elapsed = 754
         microphoneLevel = 0.12
         systemLevel = 0.64
+        demoSpeechSince = Date()
         voices = [
             MeetingSpeaker.meKey: LiveVoice(key: MeetingSpeaker.meKey, label: Strings.meLabel, personId: "p-me", name: nil, suggestedName: nil, speech: 40),
             "S1": LiveVoice(key: "S1", label: Strings.speakerLabel(1), personId: "p-anna", name: "Anna Berger", suggestedName: nil, speech: 90),

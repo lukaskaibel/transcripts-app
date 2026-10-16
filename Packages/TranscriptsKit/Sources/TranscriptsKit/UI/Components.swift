@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - People
 
-/// A round badge with initials. The user is grey, unknown voices are a dashed ring.
+/// A round badge with initials, as Contacts draws one: grey, white letters. Unknown voices are a dashed ring.
 struct Avatar: View {
     enum Kind: Equatable {
         case person(name: String)
@@ -17,20 +17,15 @@ struct Avatar: View {
     var body: some View {
         ZStack {
             switch kind {
-            case .person(let name):
-                Circle().fill(Theme.color(for: name))
+            case .person(let name), .me(let name):
+                Circle().fill(Self.monogram)
                 Text(Self.initials(name))
-                    .font(.system(size: size * 0.42, weight: .semibold))
-                    .foregroundStyle(Color(hex: 0x111214))
-            case .me(let name):
-                Circle().fill(Theme.meColor)
-                Text(Self.initials(name))
-                    .font(.system(size: size * 0.42, weight: .semibold))
-                    .foregroundStyle(Color(hex: 0x111214))
-            case .unknown(let label):
-                Circle().strokeBorder(Theme.textTertiary, style: StrokeStyle(lineWidth: 1, dash: [2.2, 2]))
-                Text(Self.number(label))
-                    .font(.system(size: size * 0.42, weight: .semibold))
+                    .font(.system(size: size * 0.4, weight: .semibold, design: .rounded))
+                    .foregroundStyle(.white)
+            case .unknown:
+                Circle().strokeBorder(Theme.textTertiary, style: StrokeStyle(lineWidth: 1.2, dash: [2.4, 2.2]))
+                Text(verbatim: "?")
+                    .font(.system(size: size * 0.44, weight: .semibold, design: .rounded))
                     .foregroundStyle(Theme.textTertiary)
             }
         }
@@ -40,6 +35,12 @@ struct Avatar: View {
         }
         .accessibilityHidden(true)
     }
+
+    /// Contacts' grey, a little darker so the white letters read.
+    private static let monogram = LinearGradient(
+        colors: [Color(light: 0x9A9EA8, dark: 0x6E7079), Color(light: 0x7A7E88, dark: 0x55575F)],
+        startPoint: .top, endPoint: .bottom
+    )
 
     static func initials(_ name: String) -> String {
         let parts = name.split(whereSeparator: { $0 == " " || $0 == "-" }).filter { !$0.isEmpty }
@@ -56,6 +57,15 @@ struct Avatar: View {
 }
 
 extension MeetingDetail {
+    /// The name of whoever the voice is, once that is settled; until then its label ("Sprecher 4"), never a guess
+    /// with a question mark.
+    func settledName(for key: String) -> String {
+        guard let speaker = speaker(for: key) else { return key == MeetingSpeaker.meKey ? Strings.me : key }
+        if let personId = speaker.personId, let person = people[personId] { return person.name }
+        if speaker.isMe { return Strings.me }
+        return speaker.displayLabel
+    }
+
     func avatarKind(for key: String) -> Avatar.Kind {
         guard let speaker = speaker(for: key) else { return key == MeetingSpeaker.meKey ? .me(name: Strings.me) : .unknown(label: key) }
         if let personId = speaker.personId, let person = people[personId] {
@@ -305,19 +315,20 @@ extension MeetingRow {
     }
 }
 
+/// A heading over a group of rows, as in Mail's lists: plain text, no bar.
 struct SectionHeader: View {
     var title: String
     var count: Int?
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             Text(title).font(.uiSemibold)
             if let count { Text("\(count)").foregroundStyle(Theme.textTertiary) }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 14)
-        .frame(height: 34)
-        .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Theme.groupHeader))
+        .frame(height: 32)
+        .accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -344,24 +355,20 @@ struct EmptyState<Accessory: View>: View {
         self.accessory = accessory
     }
 
+    /// As the system shows an empty list: a large symbol, the title, a line of explanation, and what to do.
     var body: some View {
-        VStack(spacing: 6) {
+        ContentUnavailableView {
             if let systemImage {
-                Image(systemName: systemImage)
-                    .font(.system(size: 22, weight: .light))
-                    .foregroundStyle(Theme.textTertiary)
-                    .padding(.bottom, 8)
+                Label { title } icon: { Image(systemName: systemImage) }
+            } else {
+                title
             }
-            title.font(.uiSemibold)
-            message
-                .font(.ui)
-                .foregroundStyle(Theme.textSecondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 380)
-            accessory.padding(.top, 10)
+        } description: {
+            message.frame(maxWidth: 400)
+        } actions: {
+            accessory
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(24)
     }
 }
 
@@ -464,3 +471,40 @@ struct WindowReader: NSViewRepresentable {
     }
 }
 #endif
+
+/// The sound of the last seconds as bars, newest on the right, as Voice Memos draws a recording. It reads the level
+/// itself on every tick and keeps its own short history, so the view around it doesn't redraw for every change.
+struct LevelWaveform: View {
+    var level: () -> Float
+    var bars = 60
+    var color: Color = Theme.recording
+    var height: CGFloat = 40
+    var barWidth: CGFloat = 3
+    var spacing: CGFloat = 2
+    /// Off while paused: the bars stand still.
+    var running = true
+    @State private var samples: [Float] = []
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 0.08)) { context in
+            HStack(alignment: .center, spacing: spacing) {
+                ForEach(Array(shown.enumerated()), id: \.offset) { index, value in
+                    Capsule()
+                        .fill(color.opacity(0.3 + 0.7 * Double(index) / Double(max(bars - 1, 1))))
+                        .frame(width: barWidth, height: max(barWidth, height * CGFloat(value)))
+                }
+            }
+            .frame(height: height)
+            .onChange(of: context.date) {
+                guard running else { return }
+                samples.append(min(max(level(), 0), 1))
+                if samples.count > bars { samples.removeFirst(samples.count - bars) }
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    private var shown: [Float] {
+        Array(repeating: 0, count: max(0, bars - samples.count)) + samples
+    }
+}

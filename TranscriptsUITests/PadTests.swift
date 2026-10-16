@@ -18,7 +18,8 @@ final class PadTests: AppTestCase {
         snapshot("iPad, meetings")
         element("meeting-m-sync").tap()
         wait(labelled("Zusammenfassung"))
-        wait(labelled("Sprecher"))
+        // The inspector beside the meeting, with a voice that has no name yet.
+        wait(labelled("Sprecher 4", type: .button))
         snapshot("iPad, meeting with inspector")
     }
 

@@ -72,7 +72,7 @@ struct SettingsScreen: View {
     }
 }
 
-/// "Wer ist das?" in a sheet: the Mac's panel, one voice after another.
+/// Naming voices in a sheet: the Mac's view, one voice after another.
 struct NamingSheet: View {
     @Environment(AppModel.self) private var model
     var meetingId: String?
@@ -82,7 +82,7 @@ struct NamingSheet: View {
             NameVoicesPanel(meetingId: meetingId)
         }
         .background(Theme.panel)
-        .presentationDetents([.large])
+        .presentationDetents([.fraction(0.75), .large])
         .presentationDragIndicator(.visible)
         .onDisappear {
             model.player.stop()

@@ -2,48 +2,83 @@
 import AppKit
 import SwiftUI
 
+/// What the sidebar can select: a section, a recording, or a calendar meeting nobody recorded (which opens a popover).
+enum SidebarItem: Hashable {
+    case section(AppModel.Section)
+    case meeting(String)
+    case planned(String)
+}
+
+/// The system's sidebar, as in Notebook and Mail: the inbox, all meetings, the tasks and the people, then today's
+/// meetings, tomorrow's (folded away) and the ones before today.
 struct Sidebar: View {
     @Environment(AppModel.self) private var model
     @State private var deleting: MeetingRow?
+    /// The calendar meeting whose popover is open.
+    @State private var planned: String?
+    @AppStorage("sidebarShowsTomorrow") private var showsTomorrow = false
 
     var body: some View {
         TimelineView(.everyMinute) { context in
             let agenda = model.agenda(now: context.date)
-            let waiting = model.inbox.count
-            VStack(alignment: .leading, spacing: 2) {
-                // Room for the window's traffic lights.
-                Color.clear.frame(height: 44)
+            List(selection: selection(agenda)) {
+                Section {
+                    Label(AppModel.Section.inbox.title, systemImage: "tray")
+                        .badge(model.inbox.count)
+                        .help(String(localized: "\(model.inbox.count) Dinge warten auf dich", comment: "plural: entries in the inbox"))
+                        .tag(SidebarItem.section(.inbox))
+                        .debugFrame("sidebar.inbox")
+                    Label(String(localized: "Alle Meetings"), systemImage: "waveform")
+                        .tag(SidebarItem.section(.meetings))
+                        .debugFrame("sidebar.meetings")
+                    Label(AppModel.Section.tasks.title, systemImage: "checkmark.circle")
+                        .tag(SidebarItem.section(.tasks))
+                        .debugFrame("sidebar.tasks")
+                    Label(AppModel.Section.people.title, systemImage: "person.2")
+                        .tag(SidebarItem.section(.people))
+                        .debugFrame("sidebar.people")
+                }
 
-                HStack(spacing: 6) {
-                    RecordButton()
-                    SearchButton()
+                if !agenda.today.isEmpty || !agenda.tomorrow.isEmpty || model.calendarAllowed == true {
+                    Section(String(localized: "Heute")) {
+                        if agenda.today.isEmpty {
+                            Text("Keine Termine", comment: "sidebar: nothing in the calendar today")
+                                .foregroundStyle(.secondary)
+                                .selectionDisabled()
+                        }
+                        ForEach(agenda.today) { item in
+                            switch item.kind {
+                            case .recorded(let row):
+                                RecordedRow(row: row, time: TimeFormat.time(row.meeting.startedAt)) { deleting = row }
+                            case .planned(let meeting):
+                                PlannedRow(meeting: meeting, now: context.date, popover: $planned)
+                            }
+                        }
+                    }
                 }
-                .padding(.bottom, 12)
-
-                SidebarRow(title: AppModel.Section.inbox.title, systemImage: "tray", active: model.section == .inbox, badge: waiting,
-                           badgeHelp: String(localized: "\(waiting) Dinge warten auf dich", comment: "plural: entries in the inbox")) {
-                    model.show(.inbox)
+                if !agenda.tomorrow.isEmpty {
+                    Section(isExpanded: $showsTomorrow) {
+                        ForEach(agenda.tomorrow) { meeting in
+                            PlannedRow(meeting: meeting, now: context.date, popover: $planned)
+                        }
+                    } header: {
+                        Text(String(localized: "Morgen", comment: "sidebar: heading over tomorrow's calendar meetings"))
+                            .debugFrame("agenda.tomorrow")
+                    }
                 }
-                .debugFrame("sidebar.inbox")
-                SidebarRow(title: String(localized: "Alle Meetings"), systemImage: "list.bullet.rectangle", active: allMeetingsActive(agenda)) {
-                    model.select(nil)
+                if !agenda.recent.isEmpty {
+                    Section(String(localized: "Letzte Meetings")) {
+                        ForEach(agenda.recent) { row in
+                            RecordedRow(row: row, time: TimeFormat.shortDay(row.meeting.startedAt, now: context.date)) { deleting = row }
+                        }
+                    }
                 }
-                .debugFrame("sidebar.meetings")
-                SidebarRow(title: AppModel.Section.tasks.title, systemImage: "checkmark.circle", active: model.section == .tasks) {
-                    model.show(.tasks)
-                }
-                .debugFrame("sidebar.tasks")
-
-                ScrollView {
-                    AgendaList(agenda: agenda, now: context.date) { deleting = $0 }
-                        .padding(.bottom, 8)
-                }
-                .scrollIndicators(.never)
-
-                StatusLine()
             }
-            .padding(.horizontal, 10)
-            .padding(.bottom, 10)
+            .listStyle(.sidebar)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) { StatusLine() }
+        .toolbar {
+            ToolbarItem { RecordToolbarItem() }
         }
         .confirmationDialog(
             "„\(deleting?.meeting.title ?? "")“ löschen?",
@@ -57,176 +92,170 @@ struct Sidebar: View {
         }
     }
 
-    /// The whole list, or a meeting that the day plan doesn't show.
-    private func allMeetingsActive(_ agenda: Agenda) -> Bool {
-        guard model.section == .meetings else { return false }
-        guard let id = model.selectedMeetingId else { return true }
-        return !agenda.shows(meetingId: id)
+    /// The section or the meeting on screen. A meeting the sidebar doesn't list keeps "Alle Meetings" selected.
+    private func selection(_ agenda: Agenda) -> Binding<SidebarItem?> {
+        Binding {
+            switch model.section {
+            case .meetings:
+                if let id = model.selectedMeetingId, agenda.shows(meetingId: id) { return .meeting(id) }
+                return .section(.meetings)
+            default:
+                return .section(model.section)
+            }
+        } set: { item in
+            switch item {
+            case .section(let section): model.show(section)
+            case .meeting(let id): model.select(id)
+            case .planned(let id): planned = id
+            case nil: break
+            }
+        }
     }
 }
 
-/// Search, next to the record button.
-struct SearchButton: View {
+/// A recording: its title, and when it was or how far along its processing is.
+private struct RecordedRow: View {
     @Environment(AppModel.self) private var model
+    var row: MeetingRow
+    var time: String
+    var onDelete: () -> Void
 
     var body: some View {
-        Button {
-            model.overlay = .palette
-        } label: {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(Theme.textSecondary)
-                .frame(width: 34, height: 34)
-                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Theme.card))
-                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
-                .contentShape(Rectangle())
+        Label {
+            Text(row.meeting.title).lineLimit(1)
+        } icon: {
+            symbol
         }
-        .buttonStyle(PlainPressStyle())
-        .help("Suchen (⌘K)")
-        .accessibilityLabel("Suchen")
+        .badge(Text(trailing))
+        .tag(SidebarItem.meeting(row.id))
+        .help("\(row.meeting.title) · \(TimeFormat.duration(row.meeting.duration))")
+        .contextMenu { MeetingMenuItems(meetingId: row.id, onDelete: onDelete) }
+        .debugFrame("agenda.\(row.id)")
+    }
+
+    @ViewBuilder
+    private var symbol: some View {
+        switch row.meeting.status {
+        case .recording:
+            Image(systemName: "record.circle").foregroundStyle(Theme.recording)
+        case .failed:
+            Image(systemName: "exclamationmark.triangle").foregroundStyle(Theme.warning)
+        default:
+            Image(systemName: "waveform").foregroundStyle(.secondary)
+        }
+    }
+
+    private var trailing: String {
+        switch row.meeting.status {
+        case .recording: String(localized: "läuft", comment: "in place of a meeting's duration: it is being recorded right now")
+        case .processing: row.meeting.progress.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current))
+        default: time
+        }
     }
 }
 
-/// The big button at the top: start a recording, or show the one that is running.
-struct RecordButton: View {
+/// A calendar meeting without a recording: greyed, and a click opens its popover to record or join it.
+private struct PlannedRow: View {
+    var meeting: UpcomingMeeting
+    var now: Date
+    @Binding var popover: String?
+
+    var body: some View {
+        let over = meeting.end <= now
+        Label {
+            Text(meeting.title).lineLimit(1)
+        } icon: {
+            Image(systemName: "calendar")
+        }
+        .foregroundStyle(.secondary)
+        .badge(Text(TimeFormat.time(meeting.start)))
+        .opacity(over ? 0.6 : 1)
+        .tag(SidebarItem.planned(meeting.id))
+        .help(over ? String(localized: "Nicht aufgenommen", comment: "a calendar meeting that is over and was not recorded") : meeting.subtitle)
+        .contextMenu { NotMineItems(meeting: meeting) }
+        .popover(isPresented: Binding(get: { popover == meeting.id }, set: { if !$0 { popover = nil } }), arrowEdge: .trailing) {
+            UpcomingPopover(meeting: meeting) { popover = nil }
+        }
+        .debugFrame("agenda.\(meeting.eventId)")
+    }
+}
+
+/// In the sidebar's toolbar, where Notebook has its New Note button: start a recording, or the one that runs with
+/// its time and a stop button.
+struct RecordToolbarItem: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         if let session = model.recording {
             HStack(spacing: 8) {
-                Button {
-                    model.request(.live)
-                } label: {
-                    HStack(spacing: 9) {
+                // Plain views and a symbol-only button: the toolbar draws a button with a label of its own as an
+                // icon only.
+                HStack(spacing: 6) {
+                    if session.state == .paused {
+                        Image(systemName: "pause.fill").font(.system(size: 9, weight: .bold)).foregroundStyle(.secondary)
+                    } else {
                         RecordingDot()
-                        Text(TimeFormat.clock(session.elapsed)).font(.uiMedium).monospacedDigit()
-                        Spacer(minLength: 0)
                     }
-                    .padding(.horizontal, 10)
-                    .frame(height: 34)
-                    .contentShape(Rectangle())
+                    Text(TimeFormat.clock(session.elapsed)).monospacedDigit()
                 }
-                .buttonStyle(PlainPressStyle())
+                .padding(.leading, 10)
+                .contentShape(Rectangle())
+                .onTapGesture { model.request(.live) }
                 .help("Live-Fenster öffnen")
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(.isButton)
+                .accessibilityAction { model.request(.live) }
                 Button {
                     Task { await model.stopRecording() }
                 } label: {
-                    RoundedRectangle(cornerRadius: 2).fill(.white).frame(width: 9, height: 9)
-                        .frame(width: 26, height: 26)
-                        .background(Circle().fill(Theme.recordingFill))
+                    Label("Aufnahme beenden", systemImage: "stop.circle.fill")
                 }
-                .buttonStyle(PlainPressStyle())
+                .foregroundStyle(Theme.recording)
                 .help("Aufnahme beenden (⌘R)")
-                .accessibilityLabel("Aufnahme beenden")
-                .padding(.trailing, 4)
             }
-            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Theme.card))
-            .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.recording.opacity(0.45), lineWidth: 1))
         } else {
             Button {
                 Task { await model.startRecording() }
             } label: {
-                HStack(spacing: 10) {
-                    Circle().fill(Theme.recording).frame(width: 9, height: 9).padding(.horizontal, 2)
-                    Text("Aufnehmen").font(.uiMedium)
-                    Spacer(minLength: 0)
-                    Text("⌘R").font(.small).foregroundStyle(Theme.textTertiary)
+                Label {
+                    Text("Aufnehmen")
+                } icon: {
+                    Image(systemName: "record.circle").foregroundStyle(Theme.recording)
                 }
-                .padding(.horizontal, 10)
-                .frame(height: 34)
-                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Theme.card))
-                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
-                .contentShape(Rectangle())
             }
-            .buttonStyle(PlainPressStyle())
-            .help("Aufnahme starten")
+            .help("Aufnahme starten (⌘R)")
         }
     }
 }
 
-struct SidebarRow: View {
-    var title: String
-    var systemImage: String
-    var active = false
-    var badge = 0
-    var badgeHelp: String?
-    var action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 9) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Theme.textSecondary)
-                    .frame(width: 16)
-                Text(title)
-                Spacer(minLength: 0)
-                if badge > 0 {
-                    Text("\(badge)")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(Theme.textSecondary)
-                        .padding(.horizontal, 6)
-                        .frame(minWidth: 18, minHeight: 18)
-                        .background(Capsule().fill(Theme.control))
-                        .help(badgeHelp ?? "")
-                }
-            }
-            .font(active ? .uiMedium : .ui)
-            .foregroundStyle(Theme.text)
-            .padding(.horizontal, 8)
-            .frame(height: 30)
-            .hoverFill(active: active, radius: 7, fill: active ? Theme.selected : Theme.hover)
-        }
-        .buttonStyle(PlainPressStyle())
-    }
-}
-
-/// The line at the bottom of the sidebar: what the app is doing right now.
+/// At the bottom of the sidebar, only while something is going on: processing a meeting, loading the models, or
+/// a problem with them. Ready needs no line.
 struct StatusLine: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
-        HStack(spacing: 0) {
-            indicator
-            Text(text)
-                .font(.small)
-                .foregroundStyle(Theme.textSecondary)
-                .lineLimit(1)
-                .padding(.leading, 8)
-            Spacer(minLength: 6)
-            Button {
-                model.show(.people)
-            } label: {
-                Image(systemName: "person.2")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(model.section == .people ? Theme.text : Theme.textSecondary)
-                    .frame(width: 24, height: 24)
-                    .hoverFill(active: model.section == .people, radius: 6, fill: model.section == .people ? Theme.selected : Theme.hover)
+        if showsStatus {
+            HStack(spacing: 8) {
+                StatusIndicator()
+                Text(model.statusText)
+                    .font(.small)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
             }
-            .buttonStyle(PlainPressStyle())
-            .help("Personen und Stimmen (⌘4)")
-            .accessibilityLabel(AppModel.Section.people.title)
-            .debugFrame("sidebar.people")
-            IconButton(systemName: "slider.horizontal.3", label: String(localized: "Einstellungen (⌘,)"), size: 24) {
-                openSettings()
-            }
+            .padding(.horizontal, 18)
+            .frame(height: 30)
+            .help(model.statusHelp)
         }
-        .padding(.leading, 8)
-        .frame(height: 28)
-        .help(help)
     }
 
-    private var indicator: some View {
-        StatusIndicator()
-    }
-
-    private var text: String {
-        model.statusText
-    }
-
-    private var help: String {
-        model.statusHelp
+    private var showsStatus: Bool {
+        guard model.recording == nil else { return false }
+        if model.processingMeetingId != nil { return true }
+        switch model.engineState {
+        case .preparing, .failed: return true
+        default: return !model.modelsDownloaded
+        }
     }
 }
 #endif

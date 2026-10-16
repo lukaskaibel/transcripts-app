@@ -10,32 +10,6 @@ struct PeopleView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                Text("Personen").font(.uiSemibold)
-                Text("\(model.peopleStats.count)").foregroundStyle(Theme.textTertiary)
-                Spacer()
-                Button {
-                    withAnimation(Theme.spring) { showsMap.toggle() }
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "circle.hexagongrid").font(.system(size: 11))
-                        Text("Stimmenkarte")
-                    }
-                    .font(.small)
-                    .foregroundStyle(showsMap ? Theme.accent : Theme.textSecondary)
-                    .padding(.horizontal, 9)
-                    .frame(height: 24)
-                    .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(showsMap ? Theme.selectionFill : Theme.control))
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(PlainPressStyle())
-                .help(showsMap ? "Stimmenkarte ausblenden" : "Stimmenkarte zeigen: alle Stimmen auf einen Blick")
-                .disabled(model.peopleStats.isEmpty)
-            }
-            .padding(.horizontal, 18)
-            .frame(height: Theme.headerHeight)
-            .overlay(alignment: .bottom) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
-
             if model.peopleStats.isEmpty && model.reviews.isEmpty {
                 EmptyState(systemImage: "person.2", title: String(localized: "Noch niemand bekannt"), message: String(localized: "Nach dem ersten Meeting erscheinen hier die Stimmen. Benenne sie einmal, dann erkennt die App sie in künftigen Meetings wieder."))
             } else {
@@ -47,8 +21,8 @@ struct PeopleView: View {
                                 .transition(.opacity.combined(with: .move(edge: .top)))
                         }
                         if !model.reviews.isEmpty {
-                            HStack(spacing: 8) {
-                                Circle().fill(Theme.warning).frame(width: 7, height: 7)
+                            HStack(spacing: 10) {
+                                Image(systemName: "person.wave.2").foregroundStyle(Theme.accent)
                                 Text("Zu bestätigen").font(.uiSemibold)
                                 Text("\(model.reviews.count)").foregroundStyle(Theme.textTertiary)
                                 Spacer()
@@ -56,9 +30,10 @@ struct PeopleView: View {
                                     .buttonStyle(PrimaryButtonStyle())
                                     .help("Eine Stimme nach der anderen anhören und benennen")
                             }
-                            .padding(.horizontal, 14)
-                            .frame(height: 34)
-                            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Theme.groupHeader))
+                            .padding(.leading, 14)
+                            .padding(.trailing, 10)
+                            .frame(height: 44)
+                            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.suggestion))
                             ForEach(model.reviews) { review in
                                 ReviewRow(review: review)
                                 if review.id != model.reviews.last?.id {
@@ -78,6 +53,21 @@ struct PeopleView: View {
                 }
             }
         }
+        .navigationTitle(AppModel.Section.people.title)
+        #if os(macOS)
+        .toolbar {
+            ToolbarSpacer(.flexible)
+            ToolbarItem {
+                Toggle(isOn: Binding(get: { showsMap }, set: { value in withAnimation(Theme.spring) { showsMap = value } })) {
+                    Label("Stimmenkarte", systemImage: "circle.hexagongrid")
+                }
+                .help(showsMap ? "Stimmenkarte ausblenden" : "Stimmenkarte zeigen: alle Stimmen auf einen Blick")
+                .disabled(model.peopleStats.isEmpty)
+            }
+            ToolbarSpacer(.fixed)
+            SearchToolbarItem(model: model)
+        }
+        #endif
         .sheet(item: $selected) { stats in
             PersonSheet(personId: stats.person.id)
                 .id(stats.person.id)
@@ -105,7 +95,6 @@ struct PeopleView: View {
         }
         .padding(.horizontal, 14)
         .frame(height: 34)
-        .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Theme.groupHeader))
     }
 }
 
@@ -223,13 +212,12 @@ struct ReviewRow: View {
             }
         } label: {
             Text(title)
-                .font(.small)
+                .font(ButtonMetrics.secondaryFont)
                 .foregroundStyle(Theme.textBody)
-                .padding(.horizontal, 10)
-                .frame(height: 26)
-                .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Theme.card))
-                .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Theme.chipBorder, lineWidth: 1))
-                .contentShape(Rectangle())
+                .padding(.horizontal, ButtonMetrics.padding - 2)
+                .frame(height: ButtonMetrics.height)
+                .background(Capsule().fill(Theme.control))
+                .contentShape(Capsule())
         }
         .menuStyle(.button)
         .buttonStyle(.plain)

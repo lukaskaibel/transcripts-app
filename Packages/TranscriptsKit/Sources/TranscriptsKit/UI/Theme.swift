@@ -1,30 +1,37 @@
 import SwiftUI
 
-/// Design tokens, shared with the Issues app. Every colour has a light and a dark value.
+/// Design tokens, the same as in Notebook: the system's own page and window colours, and greys that sit on them.
+/// Every colour has a light and a dark value.
 enum Theme {
-    static let window = Color(light: 0xF1F2F4, dark: 0x0B0C0E)
-    static let panel = Color(light: 0xFBFBFC, dark: 0x111214)
-    static let panelBorder = Color(light: 0xE3E4E8, dark: 0x1F2126)
-    static let groupHeader = Color(light: 0xF5F6F8, dark: 0x191B1F)
-    static let rowSeparator = Color(light: 0xEDEEF1, dark: 0x191B1F)
+    #if os(macOS)
+    /// The page a meeting is read on: the system's text background, white or dark grey.
+    static let panel = Color(nsColor: .textBackgroundColor)
+    #else
+    static let panel = Color(uiColor: .systemBackground)
+    #endif
+    static let panelBorder = Color(light: 0xE3E4E8, dark: 0x343437)
+    static let groupHeader = Color(light: 0xF5F5F7, dark: 0x2A2A2D)
+    static let rowSeparator = Color(light: 0xECECEE, dark: 0x323235)
 
-    static let card = Color(light: 0xFFFFFF, dark: 0x17181B)
-    static let cardBorder = Color(light: 0xE6E7EB, dark: 0x212327)
+    static let card = Color(light: 0xFFFFFF, dark: 0x262628)
+    static let cardBorder = Color(light: 0xE6E7EB, dark: 0x343437)
+    /// Behind a suggestion on the page, as Mail shows one: a quiet grey, no border.
+    static let suggestion = Color(light: 0xF2F2F7, dark: 0x2C2C2E)
 
-    static let hover = Color(light: 0xE8E9ED, dark: 0x1A1C20)
-    static let selected = Color(light: 0xECEDF1, dark: 0x1C1E23)
-    static let control = Color(light: 0xE7E8EC, dark: 0x191B1F)
-    static let controlActive = Color(light: 0xE4E5E9, dark: 0x2A2D33)
-    static let chipBorder = Color(light: 0xDCDDE2, dark: 0x2A2D33)
-    static let selectionFill = Color(light: 0xEDEEFC, dark: 0x1D1F33)
+    static let hover = Color(light: 0xE8E9ED, dark: 0x2A2A2D)
+    static let selected = Color(light: 0xE3E4E8, dark: 0x303033)
+    static let control = Color(light: 0xE7E8EC, dark: 0x2A2A2D)
+    static let controlActive = Color(light: 0xDFE0E5, dark: 0x38383B)
+    static let chipBorder = Color(light: 0xDCDDE2, dark: 0x3A3A3D)
+    static let selectionFill = Color(light: 0xEDEEFC, dark: 0x2B2C47)
     static let selectionBorder = Color(light: 0x8D93E6, dark: 0x5C63C9)
 
-    static let popover = Color(light: 0xFFFFFF, dark: 0x1B1D21)
-    static let popoverBorder = Color(light: 0xDDDEE3, dark: 0x2C2F36)
-    static let popoverSelected = Color(light: 0xEEEFF2, dark: 0x2A2D33)
+    static let popover = Color(light: 0xFFFFFF, dark: 0x2A2A2C)
+    static let popoverBorder = Color(light: 0xDDDEE3, dark: 0x3A3A3D)
+    static let popoverSelected = Color(light: 0xEEEFF2, dark: 0x38383B)
     /// The row the keyboard is on, in a list inside a popover.
-    static let popoverActiveRow = Color(light: 0xF7F8FA, dark: 0x202227)
-    static let keycapBorder = Color(light: 0xD0D2D8, dark: 0x3A3E46)
+    static let popoverActiveRow = Color(light: 0xF7F8FA, dark: 0x323235)
+    static let keycapBorder = Color(light: 0xD0D2D8, dark: 0x4A4A4E)
     /// Behind a small icon or avatar under the pointer.
     static let noticeFill = Color(light: 0xFBF6EC, dark: 0x2A2216)
     static let noticeText = Color(light: 0x7A4E0E, dark: 0xE5C48B)
@@ -42,7 +49,7 @@ enum Theme {
     /// The stop button: dark enough for white text in both appearances.
     static let recordingFill = Color(hex: 0xC93C3C)
     static let barOff = Color(light: 0xD5D7DC, dark: 0x3A3E46)
-    static let segmentActive = Color(light: 0xFFFFFF, dark: 0x2A2D33)
+    static let segmentActive = Color(light: 0xFFFFFF, dark: 0x3A3A3D)
     static let onColor = Color(light: 0xFFFFFF, dark: 0x111214)
     static let scrim = Color(light: 0x14161A, dark: 0x000000).opacity(0.4)
     static let shadow = Color(platformColor: .dynamic { isDark in
@@ -53,10 +60,8 @@ enum Theme {
     static let quick = Animation.easeOut(duration: 0.14)
     static let overlay = Animation.spring(response: 0.26, dampingFraction: 0.86)
 
-    static let sidebarWidth: CGFloat = 236
     static let headerHeight: CGFloat = 44
     static let rowHeight: CGFloat = 38
-    static let inspectorWidth: CGFloat = 280
 
     static let avatarPalette: [Color] = [
         Color(hex: 0x8F96F2), Color(hex: 0x4CB782), Color(hex: 0xE5A84B),
@@ -95,10 +100,12 @@ extension Font {
     static let smallSemibold = Font.system(size: 12, weight: .semibold)
     static let tiny = Font.system(size: 11)
     static let tinySemibold = Font.system(size: 11, weight: .semibold)
-    static let reading = Font.system(size: 14)
-    static let pageTitle = Font.system(size: 22, weight: .semibold)
+    static let reading = Font.system(size: 15)
+    static let pageTitle = Font.system(size: 28, weight: .bold)
+    /// A heading on the page, as a note's heading in Notebook.
+    static let pageHeading = Font.system(size: 19, weight: .bold)
     /// The live transcript, a little larger than a meeting's.
-    static let live = Font.system(size: 15)
+    static let live = Font.system(size: 17)
     #else
     // On iPhone and iPad the same roles follow the reader's text size, as in Issues for GitHub.
     static let ui = Font.callout
@@ -110,8 +117,9 @@ extension Font {
     static let tiny = Font.caption
     static let tinySemibold = Font.caption.weight(.semibold)
     static let reading = Font.body
-    static let pageTitle = Font.title2.weight(.semibold)
-    static let live = Font.body
+    static let pageTitle = Font.title.bold()
+    static let pageHeading = Font.title3.bold()
+    static let live = Font.title3
     #endif
 }
 
@@ -147,13 +155,6 @@ extension View {
         modifier(HoverFill(active: active, radius: radius, fill: fill))
     }
 
-    /// The rounded, bordered panel the content of a window sits in.
-    func panelStyle(radius: CGFloat = 10) -> some View {
-        background(Theme.panel)
-            .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).stroke(Theme.panelBorder, lineWidth: 1))
-    }
-
     func cardStyle(radius: CGFloat = 10) -> some View {
         background(RoundedRectangle(cornerRadius: radius, style: .continuous).fill(Theme.card))
             .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).stroke(Theme.cardBorder, lineWidth: 1))
@@ -177,6 +178,7 @@ enum ButtonMetrics {
     #endif
 }
 
+/// The app's buttons are capsules, as the system's are since macOS 26 and iOS 26.
 struct PrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
@@ -186,7 +188,7 @@ struct PrimaryButtonStyle: ButtonStyle {
             .foregroundStyle(.white)
             .padding(.horizontal, ButtonMetrics.padding)
             .frame(minHeight: ButtonMetrics.height)
-            .background(RoundedRectangle(cornerRadius: ButtonMetrics.radius, style: .continuous).fill(Theme.accentFill))
+            .background(Capsule().fill(Theme.accentFill))
             .opacity(isEnabled ? (configuration.isPressed ? 0.8 : 1) : 0.4)
             .contentShape(Rectangle())
     }
@@ -201,8 +203,7 @@ struct SecondaryButtonStyle: ButtonStyle {
             .foregroundStyle(Theme.textBody)
             .padding(.horizontal, ButtonMetrics.padding - 2)
             .frame(minHeight: ButtonMetrics.height)
-            .background(RoundedRectangle(cornerRadius: ButtonMetrics.radius, style: .continuous).fill(configuration.isPressed ? Theme.controlActive : Theme.card))
-            .overlay(RoundedRectangle(cornerRadius: ButtonMetrics.radius, style: .continuous).stroke(Theme.chipBorder, lineWidth: 1))
+            .background(Capsule().fill(configuration.isPressed ? Theme.controlActive : Theme.control))
             .opacity(isEnabled ? 1 : 0.45)
             .contentShape(Rectangle())
     }
@@ -216,7 +217,7 @@ struct StopButtonStyle: ButtonStyle {
             .foregroundStyle(.white)
             .padding(.horizontal, ButtonMetrics.padding - 1)
             .frame(minHeight: ButtonMetrics.height + 2)
-            .background(RoundedRectangle(cornerRadius: ButtonMetrics.radius + 1, style: .continuous).fill(Theme.recordingFill))
+            .background(Capsule().fill(Theme.recordingFill))
             .opacity(configuration.isPressed ? 0.8 : 1)
             .contentShape(Rectangle())
     }

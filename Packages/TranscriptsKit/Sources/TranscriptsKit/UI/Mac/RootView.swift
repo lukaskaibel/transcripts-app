@@ -2,26 +2,28 @@
 import AppKit
 import SwiftUI
 
-/// The main window.
+/// The main window, built like the system's own and like Notebook: a sidebar, the page, and beside a meeting an
+/// inspector.
 public struct RootView: View {
     @Environment(AppModel.self) private var model
 
     public init() {}
 
     public var body: some View {
-        ZStack {
-            Theme.window.ignoresSafeArea()
+        Group {
             if model.settings.onboardingDone {
                 MainLayout()
                     .transition(.opacity)
             } else {
                 OnboardingView()
+                    .foregroundStyle(Theme.text)
+                    .toolbar(removing: .title)
+                    .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
                     .transition(.opacity)
             }
         }
         .frame(minWidth: 940, minHeight: 600)
         .font(.ui)
-        .foregroundStyle(Theme.text)
         .tint(Theme.accent)
         .animation(Theme.overlay, value: model.settings.onboardingDone)
         .overlay(alignment: .bottomTrailing) {
@@ -34,50 +36,91 @@ struct MainLayout: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        HStack(spacing: 0) {
+        NavigationSplitView {
             Sidebar()
-                .frame(width: Theme.sidebarWidth)
-            ContentPanel()
+                .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 360)
+        } detail: {
+            DetailColumn()
         }
-        .ignoresSafeArea()
         .overlay { OverlayHost() }
+        .sheet(item: naming) { request in
+            NameVoicesPanel(meetingId: request.meetingId)
+        }
+    }
+
+    /// Naming voices, as a sheet on the window, while the overlay asks for it.
+    private var naming: Binding<NamingRequest?> {
+        Binding {
+            if case .naming(let meetingId) = model.overlay { return NamingRequest(meetingId: meetingId) }
+            return nil
+        } set: { request in
+            if request == nil, case .naming = model.overlay { model.overlay = nil }
+        }
     }
 }
 
-struct ContentPanel: View {
+struct NamingRequest: Identifiable {
+    var meetingId: String?
+    var id: String { meetingId ?? "" }
+}
+
+/// The page for what the sidebar selected.
+struct DetailColumn: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        ZStack {
+        Group {
             switch model.section {
             case .meetings:
                 if let detail = model.detail, model.selectedMeetingId == detail.meeting.id {
                     MeetingDetailView(detail: detail)
                         .id(detail.meeting.id)
-                        .transition(.asymmetric(
-                            insertion: .opacity.combined(with: .offset(x: 14)),
-                            removal: .opacity.combined(with: .offset(x: 14))
-                        ))
-                } else {
+                } else if model.selectedMeetingId == nil {
                     MeetingListView()
-                        .transition(.opacity)
+                } else {
+                    Color.clear
                 }
             case .inbox:
                 InboxView()
-                    .transition(.opacity)
             case .tasks:
                 TasksView()
-                    .transition(.opacity)
             case .people:
                 PeopleView()
-                    .transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .panelStyle()
-        .padding(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 8))
-        .animation(Theme.overlay, value: model.selectedMeetingId)
-        .animation(Theme.overlay, value: model.section)
+        .background(Theme.panel.ignoresSafeArea())
+        .foregroundStyle(Theme.text)
+    }
+}
+
+/// Search, where Notebook has its search field. It opens the palette, which finds meetings, people and lines.
+struct SearchToolbarItem: ToolbarContent {
+    let model: AppModel
+
+    var body: some ToolbarContent {
+        ToolbarItem {
+            // A plain view: the toolbar draws a button with a label of its own as an icon only.
+            HStack(spacing: 6) {
+                Image(systemName: "magnifyingglass")
+                Text("Suchen").foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                Text(verbatim: "⌘K").font(.small).foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 12)
+            .frame(width: 180, height: 34)
+            .contentShape(Capsule())
+            .onTapGesture(perform: toggle)
+            .help("Suchen (⌘K)")
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Suchen")
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction { toggle() }
+        }
+    }
+
+    private func toggle() {
+        model.overlay = model.overlay == .palette ? nil : .palette
     }
 }
 
@@ -93,15 +136,6 @@ struct OverlayHost: View {
                     .onTapGesture { model.overlay = nil }
                     .transition(.opacity)
                 CommandPalette()
-                    .padding(.top, 110)
-                    .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)).combined(with: .offset(y: -6)))
-            }
-            if case .naming(let meetingId) = model.overlay {
-                Theme.scrim
-                    .ignoresSafeArea()
-                    .onTapGesture { model.overlay = nil }
-                    .transition(.opacity)
-                NameVoicesPanel(meetingId: meetingId)
                     .padding(.top, 80)
                     .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)).combined(with: .offset(y: -6)))
             }
@@ -137,18 +171,17 @@ struct ToastStack: View {
                             model.dismissToast(toast.id)
                             model.perform(action)
                         }
-                        .buttonStyle(PrimaryButtonStyle())
+                        .buttonStyle(.borderedProminent)
                         .fixedSize()
                     }
                     IconButton(systemName: "xmark", label: String(localized: "Schließen"), size: 20) { model.dismissToast(toast.id) }
                 }
+                .foregroundStyle(Theme.text)
                 .padding(.vertical, 12)
                 .padding(.leading, 14)
                 .padding(.trailing, 10)
                 .frame(width: 360, alignment: .leading)
-                .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Theme.popover))
-                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Theme.popoverBorder, lineWidth: 1))
-                .shadow(color: Theme.shadow, radius: 18, y: 10)
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 12)), removal: .opacity.combined(with: .scale(scale: 0.96))))
             }
         }

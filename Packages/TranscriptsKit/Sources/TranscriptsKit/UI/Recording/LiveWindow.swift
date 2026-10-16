@@ -43,21 +43,46 @@ public struct LiveWindowView: View {
 struct LiveSessionView: View {
     @Environment(AppModel.self) private var model
     let session: RecordingSession
+    @AppStorage("liveShowsSummary") private var showsSummary = false
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-            Rectangle().fill(Theme.rowSeparator).frame(height: 1)
             if let problem = session.microphoneProblem {
                 warning(problem.message, settings: "Privacy_Microphone")
             } else if session.systemAudioSeemsBlocked {
                 warning(String(localized: "Vom Call kommt nichts an. Erlaube Transcripts unter Datenschutz & Sicherheit → Aufnahme von Bildschirm & Systemaudio."), settings: "Privacy_ScreenCapture")
             }
-            HStack(spacing: 0) {
-                LiveTranscriptView(session: session)
-                Rectangle().fill(Theme.rowSeparator).frame(width: 1)
-                LiveSidePane(session: session)
-                    .frame(width: 360)
+            header
+            Rectangle().fill(Theme.rowSeparator).frame(height: 1).padding(.top, 16)
+            LiveTranscriptView(session: session)
+        }
+        .overlay(alignment: .bottom) {
+            controls.padding(.bottom, 22)
+        }
+        .inspector(isPresented: $showsSummary) {
+            LiveSidePane(session: session)
+                .inspectorColumnWidth(min: 280, ideal: 340, max: 460)
+        }
+        .navigationTitle(session.title)
+        .navigationSubtitle(subtitle)
+        .toolbar {
+            ToolbarSpacer(.flexible)
+            ToolbarItem {
+                Toggle(isOn: $showsSummary) {
+                    Label("Live-Zusammenfassung", systemImage: "sparkle")
+                }
+                .help("Live-Zusammenfassung und Markierungen")
+            }
+            ToolbarItem {
+                Menu {
+                    Button("Umbenennen …", systemImage: "pencil") {
+                        NamePrompt.ask(title: String(localized: "Umbenennen"), message: "", initial: session.title) { session.rename($0) }
+                    }
+                    Button("Markierung setzen", systemImage: "bookmark") { session.addMarker("") }
+                } label: {
+                    Label("Mehr", systemImage: "ellipsis")
+                }
+                .menuIndicator(.hidden)
             }
         }
     }
@@ -70,72 +95,99 @@ struct LiveSessionView: View {
             Button("Einstellungen öffnen") { model.openPrivacySettings(pane) }
                 .buttonStyle(SecondaryButtonStyle())
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 14)
         .padding(.vertical, 9)
-        .background(Theme.warning.opacity(0.1))
-        .overlay(alignment: .bottom) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.warning.opacity(0.12)))
+        .padding(.horizontal, 28)
+        .padding(.top, 10)
     }
 
+    /// The time, large, the sound of the last seconds, and where it comes from.
     private var header: some View {
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 1) {
-                EditableText(text: session.title, font: .uiSemibold) { session.rename($0) }
-                    .lineLimit(1)
-                Text(subtitle)
-                    .font(.small)
-                    .foregroundStyle(Theme.textTertiary)
-                    .lineLimit(1)
-            }
-            .frame(maxWidth: 320, alignment: .leading)
-            Spacer(minLength: 12)
-            HStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .center, spacing: 12) {
                 if session.state == .paused {
-                    Image(systemName: "pause.fill").font(.system(size: 9, weight: .bold)).foregroundStyle(Theme.textSecondary)
+                    Image(systemName: "pause.fill").font(.system(size: 13, weight: .bold)).foregroundStyle(Theme.textSecondary)
                 } else {
-                    RecordingDot()
+                    RecordingDot(size: 11)
                 }
                 Text(TimeFormat.clock(session.elapsed))
-                    .font(.system(size: 13, design: .monospaced))
+                    .font(.system(size: 38, weight: .medium))
                     .monospacedDigit()
-            }
-            .padding(.horizontal, 12)
-            .frame(height: 30)
-            .background(Capsule().fill(Theme.groupHeader))
-            HStack(spacing: 8) {
-                Image(systemName: "mic").font(.system(size: 11)).foregroundStyle(Theme.textTertiary)
-                LevelBars(level: session.microphoneLevel)
-                if session.capturesSystemAudio {
-                    Text(session.source ?? String(localized: "Call", comment: "label of the level meter for the call's sound")).font(.small).foregroundStyle(Theme.textTertiary).padding(.leading, 6)
-                    LevelBars(level: session.systemLevel)
+                    .foregroundStyle(session.state == .paused ? Theme.textSecondary : Theme.text)
+                    .contentTransition(.numericText())
+                Spacer(minLength: 12)
+                HStack(spacing: 8) {
+                    Label("Mikrofon", systemImage: "mic").labelStyle(.titleAndIcon)
+                    LevelBars(level: session.microphoneLevel, color: Theme.positive, height: 12)
+                    if session.capturesSystemAudio {
+                        Label(session.source ?? String(localized: "Call", comment: "label of the level meter for the call's sound"), systemImage: "video")
+                            .labelStyle(.titleAndIcon)
+                            .padding(.leading, 10)
+                        LevelBars(level: session.systemLevel, color: Theme.positive, height: 12)
+                    }
                 }
+                .font(.small)
+                .foregroundStyle(Theme.textTertiary)
+                .help("Pegel von Mikrofon und Call")
             }
-            .help("Pegel von Mikrofon und Call")
-            Spacer(minLength: 12)
+            LevelWaveform(level: { session.waveformLevel() }, bars: 160, height: 54, running: session.state != .paused)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .clipped()
+        }
+        .padding(.horizontal, 40)
+        .padding(.top, 14)
+    }
+
+    /// Pause, stop and a bookmark, floating over the transcript as Voice Memos has them.
+    private var controls: some View {
+        HStack(spacing: 18) {
             Button {
                 model.togglePause()
             } label: {
-                Label(session.state == .paused ? "Fortsetzen" : "Pause", systemImage: session.state == .paused ? "play.fill" : "pause.fill")
-                    .labelStyle(.titleAndIcon)
+                Image(systemName: session.state == .paused ? "play.fill" : "pause.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Theme.text)
+                    .frame(width: 44, height: 44)
+                    .background(Circle().fill(Theme.text.opacity(0.07)))
             }
-            .buttonStyle(SecondaryButtonStyle())
-            .keyboardShortcut("p", modifiers: [.command, .shift])
+            .buttonStyle(PlainPressStyle())
+            .help(session.state == .paused ? "Fortsetzen (⇧⌘P)" : "Pausieren (⇧⌘P)")
+            .accessibilityLabel(session.state == .paused ? "Fortsetzen" : "Pausieren")
             Button {
                 Task { await model.stopRecording() }
             } label: {
-                Label(String(localized: "Beenden", comment: "button: stop the recording"), systemImage: "stop.fill")
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .fill(Theme.recordingFill)
+                    .frame(width: 20, height: 20)
+                    .frame(width: 52, height: 52)
+                    .background(Circle().strokeBorder(Theme.textTertiary.opacity(0.35), lineWidth: 3))
             }
-            .buttonStyle(StopButtonStyle())
+            .buttonStyle(PlainPressStyle())
+            .help("Aufnahme beenden (⌘R)")
+            .accessibilityLabel("Aufnahme beenden")
+            Button {
+                session.addMarker("")
+            } label: {
+                Image(systemName: "bookmark")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Theme.text)
+                    .frame(width: 44, height: 44)
+                    .background(Circle().fill(Theme.text.opacity(0.07)))
+            }
+            .buttonStyle(PlainPressStyle())
+            .help("Markierung setzen (⇧⌘M)")
+            .accessibilityLabel("Markierung setzen")
         }
-        .padding(.leading, 78)
-        .padding(.trailing, 16)
-        .frame(height: 56)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .glassEffect(.regular, in: Capsule())
     }
 
     private var subtitle: String {
-        let voices = session.voices.count
         var parts: [String] = []
         if let source = session.source { parts.append(source) }
-        parts.append(String(localized: "\(voices) Stimmen", comment: "plural: voices heard so far in the recording"))
+        parts.append(session.state == .paused ? String(localized: "Pausiert", comment: "the recording is paused") : String(localized: "Aufnahme läuft"))
         return parts.joined(separator: " · ")
     }
 }
@@ -188,13 +240,14 @@ struct LiveTranscriptView: View {
                             LiveLineView(session: session, line: line)
                                 .id(line.id)
                         case .marker(let marker):
-                            MarkerRow(time: marker.time, text: marker.text)
+                            LiveMarkerRow(marker: marker)
                         }
                     }
                     Color.clear.frame(height: 1).id("bottom")
                 }
                 .padding(.horizontal, Platform.isMobile ? 20 : 40)
-                .padding(.vertical, Platform.isMobile ? 18 : 26)
+                .padding(.top, Platform.isMobile ? 18 : 22)
+                .padding(.bottom, Platform.isMobile ? 18 : 110)
                 .frame(maxWidth: 760, alignment: .leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -220,68 +273,56 @@ struct LiveTranscriptView: View {
     }
 }
 
+/// A line as it is spoken: when, and what. Nobody's name: who is talking is only guessed during the meeting and
+/// settled afterwards. Only your own lines say so, where the call comes in on its own and the microphone is yours.
 struct LiveLineView: View {
-    @Environment(AppModel.self) private var model
     let session: RecordingSession
     let line: LiveLine
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Avatar(kind: avatar, size: 22)
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 8) {
-                    Text(session.displayName(for: line.speakerKey)).font(.uiSemibold)
-                    Text(TimeFormat.clock(line.start)).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
-                    if line.isPartial {
-                        SpeakingIndicator()
-                    }
-                    if let suggestion = session.voices[line.speakerKey]?.suggestedName, !line.isPartial, isLastLine(of: line.speakerKey) {
-                        Button {
-                            session.confirm(line.speakerKey, as: suggestion)
-                        } label: {
-                            Group {
-                                #if os(macOS)
-                                Label("Als „\(suggestion)“ speichern", systemImage: "checkmark")
-                                #else
-                                // A phone has room for the name only.
-                                ViewThatFits(in: .horizontal) {
-                                    Label("Als „\(suggestion)“ speichern", systemImage: "checkmark").fixedSize()
-                                    Label("\(suggestion)?", systemImage: "checkmark").fixedSize()
-                                }
-                                #endif
-                            }
-                            .font(.tiny.weight(.medium))
-                            .foregroundStyle(Theme.accent)
-                            .padding(.horizontal, 9)
-                            .frame(height: Platform.isMobile ? 28 : 22)
-                            .background(Capsule().fill(Theme.selectionFill))
-                            .overlay(Capsule().stroke(Theme.selectionBorder, lineWidth: 1))
-                        }
-                        .buttonStyle(PlainPressStyle())
-                        .accessibilityLabel(Text("Als „\(suggestion)“ speichern"))
-                        IconButton(systemName: "xmark", label: "Vorschlag verwerfen", size: 20) {
-                            session.dismissSuggestion(for: line.speakerKey)
-                        }
+        HStack(alignment: .firstTextBaseline, spacing: 14) {
+            if !Platform.isMobile {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(TimeFormat.clock(line.start))
+                        .font(.small)
+                        .monospacedDigit()
+                        .foregroundStyle(Theme.textTertiary)
+                    if isYou {
+                        Text(Strings.me).font(.tinySemibold).foregroundStyle(Theme.accent)
                     }
                 }
-                Text(line.text)
-                    .font(.live)
-                    .lineSpacing(3)
-                    .foregroundStyle(line.isPartial ? Theme.textSecondary : Theme.textBody)
-                    .textSelection(.enabled)
+                .frame(width: 56, alignment: .leading)
             }
+            Text(line.text)
+                .font(.live)
+                .lineSpacing(4)
+                .foregroundStyle(line.isPartial ? Theme.textSecondary : Theme.text)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
-    private func isLastLine(of key: String) -> Bool {
-        session.lines.last(where: { $0.speakerKey == key })?.id == line.id
+    private var isYou: Bool {
+        session.capturesSystemAudio && line.speakerKey == MeetingSpeaker.meKey
     }
+}
 
-    private var avatar: Avatar.Kind {
-        if line.speakerKey == MeetingSpeaker.meKey { return .me(name: model.myName) }
-        guard let voice = session.voices[line.speakerKey] else { return .unknown(label: "?") }
-        if let name = voice.name { return .person(name: name) }
-        return .unknown(label: voice.label)
+/// A bookmark in the live transcript, in the time column's line.
+private struct LiveMarkerRow: View {
+    let marker: LiveMarker
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 14) {
+            if !Platform.isMobile {
+                Text(TimeFormat.clock(marker.time))
+                    .font(.small)
+                    .monospacedDigit()
+                    .frame(width: 56, alignment: .leading)
+            }
+            Label(marker.text.isEmpty ? String(localized: "Markierung", comment: "a marker set at a moment of the recording, without a note") : marker.text, systemImage: "bookmark.fill")
+                .font(.uiMedium)
+        }
+        .foregroundStyle(Theme.accent)
     }
 }
 
@@ -310,14 +351,14 @@ struct MarkerRow: View {
     var text: String
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "bookmark.fill").font(.system(size: 10)).foregroundStyle(Theme.accent)
-            Text(TimeFormat.clock(time)).font(.small).monospacedDigit().foregroundStyle(Theme.accent)
-            Text(text.isEmpty ? String(localized: "Markierung", comment: "a marker set at a moment of the recording, without a note") : text).font(.small).foregroundStyle(Theme.textSecondary)
+        HStack(spacing: 8) {
+            Image(systemName: "bookmark.fill").font(.system(size: 10))
+            Text(TimeFormat.clock(time)).font(.small).monospacedDigit()
+            Text(text.isEmpty ? String(localized: "Markierung", comment: "a marker set at a moment of the recording, without a note") : text).font(.uiMedium)
                 .layoutPriority(1)
             Rectangle().fill(Theme.rowSeparator).frame(height: 1)
         }
-        .padding(.leading, 34)
+        .foregroundStyle(Theme.accent)
     }
 }
 

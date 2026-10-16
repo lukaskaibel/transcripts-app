@@ -90,6 +90,12 @@ def scaled(img, s):
     return img.resize((round(img.width * s), round(img.height * s)), Image.LANCZOS)
 
 
+def opaque(img, threshold=200):
+    """Only what is drawn solidly: the floating recorder without the room its window leaves for the shadow."""
+    box = img.getchannel("A").point(lambda v: 255 if v >= threshold else 0).getbbox()
+    return img.crop(box) if box else img
+
+
 def window(img, radius=30):
     """A window rendered by the app itself (square corners) with the rounded corners of a macOS window."""
     return rounded(img, radius)

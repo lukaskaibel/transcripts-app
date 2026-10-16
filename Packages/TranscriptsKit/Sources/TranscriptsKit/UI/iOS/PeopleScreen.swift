@@ -301,9 +301,8 @@ struct MobileReviewRow: View {
                 .foregroundStyle(Theme.textBody)
                 .padding(.horizontal, ButtonMetrics.padding - 2)
                 .frame(minHeight: ButtonMetrics.height)
-                .background(RoundedRectangle(cornerRadius: ButtonMetrics.radius, style: .continuous).fill(Theme.card))
-                .overlay(RoundedRectangle(cornerRadius: ButtonMetrics.radius, style: .continuous).stroke(Theme.chipBorder, lineWidth: 1))
-                .contentShape(Rectangle())
+                .background(Capsule().fill(Theme.control))
+                .contentShape(Capsule())
         }
         .menuIndicator(.hidden)
     }

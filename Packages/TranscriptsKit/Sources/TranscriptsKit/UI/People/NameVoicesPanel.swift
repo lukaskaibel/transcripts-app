@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// "Wer ist das?": the voices still without a name, one after another. The sample plays by itself, the
-/// app's guesses come first, a number key or Return names the voice and the next one follows. The Mac shows it as a
-/// panel over the window, iPhone and iPad in a sheet, where a tap on a name does what the keys do.
+/// Naming the voices still without a name, one after another, as Photos asks about a face: the voice plays, the app
+/// says whom it thinks it is ("Ist das Jonas Weber?"), and Yes or Someone Else settles it; then the next one. The Mac
+/// shows it as a sheet on the window, iPhone and iPad as a sheet from the bottom. Return says yes, Space plays the
+/// voice again, → skips it and Escape stops for now.
 struct NameVoicesPanel: View {
     @Environment(AppModel.self) private var model
     let meetingId: String?
@@ -26,6 +27,9 @@ struct NameVoicesPanel: View {
         var meeting: Meeting
         var quotes: [String]
         var choices: [Choice]
+
+        /// The app's best guess, if it has one.
+        var guess: Choice? { choices.first.flatMap { $0.isGuess ? $0 : nil } }
     }
 
     struct Choice: Identifiable {
@@ -51,36 +55,29 @@ struct NameVoicesPanel: View {
             case .newPerson(let name, _): name
             }
         }
+
+        var firstName: String {
+            name.split(separator: " ").first.map(String.init) ?? name
+        }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            header
-            Rectangle().fill(Theme.rowSeparator).frame(height: 1)
             if let current {
                 content(current)
             } else {
                 done
             }
         }
+        .padding(.horizontal, Platform.isMobile ? 20 : 22)
+        .padding(.top, Platform.isMobile ? 14 : 20)
+        .padding(.bottom, Platform.isMobile ? 12 : 18)
         #if os(macOS)
-        .frame(width: 560)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Theme.popover))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.popoverBorder, lineWidth: 1))
-        .shadow(color: Theme.shadow, radius: 30, y: 16)
+        .frame(width: 460)
         #endif
         .focusable()
         .focusEffectDisabled()
         .focused($focus, equals: .panel)
-        .onKeyPress(.escape) {
-            close()
-            return .handled
-        }
-        .onKeyPress(.return) {
-            guard focus == .panel, let first = current?.choices.first else { return .ignored }
-            choose(first)
-            return .handled
-        }
         .onKeyPress(.rightArrow) {
             guard focus == .panel else { return .ignored }
             advance()
@@ -89,28 +86,6 @@ struct NameVoicesPanel: View {
         .onKeyPress(.space) {
             guard focus == .panel else { return .ignored }
             playSample()
-            return .handled
-        }
-        .onKeyPress(characters: .alphanumerics) { press in
-            guard focus == .panel, let current else { return .ignored }
-            let key = press.characters.lowercased()
-            if let number = Int(key), number >= 1, number <= min(9, current.choices.count) {
-                choose(current.choices[number - 1])
-                return .handled
-            }
-            // The letters of the interface's language, and the German ones, which always work.
-            if key == Shortcut.newPerson.lowercased() || key == "n" {
-                addingPerson = true
-                focus = .name
-            } else if key == Shortcut.me.lowercased() || key == "d" {
-                model.assignToMe(current.speaker)
-                next(named: true)
-            } else if key == Shortcut.nobody.lowercased() || key == "x" {
-                model.ignoreVoice(current.speaker)
-                next(named: false)
-            } else {
-                return .ignored
-            }
             return .handled
         }
         .onAppear {
@@ -124,138 +99,242 @@ struct NameVoicesPanel: View {
 
     // MARK: Parts
 
-    private var header: some View {
-        HStack(spacing: 10) {
-            Text("Wer ist das?").font(Platform.isMobile ? .headline : .system(size: 15, weight: .semibold))
-            Spacer()
-            if current != nil, queue.count > 1 {
+    private func content(_ item: Item) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header(item)
+            clip(item).padding(.top, 14)
+            question(item).padding(.top, 20)
+            if addingPerson {
+                newPersonField.padding(.top, 20)
+            } else {
+                answers(item).padding(.top, 20)
+            }
+            footer.padding(.top, Platform.isMobile ? 6 : 14)
+        }
+    }
+
+    private func header(_ item: Item) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(item.speaker.displayLabel).font(Platform.isMobile ? .headline : .uiSemibold)
+                Text("\(item.meeting.title) · \(TimeFormat.compactDay(item.meeting.startedAt)) · \(TimeFormat.duration(item.speaker.talkTime)) Sprache")
+                    .font(.small)
+                    .foregroundStyle(Theme.textTertiary)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 8)
+            if queue.count > 1 {
                 Text("\(min(position + 1, queue.count)) von \(queue.count)")
                     .font(.small)
                     .monospacedDigit()
                     .foregroundStyle(Theme.textTertiary)
             }
-            IconButton(systemName: "xmark", label: String(localized: "Schließen (esc)"), size: 22) { close() }
         }
-        .padding(.horizontal, 18)
-        .frame(height: Platform.isMobile ? 56 : 50)
     }
 
-    private func content(_ item: Item) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top, spacing: 14) {
+    /// The voice to listen to, with what it said.
+    private func clip(_ item: Item) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
                 Button(action: playSample) {
                     Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: Platform.isMobile ? 17 : 14))
-                        .foregroundStyle(Theme.onColor)
-                        .frame(width: Platform.isMobile ? 48 : 40, height: Platform.isMobile ? 48 : 40)
+                        .font(.system(size: Platform.isMobile ? 16 : 13))
+                        .foregroundStyle(.white)
+                        .frame(width: Platform.isMobile ? 44 : 36, height: Platform.isMobile ? 44 : 36)
                         .background(Circle().fill(Theme.accentFill))
                 }
                 .buttonStyle(PlainPressStyle())
                 .help("Stimmprobe anhören (Leertaste)")
+                .accessibilityLabel("Stimmprobe anhören")
                 .disabled(item.speaker.sampleStart == nil || !AudioArchiver.hasAudio(meetingId: item.meeting.id))
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(item.speaker.displayLabel) · \(TimeFormat.duration(item.speaker.talkTime)) Sprache")
-                        .font(.uiSemibold)
-                    Text("\(item.meeting.title) · \(TimeFormat.compactDay(item.meeting.startedAt))")
-                        .font(.small)
-                        .foregroundStyle(Theme.textTertiary)
-                        .lineLimit(1)
-                    ForEach(item.quotes, id: \.self) { quote in
-                        Text(Strings.quote(quote))
-                            .font(.small)
-                            .foregroundStyle(Theme.textSecondary)
-                            .lineLimit(2)
-                            .padding(.top, 2)
-                    }
+                ThinBar(fraction: sampleProgress(item), height: 4)
+                if let start = item.speaker.sampleStart, let end = item.speaker.sampleEnd {
+                    Text(TimeFormat.clock(end - start)).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
                 }
             }
-            .padding(18)
+            ForEach(item.quotes, id: \.self) { quote in
+                Text(Strings.quote(quote))
+                    .font(Platform.isMobile ? .subheadline : .ui)
+                    .foregroundStyle(Theme.textBody)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Theme.suggestion))
+    }
 
-            VStack(alignment: .leading, spacing: 2) {
-                ForEach(Array(item.choices.prefix(9).enumerated()), id: \.element.id) { index, choice in
-                    if index == 0 && choice.isGuess {
-                        sectionTitle(item.choices.filter(\.isGuess).count > 1 ? String(localized: "Vermutlich einer von ihnen") : String(localized: "Vermutlich", comment: "section title over the person a voice probably is"))
-                    } else if !choice.isGuess && (index == 0 || item.choices[index - 1].isGuess) {
-                        sectionTitle(String(localized: "Andere", comment: "section title over the other people a voice could be"))
-                    }
-                    ChoiceRow(number: index + 1, choice: choice, highlighted: index == 0) { choose(choice) }
+    /// "Ist das Jonas Weber?" with why the app thinks so, or "Wer ist das?" when it has no idea.
+    private func question(_ item: Item) -> some View {
+        VStack(spacing: 6) {
+            if let guess = item.guess {
+                Avatar(kind: .person(name: guess.name), size: Platform.isMobile ? 60 : 52)
+                Text("Ist das \(guess.name)?", comment: "naming a voice: whom the app thinks it is")
+                    .font(Platform.isMobile ? .title2.bold() : .system(size: 20, weight: .bold))
+                    .foregroundStyle(Theme.text)
+                    .padding(.top, 6)
+                if let reason = guess.detail {
+                    Text(reason)
                 }
-                if item.choices.count > 9 {
-                    Menu("Weitere …") {
-                        ForEach(item.choices.dropFirst(9)) { choice in
-                            Button(choice.name) { choose(choice) }
-                        }
-                    }
-                    .menuStyle(.button)
-                    .buttonStyle(.plain)
-                    .font(.small)
-                    .foregroundStyle(Theme.textSecondary)
-                    .padding(.leading, 12)
-                    .padding(.top, 4)
-                    .fixedSize()
-                }
-                newPersonRow
+            } else {
+                Avatar(kind: .unknown(label: item.speaker.label), size: Platform.isMobile ? 60 : 52)
+                Text("Wer ist das?")
+                    .font(Platform.isMobile ? .title2.bold() : .system(size: 20, weight: .bold))
+                    .foregroundStyle(Theme.text)
+                    .padding(.top, 6)
+                Text("Im Gespräch fiel kein Name, und die Stimme klingt nach niemandem, den du schon benannt hast.", comment: "naming a voice the app has no guess for")
             }
-            .padding(.horizontal, 12)
+        }
+        .font(Platform.isMobile ? .subheadline : .ui)
+        .foregroundStyle(Theme.textSecondary)
+        .multilineTextAlignment(.center)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity)
+    }
 
-            Rectangle().fill(Theme.rowSeparator).frame(height: 1).padding(.top, 12)
-            HStack(spacing: 14) {
-                footerButton("Das bin ich", key: Shortcut.me) {
-                    model.assignToMe(item.speaker)
-                    next(named: true)
-                }
-                footerButton("Niemand Bestimmtes", key: Shortcut.nobody) {
-                    model.ignoreVoice(item.speaker)
-                    next(named: false)
-                }
-                Spacer()
-                footerButton("Überspringen", key: "→") { advance() }
+    /// Yes and Someone Else side by side on the Mac, stacked for a thumb on iPhone and iPad.
+    @ViewBuilder
+    private func answers(_ item: Item) -> some View {
+        let layout = Platform.isMobile ? AnyLayout(VStackLayout(spacing: 10)) : AnyLayout(HStackLayout(spacing: 10))
+        layout {
+            if Platform.isMobile, let guess = item.guess {
+                yesButton(guess)
             }
-            .padding(.horizontal, 18)
-            .frame(height: 46)
+            Menu {
+                otherChoices(item)
+            } label: {
+                HStack(spacing: 6) {
+                    Text(item.guess == nil ? String(localized: "Name wählen", comment: "naming a voice: button that opens the list of people") : String(localized: "Jemand anderes", comment: "naming a voice: it is not the person the app guessed"))
+                    Image(systemName: "chevron.up.chevron.down").font(.system(size: 9, weight: .semibold))
+                }
+                .font(Platform.isMobile ? .body.weight(.semibold) : .uiMedium)
+                .foregroundStyle(Theme.text)
+                .frame(maxWidth: .infinity)
+                .frame(height: Platform.isMobile ? 50 : 32)
+                .background(Capsule().fill(Theme.control))
+                .contentShape(Capsule())
+            }
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .menuIndicator(.hidden)
+            .accessibilityIdentifier("naming.other")
+            if !Platform.isMobile, let guess = item.guess {
+                yesButton(guess)
+            }
         }
     }
 
-    private var newPersonRow: some View {
-        HStack(spacing: 10) {
-            if Platform.isMobile {
-                Image(systemName: "person.badge.plus").font(.callout).foregroundStyle(Theme.textSecondary).frame(width: 24)
-            } else {
-                Keycap(Shortcut.newPerson)
-            }
-            if addingPerson {
-                TextField("Name", text: $newName)
-                    .textFieldStyle(.plain)
-                    .font(.ui)
-                    .focused($focus, equals: .name)
-                    .onSubmit(saveNewPerson)
-                    .onExitCommand {
-                        addingPerson = false
-                        newName = ""
-                        focus = .panel
-                    }
-                Button("Sichern") { saveNewPerson() }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .disabled(newName.trimmingCharacters(in: .whitespaces).isEmpty)
-            } else {
-                Button {
-                    addingPerson = true
-                    focus = .name
-                } label: {
-                    Text("Neue Person …").foregroundStyle(Theme.textSecondary).frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .buttonStyle(PlainPressStyle())
+    private func yesButton(_ guess: Choice) -> some View {
+        Button {
+            choose(guess)
+        } label: {
+            Text("Ja, das ist \(guess.firstName)", comment: "naming a voice: confirm the person the app guessed")
+                .font(Platform.isMobile ? .body.weight(.semibold) : .uiSemibold)
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+                .frame(height: Platform.isMobile ? 50 : 32)
+                .background(Capsule().fill(Theme.accentFill))
+                .contentShape(Capsule())
+        }
+        .buttonStyle(PlainPressStyle())
+        .keyboardShortcut(.defaultAction)
+        .accessibilityIdentifier("naming.yes")
+    }
+
+    /// Everyone else it could be: the app's other guesses, the invitees, everyone known; a new name; you; nobody.
+    @ViewBuilder
+    private func otherChoices(_ item: Item) -> some View {
+        let others = item.guess == nil ? item.choices : Array(item.choices.dropFirst())
+        let guesses = others.filter(\.isGuess)
+        let rest = others.filter { !$0.isGuess }
+        if !guesses.isEmpty {
+            Section(String(localized: "Vermutlich", comment: "section title over the person a voice probably is")) {
+                ForEach(guesses) { choice in choiceButton(choice) }
             }
         }
-        .padding(.horizontal, 12)
-        .frame(height: Platform.isMobile ? 48 : 34)
+        if !rest.isEmpty {
+            if item.guess == nil && guesses.isEmpty {
+                restButtons(rest)
+            } else {
+                Section(String(localized: "Andere", comment: "section title over the other people a voice could be")) {
+                    restButtons(rest)
+                }
+            }
+        }
+        Divider()
+        Button("Neue Person …", systemImage: "person.badge.plus") {
+            addingPerson = true
+            focus = .name
+        }
+        Button("Das bin ich", systemImage: "person.crop.circle") {
+            model.assignToMe(item.speaker)
+            next(named: true)
+        }
+        Button("Niemand Bestimmtes", systemImage: "person.slash") {
+            model.ignoreVoice(item.speaker)
+            next(named: false)
+        }
+    }
+
+    @ViewBuilder
+    private func restButtons(_ rest: [Choice]) -> some View {
+        ForEach(rest.prefix(12)) { choice in choiceButton(choice) }
+        if rest.count > 12 {
+            Menu("Weitere …") {
+                ForEach(rest.dropFirst(12)) { choice in choiceButton(choice) }
+            }
+        }
+    }
+
+    private func choiceButton(_ choice: Choice) -> some View {
+        Button {
+            choose(choice)
+        } label: {
+            Text(choice.name)
+            if let detail = choice.detail { Text(detail) }
+        }
+    }
+
+    private var newPersonField: some View {
+        HStack(spacing: 10) {
+            TextField("Name", text: $newName)
+                .textFieldStyle(.roundedBorder)
+                .focused($focus, equals: .name)
+                .onSubmit(saveNewPerson)
+                .onExitCommand {
+                    addingPerson = false
+                    newName = ""
+                    focus = .panel
+                }
+            Button("Sichern") { saveNewPerson() }
+                .buttonStyle(PrimaryButtonStyle())
+                .disabled(newName.trimmingCharacters(in: .whitespaces).isEmpty)
+        }
+    }
+
+    private var footer: some View {
+        HStack {
+            Button("Überspringen") { advance() }
+                .help("Diese Stimme überspringen (→)")
+            Spacer()
+            Button(String(localized: "Später", comment: "naming voices: stop for now, the rest waits")) { close() }
+                .keyboardShortcut(.cancelAction)
+                .help("Die übrigen Stimmen warten im Eingang (Esc)")
+        }
+        .buttonStyle(PlainPressStyle())
+        .font(Platform.isMobile ? .body : .ui)
+        .foregroundStyle(Theme.accent)
+        .frame(minHeight: Platform.isMobile ? 44 : 24)
     }
 
     private var done: some View {
         VStack(spacing: 10) {
-            Image(systemName: "checkmark.circle").font(.system(size: 26)).foregroundStyle(Theme.positive)
+            Image(systemName: "checkmark.circle").font(.system(size: 30)).foregroundStyle(Theme.positive)
             Text(named > 0 ? "Alle Stimmen haben einen Namen." : "Keine Stimme wartet auf einen Namen.")
-                .font(.uiMedium)
+                .font(.uiSemibold)
             Text("Die App erkennt die Stimmen jetzt auch in anderen Meetings und sortiert dort nach.")
                 .font(.small)
                 .foregroundStyle(Theme.textSecondary)
@@ -265,38 +344,14 @@ struct NameVoicesPanel: View {
                 .keyboardShortcut(.defaultAction)
                 .padding(.top, 6)
         }
-        .padding(28)
+        .padding(.vertical, 18)
         .frame(maxWidth: .infinity)
     }
 
-    private func sectionTitle(_ title: String) -> some View {
-        Text(title)
-            .font(.smallMedium)
-            .foregroundStyle(Theme.textTertiary)
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
-            .padding(.bottom, 2)
-    }
-
-    /// One-letter keys for the choices that aren't numbered, taken from their words in the interface's language.
-    private enum Shortcut {
-        static var me: String { String(localized: "D", comment: "one-letter key for \"Das bin ich\" (That's me), ideally its first letter; not a digit, and not the same as the keys for \"Niemand Bestimmtes\" and a new name") }
-        static var nobody: String { String(localized: "X", comment: "one-letter key for \"Niemand Bestimmtes\" (nobody in particular); not a digit, and not the same as the keys for \"Das bin ich\" and a new name") }
-        static var newPerson: String { String(localized: "N", comment: "one-letter key for typing a new name in the Who is this panel, ideally the first letter of \"Name\"; not a digit, and not the same as the keys for \"Das bin ich\" and \"Niemand Bestimmtes\"") }
-    }
-
-    private func footerButton(_ title: LocalizedStringKey, key: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                Text(title)
-                if !Platform.isMobile { Keycap(key) }
-            }
-            .font(Platform.isMobile ? .smallMedium : .small)
-            .foregroundStyle(Theme.textSecondary)
-            .frame(minHeight: Platform.isMobile ? 44 : nil)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(PlainPressStyle())
+    /// How far the voice sample has played.
+    private func sampleProgress(_ item: Item) -> Double {
+        guard isPlaying, let start = item.speaker.sampleStart, let end = item.speaker.sampleEnd, end > start else { return 0 }
+        return (model.player.currentTime - start) / (end - start)
     }
 
     // MARK: Actions
@@ -354,6 +409,8 @@ struct NameVoicesPanel: View {
     /// The next voice that still waits: naming one voice can let the app recognise others by itself.
     private func load() {
         model.player.stop()
+        addingPerson = false
+        newName = ""
         current = nil
         while position < queue.count {
             let review = queue[position]
@@ -412,48 +469,5 @@ struct NameVoicesPanel: View {
             result.append(Choice(kind: .person(person), detail: voiceDetail(person.id), isGuess: false))
         }
         return result
-    }
-}
-
-private struct ChoiceRow: View {
-    let number: Int
-    let choice: NameVoicesPanel.Choice
-    let highlighted: Bool
-    let action: () -> Void
-    @State private var hovering = false
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                if !Platform.isMobile {
-                    Keycap(highlighted ? "↩" : "\(number)")
-                        .frame(width: 26)
-                }
-                Avatar(kind: .person(name: choice.name), size: Platform.isMobile ? 26 : 20)
-                if Platform.isMobile {
-                    // Narrow: why the app thinks so goes under the name, with room for a quote.
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(choice.name).font(.uiMedium).lineLimit(1)
-                        if let detail = choice.detail {
-                            Text(detail).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(2)
-                        }
-                    }
-                } else {
-                    Text(choice.name).font(.uiMedium).lineLimit(1)
-                    if let detail = choice.detail {
-                        Text(detail).font(.small).foregroundStyle(Theme.textTertiary).lineLimit(1)
-                    }
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, Platform.isMobile ? 7 : 0)
-            .frame(minHeight: Platform.isMobile ? 52 : 34)
-            .background(RoundedRectangle(cornerRadius: Platform.isMobile ? 12 : 8, style: .continuous).fill(hovering || highlighted ? Theme.hover : .clear))
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(PlainPressStyle())
-        .onHover { hovering = $0 }
-        .help(highlighted ? "Return oder \(number)" : "Taste \(number)")
     }
 }

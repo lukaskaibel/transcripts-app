@@ -10,13 +10,26 @@ struct MeetingListView: View {
     @State private var deleting: MeetingRow?
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
+        Group {
             if model.rows.isEmpty {
                 emptyState
             } else {
                 list
             }
+        }
+        .navigationTitle(AppModel.Section.meetings.title)
+        .toolbar {
+            ToolbarSpacer(.flexible)
+            ToolbarItem {
+                Button {
+                    importing = true
+                } label: {
+                    Label("Audiodatei importieren …", systemImage: "square.and.arrow.down")
+                }
+                .help("Audiodatei importieren …")
+            }
+            ToolbarSpacer(.fixed)
+            SearchToolbarItem(model: model)
         }
         .fileImporter(isPresented: $importing, allowedContentTypes: AppModel.importableTypes, allowsMultipleSelection: true) { result in
             if case .success(let urls) = result { model.importAudio(urls) }
@@ -45,19 +58,6 @@ struct MeetingListView: View {
         } message: { _ in
             Text("Transkript, Zusammenfassung und Aufnahme werden gelöscht.")
         }
-    }
-
-    private var header: some View {
-        HStack(spacing: 8) {
-            Text("Meetings").font(.uiSemibold)
-            Text("\(model.rows.count)").foregroundStyle(Theme.textTertiary)
-            Spacer()
-            IconButton(systemName: "square.and.arrow.down", label: String(localized: "Audiodatei importieren …")) { importing = true }
-        }
-        .padding(.leading, 18)
-        .padding(.trailing, 10)
-        .frame(height: Theme.headerHeight)
-        .overlay(alignment: .bottom) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
     }
 
     private var emptyState: some View {
@@ -103,54 +103,64 @@ struct MeetingRowView: View {
     var onDelete: () -> Void
     @State private var hovering = false
 
-    private var peopleById: [String: Person] {
-        Dictionary(uniqueKeysWithValues: model.people.map { ($0.id, $0) })
-    }
-
     var body: some View {
         Button {
             model.select(row.id)
         } label: {
             HStack(spacing: 12) {
-                MeetingGlyph(state: row.glyph)
-                    .frame(width: 16)
-                Text(row.meeting.title)
-                    .font(.uiMedium)
-                    .lineLimit(1)
-                if row.pendingVoices > 0, row.meeting.status == .ready {
-                    DotChip(text: String(localized: "\(row.pendingVoices) Stimmen offen", comment: "plural: voices in a meeting still waiting for a name"), color: Theme.warning)
-                }
-                if row.meeting.status == .processing {
-                    Text(row.meeting.processingStep ?? String(localized: "Wird verarbeitet"))
-                        .font(.small)
-                        .foregroundStyle(Theme.textTertiary)
+                symbol
+                    .frame(width: 18)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(row.meeting.title)
+                        .font(.uiMedium)
                         .lineLimit(1)
-                }
-                if row.meeting.status == .failed {
-                    Text("Fehler bei der Verarbeitung").font(.small).foregroundStyle(Theme.warning)
+                    if let note {
+                        Text(note)
+                            .font(.small)
+                            .foregroundStyle(row.meeting.status == .failed ? Theme.warning : Theme.textTertiary)
+                            .lineLimit(1)
+                    }
                 }
                 Spacer(minLength: 12)
-                AvatarStack(kinds: row.avatarKinds(people: peopleById), ring: hovering ? Theme.hover : Theme.panel)
                 Text(row.meeting.status == .recording ? String(localized: "läuft", comment: "in place of a meeting's duration: it is being recorded right now") : TimeFormat.duration(row.meeting.duration))
                     .font(.small)
                     .monospacedDigit()
                     .foregroundStyle(Theme.textTertiary)
-                    .frame(width: 76, alignment: .trailing)
                 Text(TimeFormat.time(row.meeting.startedAt))
                     .font(.small)
                     .monospacedDigit()
                     .foregroundStyle(Theme.textTertiary)
-                    .frame(width: 44, alignment: .trailing)
+                    .frame(minWidth: 64, alignment: .trailing)
             }
             .padding(.horizontal, 14)
-            .frame(height: Theme.rowHeight)
-            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(hovering ? Theme.hover : .clear))
+            .frame(minHeight: 46)
+            .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(hovering ? Theme.hover : .clear))
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainPressStyle())
         .onHover { hovering = $0 }
         .contextMenu {
             MeetingMenuItems(meetingId: row.id, onDelete: onDelete)
+        }
+    }
+
+    @ViewBuilder
+    private var symbol: some View {
+        switch row.meeting.status {
+        case .recording: Image(systemName: "record.circle").foregroundStyle(Theme.recording)
+        case .processing: ProgressView().controlSize(.small)
+        case .failed: Image(systemName: "exclamationmark.triangle").foregroundStyle(Theme.warning)
+        case .ready: Image(systemName: "waveform").foregroundStyle(row.hasSummary ? Theme.accent : Theme.textTertiary)
+        }
+    }
+
+    /// What is special about the meeting, under its title: the step it is in, an error, or voices without a name.
+    private var note: String? {
+        switch row.meeting.status {
+        case .processing: row.meeting.processingStep ?? String(localized: "Wird verarbeitet")
+        case .failed: String(localized: "Fehler bei der Verarbeitung")
+        case .ready where row.pendingVoices > 0: String(localized: "\(row.pendingVoices) Stimmen offen", comment: "plural: voices in a meeting still waiting for a name")
+        default: nil
         }
     }
 }

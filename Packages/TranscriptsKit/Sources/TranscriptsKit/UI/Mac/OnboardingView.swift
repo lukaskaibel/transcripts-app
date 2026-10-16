@@ -90,8 +90,7 @@ struct OnboardingView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .panelStyle()
-        .padding(8)
+        .background(Theme.panel.ignoresSafeArea())
         .onAppear {
             model.refreshPermissions()
             // Models already on this Mac load right away; only the download waits for a click.

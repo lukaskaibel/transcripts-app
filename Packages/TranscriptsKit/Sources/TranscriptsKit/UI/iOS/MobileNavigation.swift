@@ -20,7 +20,7 @@ enum Route: Hashable {
 /// Sheets the whole window can show, whichever tab asked for them.
 enum MobileSheet: Identifiable, Equatable {
     case settings(AppModel.SettingsTab?)
-    /// "Wer ist das?", for the voices of one meeting first or for all.
+    /// Naming voices, those of one meeting first or all of them.
     case naming(meetingId: String?)
     /// A calendar meeting that hasn't been recorded: who is invited, record or join.
     case upcoming(UpcomingMeeting)

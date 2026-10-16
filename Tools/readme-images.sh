@@ -3,8 +3,8 @@
 # meeting in a few other languages), Tools/readme-images/build.py lays them out as Design/screenshots/*.webp and
 # Design/social-preview.png, and Tools/readme-images/website.py makes the website's pictures in Website/images.
 #   Tools/readme-images.sh
-# Needs Python 3 with Pillow and NumPy. Works with a locked screen: the app draws into images itself, nothing is
-# captured from the screen.
+# Needs Python 3 with Pillow and NumPy, Screen Recording permission for the terminal and an awake screen: the windows
+# are captured as the screen shows them (ScreenCaptureKit), the floating recorder and the menu are drawn by the app.
 set -e
 cd "$(dirname "$0")/.."
 python3 -c "import PIL, numpy" 2>/dev/null || { echo "Needs Pillow and NumPy: pip3 install pillow numpy" >&2; exit 1; }
@@ -29,21 +29,21 @@ run() {
 scenes() {
   local theme=$1
   print -l "appearance $theme" "wait 1.5" \
-    "select m-sync" "wait 2" "snapframe main meeting-$theme" \
-    "section people" "wait 3" "snapframe main people-$theme" \
-    "naming" "wait 2.5" "snapframe main naming-$theme" "closeoverlay" "wait 1"
+    "select m-sync" "wait 2" "capture shot meeting-$theme" \
+    "section people" "wait 3" "capture shot people-$theme" \
+    "select m-sync" "wait 2" "naming" "wait 2.5" "capture shot naming-$theme" "closeoverlay" "wait 1"
 }
 
 echo "English, light and dark…"
 run en US "${(@f)$(scenes light)}" "${(@f)$(scenes dark)}" \
-  "appearance light" "live" "wait 2.5" "snapframe live live-light" "floating" "wait 1.5" "snapwindow floating floating-light" \
+  "appearance light" "live" "wait 2.5" "capture second live-light" "floating" "wait 1.5" "snapwindow floating floating-light" \
   "menubar" "wait 1.5" "snapwindow MenuBar menubar-light" \
-  "appearance dark" "wait 1.5" "snapframe live live-dark" "snapwindow floating floating-dark" "snapwindow MenuBar menubar-dark"
+  "appearance dark" "wait 1.5" "capture second live-dark" "snapwindow floating floating-dark" "snapwindow MenuBar menubar-dark"
 
 for place in de_DE fr_FR uk_UA; do
   language=${place%_*}
   echo "The meeting in $language…"
-  run $language ${place#*_} "appearance light" "wait 1" "select m-sync" "wait 2" "snapframe main meeting-light-$language"
+  run $language ${place#*_} "appearance light" "wait 1" "select m-sync" "wait 2" "capture shot meeting-light-$language"
 done
 
 echo "Laying out…"

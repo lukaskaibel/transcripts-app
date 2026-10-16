@@ -8,7 +8,8 @@ struct TranscriptSection: View {
     @FocusState private var searchFocused: Bool
 
     private enum Item: Identifiable {
-        case line(Segment, showsHeader: Bool)
+        /// A line; the first of a block carries the block's lines, which "Nur diese Passage" gives to someone else.
+        case line(Segment, block: [Int64]?)
         case marker(Marker)
 
         var id: String {
@@ -25,6 +26,7 @@ struct TranscriptSection: View {
         var result: [Item] = []
         var markers = query.isEmpty ? detail.markers : []
         var previous: Segment?
+        var blockStart: Int?
         for segment in segments {
             while let marker = markers.first, marker.time <= segment.start {
                 result.append(.marker(marker))
@@ -33,7 +35,13 @@ struct TranscriptSection: View {
             }
             // Consecutive lines of one speaker read as one block.
             let continues = previous.map { $0.speakerKey == segment.speakerKey && segment.start - $0.end < 4 } ?? false
-            result.append(.line(segment, showsHeader: !continues || !query.isEmpty))
+            if continues, query.isEmpty, let start = blockStart, case .line(let first, let block?) = result[start] {
+                result[start] = .line(first, block: block + [segment.id].compactMap { $0 })
+                result.append(.line(segment, block: nil))
+            } else {
+                blockStart = result.count
+                result.append(.line(segment, block: [segment.id].compactMap { $0 }))
+            }
             previous = segment
         }
         result += markers.map { .marker($0) }
@@ -43,8 +51,6 @@ struct TranscriptSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                Text("Transkript").font(.uiSemibold)
-                Text(TimeFormat.duration(detail.meeting.duration)).foregroundStyle(Theme.textTertiary)
                 Spacer(minLength: 8)
                 if searching {
                     HStack(spacing: 6) {
@@ -82,8 +88,8 @@ struct TranscriptSection: View {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(items) { item in
                         switch item {
-                        case .line(let segment, let showsHeader):
-                            TranscriptLine(detail: detail, segment: segment, showsHeader: showsHeader, highlight: filter)
+                        case .line(let segment, let block):
+                            TranscriptLine(detail: detail, segment: segment, block: block, highlight: filter)
                                 .id(segment.id ?? 0)
                         case .marker(let marker):
                             MarkerRow(time: marker.time, text: marker.text)
@@ -91,7 +97,6 @@ struct TranscriptSection: View {
                         }
                     }
                 }
-                .padding(.top, 10)
             }
         }
     }
@@ -111,14 +116,18 @@ struct TranscriptSection: View {
     }
 }
 
+/// One line of the transcript. The first line of a block says who spoke and when: a click on the name names the
+/// voice, or gives just this passage to someone else; a click on the time plays from there.
 struct TranscriptLine: View {
     @Environment(AppModel.self) private var model
     let detail: MeetingDetail
     let segment: Segment
-    let showsHeader: Bool
+    /// The lines of the block this line starts, or nil for a line that continues one.
+    let block: [Int64]?
     var highlight: String = ""
     @State private var hovering = false
 
+    private var showsHeader: Bool { block != nil }
     private var isFocused: Bool { model.focusedSegmentId != nil && model.focusedSegmentId == segment.id }
     private var isPlaying: Bool {
         model.player.meetingId == detail.meeting.id && model.player.isPlaying
@@ -126,65 +135,78 @@ struct TranscriptLine: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Group {
-                if showsHeader {
-                    Avatar(kind: detail.avatarKind(for: segment.speakerKey), size: 22)
-                } else {
-                    Color.clear.frame(width: 22, height: 1)
+        VStack(alignment: .leading, spacing: 3) {
+            if showsHeader {
+                HStack(spacing: 8) {
+                    speakerMenu
+                    timestamp
+                    if hovering { playButton }
                 }
             }
-            .padding(.top, showsHeader ? 0 : 0)
-            VStack(alignment: .leading, spacing: 2) {
-                if showsHeader {
-                    HStack(spacing: 8) {
-                        // Where the guesses stand as buttons, the label says who isn't settled yet.
-                        Text(showsGuesses ? (detail.speaker(for: segment.speakerKey)?.displayLabel ?? "") : detail.displayName(for: segment.speakerKey)).font(.uiSemibold)
-                        timestamp
-                        if let speaker = detail.speaker(for: segment.speakerKey), speaker.needsReview, isFirstLine {
-                            SuggestionChip(detail: detail, speaker: speaker)
-                        }
-                        if segment.placement == .app {
-                            Image(systemName: "arrow.turn.down.right")
-                                .font(.system(size: 9, weight: .semibold))
-                                .foregroundStyle(Theme.textTertiary)
-                                .help("Von der App hierher verschoben, weil es so klingt. Rechts unter „Sprecher“ lässt es sich zurücknehmen.")
-                        }
-                        if hovering { playButton }
-                    }
+            Text(attributedText)
+                .font(.reading)
+                .lineSpacing(4)
+                .foregroundStyle(Theme.text)
+                .textSelection(.enabled)
+                .fixedSize(horizontal: false, vertical: true)
+                .overlay(alignment: .topTrailing) {
+                    if hovering, !showsHeader { playButton.offset(x: 28) }
                 }
-                Text(attributedText)
-                    .font(.reading)
-                    .lineSpacing(3)
-                    .foregroundStyle(Theme.textBody)
-                    .textSelection(.enabled)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .overlay(alignment: .topTrailing) {
-                        if hovering, !showsHeader { playButton.offset(x: 28) }
-                    }
-            }
-            Spacer(minLength: 0)
         }
-        .padding(.top, showsHeader ? 14 : 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, showsHeader ? 18 : 4)
         .padding(.horizontal, 8)
         .padding(.bottom, 2)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(isFocused ? Theme.selectionFill : (isPlaying ? Theme.groupHeader : .clear))
-                .padding(.top, showsHeader ? 8 : 0)
+                .padding(.top, showsHeader ? 12 : 0)
         )
         .padding(.horizontal, -8)
         .onHover { hovering = $0 }
         .animation(Theme.quick, value: isPlaying)
     }
 
-    private var showsGuesses: Bool {
-        guard isFirstLine, let speaker = detail.speaker(for: segment.speakerKey), speaker.needsReview else { return false }
-        return !detail.guesses(for: speaker).isEmpty || (speaker.suggestedPersonId == nil && speaker.suggestedName != nil)
-    }
+    private var speaker: MeetingSpeaker? { detail.speaker(for: segment.speakerKey) }
 
-    private var isFirstLine: Bool {
-        detail.segments.first { $0.speakerKey == segment.speakerKey }?.id == segment.id
+    /// The name, which opens what can be said about the voice and about this passage.
+    private var speakerMenu: some View {
+        Menu {
+            if let speaker {
+                SpeakerMenuItems(detail: detail, speaker: speaker)
+            }
+            if let block, !block.isEmpty {
+                Divider()
+                Menu(String(localized: "Nur diese Passage", comment: "menu: give only these lines of the transcript to someone else")) {
+                    PersonChoices(attendees: detail.meeting.attendees, excluding: speaker?.personId) { personId in
+                        model.assignLines(block, in: detail.meeting.id, to: personId)
+                    } newPerson: {
+                        NamePrompt.ask(title: String(localized: "Wer ist das?"), message: String(localized: "Diese Zeilen werden der Person zugeordnet und ihre Stimme gemerkt.")) { name in
+                            model.assignLines(block, in: detail.meeting.id, toNewPersonNamed: name)
+                        }
+                    }
+                }
+            }
+            if AudioArchiver.hasAudio(meetingId: detail.meeting.id) {
+                Button("Ab hier abspielen", systemImage: "play", action: play)
+            }
+        } label: {
+            HStack(spacing: 3) {
+                Text(detail.settledName(for: segment.speakerKey))
+                    .font(.uiSemibold)
+                    .foregroundStyle(speaker?.needsReview == true ? Theme.textSecondary : Theme.text)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(Theme.textTertiary)
+                    .opacity(hovering || speaker?.needsReview == true ? 1 : 0)
+            }
+            .contentShape(Rectangle())
+        }
+        .menuStyle(.button)
+        .buttonStyle(.plain)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help(speaker?.needsReview == true ? "Klicken, um die Stimme zuzuordnen" : "Klicken, um den Sprecher zu ändern")
     }
 
     private var timestamp: some View {
@@ -231,42 +253,5 @@ struct TranscriptLine: View {
             searchRange = range.upperBound..<text.endIndex
         }
         return text
-    }
-}
-
-/// "Jonas Weber?" (or "Hai?" "Julian?") next to a voice the app thinks it recognised, one click each.
-struct SuggestionChip: View {
-    @Environment(AppModel.self) private var model
-    let detail: MeetingDetail
-    let speaker: MeetingSpeaker
-
-    var body: some View {
-        HStack(spacing: 4) {
-            ForEach(detail.guesses(for: speaker)) { person in
-                chip(person.name, help: person.id == speaker.suggestedPersonId ? speaker.displayReason : String(localized: "Stimme ähnlich")) {
-                    model.assign(speaker, to: person.id)
-                }
-            }
-            if speaker.suggestedPersonId == nil, let name = speaker.suggestedName {
-                chip(name, help: speaker.displayReason) { model.confirmSuggestion(speaker) }
-            }
-        }
-    }
-
-    private func chip(_ name: String, help: String?, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 5) {
-                Image(systemName: "checkmark").font(.system(size: 9, weight: .bold))
-                Text("\(name)?")
-            }
-            .font(.tiny.weight(.medium))
-            .foregroundStyle(Theme.accent)
-            .padding(.horizontal, 8)
-            .frame(height: 22)
-            .background(Capsule().fill(Theme.selectionFill))
-            .overlay(Capsule().stroke(Theme.selectionBorder, lineWidth: 1))
-        }
-        .buttonStyle(PlainPressStyle())
-        .help(help.map { String(localized: "\(name) zuordnen") + " · " + $0 } ?? String(localized: "\(name) zuordnen"))
     }
 }

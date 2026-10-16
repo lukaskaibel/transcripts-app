@@ -27,13 +27,17 @@ final class PhoneTests: AppTestCase {
         launch()
         element("meeting-m-sync").tap()
         wait(labelled("Zusammenfassung"))
-        wait(button("Wer ist das?"))
+        wait(element("voices.name"))
         snapshot("Meeting")
         app.swipeUp(velocity: .slow)
         snapshot("Meeting, tasks")
-        app.swipeUp(velocity: .slow)
-        snapshot("Meeting, speakers")
         app.swipeUp(velocity: .fast)
+        snapshot("Meeting, people")
+        // The transcript is the other side of the switch under the title.
+        app.swipeDown(velocity: .fast)
+        app.swipeDown(velocity: .fast)
+        app.segmentedControls.buttons["Transkript"].tap()
+        wait(labelled("Sprecher 4", type: .button))
         snapshot("Meeting, transcript")
         element("meeting.more").tap()
         wait(button("Umbenennen …"))
@@ -82,12 +86,27 @@ final class PhoneTests: AppTestCase {
     func testAVoiceGetsANameFromTheSpeakers() {
         launch()
         element("meeting-m-sync").tap()
-        let speaker = labelled("Jonas Weber?", type: .button)
+        // A voice without a name keeps its label; its menu has the app's guess first.
+        let speaker = labelled("Sprecher 4", type: .button)
         scrollTo(speaker)
         speaker.tap()
-        wait(button("Jonas Weber"))
+        let jonas = labelled("Jonas Weber", type: .button)
+        wait(jonas)
         snapshot("Speaker menu")
-        button("Jonas Weber").tap()
+        jonas.tap()
+        waitGone(labelled("Sprecher 4", type: .button))
+    }
+
+    func testVoicesAreNamedOneAfterAnother() {
+        launch()
+        element("meeting-m-sync").tap()
+        element("voices.name").tap()
+        wait(labelled("Ist das Jonas Weber?"))
+        snapshot("Naming a voice")
+        element("naming.yes").tap()
+        waitGone(labelled("Ist das Jonas Weber?"))
+        wait(element("naming.other"))
+        snapshot("Naming the next voice")
     }
 
     func testATaskCanBeCheckedOff() {
@@ -181,7 +200,7 @@ final class PhoneTests: AppTestCase {
         wait(element("inbox.summary.m-sync"))
         snapshot("Inbox")
         element("inbox.nameAll").tap()
-        wait(labelled("Wer ist das?"))
+        wait(element("naming.other"))
         snapshot("Who is this")
     }
 

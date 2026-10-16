@@ -11,7 +11,7 @@ import tempfile
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from compose import THEMES, rounded, scaled
+from compose import THEMES, opaque, rounded, scaled
 
 raw = sys.argv[1] if len(sys.argv) > 1 else "build/readme-images/raw"
 icons = "Packages/TranscriptsKit/Sources/TranscriptsKit/Resources"
@@ -31,7 +31,7 @@ def capture(name):
 for theme in ["light", "dark"]:
     border = THEMES[theme]["border"]
     save(scaled(rounded(capture(f"meeting-{theme}"), 30, border), 0.72), f"mac-{theme}.webp", quality=86, method=6)
-    save(rounded(capture(f"floating-{theme}"), 26, border), f"recorder-{theme}.webp", quality=90, method=6)
+    save(rounded(opaque(capture(f"floating-{theme}")), 48, border), f"recorder-{theme}.webp", quality=90, method=6)
 
 for theme in ["light", "dark"]:
     icon = Image.open(f"{icons}/icon-{theme}.png").convert("RGBA")

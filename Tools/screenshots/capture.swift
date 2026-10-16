@@ -2,10 +2,14 @@ import AppKit
 import AVFoundation
 import ScreenCaptureKit
 
-// Captures the windows of one process with ScreenCaptureKit: composited together (so popovers come along), without
-// whatever lies in front of or behind them, cropped to the largest window.
+// Captures the windows of one process with ScreenCaptureKit: composited together (so popovers and sheets come along),
+// without whatever lies in front of or behind them, cropped to the largest window. `second` captures the second
+// largest window on its own (the live window next to the main one).
 //   capture shot <pid> <out.png>
+//   capture second <pid> <out.png>
 //   capture rec <pid> <out.mov> <seconds>
+// A window filter needs the window server's connection, which AppKit opens.
+_ = NSApplication.shared
 let args = CommandLine.arguments
 guard args.count >= 4, let pid = pid_t(args[2]) else {
     print("usage: capture shot <pid> <out.png> | capture rec <pid> <out.mov> <seconds>")
@@ -20,6 +24,21 @@ func setup() async throws -> (SCContentFilter, SCStreamConfiguration) {
     guard let main = windows.max(by: { $0.frame.width * $0.frame.height < $1.frame.width * $1.frame.height }),
           let display = content.displays.first(where: { $0.frame.intersects(main.frame) }) else {
         throw NSError(domain: "capture", code: 1, userInfo: [NSLocalizedDescriptionKey: "No window of process \(pid) on a display (is the screen asleep?)"])
+    }
+    if mode == "second" {
+        let sorted = windows.sorted { $0.frame.width * $0.frame.height > $1.frame.width * $1.frame.height }
+        guard sorted.count > 1 else {
+            throw NSError(domain: "capture", code: 1, userInfo: [NSLocalizedDescriptionKey: "Process \(pid) has only one window"])
+        }
+        let filter = SCContentFilter(desktopIndependentWindow: sorted[1])
+        let config = SCStreamConfiguration()
+        config.width = Int(sorted[1].frame.width * CGFloat(filter.pointPixelScale))
+        config.height = Int(sorted[1].frame.height * CGFloat(filter.pointPixelScale))
+        config.showsCursor = false
+        config.ignoreShadowsSingleWindow = true
+        config.backgroundColor = .clear
+        config.colorSpaceName = CGColorSpace.sRGB
+        return (filter, config)
     }
     let filter = SCContentFilter(display: display, including: windows)
     let config = SCStreamConfiguration()
@@ -47,7 +66,7 @@ final class RecordingDelegate: NSObject, SCRecordingOutputDelegate {
 Task {
     do {
         let (filter, config) = try await setup()
-        if mode == "shot" {
+        if mode == "shot" || mode == "second" {
             let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)
             try NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])!.write(to: out)
         } else {

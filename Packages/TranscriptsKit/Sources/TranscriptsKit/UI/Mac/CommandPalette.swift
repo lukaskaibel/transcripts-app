@@ -114,9 +114,9 @@ struct CommandPalette: View {
             }
         }
         .frame(width: 620)
-        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.popover))
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Theme.popoverBorder, lineWidth: 1))
-        .shadow(color: Theme.shadow, radius: 30, y: 16)
+        // Like Spotlight: a glass panel over the window.
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .shadow(color: Theme.shadow, radius: 24, y: 12)
         .onAppear { focused = true }
         .onChange(of: query) { _, text in
             highlighted = 0
@@ -150,7 +150,7 @@ struct CommandPalette: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .frame(minHeight: 36)
-        .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(active ? Theme.selected : .clear))
+        .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(active ? Theme.selected : .clear))
         .contentShape(Rectangle())
     }
 

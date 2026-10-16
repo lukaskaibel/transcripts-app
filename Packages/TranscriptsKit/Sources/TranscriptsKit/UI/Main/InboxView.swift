@@ -10,15 +10,6 @@ struct InboxView: View {
     var body: some View {
         let inbox = model.inbox
         VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                Text(AppModel.Section.inbox.title).font(.uiSemibold)
-                Text("\(inbox.count)").foregroundStyle(Theme.textTertiary)
-                Spacer()
-            }
-            .padding(.horizontal, 18)
-            .frame(height: Theme.headerHeight)
-            .overlay(alignment: .bottom) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
-
             if inbox.isEmpty {
                 EmptyState(systemImage: "tray", title: String(localized: "Alles erledigt", comment: "empty inbox"),
                            message: String(localized: "Neue Zusammenfassungen und Stimmen ohne Namen landen hier."))
@@ -53,10 +44,18 @@ struct InboxView: View {
                 }
             }
         }
+        .navigationTitle(AppModel.Section.inbox.title)
+        #if os(macOS)
+        .toolbar {
+            ToolbarSpacer(.flexible)
+            SearchToolbarItem(model: model)
+        }
+        #endif
     }
 
     private func voicesHeader(count: Int) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
+            Image(systemName: "person.wave.2").foregroundStyle(Theme.accent)
             Text("Stimmen benennen").font(.uiSemibold)
             Text("\(count)").foregroundStyle(Theme.textTertiary)
             Spacer()
@@ -64,9 +63,10 @@ struct InboxView: View {
                 .buttonStyle(PrimaryButtonStyle())
                 .help("Eine Stimme nach der anderen anhören und benennen")
         }
-        .padding(.horizontal, 14)
-        .frame(height: 34)
-        .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Theme.groupHeader))
+        .padding(.leading, 14)
+        .padding(.trailing, 10)
+        .frame(height: 44)
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.suggestion))
     }
 
     private func separated<Item: Identifiable, Row: View>(_ items: [Item], @ViewBuilder row: @escaping (Item) -> Row) -> some View {

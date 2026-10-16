@@ -11,33 +11,6 @@ struct TasksView: View {
     var body: some View {
         let groups = groups
         VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                Text(AppModel.Section.tasks.title).font(.uiSemibold)
-                Text("\(groups.reduce(0) { $0 + $1.items.filter { !$0.done }.count })").foregroundStyle(Theme.textTertiary)
-                Spacer()
-                Button {
-                    withAnimation(Theme.spring) { onlyMine.toggle() }
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "person").font(.system(size: 11))
-                        Text("Nur meine", comment: "tasks: show only the user's own")
-                    }
-                    .font(.small)
-                    .foregroundStyle(onlyMine ? Theme.accent : Theme.textSecondary)
-                    .padding(.horizontal, 9)
-                    .frame(height: 24)
-                    .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(onlyMine ? Theme.selectionFill : Theme.control))
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(PlainPressStyle())
-                .help(onlyMine ? "Alle Aufgaben zeigen" : "Nur Aufgaben zeigen, die dir zugeordnet sind")
-                .debugFrame("tasks.onlyMine")
-            }
-            .padding(.leading, 18)
-            .padding(.trailing, 10)
-            .frame(height: Theme.headerHeight)
-            .overlay(alignment: .bottom) { Rectangle().fill(Theme.rowSeparator).frame(height: 1) }
-
             if groups.isEmpty {
                 EmptyState(systemImage: "checkmark.circle",
                            title: onlyMine ? String(localized: "Keine offenen Aufgaben für dich") : String(localized: "Keine offenen Aufgaben"),
@@ -56,6 +29,21 @@ struct TasksView: View {
                 }
             }
         }
+        .navigationTitle(AppModel.Section.tasks.title)
+        #if os(macOS)
+        .toolbar {
+            ToolbarSpacer(.flexible)
+            ToolbarItem {
+                Toggle(isOn: Binding(get: { onlyMine }, set: { value in withAnimation(Theme.spring) { onlyMine = value } })) {
+                    Label(String(localized: "Nur meine", comment: "tasks: show only the user's own"), systemImage: "person")
+                }
+                .help(onlyMine ? "Alle Aufgaben zeigen" : "Nur Aufgaben zeigen, die dir zugeordnet sind")
+                .debugFrame("tasks.onlyMine")
+            }
+            ToolbarSpacer(.fixed)
+            SearchToolbarItem(model: model)
+        }
+        #endif
         .onChange(of: openIds, initial: true) { _, open in
             shown.formUnion(open)
         }
