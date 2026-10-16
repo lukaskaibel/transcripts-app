@@ -1,58 +1,55 @@
-/* The website of Transcripts. Colours follow the app's Theme.swift (indigo accent, the red of a recording), in light
-   and dark. No fonts, scripts or images from other servers. */
+/* The website of Transcripts, in the colours of its icon: a graphite dictaphone with a silver speaker grille and a red
+   record button, standing on warm stone (on charcoal in the dark). No fonts, scripts or images from other servers. */
 
 :root {
   color-scheme: light dark;
-  --bg: #F5F5F9;
-  --text: #16171B;
-  --text-2: #4F535B;
-  --text-3: #6B6F78;
-  --accent: #5B63D3;
-  --recording: #D64545;
-  --line: rgba(22, 24, 44, 0.10);
-  --surface: rgba(255, 255, 255, 0.55);
-  --surface-hover: rgba(255, 255, 255, 0.85);
-  --button: #16171B;
-  --button-text: #FFFFFF;
-  --button-hover: #2A2C33;
-  --window-shadow: rgba(36, 38, 80, 0.26);
-  --glow-indigo: 128, 135, 240;
-  --glow-coral: 236, 128, 116;
-  --glow-sky: 104, 178, 226;
-  --glow-indigo-a: 0.42;
-  --glow-coral-a: 0.20;
-  --glow-sky-a: 0.16;
-  --bar-top: 91, 99, 211;
-  --bar-bottom: 196, 110, 160;
-  --bar-a: 0.24;
+  --bg: #ECE8E1;
+  --bg-low: #DED8CF;
+  --text: #1E1F22;
+  --text-2: #55524D;
+  --text-3: #6F6B65;
+  --record: #E8382D;
+  /* The record red, dark enough for text on stone. */
+  --link: #B42A20;
+  --line: rgba(60, 46, 30, 0.12);
+  --surface: rgba(255, 252, 247, 0.5);
+  --surface-hover: rgba(255, 252, 247, 0.85);
+  /* The dictaphone's body, and its speaker grille. */
+  --body-top: #3A3C42;
+  --body-bottom: #1F2125;
+  --body-text: #FFFFFF;
+  --metal-top: #F7F8FA;
+  --metal-bottom: #D5D8DD;
+  --metal-text: #1E1F22;
+  --light: rgba(255, 253, 248, 0.9);
+  --window-shadow: rgba(70, 52, 32, 0.28);
+  --hole: rgba(30, 31, 34, 0.16);
   --noise: 0.05;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0B0C10;
-    --text: #F0F1F5;
-    --text-2: #A9ADBA;
-    --text-3: #7D8290;
-    --accent: #8F96F2;
-    --recording: #EB6A6A;
+    --bg: #262625;
+    --bg-low: #1A1A19;
+    --text: #F3F1ED;
+    --text-2: #B6B2AB;
+    --text-3: #8E8A83;
+    --record: #F0473C;
+    --link: #FF7A70;
     --line: rgba(255, 255, 255, 0.09);
-    --surface: rgba(255, 255, 255, 0.04);
-    --surface-hover: rgba(255, 255, 255, 0.08);
-    --button: #F0F1F5;
-    --button-text: #0B0C10;
-    --button-hover: #FFFFFF;
-    --window-shadow: rgba(0, 0, 0, 0.6);
-    --glow-indigo: 101, 108, 230;
-    --glow-coral: 214, 92, 92;
-    --glow-sky: 70, 150, 210;
-    --glow-indigo-a: 0.74;
-    --glow-coral-a: 0.26;
-    --glow-sky-a: 0.20;
-    --bar-top: 143, 150, 242;
-    --bar-bottom: 222, 120, 170;
-    --bar-a: 0.22;
+    --surface: rgba(255, 255, 255, 0.05);
+    --surface-hover: rgba(255, 255, 255, 0.09);
+    /* In the dark the buttons are the grille's silver. */
+    --body-top: #F2F3F5;
+    --body-bottom: #CFD2D7;
+    --body-text: #1E1F22;
+    --metal-top: #3C3D41;
+    --metal-bottom: #2B2C30;
+    --metal-text: #F3F1ED;
+    --light: rgba(255, 248, 238, 0.07);
+    --window-shadow: rgba(0, 0, 0, 0.62);
+    --hole: rgba(255, 255, 255, 0.075);
     --noise: 0.07;
   }
 }
@@ -71,9 +68,9 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* The backdrop: an indigo glow behind the window, the warm light of a recording below it, a cool one in the corner,
-   and a fine grain so the gradients don't band. Fixed layers, so long pages scroll over them
-   (background-attachment: fixed doesn't work on iOS). */
+/* The backdrop: stone lit from above, as the icon's ground, a little darker towards the bottom, and a fine grain so the
+   gradients don't band. Fixed layers, so long pages scroll over them (background-attachment: fixed doesn't work on
+   iOS). */
 body::before, body::after {
   content: "";
   position: fixed;
@@ -84,22 +81,8 @@ body::before, body::after {
 
 body::before {
   background:
-    radial-gradient(circle max(75vw, 640px) at 78% 42%,
-      rgba(var(--glow-indigo), var(--glow-indigo-a)) 0%,
-      rgba(var(--glow-indigo), calc(var(--glow-indigo-a) * 0.56)) 25%,
-      rgba(var(--glow-indigo), calc(var(--glow-indigo-a) * 0.25)) 50%,
-      rgba(var(--glow-indigo), calc(var(--glow-indigo-a) * 0.06)) 75%,
-      rgba(var(--glow-indigo), 0) 100%),
-    radial-gradient(circle max(42vw, 380px) at 38% 108%,
-      rgba(var(--glow-coral), var(--glow-coral-a)) 0%,
-      rgba(var(--glow-coral), calc(var(--glow-coral-a) * 0.56)) 25%,
-      rgba(var(--glow-coral), calc(var(--glow-coral-a) * 0.25)) 50%,
-      rgba(var(--glow-coral), 0) 100%),
-    radial-gradient(circle max(48vw, 420px) at -4% -8%,
-      rgba(var(--glow-sky), var(--glow-sky-a)) 0%,
-      rgba(var(--glow-sky), calc(var(--glow-sky-a) * 0.56)) 25%,
-      rgba(var(--glow-sky), calc(var(--glow-sky-a) * 0.25)) 50%,
-      rgba(var(--glow-sky), 0) 100%);
+    radial-gradient(ellipse max(90vw, 760px) max(60vh, 520px) at 62% -6%, var(--light) 0%, transparent 70%),
+    linear-gradient(var(--bg) 35%, var(--bg-low));
 }
 
 body::after {
@@ -110,11 +93,11 @@ body::after {
 
 a { color: inherit; }
 
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+:focus-visible { outline: 2px solid var(--record); outline-offset: 3px; border-radius: 6px; }
 
 /* Buttons */
 
-.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
 .button {
   display: inline-flex;
@@ -122,7 +105,7 @@ a { color: inherit; }
   gap: 10px;
   height: 48px;
   padding: 0 20px 0 18px;
-  border-radius: 12px;
+  border-radius: 24px;
   font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -133,26 +116,31 @@ a { color: inherit; }
 
 .button svg { width: 20px; height: 20px; flex: none; fill: currentColor; }
 
-.button.primary { background: var(--button); color: var(--button-text); }
-.button.primary:hover { background: var(--button-hover); }
+/* The dictaphone's body: graphite with a lit top edge (silver in the dark). */
+.button.primary {
+  background: linear-gradient(var(--body-top), var(--body-bottom));
+  color: var(--body-text);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.25), 0 1px 2px rgba(40, 30, 20, 0.18),
+    0 6px 16px -6px var(--window-shadow);
+}
+.button.primary:hover { filter: brightness(1.12); }
 .button:active { transform: scale(0.98); }
 
 /* Until the app is out: says so, in the place the Mac App Store badge will take, with the app's recording dot. */
+/* Brushed metal like the grille's frame, with the icon's red light glowing in it. */
 .soon {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   height: 48px;
-  padding: 0 18px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
+  padding: 0 17px 0 16px;
+  border-radius: 24px;
+  background: linear-gradient(var(--metal-top), var(--metal-bottom));
   color: var(--text-2);
   font-size: 15px;
   font-weight: 500;
   white-space: nowrap;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 0 0 1px var(--line), 0 1px 2px rgba(40, 30, 20, 0.1);
 }
 
 .soon::before {
@@ -161,16 +149,16 @@ a { color: inherit; }
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--recording);
-  animation: pulse 2s ease-in-out infinite;
+  background: radial-gradient(circle at 35% 30%, #FF9A90, var(--record) 60%);
+  animation: glow 2.4s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--recording) 40%, transparent); }
-  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--recording) 0%, transparent); }
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 2px 1px color-mix(in srgb, var(--record) 45%, transparent); }
+  50% { box-shadow: 0 0 7px 3px color-mix(in srgb, var(--record) 30%, transparent); }
 }
 
-.soon strong { color: var(--text); font-weight: 600; }
+.soon strong { color: var(--metal-text); font-weight: 600; }
 
 .store-badge { display: block; height: 48px; width: auto; }
 
@@ -197,7 +185,7 @@ a { color: inherit; }
 
 .home {
   --pad: clamp(24px, 7vw, 132px);
-  --copy: clamp(380px, 22vw + 150px, 560px);
+  --copy: clamp(380px, 22vw + 172px, 580px);
   --footer: 64px;
   /* The window's width: what is left beside the text, unless the window is too short for it, and at most about its
      real size. It runs off the right edge by 8 %, and the recorder stands out 6 % on its left. */
@@ -224,6 +212,7 @@ a { color: inherit; }
   width: clamp(112px, 4vw + 70px, 156px);
   height: auto;
   margin: 0 0 18px -10px;
+  filter: drop-shadow(0 10px 18px var(--window-shadow));
 }
 
 .home h1 {
@@ -272,7 +261,7 @@ a { color: inherit; }
 
 .facts li { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; }
 
-/* A white glyph on a small coloured square, as in the Mac's System Settings. */
+/* A glyph on a small tile of the dictaphone's body, as System Settings puts one on a coloured square. */
 .glyph {
   display: grid;
   place-items: center;
@@ -280,15 +269,12 @@ a { color: inherit; }
   width: 24px;
   height: 24px;
   border-radius: 7px;
-  background: linear-gradient(var(--glyph-top), var(--glyph-bottom));
-  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(20, 22, 50, 0.14);
+  background: linear-gradient(var(--body-top), var(--body-bottom));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(40, 30, 20, 0.2);
 }
 
-.glyph svg { width: 15px; height: 15px; fill: none; stroke: #FFFFFF; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.glyph rect { fill: #FFFFFF; stroke: none; }
-.glyph.free { --glyph-top: #5DD36F; --glyph-bottom: #2CB24A; }
-.glyph.code { --glyph-top: #8D94F3; --glyph-bottom: #5B63D3; }
-.glyph.private { --glyph-top: #5AAEFF; --glyph-bottom: #1F7BF0; }
+.glyph svg { width: 15px; height: 15px; fill: none; stroke: var(--body-text); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.glyph rect { fill: var(--body-text); stroke: none; }
 
 /* The Mac: the meeting window runs off the right edge, the floating recorder hovers over its lower left corner, as
    it does over any window while a meeting is recorded. */
@@ -322,71 +308,27 @@ a { color: inherit; }
   filter: drop-shadow(0 calc(var(--mac) * 0.016) calc(var(--mac) * 0.024) var(--window-shadow));
 }
 
-/* A voice behind it all: rounded bars like the ones in the icon, louder in the middle, each one moving at its own
-   pace. Seven heights, five speeds and four delays repeat at different rates, so no pattern shows. */
-.voice {
+/* The speaker grille behind it all: the icon's perforated metal, its holes fading out before the text and towards the
+   edges. */
+.grille {
   position: absolute;
   z-index: 0;
   left: 0;
   right: 0;
   top: 50%;
   height: calc(var(--mac) * 1.1);
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
   transform: translateY(-50%);
   pointer-events: none;
-  /* Fades out before the text and towards the top and bottom. */
+  --hole-size: clamp(12px, 0.9vw + 6px, 20px);
+  background-image: radial-gradient(circle at center, var(--hole) 0, var(--hole) 26%, transparent 31%);
+  background-size: var(--hole-size) var(--hole-size);
+  background-position: center;
   -webkit-mask-image: linear-gradient(to right, transparent calc(var(--pad) + var(--copy) * 0.8), #000 calc(var(--pad) + var(--copy) + 80px)),
     linear-gradient(transparent, #000 22%, #000 78%, transparent);
   -webkit-mask-composite: source-in;
   mask-image: linear-gradient(to right, transparent calc(var(--pad) + var(--copy) * 0.8), #000 calc(var(--pad) + var(--copy) + 80px)),
     linear-gradient(transparent, #000 22%, #000 78%, transparent);
   mask-composite: intersect;
-}
-
-.voice i {
-  --h: 0.6;
-  --e: 1;
-  --lo: 0.45;
-  --t: 1.6s;
-  --d: 0s;
-  flex: none;
-  width: clamp(5px, 0.7vw, 12px);
-  height: calc(var(--h) * var(--e) * 100%);
-  border-radius: 99px;
-  background: linear-gradient(rgba(var(--bar-top), var(--bar-a)), rgba(var(--bar-bottom), var(--bar-a)));
-  transform: scaleY(var(--lo));
-  animation: speak var(--t) ease-in-out var(--d) infinite;
-}
-
-.voice i:nth-child(7n+1) { --h: 0.62; }
-.voice i:nth-child(7n+2) { --h: 0.92; }
-.voice i:nth-child(7n+3) { --h: 0.46; }
-.voice i:nth-child(7n+4) { --h: 1; }
-.voice i:nth-child(7n+5) { --h: 0.7; }
-.voice i:nth-child(7n+6) { --h: 0.36; }
-.voice i:nth-child(7n) { --h: 0.82; }
-
-.voice i:nth-child(5n+1) { --t: 1.3s; --lo: 0.5; }
-.voice i:nth-child(5n+2) { --t: 1.9s; --lo: 0.7; }
-.voice i:nth-child(5n+3) { --t: 1.55s; --lo: 0.55; }
-.voice i:nth-child(5n+4) { --t: 2.2s; --lo: 0.75; }
-.voice i:nth-child(5n) { --t: 1.7s; --lo: 0.6; }
-
-.voice i:nth-child(4n+1) { --d: -0.4s; }
-.voice i:nth-child(4n+2) { --d: -1.3s; }
-.voice i:nth-child(4n+3) { --d: -0.8s; }
-.voice i:nth-child(4n) { --d: -1.9s; }
-
-/* Louder in the middle. */
-.voice i:nth-child(-n+8), .voice i:nth-child(n+51) { --e: 0.32; }
-.voice i:nth-child(n+9):nth-child(-n+16), .voice i:nth-child(n+45):nth-child(-n+50) { --e: 0.55; }
-.voice i:nth-child(n+17):nth-child(-n+22), .voice i:nth-child(n+39):nth-child(-n+44) { --e: 0.8; }
-
-@keyframes speak {
-  0%, 100% { transform: scaleY(var(--lo)); }
-  50% { transform: scaleY(1); }
 }
 
 .home .footer { position: relative; z-index: 3; }
@@ -409,7 +351,7 @@ a { color: inherit; }
 @media (max-width: 900px), (max-aspect-ratio: 1/1) {
   .home { --copy: min(560px, 100%); }
 
-  /* The voice shares the window's cell, so its bars stay around the window and out of the text. */
+  /* The grille shares the window's cell, so its holes stay around the window and out of the text. */
   .hero {
     display: grid;
     grid-template-rows: auto minmax(var(--screens-min, 200px), 1fr);
@@ -425,7 +367,7 @@ a { color: inherit; }
   .home .actions, .facts { justify-content: center; }
   .home .actions { margin-top: 28px; }
 
-  .screens, .voice {
+  .screens, .grille {
     position: relative;
     grid-row: 2;
     grid-column: 1;
@@ -464,7 +406,7 @@ a { color: inherit; }
     filter: drop-shadow(0 calc(var(--r) * 0.04) calc(var(--r) * 0.06) var(--window-shadow));
   }
 
-  .voice {
+  .grille {
     left: auto;
     margin-left: -16px;
     margin-right: -16px;
@@ -489,7 +431,7 @@ a { color: inherit; }
   .home .actions { margin-top: 20px; gap: 10px; }
   .button, .soon { height: 44px; }
   .facts { margin-top: 18px; }
-  .screens, .voice { margin-top: 16px; }
+  .screens, .grille { margin-top: 16px; }
   .home .footer { gap: 4px; padding-top: 6px; padding-bottom: 16px; }
 }
 
@@ -538,7 +480,7 @@ a { color: inherit; }
   text-decoration: none;
 }
 
-.brand img { width: 34px; height: 34px; margin: -3px 0; }
+.brand img { width: 34px; height: 34px; margin: -3px 0; filter: drop-shadow(0 2px 4px var(--window-shadow)); }
 
 .top .link {
   display: inline-flex;
@@ -610,8 +552,8 @@ body:not(.home) { display: flex; flex-direction: column; min-height: 100vh; min-
   overflow-wrap: anywhere;
 }
 
-.doc a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); text-underline-offset: 3px; }
-.doc a:hover { text-decoration-color: var(--accent); }
+.doc a { color: var(--link); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent); text-underline-offset: 3px; }
+.doc a:hover { text-decoration-color: var(--link); }
 
 /* Support: ways to get in touch. */
 .cards {
@@ -637,8 +579,8 @@ body:not(.home) { display: flex; flex-direction: column; min-height: 100vh; min-
 }
 
 .doc .card:hover { background: var(--surface-hover); }
-.card svg { width: 22px; height: 22px; margin-bottom: 10px; fill: none; stroke: var(--accent); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.card svg.filled { fill: var(--accent); stroke: none; }
+.card svg { width: 22px; height: 22px; margin-bottom: 10px; fill: none; stroke: var(--link); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.card svg.filled { fill: var(--link); stroke: none; }
 .card b { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
 .card span { font-size: 13.5px; line-height: 1.45; color: var(--text-3); overflow-wrap: anywhere; }
 
