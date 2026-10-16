@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="Design/icon-dark.png">
-    <img src="Design/icon.png" width="128" height="128" alt="Transcripts app icon: an indigo speech bubble with a waveform in it">
+    <img src="Design/icon.png" width="128" height="128" alt="Transcripts app icon: a black dictaphone with a silver speaker grille and a red record button">
   </picture>
 </p>
 
@@ -130,7 +130,8 @@ the device; only the transcript text goes to the summary service you choose.
 - **Finished in the background.** After the recording the meeting is processed on the device; iOS 26 lets that go on
   with the screen locked and shows its progress.
 - **Shared views.** *Who is this?*, the speakers, the summary and the settings are the Mac's own views, laid out for a
-  narrow screen, so a change shows on every device.
+  narrow screen, so a change shows on every device. Settings › App-Icon offers the dictaphone in silver, titanium,
+  white and midnight for the Home Screen.
 
 - **The same meetings everywhere.** With Settings › General › iCloud on, meetings, people and the voices the app
   learned are the same on your Mac, iPhone and iPad, and the recordings too if you like: record on the phone, read on the
@@ -165,8 +166,9 @@ Summaries use Anthropic, OpenAI or Google (Ollama runs on the Mac only).
 - **Keeps an archive you can search.** Meetings grouped by day, full-text search through every transcript, playback
   from any line, Markdown export, and import of audio or video files (voice memos, Zoom recordings, a meeting recorded
   in a room).
-- **Native.** Swift and SwiftUI, light and dark, four app icons in Apple's style (automatic, light, dark, indigo).
-  Apple silicon only.
+- **Native.** Swift and SwiftUI, light and dark. The icon is a dictaphone, and Settings › App-Icon makes it yours:
+  pick the body, the speaker grille, the record button and the background, or start from a preset, and the Dock shows
+  your dictaphone while the app runs. Apple silicon only.
 
 ## How the names come about
 
@@ -336,11 +338,12 @@ Packages/TranscriptsKit/      Everything else, as a Swift package
     AI/                       Summary providers and prompts
     Model/  Store/            Records and the GRDB database with full-text search
     Sync/                     iCloud sync with CKSyncEngine: change tracking, records, conflicts
-    App/                      App model, settings, demo data
+    App/                      App model, settings, demo data, the app icon in any colours
     UI/                       SwiftUI views every platform shares: the meeting, people, settings, live transcript
     UI/Mac/                   The Mac's windows: sidebar, menu bar, floating recorder, command palette
     UI/iOS/                   iPhone and iPad: tabs and the iPad's sidebar, the screens around the shared views
     Support/                  Paths, formatting, the languages the app speaks
+    AppIconPasses/            The app icon's grey passes that Settings › App-Icon colours (Tools/AppIcon/make.sh)
   Sources/transcripts-cli/    The pipeline on the command line
   Tests/TranscriptsKitTests/
 Packages/Vendor/FluidAudio/   FluidAudio, vendored (see below)
@@ -358,6 +361,15 @@ what a language lacks, takes translations in and checks placeholders and plural 
 made by `Tools/readme-images.sh`: the app renders its own windows in demo mode, in light and dark,
 `Tools/readme-images/build.py` lays them out, and `Tools/readme-images/website.py` makes the website's pictures from
 the same windows. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose changes.
+
+The app icon is drawn by `Tools/AppIcon/dictaphone.py`. After changing it, run the script below: it writes
+`Transcripts/AppIcon.icon` and the presets' icons (`AppIcon-*.icon`, alternate icons on iPhone and iPad), renders, with
+Icon Composer's `ictool`, the grey passes that Settings › App-Icon colours in any colours, and the pictures of the icon
+(it needs Python 3 with NumPy and Pillow, and `brew install librsvg`):
+
+```bash
+Tools/AppIcon/make.sh
+```
 
 The [website](https://lukaskaibel.github.io/transcripts-app/) is plain HTML and CSS in `Website/`, without a build
 step; `.github/workflows/website.yml` publishes it to GitHub Pages when it changes on `main`. To look at it locally:

@@ -58,7 +58,7 @@ public final class AppModel {
     }
 
     public enum SettingsTab: String, CaseIterable, Identifiable, Sendable {
-        case general, recording, transcription, ai, voices
+        case general, recording, transcription, ai, voices, icon
         public var id: String { rawValue }
         public var title: String {
             switch self {
@@ -67,6 +67,7 @@ public final class AppModel {
             case .transcription: String(localized: "Transkription")
             case .ai: String(localized: "KI")
             case .voices: String(localized: "Stimmen", comment: "settings tab: people's voices")
+            case .icon: String(localized: "App-Icon")
             }
         }
         public var systemImage: String {
@@ -76,6 +77,7 @@ public final class AppModel {
             case .transcription: "waveform"
             case .ai: "sparkle"
             case .voices: "person.2"
+            case .icon: "paintpalette"
             }
         }
     }
@@ -410,9 +412,9 @@ public final class AppModel {
     }
     #endif
 
-    public func setAppIcon(_ choice: AppIconChoice) {
-        settings.appIcon = choice
-        choice.apply()
+    public func setAppIcon(_ look: AppIconLook) {
+        settings.appIcon = look
+        look.apply()
     }
 
     // MARK: Speech models

@@ -94,7 +94,7 @@ struct MobileOnboarding: View {
 
     private var icon: some View {
         Group {
-            if let image = (colorScheme == .dark ? AppIconChoice.dark : AppIconChoice.light).image {
+            if let image = AppIconPicture.standard(dark: colorScheme == .dark) {
                 Image(platformImage: image)
                     .resizable()
                     .interpolation(.high)

@@ -102,7 +102,7 @@ final class DebugRemote {
             model.settings.appearance = Appearance(rawValue: argument) ?? .system
             NSApp.appearance = argument == "dark" ? NSAppearance(named: .darkAqua) : (argument == "light" ? NSAppearance(named: .aqua) : nil)
         case "icon":
-            model.setAppIcon(AppIconChoice(rawValue: argument) ?? .automatic)
+            model.setAppIcon((AppIconPreset(rawValue: argument) ?? .standard).look)
         case "onboarding":
             model.settings.onboardingDone = argument != "on"
         case "settings":
