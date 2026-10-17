@@ -41,27 +41,53 @@ struct SummarySection: View {
     }
 
     private var empty: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "sparkle").font(.system(size: 13, weight: .medium)).foregroundStyle(Theme.textTertiary)
-            if model.summaryProviderReady, let kind = model.settings.summaryProvider {
-                Text("Noch keine Zusammenfassung").foregroundStyle(Theme.textSecondary)
+        // In one line where it fits; on a narrow screen the buttons go under the text.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) {
+                emptyMessage.fixedSize(horizontal: true, vertical: false)
                 Spacer(minLength: 8)
-                ModelMenu(kind: kind)
-                Button("Erstellen") { Task { await model.generateSummary(detail.meeting.id) } }
-                    .buttonStyle(PrimaryButtonStyle())
-            } else {
-                Text("Für Zusammenfassungen ein KI-Modell einrichten").foregroundStyle(Theme.textSecondary)
-                Spacer(minLength: 8)
-                Button("Einrichten …") {
-                    model.request(.settings(.ai))
-                }
-                .buttonStyle(SecondaryButtonStyle())
+                emptyActions
             }
+            VStack(alignment: .leading, spacing: 10) {
+                emptyMessage
+                HStack(spacing: 8) { emptyActions }
+                    .padding(.leading, 23)
+            }
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.leading, 14)
         .padding(.trailing, 10)
         .frame(minHeight: 46)
         .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Theme.suggestion))
+    }
+
+    private var emptyMessage: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "sparkle").font(.system(size: 13, weight: .medium)).foregroundStyle(Theme.textTertiary)
+            Group {
+                if model.summaryProviderReady, model.settings.summaryProvider != nil {
+                    Text("Noch keine Zusammenfassung")
+                } else {
+                    Text("Für Zusammenfassungen ein KI-Modell einrichten")
+                }
+            }
+            .foregroundStyle(Theme.textSecondary)
+        }
+    }
+
+    @ViewBuilder
+    private var emptyActions: some View {
+        if model.summaryProviderReady, let kind = model.settings.summaryProvider {
+            ModelMenu(kind: kind)
+            Button("Erstellen") { Task { await model.generateSummary(detail.meeting.id) } }
+                .buttonStyle(PrimaryButtonStyle())
+        } else {
+            Button("Einrichten …") {
+                model.request(.settings(.ai))
+            }
+            .buttonStyle(SecondaryButtonStyle())
+        }
     }
 
     private func content(_ summary: MeetingSummary) -> some View {
@@ -100,24 +126,40 @@ struct SummarySection: View {
         }
     }
 
-    /// Which model wrote it, and the ways to write it again or copy it, quietly under the summary.
+    /// Which model wrote it, and the ways to write it again or copy it, quietly under the summary: in one line where
+    /// it fits, the buttons under the model's name on a phone.
     private func footer(_ summary: MeetingSummary) -> some View {
-        HStack(spacing: 14) {
-            Text("Zusammengefasst mit \(summary.model)", comment: "under a summary: the language model that wrote it")
-                .lineLimit(1)
-            Button("Neu erstellen") { Task { await model.generateSummary(detail.meeting.id) } }
-                .disabled(!model.summaryProviderReady)
-            Button("Kopieren") {
-                model.copyToClipboard(SummaryText.markdown(detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 14) {
+                writtenBy(summary).fixedSize(horizontal: true, vertical: false)
+                footerButtons
+                Spacer(minLength: 0)
             }
-            .accessibilityIdentifier("summary.copy")
-            .debugFrame("summary.copy")
-            Spacer(minLength: 0)
+            VStack(alignment: .leading, spacing: 8) {
+                writtenBy(summary)
+                HStack(spacing: 14) { footerButtons }
+            }
         }
         .buttonStyle(PlainPressStyle())
         .font(.small)
         .foregroundStyle(Theme.textTertiary)
         .padding(.top, 32)
+    }
+
+    private func writtenBy(_ summary: MeetingSummary) -> some View {
+        Text("Zusammengefasst mit \(summary.model)", comment: "under a summary: the language model that wrote it")
+            .lineLimit(1)
+    }
+
+    @ViewBuilder
+    private var footerButtons: some View {
+        Button("Neu erstellen") { Task { await model.generateSummary(detail.meeting.id) } }
+            .disabled(!model.summaryProviderReady)
+        Button("Kopieren") {
+            model.copyToClipboard(SummaryText.markdown(detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
+        }
+        .accessibilityIdentifier("summary.copy")
+        .debugFrame("summary.copy")
     }
 }
 

@@ -197,7 +197,12 @@ struct MeetingsScreen: View {
     private func meetingRow(_ row: MeetingRow) -> some View {
         let selected = wide && navigation.meetingInSplit[.meetings] == row.id
         return Button {
-            navigation.open(meeting: row.id)
+            // The meeting being recorded opens where it is running: the recording screen.
+            if model.recording?.meetingId == row.id {
+                navigation.showsLive = true
+            } else {
+                navigation.open(meeting: row.id)
+            }
         } label: {
             MobileMeetingRow(row: row)
         }

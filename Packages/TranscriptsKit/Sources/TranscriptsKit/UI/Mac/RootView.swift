@@ -148,9 +148,17 @@ struct OverlayHost: View {
 struct ToastStack: View {
     @Environment(AppModel.self) private var model
 
+    /// The toasts, but not "2 voices without a name" for the meeting on screen: its banner says so already.
+    private var toasts: [AppModel.Toast] {
+        model.toasts.filter { toast in
+            guard case .nameVoices(let meetingId)? = toast.action else { return true }
+            return !(model.section == .meetings && model.selectedMeetingId == meetingId)
+        }
+    }
+
     var body: some View {
         VStack(alignment: .trailing, spacing: 10) {
-            ForEach(model.toasts) { toast in
+            ForEach(toasts) { toast in
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: toast.isError ? "exclamationmark.triangle" : "checkmark.circle")
                         .font(.system(size: 13, weight: .medium))

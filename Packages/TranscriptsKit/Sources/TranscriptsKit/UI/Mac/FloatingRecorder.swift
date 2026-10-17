@@ -114,7 +114,7 @@ struct FloatingRecorderView: View {
                 } else {
                     RecordingDot()
                 }
-                Text(TimeFormat.clock(session.elapsed))
+                RecordingTime(session: session)
                     .font(.system(size: 15, weight: .semibold))
                     .monospacedDigit()
                     .foregroundStyle(session.state == .paused ? Theme.textSecondary : Theme.text)

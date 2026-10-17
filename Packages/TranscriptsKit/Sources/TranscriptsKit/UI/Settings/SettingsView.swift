@@ -393,7 +393,7 @@ struct TranscriptionSettings: View {
     private var modelState: some View {
         switch model.engineState {
         case .ready:
-            Label("Bereit", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+            Label("Bereit", systemImage: "checkmark.circle.fill").foregroundStyle(.green).labelStyle(.titleAndIcon)
         case .preparing(let step, let fraction):
             HStack {
                 ProgressView(value: fraction).frame(width: 120)

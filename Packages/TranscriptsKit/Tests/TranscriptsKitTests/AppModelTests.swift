@@ -234,6 +234,23 @@ import Testing
         #expect(session.voices["S3"]?.name == "Paula Schmidt")
     }
 
+    @Test func inARoomTheLinesOfPeopleTheAppKnowsStayInTheLiveTranscript() throws {
+        let database = try AppDatabase.inMemory()
+        let anna = try database.person(named: "Anna Berger")
+        var voice = [Float](repeating: 0, count: 256)
+        voice[0] = 1
+        let library = VoiceLibrary(samples: [VoiceSample(id: "anna", personId: anna.id, embedding: voice, duration: 30, source: .confirmed)])
+        let meeting = Meeting(title: "Workshop", status: .recording)
+        try database.save(meeting)
+        // Only the microphone, as on iPhone and iPad: Anna sits at the table, she isn't a call coming back
+        // through the speakers.
+        let session = RecordingSession(meeting: meeting, database: database, configuration: .init(), library: library, sources: [.microphone: FileAudioSource.silent])
+
+        session.handle(.final(channel: .microphone, start: 2, end: 6, text: "Hallo zusammen, ich bin Anna.", speaker: nil, embedding: nil, voice: voice))
+
+        #expect(session.lines.map(\.text) == ["Hallo zusammen, ich bin Anna."])
+    }
+
     @Test func peopleCanBeRenamedButMeIsNeverDeleted() throws {
         let (model, database) = try makeModel()
         let me = try database.mePerson(defaultName: "Lukas Kaibel")

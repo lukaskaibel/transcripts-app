@@ -4,7 +4,8 @@ extension AppModel {
     /// The model the app runs on: the user's own data, or made-up meetings with `-demo YES`.
     ///
     /// `-demo.sync <zone>` tries iCloud sync out in a zone of its own, with `-demo.data <folder>` per instance (a new
-    /// folder starts empty, or with the made-up meetings with `-demo.seed YES`).
+    /// folder starts empty, or with the made-up meetings with `-demo.seed YES`). `-demo.recordFrom <file>` makes
+    /// recording real, with the file as the microphone (see `demoRecordingFile`).
     @MainActor
     static func makeForLaunch() -> AppModel {
         let arguments = UserDefaults.standard
@@ -29,7 +30,8 @@ extension AppModel {
             let syncZone = arguments.string(forKey: "demo.sync")
             settings.iCloudSync = syncZone != nil
             settings.onboardingDone = !arguments.bool(forKey: "demo.onboarding")
-            settings.summaryProvider = .anthropic
+            // A real recording's transcript is never sent anywhere: the demo's key is made up.
+            settings.summaryProvider = arguments.string(forKey: "demo.recordFrom") == nil ? .anthropic : nil
             settings.setModel("claude-opus-5-5", for: .anthropic)
             if let appearance = arguments.string(forKey: "demo.appearance").flatMap(Appearance.init(rawValue:)) {
                 settings.appearance = appearance

@@ -85,6 +85,13 @@ final class MobileNavigation {
         setPath(path, for: tab)
     }
 
+    /// Whether a meeting is on screen: its page on top of the current tab, or beside the list on a wide iPad.
+    func isShowing(meeting id: String) -> Bool {
+        guard !showsLive, sheet == nil else { return false }
+        if case .meeting(id)? = path(for: tab).last { return true }
+        return regular && path(for: tab).isEmpty && meetingInSplit[tab] == id
+    }
+
     /// Opens a meeting where the user is: beside the list on a wide iPad, on top of the tab's stack otherwise.
     func open(meeting id: String) {
         if regular, [.meetings, .inbox].contains(tab) {

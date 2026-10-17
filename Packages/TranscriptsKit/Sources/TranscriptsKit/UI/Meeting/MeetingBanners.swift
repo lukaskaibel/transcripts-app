@@ -13,7 +13,8 @@ struct StatusBanner: View {
                 Text("Aufnahme läuft").font(.uiMedium)
                 Text("Das Transkript unten ist vorläufig.").foregroundStyle(Theme.textSecondary)
                 Spacer()
-                Button("Live-Fenster") { model.request(.live) }.buttonStyle(SecondaryButtonStyle())
+                Button(Platform.isMobile ? String(localized: "Live-Transkript") : String(localized: "Live-Fenster")) { model.request(.live) }
+                    .buttonStyle(SecondaryButtonStyle())
             }
         case .processing:
             banner {
@@ -26,6 +27,8 @@ struct StatusBanner: View {
                 Spacer()
                 Text(detail.meeting.progress.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current))).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("meeting.processing")
         case .failed:
             banner {
                 Image(systemName: "exclamationmark.triangle").foregroundStyle(Theme.warning)

@@ -115,14 +115,10 @@ struct LiveScreen: View {
     /// As in Voice Memos: the time, the sound of the last seconds, and the buttons in reach of the thumb.
     private func bottom(_ session: RecordingSession) -> some View {
         VStack(spacing: 10) {
-            Text(TimeFormat.clock(session.elapsed))
+            RecordingTime(session: session, label: session.state == .paused ? Text("Pausiert", comment: "the recording is paused") : Text("Aufnahme läuft"))
                 .font(.system(size: 46, weight: .light))
                 .monospacedDigit()
                 .foregroundStyle(session.state == .paused ? Theme.textSecondary : Theme.text)
-                .contentTransition(.numericText())
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(session.state == .paused ? Text("Pausiert", comment: "the recording is paused") : Text("Aufnahme läuft"))
-                .accessibilityValue(TimeFormat.clock(session.elapsed))
             LevelWaveform(level: { session.waveformLevel(microphoneOnly: true) }, bars: 60, height: 54, running: session.state != .paused)
                 .frame(maxWidth: .infinity)
                 .clipped()

@@ -138,7 +138,7 @@ struct TranscriptLine: View {
         VStack(alignment: .leading, spacing: 3) {
             if showsHeader {
                 HStack(spacing: 8) {
-                    speakerMenu
+                    if detail.speakersSettled { speakerMenu }
                     timestamp
                     if hovering { playButton }
                 }

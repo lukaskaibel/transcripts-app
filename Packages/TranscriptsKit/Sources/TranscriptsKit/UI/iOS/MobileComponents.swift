@@ -27,6 +27,10 @@ struct MobileMeetingRow: View {
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                 details
+                if row.pendingVoices > 0, row.meeting.status == .ready {
+                    DotChip(text: String(localized: "\(row.pendingVoices) Stimmen offen", comment: "plural: voices in a meeting still waiting for a name"), color: Theme.warning)
+                        .font(.small)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             if !row.speakers.isEmpty {
@@ -59,9 +63,6 @@ struct MobileMeetingRow: View {
             }
             if let source = row.meeting.source {
                 Text(source)
-            }
-            if row.pendingVoices > 0, row.meeting.status == .ready {
-                DotChip(text: String(localized: "\(row.pendingVoices) Stimmen offen", comment: "plural: voices in a meeting still waiting for a name"), color: Theme.warning)
             }
         }
         .font(.small)
@@ -278,37 +279,7 @@ struct RecordAccessory: View {
 
     private func recording(_ session: RecordingSession) -> some View {
         HStack(spacing: 10) {
-            Button {
-                navigation.showsLive = true
-            } label: {
-                HStack(spacing: 10) {
-                    if session.state == .paused {
-                        Image(systemName: "pause.fill").font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.textSecondary)
-                            .frame(width: 14)
-                    } else {
-                        RecordingDot(size: 9).frame(width: 14)
-                    }
-                    Text(TimeFormat.clock(session.elapsed))
-                        .font(.uiSemibold)
-                        .monospacedDigit()
-                        .foregroundStyle(Theme.text)
-                    if !inline {
-                        Text(session.title)
-                            .font(.small)
-                            .foregroundStyle(Theme.textSecondary)
-                            .lineLimit(1)
-                        Spacer(minLength: 4)
-                        LevelBars(level: session.microphoneLevel, color: Theme.textSecondary, height: 14)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(PlainPressStyle())
-            .accessibilityLabel(Text("Aufnahme läuft"))
-            .accessibilityValue("\(TimeFormat.clock(session.elapsed)), \(session.title)")
-            .accessibilityHint(Text("Zeigt das Live-Transkript"))
-            .accessibilityIdentifier("live.open")
+            RecordingStatusButton(session: session, inline: inline) { navigation.showsLive = true }
             if !inline {
                 Button {
                     model.togglePause()
@@ -340,15 +311,65 @@ struct RecordAccessory: View {
     }
 }
 
+/// The running recording in the bar above the tab bar: its time, title and level; tapping it opens the live
+/// transcript. A view of its own, so that the time and the level, which change several times a second, don't make
+/// the whole bar draw again.
+private struct RecordingStatusButton: View {
+    let session: RecordingSession
+    let inline: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                if session.state == .paused {
+                    Image(systemName: "pause.fill").font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.textSecondary)
+                        .frame(width: 14)
+                } else {
+                    RecordingDot(size: 9).frame(width: 14)
+                }
+                RecordingTime(session: session)
+                    .font(.uiSemibold)
+                    .monospacedDigit()
+                    .foregroundStyle(Theme.text)
+                if !inline {
+                    Text(session.title)
+                        .font(.small)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(1)
+                    Spacer(minLength: 4)
+                    ChannelLevelBars(session: session, color: Theme.textSecondary, height: 14)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainPressStyle())
+        .accessibilityLabel(Text("Aufnahme läuft"))
+        .accessibilityValue("\(TimeFormat.clock(session.elapsed)), \(session.title)")
+        .accessibilityHint(Text("Zeigt das Live-Transkript"))
+        .accessibilityIdentifier("live.open")
+    }
+}
+
 // MARK: - Toasts
 
 /// The model's toasts at the top of the window: what just happened, sometimes with a button.
 struct MobileToasts: View {
     @Environment(AppModel.self) private var model
+    var navigation: MobileNavigation
+
+    /// The toasts, but not "2 voices without a name" for the meeting on screen: its banner says so already.
+    private var toasts: [AppModel.Toast] {
+        model.toasts.filter { toast in
+            guard case .nameVoices(let meetingId)? = toast.action else { return true }
+            return !navigation.isShowing(meeting: meetingId)
+        }
+    }
 
     var body: some View {
         VStack(spacing: 8) {
-            ForEach(model.toasts) { toast in
+            ForEach(toasts) { toast in
                 HStack(alignment: .top, spacing: 12) {
                     Image(systemName: toast.isError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
                         .font(.body)

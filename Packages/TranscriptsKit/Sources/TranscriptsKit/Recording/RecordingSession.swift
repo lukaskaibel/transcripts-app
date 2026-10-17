@@ -188,23 +188,31 @@ public final class RecordingSession {
             let writer = try AudioFileWriter(url: AppPaths.rawFile(for: meetingId, channel: channel), encoding: .pcm)
             let (stream, continuation) = AsyncStream<CapturedChunk>.makeStream(bufferingPolicy: .unbounded)
             continuations[channel] = continuation
-            let transcriber = LiveTranscriber(channel: channel, engine: engine) { [weak self] event in
+            // The microphone's own voice is only needed to tell the user apart from the call coming back through
+            // the speakers; in a room (and on iPhone and iPad) everyone talks into the microphone.
+            let transcriber = LiveTranscriber(channel: channel, engine: engine, measuresVoice: channel == .system || capturesSystemAudio) { [weak self] event in
                 Task { @MainActor in self?.handle(event) }
             }
             transcribers[channel] = transcriber
             let onLevel: @Sendable (Float, Bool) -> Void = { [weak self] level, silent in
                 Task { @MainActor in self?.setLevel(level, silent: silent, for: channel) }
             }
+            // The live transcriber gets the samples through a queue of its own: speech recognition can fall behind
+            // (on iPhone and iPad most of all), and the file and the level, which the waveform shows, must not wait.
+            let (speech, speechContinuation) = AsyncStream<[Float]>.makeStream(bufferingPolicy: .unbounded)
             channelTasks.append(Task.detached(priority: .userInitiated) { [clock] in
-                await Self.pump(stream, channel: channel, writer: writer, transcriber: transcriber, clock: clock, level: onLevel)
+                await Self.pump(stream, channel: channel, writer: writer, speech: speechContinuation, clock: clock, level: onLevel)
+            })
+            channelTasks.append(Task.detached(priority: .userInitiated) {
+                for await samples in speech { await transcriber.feed(samples) }
             })
         }
 
         let continuations = continuations
         let clock = clock
-        // Stamped when they arrive, not when the pump gets to them: the pump also feeds the live transcriber
-        // and can fall behind, and judged by the time it catches up, a channel would look short of samples
-        // and get silence padded in that never was.
+        // Stamped when they arrive, not when the pump gets to them: the pump can fall behind on a busy device,
+        // and judged by the time it catches up, a channel would look short of samples and get silence padded in
+        // that never was.
         microphone.onSamples = { samples in
             continuations[.microphone]?.yield(CapturedChunk(samples: samples, elapsed: clock.elapsed, paused: clock.isPaused))
         }
@@ -274,7 +282,6 @@ public final class RecordingSession {
         for continuation in continuations.values { continuation.finish() }
     }
 
-    /// Moves one channel's samples from the capture to the file and the live transcriber.
     /// Samples as a capture delivered them, with the recording time they arrived at.
     struct CapturedChunk: Sendable {
         var samples: [Float]
@@ -282,11 +289,12 @@ public final class RecordingSession {
         var paused: Bool
     }
 
+    /// Moves one channel's samples from the capture to the file, the level and the live transcriber's queue.
     private nonisolated static func pump(
         _ stream: AsyncStream<CapturedChunk>,
         channel: Channel,
         writer: AudioFileWriter,
-        transcriber: LiveTranscriber,
+        speech: AsyncStream<[Float]>.Continuation,
         clock: RecordingClock,
         level: @escaping @Sendable (_ level: Float, _ silent: Bool) -> Void
     ) async {
@@ -314,8 +322,9 @@ public final class RecordingSession {
                 onlyZeros = true
                 lastLevel = Date()
             }
-            await transcriber.feed(samples)
+            speech.yield(samples)
         }
+        speech.finish()
         writer.close()
         level(0, false)
     }
@@ -383,7 +392,8 @@ public final class RecordingSession {
 
     // MARK: Live transcript
 
-    private func handle(_ event: LiveEvent) {
+    /// What the live transcriber noticed. Not private, so the tests can hand it events.
+    func handle(_ event: LiveEvent) {
         switch event {
         case .partial(let channel, let start, let text):
             let key = channel == .microphone ? MeetingSpeaker.meKey : (currentSystemKey ?? "S?")
@@ -468,7 +478,9 @@ public final class RecordingSession {
 
     /// A line of the microphone whose voice is the call's, not the user's (speakers instead of headphones).
     private func soundsLikeTheCall(channel: Channel, voice: [Float]?) -> Bool {
-        guard channel == .microphone, let voice else { return false }
+        // Without a call there is nothing to come back through the speakers: everyone in the room talks into the
+        // microphone, the people the app knows too.
+        guard channel == .microphone, capturesSystemAudio, let voice else { return false }
         let me = people.values.first(where: \.isMe)?.id
         let user = me.flatMap { library.similarity(voice, to: $0) }
         let callVoices = voices.keys.filter { $0 != MeetingSpeaker.meKey }.compactMap { centroid(of: $0) }

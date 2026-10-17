@@ -196,7 +196,7 @@ struct RecordToolbarItem: View {
                     } else {
                         RecordingDot()
                     }
-                    Text(TimeFormat.clock(session.elapsed)).monospacedDigit()
+                    RecordingTime(session: session).monospacedDigit()
                 }
                 .padding(.leading, 10)
                 .contentShape(Rectangle())

@@ -225,6 +225,37 @@ struct RecordingDot: View {
     }
 }
 
+/// The running recording's time. A view of its own because the time changes four times a second: only this text
+/// draws again, not the screen around it. With a label, VoiceOver reads it as one element, the label and the time.
+struct RecordingTime: View {
+    let session: RecordingSession
+    var label: Text?
+
+    var body: some View {
+        let time = TimeFormat.clock(session.elapsed)
+        if let label {
+            Text(time)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(label)
+                .accessibilityValue(time)
+        } else {
+            Text(time)
+        }
+    }
+}
+
+/// A channel's level as `LevelBars`, in a view of its own: the level changes about twelve times a second.
+struct ChannelLevelBars: View {
+    let session: RecordingSession
+    var channel: Channel = .microphone
+    var color: Color = Theme.textSecondary
+    var height: CGFloat = 14
+
+    var body: some View {
+        LevelBars(level: channel == .microphone ? session.microphoneLevel : session.systemLevel, color: color, height: height)
+    }
+}
+
 /// Five bars that show a level between 0 and 1.
 struct LevelBars: View {
     var level: Float
@@ -473,7 +504,8 @@ struct WindowReader: NSViewRepresentable {
 #endif
 
 /// The sound of the last seconds as bars, newest on the right, as Voice Memos draws a recording. It reads the level
-/// itself on every tick and keeps its own short history, so the view around it doesn't redraw for every change.
+/// itself on every tick and keeps its own short history, so the view around it doesn't redraw for every change; the
+/// bars are drawn in one canvas, not as a view each.
 struct LevelWaveform: View {
     var level: () -> Float
     var bars = 60
@@ -483,28 +515,37 @@ struct LevelWaveform: View {
     var spacing: CGFloat = 2
     /// Off while paused: the bars stand still.
     var running = true
-    @State private var samples: [Float] = []
+    @State private var history = History()
 
     var body: some View {
-        TimelineView(.periodic(from: .now, by: 0.08)) { context in
-            HStack(alignment: .center, spacing: spacing) {
-                ForEach(Array(shown.enumerated()), id: \.offset) { index, value in
-                    Capsule()
-                        .fill(color.opacity(0.3 + 0.7 * Double(index) / Double(max(bars - 1, 1))))
-                        .frame(width: barWidth, height: max(barWidth, height * CGFloat(value)))
+        TimelineView(.animation(minimumInterval: 0.08, paused: !running)) { timeline in
+            let samples = history.samples(at: timeline.date, count: bars, running: running, level: level)
+            Canvas { context, size in
+                for (index, value) in samples.enumerated() {
+                    let barHeight = max(barWidth, height * CGFloat(value))
+                    let bar = CGRect(x: CGFloat(index) * (barWidth + spacing), y: (size.height - barHeight) / 2, width: barWidth, height: barHeight)
+                    let opacity = 0.3 + 0.7 * Double(index) / Double(max(bars - 1, 1))
+                    context.fill(Path(roundedRect: bar, cornerRadius: barWidth / 2), with: .color(color.opacity(opacity)))
                 }
             }
-            .frame(height: height)
-            .onChange(of: context.date) {
-                guard running else { return }
-                samples.append(min(max(level(), 0), 1))
-                if samples.count > bars { samples.removeFirst(samples.count - bars) }
-            }
+            .frame(width: CGFloat(bars) * (barWidth + spacing) - spacing, height: height)
         }
         .accessibilityHidden(true)
     }
 
-    private var shown: [Float] {
-        Array(repeating: 0, count: max(0, bars - samples.count)) + samples
+    /// The last levels, newest last. A class, so that taking a sample doesn't make the view draw a second time.
+    private final class History {
+        private var levels: [Float] = []
+        private var sampledAt: Date?
+
+        /// One new sample per tick of the timeline; the view drawing again within a tick takes none.
+        func samples(at date: Date, count: Int, running: Bool, level: () -> Float) -> [Float] {
+            if running, date != sampledAt {
+                sampledAt = date
+                levels.append(min(max(level(), 0), 1))
+                if levels.count > count { levels.removeFirst(levels.count - count) }
+            }
+            return Array(repeating: 0, count: max(0, count - levels.count)) + levels
+        }
     }
 }

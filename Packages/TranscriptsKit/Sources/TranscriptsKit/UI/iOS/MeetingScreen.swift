@@ -99,7 +99,7 @@ struct MeetingScreen: View {
                     switch tabBinding(detail).wrappedValue {
                     case .summary:
                         SummarySection(detail: detail)
-                        if !inspectorBeside, !detail.speakers.isEmpty || !detail.markers.isEmpty || !detail.meeting.attendees.isEmpty {
+                        if !inspectorBeside, (detail.speakersSettled && !detail.speakers.isEmpty) || !detail.markers.isEmpty || !detail.meeting.attendees.isEmpty {
                             InspectorContent(detail: detail, showsTimeFacts: false)
                                 .padding(16)
                                 .cardStyle(radius: 16)

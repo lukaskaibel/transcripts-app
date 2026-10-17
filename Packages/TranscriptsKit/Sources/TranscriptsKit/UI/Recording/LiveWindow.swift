@@ -111,20 +111,19 @@ struct LiveSessionView: View {
                 } else {
                     RecordingDot(size: 11)
                 }
-                Text(TimeFormat.clock(session.elapsed))
+                RecordingTime(session: session)
                     .font(.system(size: 38, weight: .medium))
                     .monospacedDigit()
                     .foregroundStyle(session.state == .paused ? Theme.textSecondary : Theme.text)
-                    .contentTransition(.numericText())
                 Spacer(minLength: 12)
                 HStack(spacing: 8) {
                     Label("Mikrofon", systemImage: "mic").labelStyle(.titleAndIcon)
-                    LevelBars(level: session.microphoneLevel, color: Theme.positive, height: 12)
+                    ChannelLevelBars(session: session, color: Theme.positive, height: 12)
                     if session.capturesSystemAudio {
                         Label(session.source ?? String(localized: "Call", comment: "label of the level meter for the call's sound"), systemImage: "video")
                             .labelStyle(.titleAndIcon)
                             .padding(.leading, 10)
-                        LevelBars(level: session.systemLevel, color: Theme.positive, height: 12)
+                        ChannelLevelBars(session: session, channel: .system, color: Theme.positive, height: 12)
                     }
                 }
                 .font(.small)
@@ -197,10 +196,9 @@ struct LiveSessionView: View {
 struct LiveTranscriptView: View {
     @Environment(AppModel.self) private var model
     let session: RecordingSession
-
-    private var items: [LiveLine] {
-        session.lines + session.partials.values.sorted { $0.start < $1.start }
-    }
+    /// Whether the newest words stay in view. Scrolling up to read stops it; scrolling back to the end, or the
+    /// button that shows meanwhile, starts it again.
+    @State private var following = true
 
     private enum Entry: Identifiable {
         case line(LiveLine)
@@ -219,6 +217,14 @@ struct LiveTranscriptView: View {
             case .marker(let marker): marker.time
             }
         }
+
+        /// What changes when the end of the transcript does: a new entry, or the words of the partial line.
+        var tail: String {
+            switch self {
+            case .line(let line): "\(line.id) \(line.text)"
+            case .marker: id
+            }
+        }
     }
 
     /// Lines and markers in the order they happened; the partial line stays last.
@@ -228,17 +234,17 @@ struct LiveTranscriptView: View {
     }
 
     var body: some View {
+        let entries = entries
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 18) {
-                    if items.isEmpty {
+                    if session.lines.isEmpty && session.partials.isEmpty {
                         waiting
                     }
                     ForEach(entries) { entry in
                         switch entry {
                         case .line(let line):
                             LiveLineView(session: session, line: line)
-                                .id(line.id)
                         case .marker(let marker):
                             LiveMarkerRow(marker: marker)
                         }
@@ -251,9 +257,42 @@ struct LiveTranscriptView: View {
                 .frame(maxWidth: 760, alignment: .leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .onChange(of: items.last?.text) {
+            // Opened again in the middle of a meeting, it starts at the newest words.
+            .defaultScrollAnchor(.bottom, for: .initialOffset)
+            .onScrollPhaseChange { _, phase, context in
+                // Only the user's own scrolling decides; new words making the transcript longer don't.
+                if phase == .interacting {
+                    following = false
+                } else if phase == .idle {
+                    following = context.geometry.visibleRect.maxY >= context.geometry.contentSize.height - 60
+                }
+            }
+            .onChange(of: entries.last?.tail) {
+                guard following else { return }
                 withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo("bottom", anchor: .bottom) }
             }
+            .overlay(alignment: .bottomTrailing) {
+                if !following {
+                    Button {
+                        following = true
+                        withAnimation(.easeOut(duration: 0.25)) { proxy.scrollTo("bottom", anchor: .bottom) }
+                    } label: {
+                        Image(systemName: "arrow.down")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(Theme.text)
+                            .frame(width: 44, height: 44)
+                            .glassEffect(.regular.interactive(), in: Circle())
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(PlainPressStyle())
+                    .accessibilityLabel(Text("Zum Neuesten", comment: "button: scroll the live transcript to the newest words"))
+                    .help(Text("Zum Neuesten", comment: "button: scroll the live transcript to the newest words"))
+                    .accessibilityIdentifier("live.latest")
+                    .padding(Platform.isMobile ? 16 : 28)
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+                }
+            }
+            .animation(.easeOut(duration: 0.2), value: following)
         }
     }
 

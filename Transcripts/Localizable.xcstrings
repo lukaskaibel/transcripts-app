@@ -11798,7 +11798,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ready · all on this Mac"
+            "value" : "Ready · all on device"
           }
         },
         "pl" : {
@@ -19717,7 +19717,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sul Mac"
+            "value" : "Scaricato"
           }
         },
         "uk" : {
@@ -44143,6 +44143,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Щоб переслуховувати й заново транскрибувати на будь-якому пристрої. Займає приблизно 20–60 МБ в iCloud на годину зустрічі."
+          }
+        }
+      }
+    },
+    "Zum Neuesten" : {
+      "extractionState" : "manual",
+      "comment" : "button: scroll the live transcript to the newest words",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Neuesten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jump to Latest"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir a lo más reciente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aller au plus récent"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vai al più recente"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naar het nieuwste"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przejdź do najnowszych"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir para o mais recente"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "К последним словам"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "До останніх слів"
           }
         }
       }
