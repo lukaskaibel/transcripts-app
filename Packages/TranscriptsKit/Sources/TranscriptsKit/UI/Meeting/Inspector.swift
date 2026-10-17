@@ -45,7 +45,7 @@ struct InspectorContent: View {
                 heading(String(localized: "Details", comment: "inspector: heading over a meeting's date, length, source and language"))
                 facts
             }
-            if !detail.speakers.isEmpty {
+            if !detail.speakers.isEmpty, detail.speakersSettled {
                 heading(String(localized: "Personen"))
                     .padding(.top, showsTimeFacts || hasOtherFacts ? 22 : 0)
                 VStack(alignment: .leading, spacing: 0) {

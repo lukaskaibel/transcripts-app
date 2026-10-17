@@ -192,6 +192,13 @@ public struct MeetingDetail: Equatable, Sendable {
         speakers.first { $0.key == key }
     }
 
+    /// Whether the lines' speakers mean something yet. A recording in a room (on iPhone and iPad, or a Mac without a
+    /// call) has every live line on the microphone, the user's channel; who said what is only known once the
+    /// meeting is processed.
+    public var speakersSettled: Bool {
+        meeting.status == .ready || meeting.status == .failed || segments.contains { $0.channel == .system }
+    }
+
     /// The name shown for a speaker: the assigned person, "Du" for the microphone, whom the app guesses
     /// ("Hai?", "Hai oder Julian?"), or the label.
     public func displayName(for key: String) -> String {

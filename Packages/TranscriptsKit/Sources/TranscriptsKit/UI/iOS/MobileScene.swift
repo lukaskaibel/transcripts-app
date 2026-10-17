@@ -71,7 +71,7 @@ struct MobileRoot: View {
                 .environment(\.wideLayout, wide)
         }
         .overlay(alignment: .top) {
-            MobileToasts()
+            MobileToasts(navigation: navigation)
         }
         .modifier(NamePromptHost())
         .task { model.launch() }

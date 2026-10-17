@@ -13,7 +13,7 @@ public struct MenuBarLabel: View {
                 Image(systemName: session.state == .paused ? "pause.circle.fill" : "record.circle.fill")
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(.white, Theme.recording)
-                Text(TimeFormat.clock(session.elapsed)).monospacedDigit()
+                RecordingTime(session: session).monospacedDigit()
             }
         } else {
             Image(systemName: "waveform")

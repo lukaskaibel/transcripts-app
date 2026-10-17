@@ -15,17 +15,21 @@ public enum LiveEvent: Sendable {
 /// Transcribes one channel while it is being recorded.
 ///
 /// A voice activity detector cuts the stream into utterances. While someone talks, the growing
-/// utterance is transcribed every second and a half for a live preview; when they stop, the whole
-/// utterance is transcribed once more and reported as final.
+/// utterance is transcribed every second and a half (on iPhone and iPad every two and a half) for a live
+/// preview; when they stop, the whole utterance is transcribed once more and reported as final.
 public actor LiveTranscriber {
     public let channel: Channel
     private let engine: SpeechEngine
+    /// Whether a final line of the microphone comes with its voice, which costs a voice model run per line.
+    private let measuresVoice: Bool
     private let onEvent: @Sendable (LiveEvent) -> Void
 
     private static let block = 4096
     private static let keepSeconds = 40.0
     private static let maxUtterance = 12.0
-    private static let partialInterval = 1.5
+    /// Each preview transcribes the whole utterance so far again. A phone does it less often: the words still come
+    /// as they are spoken, with less work for the phone while it records.
+    private static let partialInterval = Platform.isMobile ? 2.5 : 1.5
 
     private let vadConfig = VadSegmentationConfig(minSpeechDuration: 0.2, minSilenceDuration: 0.3, maxSpeechDuration: 12, speechPadding: 0.12)
     private var diarizer: LiveDiarizer?
@@ -40,9 +44,10 @@ public actor LiveTranscriber {
     private var lastPartialAt = 0
     private var partialTask: Task<Void, Never>?
 
-    public init(channel: Channel, engine: SpeechEngine = .shared, onEvent: @escaping @Sendable (LiveEvent) -> Void) {
+    public init(channel: Channel, engine: SpeechEngine = .shared, measuresVoice: Bool = true, onEvent: @escaping @Sendable (LiveEvent) -> Void) {
         self.channel = channel
         self.engine = engine
+        self.measuresVoice = measuresVoice
         self.onEvent = onEvent
     }
 
@@ -138,7 +143,7 @@ public actor LiveTranscriber {
         let startTime = SpeechAudio.seconds(start)
         guard channel == .system else {
             // The microphone's own voice, to notice the call coming back through the speakers.
-            let voice = SpeechAudio.seconds(audio.count) >= 1.5 ? try? await engine.voiceEmbedding(audio[...]) : nil
+            let voice = measuresVoice && SpeechAudio.seconds(audio.count) >= 1.5 ? try? await engine.voiceEmbedding(audio[...]) : nil
             onEvent(.final(channel: channel, start: startTime, end: SpeechAudio.seconds(end), text: transcription.text, speaker: nil, embedding: nil, voice: voice))
             return
         }

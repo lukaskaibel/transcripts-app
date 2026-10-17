@@ -88,6 +88,17 @@ All notable changes to this project are recorded here. The format follows
   naming both, the app recognising one of them, or merging two people left that person twice among the meeting's
   people. Their voices now become one, in meetings from before too; your lines that came through the call join your
   microphone's. What the app only recognised waits behind the ⓘ as lines the app moved, to keep or send back.
+- **Recording on iPhone and iPad runs smoother.** The waveform and the level no longer wait for the speech
+  recognition when it falls behind; the bar above the tab bar and the recording screen no longer redraw with every
+  level change; the phone transcribes the live preview less often and no longer measures a voice per line it doesn't
+  need. The live transcript stays where you scrolled to read, with a button back to the newest words, and opens at
+  the newest words.
+- **The people you know stay in a room's live transcript.** On iPhone and iPad, and on a Mac without a call, lines of
+  people the app knows were taken for the call coming back through the speakers and left out.
+- **A room recording isn't all yours while it is processed.** Its lines no longer show your name until the voices are
+  told apart; the meeting being recorded opens the recording screen; *Voices without a name* no longer pops up over the
+  meeting whose banner already says so; on a phone, the summary's buttons move under the text instead of squeezing it;
+  English says *Ready · all on device* on iPhone and iPad too.
 
 ## [0.1.0] - 2026-10-07
 

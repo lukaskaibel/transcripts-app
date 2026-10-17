@@ -3,13 +3,22 @@ import Foundation
 extension AppModel {
     public var isRecording: Bool { recording != nil }
 
+    /// In the demo, `-demo.recordFrom <file>` records for real, with the file played as the microphone: the live
+    /// transcript, the speech recognition and the processing afterwards, on a simulator or in a test, without anyone's
+    /// microphone.
+    var demoRecordingFile: URL? {
+        guard isDemo else { return nil }
+        return UserDefaults.standard.string(forKey: "demo.recordFrom").map { URL(fileURLWithPath: $0) }
+    }
+
     /// Starts recording, for a calendar meeting if one is given or running right now.
     public func startRecording(event: UpcomingMeeting? = nil) async {
         guard recording == nil else {
             request(.live)
             return
         }
-        if isDemo {
+        let file = demoRecordingFile
+        if isDemo, file == nil {
             #if os(macOS)
             showToast(String(localized: "Demo"), String(localized: "Im Demo-Modus wird nicht aufgenommen."))
             #else
@@ -19,7 +28,7 @@ extension AppModel {
             #endif
             return
         }
-        switch MicrophoneCapture.permission {
+        switch file == nil ? MicrophoneCapture.permission : .authorized {
         case .notDetermined:
             guard await MicrophoneCapture.requestPermission() else {
                 refreshPermissions()
@@ -57,7 +66,7 @@ extension AppModel {
             microphoneUID: settings.microphoneUID,
             captureSystemAudio: settings.captureSystemAudio,
             thresholds: settings.voiceStrictness.thresholds
-        ), library: voiceLibrary.isEmpty ? nil : voiceLibrary)
+        ), library: voiceLibrary.isEmpty ? nil : voiceLibrary, sources: file.flatMap { try? FileAudioSource(url: $0) }.map { [.microphone: $0] })
         do {
             try await session.start()
         } catch {
@@ -84,7 +93,7 @@ extension AppModel {
 
     /// Stops the recording and hands it to the full transcription pass.
     public func stopRecording() async {
-        if isDemo, recording != nil {
+        if isDemo, demoRecordingFile == nil, recording != nil {
             stopDemoRecording()
             showToast(String(localized: "Demo"), String(localized: "Im Demo-Modus wird nicht aufgenommen."))
             return

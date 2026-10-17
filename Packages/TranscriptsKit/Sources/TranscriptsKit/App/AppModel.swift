@@ -225,6 +225,7 @@ public final class AppModel {
         refreshPermissions()
         refreshVoices()
         startSyncIfWanted()
+        if demoRecordingFile != nil { prepareEngine() }
         guard !isDemo else { return }
         if settings.removeGitHubLeftovers() { try? secrets.setSecret(nil, for: "github") }
         recoverInterruptedMeetings()
@@ -422,7 +423,7 @@ public final class AppModel {
     public var modelsDownloaded: Bool { isDemo || settings.transcriptionModel.isDownloaded }
 
     public func prepareEngine() {
-        guard !isDemo else {
+        guard !isDemo || demoRecordingFile != nil else {
             engineState = .ready
             return
         }
