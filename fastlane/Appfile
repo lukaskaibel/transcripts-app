@@ -1,0 +1,2 @@
+# The Mac, iPhone and iPad apps are one App Store app with this bundle identifier; the widget extension adds ".Widgets".
+app_identifier("com.lukaskbl.Transcripts")

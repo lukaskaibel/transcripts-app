@@ -358,6 +358,7 @@ Packages/TranscriptsKit/      Everything else, as a Swift package
 Packages/Vendor/FluidAudio/   FluidAudio, vendored (see below)
 Config/                       Build settings, Info.plist, entitlements
 Tools/                        App icons, test meetings, screenshots, README and website pictures, translations
+fastlane/                     Building for the App Store and uploading to TestFlight
 Design/                       Icon, README pictures, social preview
 Website/                      The website on GitHub Pages: home, privacy policy, terms, support, Impressum
 ```
@@ -387,6 +388,23 @@ step; `.github/workflows/website.yml` publishes it to GitHub Pages when it chang
 ```bash
 python3 -m http.server --directory Website
 ```
+
+Builds for TestFlight are made and uploaded with [fastlane](https://fastlane.tools), for the iPhone and iPad, signed in
+with an App Store Connect API key, so Xcode needs no account. They always sync with iCloud. Copy
+`fastlane/.env.secret.example` to `fastlane/.env.secret` (it stays out of git) and fill in the key and your team, run
+`bundle install` once, and then:
+
+```bash
+bundle exec fastlane ios beta
+```
+
+Every change to the app on `main` also goes to TestFlight by itself:
+[`.github/workflows/testflight.yml`](.github/workflows/testflight.yml) runs the same lane on GitHub, signed with
+certificates made for it (the workflow lists the secrets it needs). A TestFlight build carries the version it's on its
+way to and the date and time in Germany: once `v0.1.0` is tagged, `0.2.0 (2026.1017.1047)` is the build of 17 October
+2026 at 10:47. Its "What to Test" names the commit. TestFlight and App Store builds use iCloud's production
+environment, so a change to the synced records reaches them only once its schema is deployed to production in the
+CloudKit Console.
 
 Data lives in `~/Library/Application Support/Transcripts` (the database and the recordings, compressed to AAC after
 processing; keep them forever, for 30 days, or not at all). API keys are in the Keychain. With iCloud sync on, a copy
