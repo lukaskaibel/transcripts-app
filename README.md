@@ -357,7 +357,8 @@ Packages/TranscriptsKit/      Everything else, as a Swift package
   Tests/TranscriptsKitTests/
 Packages/Vendor/FluidAudio/   FluidAudio, vendored (see below)
 Config/                       Build settings, Info.plist, entitlements
-Tools/                        App icons, test meetings, screenshots, README and website pictures, translations
+Tools/                        App icons, test meetings, screenshots, README and website pictures, translations,
+                              TestFlight uploads
 Design/                       Icon, README pictures, social preview
 Website/                      The website on GitHub Pages: home, privacy policy, terms, support, Impressum
 ```
@@ -386,6 +387,15 @@ step; `.github/workflows/website.yml` publishes it to GitHub Pages when it chang
 
 ```bash
 python3 -m http.server --directory Website
+```
+
+TestFlight builds of the iPhone and iPad app come from `Tools/testflight.sh`: it archives the Release build, with the
+number of commits as the build number, and has Xcode sign it for the App Store and upload it to App Store Connect. It
+signs with the team in `Config/Local.xcconfig` and needs an Apple account with App Store Connect access in Xcode ›
+Settings › Accounts; `--archive-only` stops before the upload.
+
+```bash
+Tools/testflight.sh
 ```
 
 Data lives in `~/Library/Application Support/Transcripts` (the database and the recordings, compressed to AAC after
