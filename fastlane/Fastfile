@@ -1,0 +1,173 @@
+# Builds Transcripts for the App Store and uploads it to TestFlight, for the iPhone and iPad.
+#
+# Every call to App Store Connect signs in with an App Store Connect API key (.p8), so there are no Apple ID or
+# two-factor prompts, and Xcode needs no account; store_signing below says how the builds are signed. Copy
+# fastlane/.env.secret.example to fastlane/.env.secret (it is gitignored) and fill it in, run `bundle install` once,
+# and then:
+#
+#   bundle exec fastlane ios beta     # build the iPhone and iPad app and upload it to TestFlight
+#   bundle exec fastlane ios build    # build it for the App Store, signed, without uploading
+#
+# .github/workflows/testflight.yml runs `ios beta` on GitHub for every change to the app on main. TestFlight builds are
+# numbered as beta_version and build_number below say: 0.2.0 (2026.1017.1047).
+#
+# The Mac app and the App Store listing (texts, screenshots, submitting for review) aren't here yet.
+
+require "shellwords"
+
+# The build settings are UTF-8, whatever the shell's locale is.
+Encoding.default_external = Encoding::UTF_8
+ENV["LANG"] = "en_US.UTF-8" if ENV["LANG"].to_s.empty?
+ENV["LC_ALL"] = "en_US.UTF-8" if ENV["LC_ALL"].to_s.empty?
+
+APP_ID = "com.lukaskbl.Transcripts"
+# The app and its widget extension (the recording's Live Activity, the Control Center control) each need a profile.
+BUNDLE_IDS = [APP_ID, "#{APP_ID}.Widgets"].freeze
+# Absolute paths, taken while loading: lanes run from other folders, and __dir__ is relative in a Fastfile.
+HERE = File.expand_path(__dir__)
+ROOT = File.expand_path("..", HERE)
+PROJECT = File.join(ROOT, "Transcripts.xcodeproj")
+SCHEME = "Transcripts"
+OUTPUT = File.join(ROOT, "build", "fastlane")
+
+# fastlane/.env.secret holds the API key and the team. Values already in the environment win.
+secrets = File.join(HERE, ".env.secret")
+if File.exist?(secrets)
+  File.foreach(secrets) do |line|
+    key, value = line.strip.split("=", 2)
+    next if key.to_s.empty? || key.start_with?("#") || value.nil?
+
+    ENV[key] ||= value
+  end
+end
+
+def secret(name)
+  value = ENV[name].to_s
+  UI.user_error!("#{name} is not set. Copy fastlane/.env.secret.example to fastlane/.env.secret and fill it in.") if value.empty?
+  value
+end
+
+def api_key
+  @api_key ||= app_store_connect_api_key(
+    key_id: secret("APP_STORE_CONNECT_API_KEY_KEY_ID"),
+    issuer_id: secret("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+    key_filepath: File.expand_path(secret("APP_STORE_CONNECT_API_KEY_P8_PATH"))
+  )
+end
+
+# Lets Xcode make the development profiles for the archive, signed in with the same API key. App Store builds always
+# sync with iCloud (TR_ICLOUD): the App ID has iCloud with the container iCloud.com.lukaskbl.Transcripts and push
+# notifications, which Xcode set up the first time it signed the app with them.
+def build_arguments(marketing_version)
+  [
+    "-allowProvisioningUpdates",
+    "-authenticationKeyPath", File.expand_path(secret("APP_STORE_CONNECT_API_KEY_P8_PATH")),
+    "-authenticationKeyID", secret("APP_STORE_CONNECT_API_KEY_KEY_ID"),
+    "-authenticationKeyIssuerID", secret("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+    "DEVELOPMENT_TEAM=#{secret('DEVELOPMENT_TEAM')}",
+    "CODE_SIGN_IDENTITY=Apple Development",
+    "TR_ICLOUD=YES",
+    "MARKETING_VERSION=#{marketing_version}",
+    "CURRENT_PROJECT_VERSION=#{build_number}"
+  ].shelljoin
+end
+
+# The archive is signed for development; the export signs it for the App Store: with the team's Apple Distribution
+# certificate in the keychain and an App Store profile for the app and one for the widget extension, which fastlane
+# makes or fetches with the API key. (The key may not use Apple's cloud-managed certificates, so Xcode can't do this
+# part by itself.) Returns the export options.
+def store_signing
+  folder = File.join(OUTPUT, "signing")
+  profiles = BUNDLE_IDS.to_h do |bundle_id|
+    get_provisioning_profile(api_key: api_key, app_identifier: bundle_id, platform: "ios", output_path: folder)
+    [bundle_id, lane_context[SharedValues::SIGH_NAME]]
+  end
+  {
+    signingStyle: "manual",
+    teamID: secret("DEVELOPMENT_TEAM"),
+    signingCertificate: "Apple Distribution",
+    provisioningProfiles: profiles,
+    manageAppVersionAndBuildNumber: false
+  }
+end
+
+def version
+  File.read(File.join(ROOT, "Config", "Base.xcconfig"))[/^MARKETING_VERSION = (.+)$/, 1].strip
+end
+
+def git(*arguments)
+  sh(["git", "-C", ROOT, *arguments].shelljoin, log: false).strip
+end
+
+# The version a TestFlight build is on its way to. Config/Base.xcconfig holds the version of the latest release, which
+# gets a v tag when it ships, so once v0.1.0 is tagged, the builds after it are the next minor version, 0.2.0. Before
+# that they are the version itself. (A version that is out is closed in App Store Connect: it takes no more builds.)
+def beta_version
+  @beta_version ||= if git("tag", "--list", "v#{version}").empty?
+                      version
+                    else
+                      major, minor = version.split(".").map(&:to_i)
+                      "#{major}.#{minor + 1}.0"
+                    end
+end
+
+# Every upload needs a higher build number. It is the date and time in Germany, year first so that it sorts:
+# 2026.1017.1047 is 17 October 2026 at 10:47. The same on this Mac and on GitHub.
+def build_number
+  @build_number ||= begin
+    zone = ENV["TZ"]
+    ENV["TZ"] = "Europe/Berlin"
+    now = Time.now.localtime
+    ENV["TZ"] = zone
+    "#{now.year}.#{now.month * 100 + now.day}.#{now.hour * 100 + now.min}"
+  end
+end
+
+# "What to Test" in TestFlight: the commit the build is made of, which the version and build number can't hold.
+def what_to_test
+  commit = git("rev-parse", "HEAD")
+  text = "#{git('log', '-1', '--format=%s')}\n\n#{commit[0, 7]}"
+  text += " with changes that aren't committed" unless git("status", "--porcelain", "--untracked-files=no").empty?
+  "#{text}\nhttps://github.com/lukaskaibel/transcripts-app/commit/#{commit}"
+end
+
+# Archives the iPhone and iPad app for the App Store and returns the .ipa. TestFlight builds take beta_version.
+def archive_for_store(marketing_version: version)
+  folder = File.join(OUTPUT, "ios")
+  UI.header("iPhone and iPad: Transcripts #{marketing_version} (#{build_number})")
+  build_app(
+    project: PROJECT,
+    scheme: SCHEME,
+    configuration: "Release",
+    # The target is for every platform; the SDK tells gym to make an .ipa.
+    sdk: "iphoneos",
+    destination: "generic/platform=iOS",
+    clean: true,
+    archive_path: File.join(folder, "Transcripts.xcarchive"),
+    output_directory: folder,
+    output_name: "Transcripts",
+    export_method: "app-store",
+    export_options: store_signing,
+    skip_profile_detection: true,
+    # gym hands these to the export as well, so they mustn't go into export_xcargs a second time.
+    xcargs: build_arguments(marketing_version)
+  )
+end
+
+platform :ios do
+  desc "Builds the iPhone and iPad app for the App Store, signed, without uploading it"
+  lane(:build) { archive_for_store }
+
+  desc "Builds the iPhone and iPad app and uploads it to TestFlight"
+  lane :beta do
+    # Waits until App Store Connect has processed the build, which "What to Test" needs. The internal testers get
+    # every build by themselves.
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: archive_for_store(marketing_version: beta_version),
+      # In the app's primary language, which a new app's builds don't have yet, and in any the builds have.
+      localized_build_info: { "default" => { whats_new: what_to_test }, "de-DE" => { whats_new: what_to_test } },
+      distribute_external: false
+    )
+  end
+end

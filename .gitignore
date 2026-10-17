@@ -13,3 +13,9 @@ xcuserdata/
 
 # Personal signing settings (see Config/Local.xcconfig.example)
 Config/Local.xcconfig
+
+# fastlane: local secrets, gems and output
+fastlane/.env.secret
+fastlane/report.xml
+fastlane/Preview.html
+vendor/
