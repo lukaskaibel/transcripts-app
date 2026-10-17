@@ -9,7 +9,7 @@ name: TestFlight
 
 on:
   push:
-    branches: [main]
+    branches: [main, claude/testflight-every-change]  # TEMPORARY: try it from the pull request
     paths:
       - Transcripts/**
       - TranscriptsWidgets/**
