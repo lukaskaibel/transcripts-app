@@ -18,17 +18,25 @@ struct StatusBanner: View {
             }
         case .processing:
             banner {
-                ProgressView().controlSize(.small)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(detail.meeting.processingStep ?? String(localized: "Wird verarbeitet")).font(.uiMedium)
-                    ThinBar(fraction: detail.meeting.progress)
-                        .frame(maxWidth: 260)
+                HStack(spacing: 10) {
+                    ProgressView().controlSize(.small)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(detail.meeting.processingStep ?? String(localized: "Wird verarbeitet")).font(.uiMedium)
+                        ThinBar(fraction: detail.meeting.progress)
+                            .frame(maxWidth: 260)
+                    }
+                    Spacer()
+                    Text(detail.meeting.progress.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current))).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
                 }
-                Spacer()
-                Text(detail.meeting.progress.formatted(.percent.precision(.fractionLength(0)).locale(AppLocale.current))).font(.small).monospacedDigit().foregroundStyle(Theme.textTertiary)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("meeting.processing")
+                // Just stopped, by mistake or for a break: it goes on from here.
+                if model.canResume(detail.meeting) {
+                    Button("Weiter aufnehmen") { Task { await model.resumeRecording(detail.meeting.id) } }
+                        .buttonStyle(SecondaryButtonStyle())
+                        .accessibilityIdentifier("meeting.resume")
+                }
             }
-            .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("meeting.processing")
         case .failed:
             banner {
                 Image(systemName: "exclamationmark.triangle").foregroundStyle(Theme.warning)

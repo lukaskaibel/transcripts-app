@@ -91,6 +91,17 @@ struct MeetingDetailView: View {
             MeetingTabPicker(tab: $tab)
         }
         ToolbarSpacer(.flexible)
+        if model.canResume(detail.meeting) {
+            ToolbarItem {
+                Button {
+                    Task { await model.resumeRecording(detail.meeting.id) }
+                } label: {
+                    Label("Weiter aufnehmen", systemImage: "record.circle")
+                }
+                .help("Weiter aufnehmen (⇧⌘R): die Aufnahme geht nach dem Ende weiter")
+            }
+            ToolbarSpacer(.fixed)
+        }
         ToolbarItemGroup {
             Menu {
                 Button("Als Markdown kopieren", systemImage: "doc.on.doc") {

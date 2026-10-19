@@ -17,6 +17,9 @@ extension AppModel {
             request(.live)
             return
         }
+        guard !startingRecording else { return }
+        startingRecording = true
+        defer { startingRecording = false }
         let file = demoRecordingFile
         if isDemo, file == nil {
             #if os(macOS)
@@ -28,21 +31,7 @@ extension AppModel {
             #endif
             return
         }
-        switch file == nil ? MicrophoneCapture.permission : .authorized {
-        case .notDetermined:
-            guard await MicrophoneCapture.requestPermission() else {
-                refreshPermissions()
-                showToast(String(localized: "Kein Zugriff aufs Mikrofon"), String(localized: "Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit › Mikrofon."), isError: true)
-                return
-            }
-            refreshPermissions()
-        case .denied, .restricted:
-            showToast(String(localized: "Kein Zugriff aufs Mikrofon"), String(localized: "Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit › Mikrofon."), isError: true)
-            openPrivacySettings("Privacy_Microphone")
-            return
-        default:
-            break
-        }
+        guard await microphoneUsable() else { return }
 
         let now = Date()
         let calendarMeeting = event ?? calendar.meeting(around: now, filter: meetingFilter)
@@ -62,11 +51,7 @@ extension AppModel {
             showToast(String(localized: "Aufnahme konnte nicht starten"), error.localizedDescription, isError: true)
             return
         }
-        let session = RecordingSession(meeting: meeting, database: database, engine: engine, configuration: .init(
-            microphoneUID: settings.microphoneUID,
-            captureSystemAudio: settings.captureSystemAudio,
-            thresholds: settings.voiceStrictness.thresholds
-        ), library: voiceLibrary.isEmpty ? nil : voiceLibrary, sources: file.flatMap { try? FileAudioSource(url: $0) }.map { [.microphone: $0] })
+        let session = makeSession(for: meeting)
         do {
             try await session.start()
         } catch {
@@ -76,6 +61,96 @@ extension AppModel {
             return
         }
         recording = session
+        didStart(session)
+    }
+
+    /// Whether a stopped meeting can be recorded further: one this device recorded, whose audio is still here,
+    /// while nothing else is being recorded.
+    public func canResume(_ meeting: Meeting) -> Bool {
+        recording == nil && meeting.origin == .recording && meeting.status != .recording
+            && AppPaths.existingAudio(for: meeting.id, channel: .microphone) != nil
+    }
+
+    /// The meeting recorded last, if it ended within the last half hour and can be recorded further: for going on
+    /// after a stop by mistake or a break.
+    public var recentlyStoppedMeeting: Meeting? {
+        guard let meeting = rows.first(where: { $0.meeting.origin == .recording })?.meeting,
+              meeting.startedAt.addingTimeInterval(meeting.duration) > Date().addingTimeInterval(-30 * 60),
+              canResume(meeting) else { return nil }
+        return meeting
+    }
+
+    /// Records more of a stopped meeting: the new audio goes on after the old, the live transcript after the
+    /// transcript, and afterwards the whole meeting is transcribed again, with the names given before kept.
+    public func resumeRecording(_ meetingId: String) async {
+        guard recording == nil else {
+            request(.live)
+            return
+        }
+        guard !startingRecording, let meeting = try? database.detail(of: meetingId)?.meeting, canResume(meeting) else { return }
+        startingRecording = true
+        defer { startingRecording = false }
+        if isDemo, demoRecordingFile == nil {
+            showToast(String(localized: "Demo"), String(localized: "Im Demo-Modus wird nicht aufgenommen."))
+            return
+        }
+        guard await microphoneUsable() else { return }
+        // A pass over the part before would be out of date.
+        cancelProcessing(meetingId)
+        try? database.update(meetingId: meetingId) { meeting in
+            meeting.status = .recording
+            meeting.progress = 0
+            meeting.processingStep = nil
+            meeting.errorMessage = nil
+        }
+        // Compressing the recording files of the part before: the new recording takes their place.
+        await finishingAudio[meetingId]?.value
+        guard let previous = try? database.detail(of: meetingId) else { return }
+        let session = makeSession(for: previous.meeting, continuing: previous)
+        do {
+            try await session.start()
+        } catch {
+            // Everything recorded before is still in the files: transcribed again, the meeting is as it was.
+            reprocess(meetingId)
+            showToast(String(localized: "Aufnahme konnte nicht starten"), error.localizedDescription, isError: true)
+            return
+        }
+        recording = session
+        didStart(session)
+    }
+
+    /// Asks for the microphone if it wasn't asked yet; false, with a word to the user, where it isn't allowed.
+    private func microphoneUsable() async -> Bool {
+        switch demoRecordingFile == nil ? MicrophoneCapture.permission : .authorized {
+        case .notDetermined:
+            guard await MicrophoneCapture.requestPermission() else {
+                refreshPermissions()
+                showToast(String(localized: "Kein Zugriff aufs Mikrofon"), String(localized: "Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit › Mikrofon."), isError: true)
+                return false
+            }
+            refreshPermissions()
+            return true
+        case .denied, .restricted:
+            showToast(String(localized: "Kein Zugriff aufs Mikrofon"), String(localized: "Erlaube ihn in den Systemeinstellungen unter Datenschutz & Sicherheit › Mikrofon."), isError: true)
+            openPrivacySettings("Privacy_Microphone")
+            return false
+        default:
+            return true
+        }
+    }
+
+    private func makeSession(for meeting: Meeting, continuing previous: MeetingDetail? = nil) -> RecordingSession {
+        let file = demoRecordingFile
+        return RecordingSession(meeting: meeting, database: database, engine: engine, configuration: .init(
+            microphoneUID: settings.microphoneUID,
+            captureSystemAudio: settings.captureSystemAudio,
+            thresholds: settings.voiceStrictness.thresholds,
+            callAudioWorkedBefore: settings.callAudioWorked
+        ), library: voiceLibrary.isEmpty ? nil : voiceLibrary, sources: file.flatMap { try? FileAudioSource(url: $0) }.map { [.microphone: $0] }, continuing: previous)
+    }
+
+    /// What follows the start of a recording: the recorder on screen, the live summary.
+    private func didStart(_ session: RecordingSession) {
         if let message = session.errorMessage {
             showToast(String(localized: "Systemaudio wird nicht aufgenommen"), message, isError: true)
         }
@@ -101,6 +176,7 @@ extension AppModel {
         guard let session = recording, session.state == .recording || session.state == .paused else { return }
         await session.stop()
         recording = nil
+        if session.systemAudioHeard { settings.callAudioWorked = true }
         #if os(macOS)
         floatingRecorder?.hide()
         #endif

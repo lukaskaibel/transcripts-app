@@ -32,15 +32,19 @@ public final class MeetingProcessor: @unchecked Sendable {
         self.engine = engine
     }
 
+    /// A meeting that is recorded again while it is processed (see `AppModel.resumeRecording`) stays as the recording
+    /// leaves it: the pass writes nothing more to it and ends with `CancellationError`.
     public func process(meetingId: String, options: Options, progress: Progress? = nil) async throws {
         let report: Progress = { [database] step, fraction in
             try? database.update(meetingId: meetingId) { meeting in
+                guard meeting.status == .processing else { return }
                 meeting.processingStep = step
                 meeting.progress = fraction
             }
             progress?(step, fraction)
         }
         try database.update(meetingId: meetingId) { meeting in
+            guard meeting.status != .recording else { return }
             meeting.status = .processing
             meeting.errorMessage = nil
         }
@@ -48,6 +52,7 @@ public final class MeetingProcessor: @unchecked Sendable {
             try await run(meetingId: meetingId, options: options, report: report)
         } catch {
             try? database.update(meetingId: meetingId) { meeting in
+                guard meeting.status == .processing, !(error is CancellationError) else { return }
                 meeting.status = .failed
                 meeting.errorMessage = error.localizedDescription
                 meeting.processingStep = nil
@@ -64,6 +69,7 @@ public final class MeetingProcessor: @unchecked Sendable {
             }
         }
         guard let meeting = try await database.reader.read({ try Meeting.fetchOne($0, key: meetingId) }) else { return }
+        guard meeting.status == .processing else { throw CancellationError() }
 
         report(String(localized: "Audio wird gelesen"), 0.06)
         let importURL = AppPaths.existingImport(for: meetingId)
@@ -71,6 +77,7 @@ public final class MeetingProcessor: @unchecked Sendable {
         let system = try AppPaths.existingAudio(for: meetingId, channel: .system).map(SpeechAudio.load) ?? []
         let imported = try importURL.map(SpeechAudio.load) ?? []
         let duration = SpeechAudio.seconds(max(microphone.count, system.count, imported.count))
+        try Task.checkCancellation()
 
         let people = try database.people()
         let me = try database.mePerson(defaultName: options.defaultMyName)
@@ -99,10 +106,15 @@ public final class MeetingProcessor: @unchecked Sendable {
                 if let cleaned = EchoSuppressor.clean(microphone: microphone, reference: system) {
                     echoLevels = (MicrophoneWords.levels(microphone), MicrophoneWords.levels(cleaned), MicrophoneWords.levels(system))
                     microphone = cleaned
+                    try Task.checkCancellation()
                     try? Self.saveCleanedMicrophone(cleaned, meetingId: meetingId)
                 } else {
                     try? FileManager.default.removeItem(at: AppPaths.cleanedMicrophoneFile(for: meetingId))
                 }
+            } else {
+                // Nothing to take out: no version without the echo, and none left over from a shorter recording of
+                // this meeting (recorded further since).
+                try? FileManager.default.removeItem(at: AppPaths.cleanedMicrophoneFile(for: meetingId))
             }
             let microphoneSpeech = try await speechSeconds(microphone)
             audioByChannel[.microphone] = microphone
@@ -110,6 +122,7 @@ public final class MeetingProcessor: @unchecked Sendable {
             if systemSpeech >= 3 {
                 report(String(localized: "Gesprächspartner werden transkribiert"), 0.12)
                 let systemText = try await engine.transcribe(system)
+                try Task.checkCancellation()
                 report(String(localized: "Stimmen werden getrennt"), 0.4)
                 let diarization = try await engine.diarize(system) { fraction in report(String(localized: "Stimmen werden getrennt"), 0.4 + fraction * 0.25) }
                 let turns = try await refined(diarization.turns, words: systemText.words, audio: system, library: library, people: people, thresholds: options.thresholds, excluding: [me.id])
@@ -117,6 +130,7 @@ public final class MeetingProcessor: @unchecked Sendable {
                 let breaks = TranscriptAssembly.pauseBreaks(words: systemText.words, turns: turns)
                 let systemLines = TranscriptAssembly.renumbered(TranscriptAssembly.lines(words: systemText.words, speakers: speakers, channel: .system, breaks: breaks)).lines
                 var microphoneLines: [DraftLine] = []
+                try Task.checkCancellation()
                 if microphoneSpeech >= 0.5 {
                     report(String(localized: "Deine Spur wird transkribiert"), 0.67)
                     let microphoneText = try await engine.transcribe(microphone)
@@ -139,6 +153,7 @@ public final class MeetingProcessor: @unchecked Sendable {
             }
         }
 
+        try Task.checkCancellation()
         report(String(localized: "Stimmen werden erkannt"), 0.8)
         // A voice embedding for every line long enough to have one: the app learns voices line by line, and
         // a line that sounds like someone else than the rest of its speaker stands out.
@@ -152,7 +167,10 @@ public final class MeetingProcessor: @unchecked Sendable {
             if let embedding = try await engine.voiceEmbedding(Self.slice(audio, from: line.start, to: min(line.end, line.start + 20))) {
                 lineEmbeddings[index] = embedding
             }
-            if count % 20 == 0 { report(String(localized: "Stimmen werden erkannt"), 0.8 + 0.1 * Double(count) / Double(max(measured.count, 1))) }
+            if count % 20 == 0 {
+                try Task.checkCancellation()
+                report(String(localized: "Stimmen werden erkannt"), 0.8 + 0.1 * Double(count) / Double(max(measured.count, 1)))
+            }
         }
         let isRoom = lines.allSatisfy { $0.channel == .microphone }
 
@@ -248,11 +266,10 @@ public final class MeetingProcessor: @unchecked Sendable {
                 embedding: lineEmbeddings[index]?.embeddingData, voiceIgnored: carried.ignoredLines.contains(index)
             )
         }
-        try database.replaceTranscript(meetingId: meetingId, segments: segments, speakers: speakers)
-
         let text = lines.map(\.text).joined(separator: " ")
         let language = NLLanguageRecognizer.dominantLanguage(for: text)?.rawValue
-        try database.update(meetingId: meetingId) { meeting in
+        try Task.checkCancellation()
+        let saved = try database.replaceProcessedTranscript(meetingId: meetingId, segments: segments, speakers: speakers) { meeting in
             meeting.status = .ready
             meeting.progress = 1
             meeting.processingStep = nil
@@ -260,6 +277,8 @@ public final class MeetingProcessor: @unchecked Sendable {
             meeting.language = language
             meeting.transcriptionModel = options.model.title
         }
+        // Recorded further while this pass ran: the pass after that recording counts.
+        guard saved else { throw CancellationError() }
         report(String(localized: "Fertig", comment: "processing step: everything is done"), 1)
     }
 

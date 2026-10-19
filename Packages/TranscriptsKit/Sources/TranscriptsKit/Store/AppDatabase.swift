@@ -381,6 +381,21 @@ extension AppDatabase {
         }
     }
 
+    /// The full pass's transcript, with `change` to the meeting, in one go; unless the meeting is no longer being
+    /// processed (it is recorded further), when nothing changes. Returns whether it was saved.
+    public func replaceProcessedTranscript(meetingId: String, segments: [Segment], speakers: [MeetingSpeaker], _ change: @escaping @Sendable (inout Meeting) -> Void) throws -> Bool {
+        try writer.write { db in
+            guard var meeting = try Meeting.fetchOne(db, key: meetingId), meeting.status == .processing else { return false }
+            try Segment.filter(Column("meetingId") == meetingId).deleteAll(db)
+            try MeetingSpeaker.filter(Column("meetingId") == meetingId).deleteAll(db)
+            for var segment in segments { try segment.insert(db) }
+            for speaker in speakers { try speaker.insert(db) }
+            change(&meeting)
+            try meeting.update(db)
+            return true
+        }
+    }
+
     public func appendSegment(_ segment: Segment) throws -> Segment {
         try writer.write { db in
             var segment = segment

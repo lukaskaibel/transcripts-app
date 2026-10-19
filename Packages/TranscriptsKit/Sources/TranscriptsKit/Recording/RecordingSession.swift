@@ -8,10 +8,17 @@ final class RecordingClock: @unchecked Sendable {
     private var startedAt: TimeInterval?
     private var pausedAt: TimeInterval?
     private var pausedTotal: TimeInterval = 0
+    /// Recorded before, when a stopped meeting is recorded further.
+    private var offset: TimeInterval = 0
 
     private static func now() -> TimeInterval { ProcessInfo.processInfo.systemUptime }
 
-    func start() { lock.withLock { startedAt = Self.now() } }
+    func start(at offset: TimeInterval = 0) {
+        lock.withLock {
+            startedAt = Self.now()
+            self.offset = offset
+        }
+    }
 
     func pause() { lock.withLock { if pausedAt == nil { pausedAt = Self.now() } } }
 
@@ -29,9 +36,9 @@ final class RecordingClock: @unchecked Sendable {
     /// Seconds recorded so far, pauses left out.
     var elapsed: TimeInterval {
         lock.withLock {
-            guard let startedAt else { return 0 }
+            guard let startedAt else { return offset }
             let end = pausedAt ?? Self.now()
-            return max(0, end - startedAt - pausedTotal)
+            return offset + max(0, end - startedAt - pausedTotal)
         }
     }
 }
@@ -120,6 +127,9 @@ public final class RecordingSession {
     public private(set) var microphoneProblem: MicrophoneProblem?
     public private(set) var errorMessage: String?
     public let capturesSystemAudio: Bool
+    /// Where this recording starts in the meeting: 0, or the length of what was recorded before, when a stopped
+    /// meeting is recorded further.
+    public private(set) var offset: TimeInterval = 0
 
     private let database: AppDatabase
     private let engine: SpeechEngine
@@ -136,22 +146,39 @@ public final class RecordingSession {
     private let thresholds: VoiceThresholds
     private var timer: Task<Void, Never>?
     private var silentSystemSeconds = 0
+    /// Whether the call side delivered any sound in this recording: then macOS lets the app listen.
+    public private(set) var systemAudioHeard = false
+    private let callAudioWorkedBefore: Bool
+    /// The meeting as it was stopped, when this session records more of it.
+    private let previous: MeetingDetail?
+    /// The voices of the part recorded before. Known, so new voices get keys and numbers of their own, but no new line
+    /// goes to one of them live: the pass afterwards keeps the names the user gave them by time, and would take a
+    /// live guess for one of their lines.
+    @ObservationIgnored private var earlierKeys: Set<String> = []
+    /// The voice tracker's keys as this session's, where the part before has the tracker's keys already.
+    @ObservationIgnored private var trackerKeys: [String: String] = [:]
 
     public struct Configuration: Sendable {
         public var microphoneUID: String?
         public var captureSystemAudio: Bool
         public var thresholds: VoiceThresholds
+        /// The call's sound came through in an earlier recording: silence at the start is then more likely a call in
+        /// which nobody talks yet than a missing permission.
+        public var callAudioWorkedBefore: Bool
 
-        public init(microphoneUID: String? = nil, captureSystemAudio: Bool = true, thresholds: VoiceThresholds = .standard) {
+        public init(microphoneUID: String? = nil, captureSystemAudio: Bool = true, thresholds: VoiceThresholds = .standard, callAudioWorkedBefore: Bool = false) {
             self.microphoneUID = microphoneUID
             self.captureSystemAudio = captureSystemAudio
             self.thresholds = thresholds
+            self.callAudioWorkedBefore = callAudioWorkedBefore
         }
     }
 
     /// `sources` replaces the microphone and the system audio tap, for tests that play files instead.
     /// `library` is everyone's voice as the app knows it; loaded from the database when not given.
-    public init(meeting: Meeting, database: AppDatabase, engine: SpeechEngine = .shared, configuration: Configuration, library: VoiceLibrary? = nil, sources: [Channel: AudioSource]? = nil) {
+    /// `previous` is the meeting as it was stopped, to record more of it: its audio comes first in the new files, and
+    /// the live transcript goes on from its transcript.
+    public init(meeting: Meeting, database: AppDatabase, engine: SpeechEngine = .shared, configuration: Configuration, library: VoiceLibrary? = nil, sources: [Channel: AudioSource]? = nil, continuing previous: MeetingDetail? = nil) {
         meetingId = meeting.id
         startedAt = meeting.startedAt
         title = meeting.title
@@ -159,6 +186,8 @@ public final class RecordingSession {
         self.database = database
         self.engine = engine
         thresholds = configuration.thresholds
+        callAudioWorkedBefore = configuration.callAudioWorkedBefore
+        self.previous = previous
         tracker = LiveSpeakerTracker(threshold: configuration.thresholds.sameSpeaker)
         self.library = library ?? VoiceLibrary(samples: (try? database.voiceSamples()) ?? [])
         people = Dictionary(uniqueKeysWithValues: ((try? database.people()) ?? []).map { ($0.id, $0) })
@@ -178,14 +207,49 @@ public final class RecordingSession {
             system = FileAudioSource.silent
             #endif
         }
+        if let previous { continueTranscript(from: previous) }
+    }
+
+    /// The transcript, the voices and the markers of the part recorded before, for the live transcript to go on from.
+    private func continueTranscript(from previous: MeetingDetail) {
+        lines = previous.segments.map { segment in
+            LiveLine(id: "\(segment.id ?? 0)", speakerKey: segment.speakerKey, channel: segment.channel, start: segment.start, end: segment.end, text: segment.text, isPartial: false)
+        }
+        for speaker in previous.speakers {
+            voices[speaker.key] = LiveVoice(
+                key: speaker.key, label: speaker.label, personId: speaker.personId, name: speaker.personId.flatMap { people[$0]?.name },
+                suggestedName: nil, speech: speaker.talkTime
+            )
+            // Their voices tell the call coming back through the speakers from the user.
+            if let embedding = speaker.embedding { liveEmbeddings[speaker.key] = [Float](embeddingData: embedding) }
+        }
+        earlierKeys = Set(previous.speakers.map(\.key)).subtracting([MeetingSpeaker.meKey])
+        markers = previous.markers.map { LiveMarker(id: $0.id ?? 0, time: $0.time, text: $0.text) }
     }
 
     // MARK: Lifecycle
 
     public func start() async throws {
         let channels: [Channel] = capturesSystemAudio ? [.microphone, .system] : [.microphone]
+        // Recording more of a stopped meeting: what was recorded before goes first into the new files.
+        let earlier = previous == nil ? [:] : try EarlierAudio.setAside(meetingId: meetingId, channels: channels)
+        var writers: [Channel: AudioFileWriter] = [:]
+        do {
+            for channel in channels {
+                writers[channel] = try AudioFileWriter(url: AppPaths.rawFile(for: meetingId, channel: channel), encoding: .pcm)
+            }
+            if previous != nil {
+                let files = writers
+                offset = try await Task.detached(priority: .userInitiated) { try EarlierAudio.copy(earlier, into: files) }.value
+            }
+        } catch {
+            for writer in writers.values { writer.close() }
+            EarlierAudio.restore(earlier, meetingId: meetingId)
+            throw error
+        }
+        if previous != nil { EarlierAudio.finish(earlier, meetingId: meetingId) }
         for channel in channels {
-            let writer = try AudioFileWriter(url: AppPaths.rawFile(for: meetingId, channel: channel), encoding: .pcm)
+            guard let writer = writers[channel] else { continue }
             let (stream, continuation) = AsyncStream<CapturedChunk>.makeStream(bufferingPolicy: .unbounded)
             continuations[channel] = continuation
             // The microphone's own voice is only needed to tell the user apart from the call coming back through
@@ -220,12 +284,15 @@ public final class RecordingSession {
             continuations[.system]?.yield(CapturedChunk(samples: samples, elapsed: clock.elapsed, paused: clock.isPaused))
         }
 
-        clock.start()
+        clock.start(at: offset)
+        elapsed = offset
         lastMicrophoneSignal = Date()
         do {
             try microphone.start()
         } catch {
             stopCaptures()
+            // The files closed, with what was recorded before still in them.
+            for task in channelTasks { await task.value }
             throw error
         }
         if capturesSystemAudio {
@@ -346,7 +413,8 @@ public final class RecordingSession {
     private func checkSystemAudio() {
         guard capturesSystemAudio, state == .recording, Date().timeIntervalSince(lastSystemCheck) >= 5 else { return }
         lastSystemCheck = Date()
-        if systemLevel > 0.001 {
+        // Sound from the call once, and macOS lets the app listen: a call that is quiet afterwards is just quiet.
+        if systemAudioHeard || systemLevel > 0.001 {
             silentSystemSeconds = 0
             systemAudioSeemsBlocked = false
             return
@@ -355,8 +423,15 @@ public final class RecordingSession {
         let ownPid = ProcessInfo.processInfo.processIdentifier
         let othersPlaying = AudioSystem.processes().contains { $0.isRunningOutput && $0.pid != ownPid }
         silentSystemSeconds = othersPlaying ? silentSystemSeconds + 5 : 0
-        systemAudioSeemsBlocked = silentSystemSeconds >= 20
+        systemAudioSeemsBlocked = Self.callSeemsBlocked(silentSeconds: silentSystemSeconds, workedBefore: callAudioWorkedBefore)
         #endif
+    }
+
+    /// Whether the call's sound has been silent long enough, while other apps play sound, for the app to be probably
+    /// not allowed to listen. A call app keeps its sound running while everyone waits for the meeting to begin: where
+    /// the call's sound came through before, that's what a silent start most likely is.
+    nonisolated static func callSeemsBlocked(silentSeconds: Int, workedBefore: Bool) -> Bool {
+        silentSeconds >= (workedBefore ? 90 : 20)
     }
 
     private var lastMicrophoneSignal = Date()
@@ -387,6 +462,8 @@ public final class RecordingSession {
             }
         case .system:
             systemLevel = level
+            // Not the level the pump reports when it ends (0 and not silent).
+            if !silent, state == .recording { systemAudioHeard = true }
         }
     }
 
@@ -395,12 +472,15 @@ public final class RecordingSession {
     /// What the live transcriber noticed. Not private, so the tests can hand it events.
     func handle(_ event: LiveEvent) {
         switch event {
-        case .partial(let channel, let start, let text):
+        case .partial(let channel, let time, let text):
+            // The live transcriber counts from where this recording started.
+            let start = time + offset
             let key = channel == .microphone ? MeetingSpeaker.meKey : (currentSystemKey ?? "S?")
             partials[channel] = LiveLine(id: "partial-\(channel.rawValue)", speakerKey: key, channel: channel, start: start, end: start, text: text, isPartial: true)
         case .silence(let channel):
             partials[channel] = nil
-        case .final(let channel, let start, let end, let text, let speaker, let embedding, let voice):
+        case .final(let channel, let from, let to, let text, let speaker, let embedding, let voice):
+            let start = from + offset, end = to + offset
             partials[channel] = nil
             var key: String
             if channel == .microphone {
@@ -415,9 +495,9 @@ public final class RecordingSession {
                 }
                 if let embedding { liveEmbeddings[key] = embedding }
             } else if let embedding {
-                key = tracker.assign(embedding, duration: end - start)
+                key = liveKey(tracker.assign(embedding, duration: end - start))
             } else {
-                key = currentSystemKey ?? tracker.voices.first?.key ?? "S1"
+                key = currentSystemKey ?? liveKey(tracker.voices.first?.key ?? "S1")
             }
             if channel == .system {
                 key = checked(key, voice: voice, text: text)
@@ -441,14 +521,24 @@ public final class RecordingSession {
 
     private func nextVoiceKey() -> String {
         var number = 1
-        while voices["S\(number)"] != nil || diarizerKeys.values.contains("S\(number)") { number += 1 }
+        while voices["S\(number)"] != nil || diarizerKeys.values.contains("S\(number)") || trackerKeys.values.contains("S\(number)") { number += 1 }
         return "S\(number)"
+    }
+
+    /// A key of the voice tracker as a key of this session: the same, unless the meeting goes on from a part recorded
+    /// before, whose voices have the tracker's keys already.
+    private func liveKey(_ trackerKey: String) -> String {
+        guard previous != nil else { return trackerKey }
+        if let key = trackerKeys[trackerKey] { return key }
+        let key = nextVoiceKey()
+        trackerKeys[trackerKey] = key
+        return key
     }
 
     /// The voice a line of the call belongs to, after checking it on its own (see `LiveLineCheck`).
     private func checked(_ key: String, voice: [Float]?, text: String) -> String {
         let outcome = LiveLineCheck.check(
-            key: key, voice: voice, text: text, voices: voices, library: library,
+            key: key, voice: voice, text: text, voices: earlierKeys.isEmpty ? voices : voices.filter { !earlierKeys.contains($0.key) }, library: library,
             names: people.mapValues(\.name), me: people.values.first(where: \.isMe)?.id,
             thresholds: thresholds, finder: NameEvidenceFinder(knownNames: people.values.map(\.name))
         )

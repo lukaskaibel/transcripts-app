@@ -117,6 +117,11 @@ struct AppCommands: Commands {
         CommandGroup(replacing: .newItem) {
             Button(model.isRecording ? "Aufnahme beenden" : "Aufnahme starten") { model.toggleRecording() }
                 .keyboardShortcut("r", modifiers: .command)
+            Button("Weiter aufnehmen") {
+                if let id = model.selectedMeetingId { Task { await model.resumeRecording(id) } }
+            }
+            .keyboardShortcut("r", modifiers: [.command, .shift])
+            .disabled(model.section != .meetings || !(model.detail.map { model.canResume($0.meeting) } ?? false))
             Button("Pause / Fortsetzen") { model.togglePause() }
                 .keyboardShortcut("p", modifiers: [.command, .shift])
                 .disabled(!model.isRecording)

@@ -51,6 +51,10 @@ All notable changes to this project are recorded here. The format follows
 - **A website** at [lukaskaibel.github.io/transcripts-app](https://lukaskaibel.github.io/transcripts-app/): the app
   on one screen, with a note that it is coming to the Mac App Store, and the pages a store listing needs: privacy
   policy, terms of use, support with common questions, and the Impressum.
+- **Continue recording a meeting you stopped.** *Continue Recording* (⇧⌘R, in the meeting's toolbar, its menus and
+  the banner while it is processed; in the menu bar for half an hour after it ended) records on where the meeting
+  stopped: the live transcript goes on from the old one, and afterwards the whole meeting is transcribed again as one,
+  with the names you gave kept. A processing pass that was under way stops.
 
 ### Changed
 
@@ -99,6 +103,12 @@ All notable changes to this project are recorded here. The format follows
   told apart; the meeting being recorded opens the recording screen; *Voices without a name* no longer pops up over the
   meeting whose banner already says so; on a phone, the summary's buttons move under the text instead of squeezing it;
   English says *Ready · all on device* on iPhone and iPad too.
+- **The floating recorder no longer crashes the app.** With the pointer over it while it showed a warning, the
+  recorder and SwiftUI resized its panel in turn until macOS ended the app. It also no longer drifts to the left each
+  time the app starts, and trying the demo no longer moves it.
+- **No false *No audio from the call* while everyone waits for the meeting to begin.** Once the call's sound came
+  through in a recording, the warning stays away for the rest of it; and where it came through before, a silent start
+  gets a minute and a half instead of 20 seconds.
 
 ## [0.1.0] - 2026-10-07
 

@@ -7,7 +7,8 @@ import TranscriptsKit
 //   transcripts-cli transcribe <file>
 //   transcripts-cli diarize <file>
 //   transcripts-cli live <file> [--channel system|microphone]
-//   transcripts-cli record --mic <file> --system <file> [--speed 4]   (a whole recording, played from files)
+//   transcripts-cli record --mic <file> --system <file> [--speed 4] [--root <dir> --meeting <id>]
+//                          (a whole recording, played from files; with --meeting, more of a meeting recorded before)
 //   transcripts-cli process [--mic <file>] [--system <file>] [--import <file>] [--root <dir>] [--attendees "A, B"] [--title T]
 //   transcripts-cli confirm --root <dir> --meeting <id> --assign "S1=Anna Berger, S2=Thomas Klein"
 //   transcripts-cli summarize --root <dir> --meeting <id> --provider ollama|anthropic|openai|google [--model M] [--url U]
@@ -272,12 +273,18 @@ case "record":
     let finished = AsyncStream<Void> { continuation in
         for source in files.values { source.onFinished = { continuation.yield() } }
     }
-    let meeting = Meeting(title: "Aufnahme aus Dateien", status: .recording)
-    try database.save(meeting)
-    let session = RecordingSession(meeting: meeting, database: database, configuration: .init(), sources: files)
+    // More of a meeting recorded before, as "Weiter aufnehmen" in the app does it.
+    let previous = try args["meeting"].map { id in
+        try database.update(meetingId: id) { $0.status = .recording }
+        guard let detail = try database.detail(of: id) else { fail("no such meeting") }
+        return detail
+    }
+    let meeting = previous?.meeting ?? Meeting(title: "Aufnahme aus Dateien", status: .recording)
+    if previous == nil { try database.save(meeting) }
+    let session = RecordingSession(meeting: meeting, database: database, configuration: .init(), sources: files, continuing: previous)
     let started = Date()
     try await session.start()
-    print("Recording \(String(format: "%.1f", length)) s at \(speed)× …")
+    print("Recording \(String(format: "%.1f", length)) s at \(speed)× …\(previous == nil ? "" : String(format: " after %.1f s recorded before", session.offset))")
     var done = 0
     for await _ in finished {
         done += 1

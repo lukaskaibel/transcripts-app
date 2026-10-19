@@ -9,6 +9,13 @@ struct MeetingMenuItems: View {
     var body: some View {
         let row = model.row(for: meetingId)
         let ready = row?.meeting.status == .ready
+        if let row, row.meeting.origin == .recording, row.meeting.status != .recording {
+            Button("Weiter aufnehmen", systemImage: "record.circle") {
+                Task { await model.resumeRecording(meetingId) }
+            }
+            .disabled(!model.canResume(row.meeting))
+            Divider()
+        }
         Button("Zusammenfassung erstellen", systemImage: "sparkle") {
             Task { await model.generateSummary(meetingId) }
         }
