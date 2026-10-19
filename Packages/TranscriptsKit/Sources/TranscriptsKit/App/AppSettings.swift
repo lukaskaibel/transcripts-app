@@ -151,6 +151,7 @@ public final class AppSettings {
         static let hideDockIcon = "hideDockIcon"
         static let models = "summaryModels"
         static let callTracksChecked = "callTracksChecked"
+        static let callAudioWorked = "callAudioWorked"
         static let iCloudSync = "iCloudSync"
         static let iCloudAudio = "iCloudAudio"
     }
@@ -207,6 +208,13 @@ public final class AppSettings {
     @ObservationIgnored public var callTracksChecked: Bool {
         get { defaults.bool(forKey: Keys.callTracksChecked) }
         set { defaults.set(newValue, forKey: Keys.callTracksChecked) }
+    }
+
+    /// The call's sound came through in a recording on this device, so macOS lets the app listen to it (see
+    /// `RecordingSession.Configuration.callAudioWorkedBefore`). Not observed: only a recording's start reads it.
+    @ObservationIgnored public var callAudioWorked: Bool {
+        get { defaults.bool(forKey: Keys.callAudioWorked) }
+        set { defaults.set(newValue, forKey: Keys.callAudioWorked) }
     }
 
     /// Removes what sending tasks to GitHub kept in the settings; true when there was something, so its token can

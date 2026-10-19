@@ -93,6 +93,12 @@ public struct MenuBarContent: View {
                 dismiss()
             }
         }
+        if let meeting = model.recentlyStoppedMeeting {
+            MenuRow(title: String(localized: "\(Strings.quote(meeting.title)) weiter aufnehmen", comment: "menu bar: record the meeting that just ended further; the argument is its title in quotes"), symbol: "arrow.clockwise.circle") {
+                Task { await model.resumeRecording(meeting.id) }
+                dismiss()
+            }
+        }
     }
 
     /// "Beginnt in 5 Min. · Zoom".

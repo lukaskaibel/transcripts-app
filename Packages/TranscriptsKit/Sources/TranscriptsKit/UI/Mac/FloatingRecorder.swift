@@ -42,20 +42,26 @@ final class FloatingRecorderController {
             panel.hidesOnDeactivate = false
             panel.isReleasedWhenClosed = false
             let hosting = NSHostingView(rootView: FloatingRecorderView { [weak self] expanded in
-                self?.setExpanded(expanded)
+                // After SwiftUI's update, not in the middle of it.
+                DispatchQueue.main.async { self?.setExpanded(expanded) }
             }.environment(model))
+            // The panel's size is this controller's alone. Sized by its content as well, SwiftUI grew the panel back
+            // whenever it shrank before the second line was gone, the two resized it in turn, and AppKit ended the
+            // app for too many layout passes (2026-10-19, hovering over the recorder while it showed a warning).
+            hosting.sizingOptions = []
+            hosting.safeAreaRegions = []
             hosting.frame = NSRect(origin: .zero, size: Self.compact)
             hosting.autoresizingMask = [.width, .height]
             panel.contentView = hosting
-            panel.setFrameAutosaveName(Self.frameName)
-            let restored = panel.setFrameUsingName(Self.frameName)
-            var frame = panel.frame
-            frame.origin.y = frame.maxY - Self.compact.height
-            frame.origin.x = frame.maxX - Self.compact.width
-            frame.size = Self.compact
-            panel.setFrame(frame, display: false)
+            // The demo's recorder has a place of its own: trying the app out doesn't move the real one.
+            let frameName = model.isDemo ? Self.frameName + ".demo" : Self.frameName
+            let saved = Self.savedFrame(frameName)
+            panel.setFrameAutosaveName(frameName)
+            if let saved {
+                panel.setFrame(NSRect(x: saved.maxX - Self.compact.width, y: saved.maxY - Self.compact.height, width: Self.compact.width, height: Self.compact.height), display: false)
+            }
             // Out of the way of the call: the top right corner, unless it was moved somewhere that is still on screen.
-            if !restored || !NSScreen.screens.contains(where: { $0.visibleFrame.intersects(panel.frame) }), let screen = NSScreen.main {
+            if saved == nil || !NSScreen.screens.contains(where: { $0.visibleFrame.intersects(panel.frame) }), let screen = NSScreen.main {
                 let visible = screen.visibleFrame
                 panel.setFrameOrigin(NSPoint(x: visible.maxX - Self.compact.width - 8, y: visible.maxY - Self.compact.height - 8))
             }
@@ -66,6 +72,16 @@ final class FloatingRecorderController {
 
     func hide() {
         panel?.orderOut(nil)
+    }
+
+    /// Where the recorder was last, as AppKit saved it. AppKit puts back only the top left corner of a panel that
+    /// can't be resized, but the recorder hangs from its top right one: saved while it was wide, it came back further
+    /// left every time.
+    private static func savedFrame(_ name: String) -> NSRect? {
+        guard let saved = UserDefaults.standard.string(forKey: "NSWindow Frame \(name)") else { return nil }
+        let numbers = saved.split(separator: " ").prefix(4).compactMap { Double($0) }
+        guard numbers.count == 4 else { return nil }
+        return NSRect(x: numbers[0], y: numbers[1], width: numbers[2], height: numbers[3])
     }
 
     /// Grows down and to the left from the top right corner, so the buttons stay under the pointer.

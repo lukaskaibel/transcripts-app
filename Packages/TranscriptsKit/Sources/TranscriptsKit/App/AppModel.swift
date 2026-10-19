@@ -126,6 +126,12 @@ public final class AppModel {
     @ObservationIgnored private var detailObservation: AnyDatabaseCancellable?
     @ObservationIgnored private var processingQueue: [String] = []
     @ObservationIgnored private var processingTask: Task<Void, Never>?
+    /// The pass over the meeting in `processingMeetingId`.
+    @ObservationIgnored private var currentPass: Task<Void, Never>?
+    /// Recording files being compressed after a pass, by meeting.
+    @ObservationIgnored var finishingAudio: [String: Task<Void, Never>] = [:]
+    /// A recording is being started (or resumed): not a second one meanwhile.
+    @ObservationIgnored var startingRecording = false
     @ObservationIgnored var liveSummaryTask: Task<Void, Never>?
     @ObservationIgnored var calendarTimerTask: Task<Void, Never>?
     #if os(macOS)
@@ -542,25 +548,40 @@ public final class AppModel {
     }
 
     public func enqueueProcessing(_ meetingId: String) {
-        guard !processingQueue.contains(meetingId), processingMeetingId != meetingId else { return }
+        // A cancelled pass may still be winding down: the meeting goes in line again.
+        guard !processingQueue.contains(meetingId), processingMeetingId != meetingId || currentPass?.isCancelled == true else { return }
         processingQueue.append(meetingId)
         guard processingTask == nil else { return }
         processingTask = Task { [weak self] in
             while let self, !self.processingQueue.isEmpty {
                 let next = self.processingQueue.removeFirst()
-                await self.process(next)
+                // Known as the one in process at once, so `cancelProcessing` finds it.
+                self.processingMeetingId = next
+                let pass = Task { await self.process(next) }
+                self.currentPass = pass
+                await pass.value
+                self.currentPass = nil
             }
             self?.processingTask = nil
         }
     }
 
+    /// Stops processing a meeting, waiting or under way, because it is recorded further: the pass after that
+    /// recording counts. A pass under way leaves the meeting as it is (see `MeetingProcessor`).
+    func cancelProcessing(_ meetingId: String) {
+        processingQueue.removeAll { $0 == meetingId }
+        if processingMeetingId == meetingId { currentPass?.cancel() }
+    }
+
     private func process(_ meetingId: String) async {
         processingMeetingId = meetingId
         defer { processingMeetingId = nil }
+        guard !Task.isCancelled else { return }
         #if os(iOS)
         // On iPhone and iPad the processing may go on with the screen locked, its progress shown by the system.
         BackgroundProcessing.shared.begin(title: String(localized: "Meeting wird verarbeitet"), subtitle: row(for: meetingId)?.meeting.title ?? "")
-        defer { BackgroundProcessing.shared.end(success: row(for: meetingId)?.meeting.status == .ready) }
+        // Stopped for recording further is no failure.
+        defer { BackgroundProcessing.shared.end(success: Task.isCancelled || row(for: meetingId)?.meeting.status == .ready) }
         #endif
         let options = MeetingProcessor.Options(
             model: settings.transcriptionModel,
@@ -572,10 +593,14 @@ public final class AppModel {
         do {
             try await processor.process(meetingId: meetingId, options: options)
         } catch {
+            // Recorded further meanwhile.
+            if Task.isCancelled || error is CancellationError { return }
             showToast(String(localized: "Meeting konnte nicht verarbeitet werden"), error.localizedDescription, isError: true)
             return
         }
+        guard !Task.isCancelled else { return }
         await finishAudio(of: meetingId)
+        guard !Task.isCancelled else { return }
         try? database.syncAudioChanged(meetingId)
         refreshVoices()
         promptForVoices(in: meetingId)
@@ -587,19 +612,24 @@ public final class AppModel {
     /// Compresses or removes the recording, as the retention setting says.
     private func finishAudio(of meetingId: String) async {
         let retention = settings.audioRetention
-        await Task.detached(priority: .utility) {
+        // Known to `resumeRecording`, which waits for it: the recording files are about to be replaced.
+        let task = Task.detached(priority: .utility) { () -> Void in
             if retention == .never {
                 AudioArchiver.deleteAudio(meetingId: meetingId)
             } else {
                 try? AudioArchiver.compress(meetingId: meetingId)
             }
-        }.value
+        }
+        finishingAudio[meetingId] = task
+        await task.value
+        finishingAudio[meetingId] = nil
     }
 
     /// Meetings the app was in the middle of when it quit: finish them now.
     private func recoverInterruptedMeetings() {
         guard let interrupted = try? database.interruptedMeetings() else { return }
         for meeting in interrupted {
+            EarlierAudio.recover(meetingId: meeting.id)
             if AudioArchiver.hasAudio(meetingId: meeting.id) {
                 try? database.update(meetingId: meeting.id) { meeting in
                     if meeting.status == .recording {

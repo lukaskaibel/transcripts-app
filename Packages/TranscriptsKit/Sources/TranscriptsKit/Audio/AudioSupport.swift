@@ -40,19 +40,24 @@ public enum SpeechAudio {
 
     /// Reads any audio file as 16 kHz mono samples.
     public static func load(_ url: URL) throws -> [Float] {
+        var result: [Float] = []
+        result.reserveCapacity(samples(duration(of: url)) + 1024)
+        try read(url) { result += $0 }
+        return result
+    }
+
+    /// Reads any audio file as 16 kHz mono samples, a piece at a time, for files too long to hold at once.
+    public static func read(_ url: URL, _ body: ([Float]) throws -> Void) throws {
         let file = try AVAudioFile(forReading: url)
         let resampler = try StreamingResampler(from: file.processingFormat)
-        var result: [Float] = []
-        result.reserveCapacity(Int(Double(file.length) * sampleRate / file.processingFormat.sampleRate) + 1024)
         let chunk: AVAudioFrameCount = 65_536
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: chunk) else { return [] }
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: chunk) else { return }
         while file.framePosition < file.length {
             try file.read(into: buffer, frameCount: chunk)
             if buffer.frameLength == 0 { break }
-            result += resampler.convert(buffer)
+            try body(resampler.convert(buffer))
         }
-        result += resampler.flush()
-        return result
+        try body(resampler.flush())
     }
 
     /// Duration of an audio file in seconds, without decoding it.

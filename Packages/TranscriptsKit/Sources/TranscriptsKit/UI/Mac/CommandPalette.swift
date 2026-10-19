@@ -35,7 +35,13 @@ struct CommandPalette: View {
             Entry(id: "people", kind: .command, title: AppModel.Section.people.title, systemImage: "person.2", shortcut: "⌘4") { model.show(.people) },
             Entry(id: "settings", kind: .command, title: String(localized: "Einstellungen"), systemImage: "slider.horizontal.3", shortcut: "⌘,") { openSettings() },
         ]
-        result += commands.filter { text.isEmpty || $0.title.lowercased().contains(text) }
+        var available = commands
+        if let detail = model.detail, model.section == .meetings, model.canResume(detail.meeting) {
+            available.insert(Entry(id: "resume", kind: .command, title: String(localized: "Weiter aufnehmen"), detail: detail.meeting.title, systemImage: "record.circle", shortcut: "⇧⌘R") {
+                Task { await model.resumeRecording(detail.meeting.id) }
+            }, at: 1)
+        }
+        result += available.filter { text.isEmpty || $0.title.lowercased().contains(text) }
         let meetings = model.rows.filter { text.isEmpty || $0.meeting.title.lowercased().contains(text) }.prefix(text.isEmpty ? 6 : 8)
         result += meetings.map { row in
             Entry(id: "m-\(row.id)", kind: .meeting, title: row.meeting.title, detail: "\(TimeFormat.dayTitle(row.meeting.startedAt)), \(TimeFormat.time(row.meeting.startedAt))", systemImage: "doc.text") {
