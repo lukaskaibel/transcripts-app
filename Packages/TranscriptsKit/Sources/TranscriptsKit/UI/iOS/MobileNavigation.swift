@@ -24,12 +24,15 @@ enum MobileSheet: Identifiable, Equatable {
     case naming(meetingId: String?)
     /// A calendar meeting that hasn't been recorded: who is invited, record or join.
     case upcoming(UpcomingMeeting)
+    /// Joining a meeting with the others it was recorded in parts with.
+    case joining(meetingId: String)
 
     var id: String {
         switch self {
         case .settings: "settings"
         case .naming(let meetingId): "naming-\(meetingId ?? "-")"
         case .upcoming(let meeting): "upcoming-\(meeting.id)"
+        case .joining(let meetingId): "joining-\(meetingId)"
         }
     }
 }
@@ -146,6 +149,11 @@ final class MobileNavigation {
                 personInSplit = nil
             }
         }
+    }
+
+    /// Whether a meeting is open in one of the tabs, pushed or beside a list.
+    func isOpen(meeting id: String) -> Bool {
+        paths.values.contains { $0.contains(.meeting(id)) } || meetingInSplit.values.contains(id)
     }
 
     /// Takes the screens of a meeting that was deleted off every stack.

@@ -3306,6 +3306,228 @@
         }
       }
     },
+    "%lld Meetings zusammengeführt" : {
+      "extractionState" : "manual",
+      "comment" : "plural: toast, how many meetings were joined into one",
+      "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Meeting zusammengeführt"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Meetings zusammengeführt"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld meeting merged"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld meetings merged"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld réunion fusionnée"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld réunions fusionnées"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reunión combinada"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reuniones combinadas"
+                }
+              }
+            }
+          }
+        },
+        "it" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld riunione unita"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld riunioni unite"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reunião mesclada"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reuniões mescladas"
+                }
+              }
+            }
+          }
+        },
+        "nl" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vergadering samengevoegd"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vergaderingen samengevoegd"
+                }
+              }
+            }
+          }
+        },
+        "pl" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Scalono %lld spotkanie"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Scalono %lld spotkania"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Scalono %lld spotkań"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Scalono %lld spotkania"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld встреча объединена"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld встречи объединены"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld встреч объединено"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld встречи объединено"
+                }
+              }
+            }
+          }
+        },
+        "uk" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld зустріч об’єднано"
+                }
+              },
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld зустрічі об’єднано"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld зустрічей об’єднано"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld зустрічі об’єднано"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld min" : {
       "extractionState" : "manual",
       "comment" : "minutes, short",
@@ -12659,6 +12881,71 @@
         }
       }
     },
+    "Das Meeting wird neu transkribiert." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Meeting wird neu transkribiert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The meeting is being transcribed again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La réunion va être retranscrite."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La reunión se volverá a transcribir."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La riunione verrà trascritta di nuovo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A reunião será transcrita novamente."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De vergadering wordt opnieuw getranscribeerd."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spotkanie zostanie ponownie transkrybowane."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Встреча будет расшифрована заново."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зустріч буде транскрибовано заново."
+          }
+        }
+      }
+    },
     "Das Mikrofon liefert nichts. Prüfe das Eingabegerät in den Einstellungen unter Aufnahme." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14476,6 +14763,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nagrywanie zostało przerwane, zanim zapisano dźwięk."
+          }
+        }
+      }
+    },
+    "Die Aufnahmen kommen nacheinander in das erste Meeting, das danach neu transkribiert wird. Namen, Markierungen und Aufgaben bleiben, die anderen Meetings werden gelöscht." : {
+      "extractionState" : "manual",
+      "comment" : "joining meetings: what happens",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Aufnahmen kommen nacheinander in das erste Meeting, das danach neu transkribiert wird. Namen, Markierungen und Aufgaben bleiben, die anderen Meetings werden gelöscht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The recordings go one after another into the first meeting, which is then transcribed again. Names, markers, and action items are kept; the other meetings are deleted."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les enregistrements sont ajoutés les uns après les autres à la première réunion, qui est ensuite retranscrite. Les noms, marqueurs et tâches sont conservés ; les autres réunions sont supprimées."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las grabaciones se añaden una tras otra a la primera reunión, que después se vuelve a transcribir. Los nombres, marcadores y tareas se conservan; las demás reuniones se eliminan."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le registrazioni vengono aggiunte una dopo l’altra alla prima riunione, che poi viene trascritta di nuovo. Nomi, marcatori e attività restano; le altre riunioni vengono eliminate."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As gravações entram, uma após a outra, na primeira reunião, que depois é transcrita novamente. Nomes, marcadores e tarefas são mantidos; as outras reuniões são apagadas."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De opnames komen achter elkaar in de eerste vergadering, die daarna opnieuw wordt getranscribeerd. Namen, markeringen en actiepunten blijven; de andere vergaderingen worden verwijderd."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nagrania trafiają po kolei do pierwszego spotkania, które zostanie potem ponownie transkrybowane. Imiona, znaczniki i zadania zostają, pozostałe spotkania zostaną usunięte."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записи по очереди добавляются в первую встречу, которая затем расшифровывается заново. Имена, метки и задачи сохраняются, остальные встречи удаляются."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Записи по черзі додаються до першої зустрічі, яку потім буде транскрибовано заново. Імена, позначки й завдання залишаються, інші зустрічі буде видалено."
           }
         }
       }
@@ -16753,6 +17106,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Odsłuchaj i nazwij głosy po kolei"
+          }
+        }
+      }
+    },
+    "Eines der Meetings hat sich inzwischen geändert." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eines der Meetings hat sich inzwischen geändert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One of the meetings has changed in the meantime."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’une des réunions a été modifiée entre-temps."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una de las reuniones ha cambiado mientras tanto."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una delle riunioni è cambiata nel frattempo."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma das reuniões foi alterada nesse meio-tempo."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Een van de vergaderingen is intussen gewijzigd."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jedno ze spotkań zmieniło się w międzyczasie."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна из встреч тем временем изменилась."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна із зустрічей тим часом змінилася."
           }
         }
       }
@@ -28343,6 +28761,71 @@
         }
       }
     },
+    "Meetings ließen sich nicht zusammenführen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meetings ließen sich nicht zusammenführen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t merge meetings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de fusionner les réunions"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se han podido combinar las reuniones"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile unire le riunioni"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível mesclar as reuniões"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergaderingen konden niet worden samengevoegd"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nie udało się scalić spotkań"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось объединить встречи"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не вдалося об’єднати зустрічі"
+          }
+        }
+      }
+    },
     "Meetings werden auf diesem Mac transkribiert. Die Stimmen der anderen erkennt die App mit der Zeit wieder. Ein paar Dinge braucht sie dafür:" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -28404,6 +28887,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spotkania są transkrybowane na tym Macu. Z czasem aplikacja nauczy się rozpoznawać głosy innych osób. Potrzebuje do tego kilku rzeczy:"
+          }
+        }
+      }
+    },
+    "Meetings zusammenführen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meetings zusammenführen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merge Meetings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fusionner des réunions"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combinar reuniones"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unisci riunioni"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesclar reuniões"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergaderingen samenvoegen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scal spotkania"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Объединить встречи"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Об’єднати зустрічі"
           }
         }
       }
@@ -43299,6 +43847,72 @@
         }
       }
     },
+    "Wird zusammengeführt …" : {
+      "extractionState" : "manual",
+      "comment" : "joining meetings: while the audio is put together",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird zusammengeführt …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merging…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fusion en cours…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combinando…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unione in corso…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesclando…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bezig met samenvoegen…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scalanie…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Объединение…"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Об’єднання…"
+          }
+        }
+      }
+    },
     "Wo bekomme ich einen Key?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -45122,6 +45736,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Podsumowania skonfigurujesz później w ustawieniach, w sekcji AI."
+          }
+        }
+      }
+    },
+    "Zusammenführen" : {
+      "extractionState" : "manual",
+      "comment" : "joining meetings: the button that does it",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenführen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merge"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fusionner"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Combinar"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unisci"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesclar"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voeg samen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scal"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Объединить"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Об’єднати"
           }
         }
       }

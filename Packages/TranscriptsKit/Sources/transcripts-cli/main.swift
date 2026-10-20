@@ -11,6 +11,8 @@ import TranscriptsKit
 //                          (a whole recording, played from files; with --meeting, more of a meeting recorded before)
 //   transcripts-cli process [--mic <file>] [--system <file>] [--import <file>] [--root <dir>] [--attendees "A, B"] [--title T]
 //   transcripts-cli confirm --root <dir> --meeting <id> --assign "S1=Anna Berger, S2=Thomas Klein"
+//   transcripts-cli join --root <dir> [--meetings <id,id,…>]   (meetings recorded one after another made one, as
+//                          "Zusammenführen" in the app does it, and transcribed again; without --meetings all of them)
 //   transcripts-cli summarize --root <dir> --meeting <id> --provider ollama|anthropic|openai|google [--model M] [--url U]
 //   transcripts-cli maintain --root <dir>     (the one-time repair and voice update, on a copy of the app's folder)
 //   transcripts-cli voices --root <dir>       (everyone's voice groups and each meeting's speakers)
@@ -322,6 +324,39 @@ case "record":
     guard let again = try database.detail(of: meeting.id) else { fail("no detail") }
     let same = again.segments.map(\.text) == detail.segments.map(\.text)
     print("Processed again from the compressed files: \(again.segments.count) lines, \(again.speakers.count) voices, same text: \(same)")
+
+case "join":
+    guard let rootPath = args["root"] else { fail("join --root <dir> [--meetings <id,id,…>]") }
+    AppPaths.overrideRoot = URL(fileURLWithPath: rootPath)
+    let database = try AppDatabase.openShared(at: URL(fileURLWithPath: rootPath))
+    let chosen = args["meetings"].map { Set($0.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }) }
+    let meetings = try database.meetingRows().map(\.meeting).filter { chosen?.contains($0.id) ?? true }.sorted { $0.startedAt < $1.startedAt }
+    guard meetings.count > 1 else { fail("join needs two meetings or more") }
+    func show(_ detail: MeetingDetail, _ prefix: String) {
+        for segment in detail.segments {
+            let name = segment.speakerKey == MeetingSpeaker.meKey ? "Du" : detail.textName(for: segment.speakerKey)
+            print(String(format: "  %@ [%6.2f] %@ (%@): %@", prefix, segment.start, name, detail.speaker(for: segment.speakerKey)?.assignment.rawValue ?? "-", segment.text))
+        }
+    }
+    for meeting in meetings {
+        guard let detail = try database.detail(of: meeting.id) else { continue }
+        print("Before: “\(meeting.title)” \(meeting.id), \(String(format: "%.1f", meeting.duration)) s, \(detail.segments.count) lines, \(detail.markers.count) markers")
+        show(detail, "before")
+    }
+    let parts = try MeetingJoin.join(meetings.map(\.id), database: database, step: "Wartet")
+    for part in parts { print(String(format: "Joined %@ from %.1f s", part.meetingId, part.offset)) }
+    await prepare()
+    let processor = MeetingProcessor(database: database, engine: engine)
+    let steps = StepPrinter()
+    try await processor.process(meetingId: meetings[0].id, options: .init(model: model, defaultMyName: args["me"] ?? "Lukas")) { step, fraction in
+        steps.show(step, fraction)
+    }
+    guard let detail = try database.detail(of: meetings[0].id) else { fail("no detail") }
+    print("After: \(try database.meetingRows().count) meeting(s); “\(detail.meeting.title)” \(String(format: "%.1f", detail.meeting.duration)) s, \(detail.segments.count) lines, \(detail.markers.count) markers, status \(detail.meeting.status.rawValue)")
+    for speaker in detail.speakers {
+        print("  \(speaker.key) \(speaker.label) · \(speaker.assignment.rawValue) · \(speaker.personId.flatMap { detail.people[$0]?.name } ?? "-") · \(String(format: "%.1f", speaker.talkTime)) s")
+    }
+    show(detail, "after")
 
 case "confirm":
     // confirm --root <dir> --meeting <id> --assign "S1=Anna Berger, S2=Thomas Klein"
