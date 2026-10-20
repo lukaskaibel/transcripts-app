@@ -14,6 +14,10 @@ struct MeetingMenuItems: View {
                 Task { await model.resumeRecording(meetingId) }
             }
             .disabled(!model.canResume(row.meeting))
+            Button("Zusammenführen …", systemImage: "arrow.triangle.merge") {
+                model.overlay = .joining(meetingId: meetingId)
+            }
+            .disabled(model.joinCandidates(for: meetingId).isEmpty)
             Divider()
         }
         Button("Zusammenfassung erstellen", systemImage: "sparkle") {

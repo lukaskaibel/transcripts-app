@@ -62,6 +62,13 @@ struct MobileRoot: View {
                 NamingSheet(meetingId: meetingId)
             case .upcoming(let meeting):
                 UpcomingSheet(meeting: meeting)
+            case .joining(let meetingId):
+                JoinMeetingsSheet(meetingId: meetingId) { joined in
+                    // The later meetings are gone: where one of them was open, the meeting they are in now is.
+                    let wasOpen = joined.dropFirst().contains(where: navigation.isOpen(meeting:))
+                    for id in joined.dropFirst() { navigation.forget(meeting: id) }
+                    if wasOpen, let first = joined.first { navigation.open(meeting: first) }
+                }
             }
         }
         .fullScreenCover(isPresented: $navigation.showsLive) {
@@ -140,12 +147,17 @@ struct MobileRoot: View {
         case .naming(let meetingId)?:
             navigation.showsLive = false
             navigation.sheet = .naming(meetingId: meetingId)
+        case .joining(let meetingId)?:
+            navigation.sheet = .joining(meetingId: meetingId)
         case .palette?:
             model.overlay = nil
             navigation.tab = .search
             navigation.searchFocusRequest += 1
         case nil:
-            if case .naming? = navigation.sheet { navigation.sheet = nil }
+            switch navigation.sheet {
+            case .naming?, .joining?: navigation.sheet = nil
+            default: break
+            }
         }
     }
 }

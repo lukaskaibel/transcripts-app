@@ -30,6 +30,64 @@ extension AppModel {
         try? FileManager.default.removeItem(at: AppPaths.folder(for: meetingId))
     }
 
+    // MARK: Joining
+
+    /// Whether a meeting can be joined with others: one this device recorded, finished, whose audio is still here,
+    /// while nothing is being recorded.
+    public func canJoin(_ meeting: Meeting) -> Bool {
+        recording == nil && !joiningMeetings && meeting.origin == .recording && (meeting.status == .ready || meeting.status == .failed)
+            && AppPaths.existingAudio(for: meeting.id, channel: .microphone) != nil
+    }
+
+    /// The meetings of that day a meeting can be joined with, itself among them, in the order they were recorded;
+    /// none if there is no other.
+    public func joinCandidates(for meetingId: String) -> [Meeting] {
+        guard let meeting = row(for: meetingId)?.meeting, canJoin(meeting) else { return [] }
+        let candidates = rows.map(\.meeting)
+            .filter { Calendar.current.isDate($0.startedAt, inSameDayAs: meeting.startedAt) && canJoin($0) }
+            .sorted { $0.startedAt < $1.startedAt }
+        return candidates.count > 1 ? candidates : []
+    }
+
+    /// The candidates that look like parts of the same meeting: recorded right before or after it.
+    public func likelyParts(of meetingId: String) -> Set<String> {
+        guard let meeting = row(for: meetingId)?.meeting else { return [] }
+        return Set(MeetingJoin.parts(of: meeting, among: joinCandidates(for: meetingId)))
+    }
+
+    /// Joins meetings recorded one after another into the first of them, and transcribes it again: the later ones'
+    /// audio goes after its own, with their lines, names, markers and tasks, and the later ones are deleted. Returns
+    /// the meetings joined, the one they are in now first; nil if they weren't.
+    @discardableResult
+    public func joinMeetings(_ meetingIds: Set<String>) async -> [String]? {
+        let meetings = rows.map(\.meeting).filter { meetingIds.contains($0.id) && canJoin($0) }.sorted { $0.startedAt < $1.startedAt }
+        guard meetings.count > 1, let first = meetings.first else { return nil }
+        guard meetings.count == meetingIds.count else {
+            showToast(String(localized: "Meetings ließen sich nicht zusammenführen"), MeetingJoin.Failure.changed.localizedDescription, isError: true)
+            return nil
+        }
+        joiningMeetings = true
+        defer { joiningMeetings = false }
+        let ids = meetings.map(\.id)
+        let hadSummary = ids.contains { row(for: $0)?.hasSummary == true }
+        if let playing = player.meetingId, ids.contains(playing) { player.stop() }
+        // Recording files of a pass that just finished may still be being compressed.
+        for id in ids { await finishingAudio[id]?.value }
+        let database = database
+        let step = String(localized: "Wartet", comment: "processing step: waiting in line to be transcribed")
+        do {
+            _ = try await Task.detached(priority: .userInitiated) { try MeetingJoin.join(ids, database: database, step: step) }.value
+        } catch {
+            showToast(String(localized: "Meetings ließen sich nicht zusammenführen"), error.localizedDescription, isError: true)
+            return nil
+        }
+        if let selected = selectedMeetingId, ids.dropFirst().contains(selected) { selectedMeetingId = first.id }
+        if hadSummary { summarizeAfterPass.insert(first.id) }
+        enqueueProcessing(first.id)
+        showToast(String(localized: "\(ids.count) Meetings zusammengeführt", comment: "plural: toast, how many meetings were joined into one"), String(localized: "Das Meeting wird neu transkribiert."))
+        return ids
+    }
+
     public static let importableTypes: [UTType] = [.audio, .mpeg4Audio, .mp3, .wav, .aiff, .movie, .mpeg4Movie, .quickTimeMovie]
 
     /// Brings in recordings made elsewhere (voice memos, Zoom recordings) and transcribes them.

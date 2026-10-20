@@ -42,6 +42,8 @@ public final class AppModel {
         case palette
         /// Naming the voices still without a name, one after another; those of one meeting first.
         case naming(meetingId: String?)
+        /// Joining a meeting with the others it was recorded in parts with.
+        case joining(meetingId: String)
     }
 
     /// Something iPhone and iPad should show. They keep their screens in navigation stacks of their own and push it
@@ -132,6 +134,11 @@ public final class AppModel {
     @ObservationIgnored var finishingAudio: [String: Task<Void, Never>] = [:]
     /// A recording is being started (or resumed): not a second one meanwhile.
     @ObservationIgnored var startingRecording = false
+    /// Meetings are being joined (see `joinMeetings`): not again meanwhile.
+    public internal(set) var joiningMeetings = false
+    /// Meetings that get a new summary after their next pass, even without automatic summaries: joined from
+    /// meetings that had one.
+    @ObservationIgnored var summarizeAfterPass: Set<String> = []
     @ObservationIgnored var liveSummaryTask: Task<Void, Never>?
     @ObservationIgnored var calendarTimerTask: Task<Void, Never>?
     #if os(macOS)
@@ -604,7 +611,8 @@ public final class AppModel {
         try? database.syncAudioChanged(meetingId)
         refreshVoices()
         promptForVoices(in: meetingId)
-        if settings.autoSummarize, summaryProviderReady {
+        let summaryWanted = summarizeAfterPass.remove(meetingId) != nil
+        if settings.autoSummarize || summaryWanted, summaryProviderReady {
             await generateSummary(meetingId)
         }
     }
@@ -628,6 +636,7 @@ public final class AppModel {
     /// Meetings the app was in the middle of when it quit: finish them now.
     private func recoverInterruptedMeetings() {
         guard let interrupted = try? database.interruptedMeetings() else { return }
+        MeetingJoin.recover(interrupted: Set(interrupted.map(\.id)))
         for meeting in interrupted {
             EarlierAudio.recover(meetingId: meeting.id)
             if AudioArchiver.hasAudio(meetingId: meeting.id) {

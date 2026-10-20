@@ -55,6 +55,10 @@ All notable changes to this project are recorded here. The format follows
   the banner while it is processed; in the menu bar for half an hour after it ended) records on where the meeting
   stopped: the live transcript goes on from the old one, and afterwards the whole meeting is transcribed again as one,
   with the names you gave kept. A processing pass that was under way stops.
+- **Merge a meeting that was recorded in parts.** *Merge…* in a meeting's menus lists the meetings of that day it can
+  be merged with, those recorded right before and after it already ticked. Their recordings go one after another into
+  the first, with a two-second pause between them, and the meeting is transcribed again as one: the names you gave in
+  each part, the markers and the action items stay, and the other meetings are deleted.
 
 ### Changed
 

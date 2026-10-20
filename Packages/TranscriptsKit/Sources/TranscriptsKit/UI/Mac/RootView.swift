@@ -43,25 +43,44 @@ struct MainLayout: View {
             DetailColumn()
         }
         .overlay { OverlayHost() }
-        .sheet(item: naming) { request in
-            NameVoicesPanel(meetingId: request.meetingId)
+        .sheet(item: sheet) { request in
+            switch request {
+            case .naming(let meetingId):
+                NameVoicesPanel(meetingId: meetingId)
+            case .joining(let meetingId):
+                JoinMeetingsSheet(meetingId: meetingId)
+            }
         }
     }
 
-    /// Naming voices, as a sheet on the window, while the overlay asks for it.
-    private var naming: Binding<NamingRequest?> {
+    /// Naming voices or joining meetings, as a sheet on the window, while the overlay asks for it.
+    private var sheet: Binding<SheetRequest?> {
         Binding {
-            if case .naming(let meetingId) = model.overlay { return NamingRequest(meetingId: meetingId) }
-            return nil
+            switch model.overlay {
+            case .naming(let meetingId): .naming(meetingId)
+            case .joining(let meetingId): .joining(meetingId)
+            case .palette, nil: nil
+            }
         } set: { request in
-            if request == nil, case .naming = model.overlay { model.overlay = nil }
+            guard request == nil else { return }
+            switch model.overlay {
+            case .naming, .joining: model.overlay = nil
+            case .palette, nil: break
+            }
         }
     }
 }
 
-struct NamingRequest: Identifiable {
-    var meetingId: String?
-    var id: String { meetingId ?? "" }
+enum SheetRequest: Identifiable {
+    case naming(String?)
+    case joining(String)
+
+    var id: String {
+        switch self {
+        case .naming(let meetingId): "naming-\(meetingId ?? "")"
+        case .joining(let meetingId): "joining-\(meetingId)"
+        }
+    }
 }
 
 /// The page for what the sidebar selected.
