@@ -36,6 +36,9 @@ enum DemoData {
                            progress: 1, transcriptionModel: "Parakeet Ultra")
         let syncLines = zip(Self.syncTiming, t.syncLines).map { ($0.0, $0.1, $0.2, $1) }
         let jonasInAnna: Set<Int> = [11, 12]
+        // A line with Anna that sounds like no one in the meeting, a little like Daniel.
+        let strangerInAnna = 8
+        let stranger = VoiceMath.normalized(zip(voices[daniel.id]!, randomVoice()).map { $0 * 0.7 + $1 * 0.71 })
         let syncSpeakers = [
             MeetingSpeaker(meetingId: sync.id, key: "me", label: Strings.meLabel, personId: me.id, assignment: .confirmed, confidence: 1, talkTime: 610, channel: .microphone),
             MeetingSpeaker(meetingId: sync.id, key: "S1", label: Strings.speakerLabel(1), personId: anna.id, assignment: .automatic, confidence: 0.86, talkTime: 790, embedding: jitter(voices[anna.id]!, 0.1).embeddingData, sampleStart: 0, sampleEnd: 12, channel: .system),
@@ -46,6 +49,7 @@ enum DemoData {
         ]
         insert(sync, lines: syncLines, speakers: syncSpeakers, into: database) { index, key in
             if jonasInAnna.contains(index) { return voices[jonas.id] }
+            if index == strangerInAnna { return stranger }
             if index >= 13 { return nil }
             return syncSpeakers.first { $0.key == key }?.personId.flatMap { voices[$0] } ?? voices[jonas.id]
         }

@@ -212,6 +212,17 @@ extension AppDatabase {
         }
     }
 
+    /// The user says lines belong with the speaker they are with: they stay, whoever put them there, and the app no
+    /// longer asks about them or moves them.
+    public func keepLines(_ segmentIds: [Int64]) throws {
+        try writer.write { db in
+            for id in segmentIds {
+                try db.execute(sql: "UPDATE segment SET placement = ?, movedFromKey = NULL WHERE id = ?",
+                               arguments: [Segment.Placement.user.rawValue, id])
+            }
+        }
+    }
+
     /// Sends lines the app moved back to the speaker they came from (or a voice of their own if that one is
     /// gone), for good: the app won't move them again.
     public func returnMovedLines(_ segmentIds: [Int64], in meetingId: String) throws {

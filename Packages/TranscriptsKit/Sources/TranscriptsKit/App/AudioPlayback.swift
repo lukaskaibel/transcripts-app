@@ -12,8 +12,16 @@ public final class AudioPlayback {
     public private(set) var duration: Double = 0
     /// When set, playback stops at this time (for "play a sample of this voice").
     public private(set) var stopAt: Double?
+    /// When set, only this channel plays: one voice without the other side of the call talking over it.
+    public private(set) var soloChannel: Channel?
+    /// Plays without sound, for the screenshot tours.
+    @ObservationIgnored public var muted = false
 
     @ObservationIgnored private var player: AVPlayer?
+    /// The stretches still to play after the one playing now, for lines played one after another.
+    @ObservationIgnored private var queue: [ClosedRange<Double>] = []
+    /// The channel the loaded composition was asked for (nil: all of them).
+    @ObservationIgnored private var loadedChannel: Channel?
     @ObservationIgnored private var timeObserver: Any?
     @ObservationIgnored private var endObserver: NSObjectProtocol?
 
@@ -21,15 +29,32 @@ public final class AudioPlayback {
 
     public var isLoaded: Bool { player != nil }
 
-    /// Starts playing `meetingId` at `time`; plays only until `until` when given.
-    public func play(meetingId: String, from time: Double, until: Double? = nil) async {
-        if self.meetingId != meetingId || player == nil {
-            guard await load(meetingId) else { return }
+    /// Starts playing `meetingId` at `time`; plays only until `until` when given, and only `channel` when given.
+    public func play(meetingId: String, from time: Double, until: Double? = nil, only channel: Channel? = nil) async {
+        queue = []
+        await start(meetingId: meetingId, from: time, until: until, only: channel)
+    }
+
+    /// Plays the stretches one after another, skipping what lies between them.
+    public func play(meetingId: String, stretches: [ClosedRange<Double>], only channel: Channel? = nil) async {
+        guard let first = stretches.first else { return }
+        queue = Array(stretches.dropFirst())
+        await start(meetingId: meetingId, from: first.lowerBound, until: first.upperBound, only: channel)
+    }
+
+    private func start(meetingId: String, from time: Double, until: Double?, only channel: Channel?) async {
+        if self.meetingId != meetingId || player == nil || loadedChannel != channel {
+            guard await load(meetingId, only: channel) else { return }
         }
         stopAt = until
         await seek(to: time)
         player?.play()
         isPlaying = true
+    }
+
+    public func pause() {
+        player?.pause()
+        isPlaying = false
     }
 
     public func toggle() {
@@ -38,8 +63,15 @@ public final class AudioPlayback {
             player.pause()
             isPlaying = false
         } else {
-            if currentTime >= duration - 0.2 { Task { await seek(to: 0) } }
+            queue = []
             stopAt = nil
+            if let meetingId, soloChannel != nil {
+                // Carrying on means the whole meeting again, with every channel.
+                let time = currentTime
+                Task { await play(meetingId: meetingId, from: time) }
+                return
+            }
+            if currentTime >= duration - 0.2 { Task { await seek(to: 0) } }
             player.play()
             isPlaying = true
         }
@@ -67,13 +99,18 @@ public final class AudioPlayback {
         currentTime = 0
         duration = 0
         stopAt = nil
+        soloChannel = nil
+        loadedChannel = nil
+        queue = []
         meetingId = nil
     }
 
-    /// Lays the channels of a meeting on top of each other in one composition.
-    private func load(_ meetingId: String) async -> Bool {
+    /// Lays the channels of a meeting on top of each other in one composition, or just the one asked for.
+    private func load(_ meetingId: String, only channel: Channel? = nil) async -> Bool {
+        let queued = queue
         stop()
-        var files = Channel.allCases.compactMap { AppPaths.playbackAudio(for: meetingId, channel: $0) }
+        queue = queued
+        var files = (channel.map { [$0] } ?? Channel.allCases).compactMap { AppPaths.playbackAudio(for: meetingId, channel: $0) }
         if files.isEmpty, let imported = AppPaths.existingImport(for: meetingId) { files = [imported] }
         guard !files.isEmpty else { return false }
 
@@ -100,17 +137,30 @@ public final class AudioPlayback {
         #endif
         let item = AVPlayerItem(asset: composition)
         let player = AVPlayer(playerItem: item)
+        player.isMuted = muted
         self.player = player
         self.meetingId = meetingId
+        // An imported recording has no channels to pick from.
+        soloChannel = channel.flatMap { AppPaths.playbackAudio(for: meetingId, channel: $0) == nil ? nil : $0 }
+        loadedChannel = channel
         duration = longest.seconds
         timeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 600), queue: .main) { [weak self] time in
             MainActor.assumeIsolated {
                 guard let self else { return }
                 self.currentTime = time.seconds
-                if let stopAt = self.stopAt, time.seconds >= stopAt {
-                    self.player?.pause()
+                guard let stopAt = self.stopAt, time.seconds >= stopAt else { return }
+                self.player?.pause()
+                if self.queue.isEmpty {
                     self.isPlaying = false
                     self.stopAt = nil
+                } else {
+                    let next = self.queue.removeFirst()
+                    self.stopAt = next.upperBound
+                    Task {
+                        await self.seek(to: next.lowerBound)
+                        // Unless it was paused or stopped meanwhile.
+                        if self.isPlaying, self.stopAt == next.upperBound { self.player?.play() }
+                    }
                 }
             }
         }

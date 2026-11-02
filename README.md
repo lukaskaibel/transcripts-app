@@ -87,7 +87,9 @@ After a meeting a quiet bar above the summary says how many voices have no name 
 one at a time, the way Photos asks about a face: a sample plays, with what the voice said, and the app says whom it
 thinks it is. *Yes* settles it (or Return); *Someone Else* lists the other guesses, the invitees and everyone known, a
 new name, you, or nobody in particular. To fix a single passage, click the speaker's name in the transcript: the menu
-names the voice, or with *Only This Passage* gives just those lines to someone else.
+names the voice, or with *Only This Passage* gives just those lines to someone else. Where the app isn't sure about some
+of a person's lines, an ⓘ next to them in the inspector opens *Who's Speaking?*: those lines in colour among the ones
+around them, played one after another like lyrics, and the names to give them to.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="Design/screenshots/naming-dark.webp">

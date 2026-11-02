@@ -102,6 +102,16 @@ private func line(of base: [Float], alike: Float = 0.85, seed: Int) -> [Float] {
         #expect(try VoiceRecheck.strayMoves(database: database, library: VoiceLibrary(samples: try database.voiceSamples()), thresholds: .standard).isEmpty)
     }
 
+    @Test func keptLinesStayWhereTheyAre() throws {
+        let database = try meeting()
+        let lines = try #require(try database.detail(of: "a")).segments.filter { $0.text.hasPrefix("Julian bei Hai") }.compactMap(\.id)
+        try database.keepLines(lines)
+        let kept = try #require(try database.detail(of: "a")).segments.filter { $0.id.map(lines.contains) ?? false }
+        #expect(kept.count == 3 && kept.allSatisfy { $0.speakerKey == "S1" && $0.placement == .user })
+        // The user said they are Hai's: the app no longer moves them to Julian.
+        #expect(try VoiceRecheck.strayMoves(database: database, library: VoiceLibrary(samples: try database.voiceSamples()), thresholds: .standard).isEmpty)
+    }
+
     @Test func acceptedMovesCountAsTheUsersWord() throws {
         let database = try meeting()
         try VoiceRecheck.moveStrayLines(database: database, library: VoiceLibrary(samples: try database.voiceSamples()), thresholds: .standard)

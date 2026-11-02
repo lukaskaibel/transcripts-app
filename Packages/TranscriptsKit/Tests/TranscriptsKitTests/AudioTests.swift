@@ -59,6 +59,28 @@ private func temporaryFolder() throws -> URL {
         #expect(abs(total - 16_000) < 200)
     }
 
+    @Test func aLineIsCutToWhereItsVoiceIs() throws {
+        let folder = try temporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = folder.appendingPathComponent("system.caf")
+        // "Ähm," at 2–3 s, then a line that runs on over near silence, as the speech model's last word does, with a
+        // click at 8 s.
+        let quiet = tone(seconds: 10, amplitude: 0.0005)
+        let click = SpeechAudio.samples(5)
+        let samples = [Float](repeating: 0, count: SpeechAudio.samples(2)) + tone(seconds: 1)
+            + quiet[..<click] + tone(seconds: 0.1, amplitude: 0.2) + quiet[(click + SpeechAudio.samples(0.1))...]
+        let writer = try AudioFileWriter(url: url)
+        try writer.write(samples)
+        writer.close()
+
+        let span = AudibleSpan.of(1.5...13, in: url)
+        #expect(abs(span.lowerBound - 1.85) < 0.1)
+        #expect(abs(span.upperBound - 3.35) < 0.1)
+        // Quiet throughout, or unreadable: the line as it is.
+        #expect(AudibleSpan.of(8.5...12, in: url) == 8.5...12)
+        #expect(AudibleSpan.of(1...2, in: folder.appendingPathComponent("missing.caf")) == 1...2)
+    }
+
     @Test func fileSourcePlaysEverySampleOnce() async throws {
         let folder = try temporaryFolder()
         defer { try? FileManager.default.removeItem(at: folder) }

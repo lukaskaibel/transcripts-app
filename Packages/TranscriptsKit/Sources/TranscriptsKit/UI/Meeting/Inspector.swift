@@ -50,9 +50,7 @@ struct InspectorContent: View {
                     .padding(.top, showsTimeFacts || hasOtherFacts ? 22 : 0)
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(speakers) { speaker in
-                        let groups = otherVoices(of: speaker)
-                        let moved = detail.segments.filter { $0.speakerKey == speaker.key && $0.placement == .app }
-                        PersonLine(detail: detail, speaker: speaker, groups: groups, moved: moved)
+                        PersonLine(detail: detail, speaker: speaker, doubts: doubts(of: speaker))
                     }
                 }
             }
@@ -100,18 +98,29 @@ struct InspectorContent: View {
             .accessibilityAddTraits(.isHeader)
     }
 
-    /// The groups of a speaker's lines worth naming on their own: the main one, and those that sound
-    /// clearly different and not like the speaker as other meetings know them (short answers often do).
-    private func otherVoices(of speaker: MeetingSpeaker) -> [SpeakerVoices.Group] {
-        let groups = SpeakerVoices.notable(voiceGroups[speaker.key] ?? [])
-        guard groups.count > 1 else { return [] }
-        let own = speaker.personId ?? (speaker.isMe ? model.me?.id : nil)
-        let threshold = model.settings.voiceStrictness.thresholds.suggestion
-        let others = groups.dropFirst().filter { group in
-            guard let own, let best = model.voiceLibrary.rank(group.centroid, without: detail.meeting.id).first else { return true }
-            return !(best.personId == own && best.similarity >= threshold)
+    /// What the app isn't sure about in a speaker's lines: the groups of them worth naming on their own, those that
+    /// sound clearly different and not like the speaker as other meetings know them (short answers often do), and the
+    /// other lines it moved here. Lines the user put somewhere are settled.
+    private func doubts(of speaker: MeetingSpeaker) -> SpeakerDoubts {
+        let all = voiceGroups[speaker.key] ?? []
+        var doubts = SpeakerDoubts(main: all.first)
+        let groups = SpeakerVoices.notable(all)
+        if groups.count > 1 {
+            let own = speaker.personId ?? (speaker.isMe ? model.me?.id : nil)
+            let threshold = model.settings.voiceStrictness.thresholds.suggestion
+            let lines = Dictionary(detail.segments.compactMap { line in line.id.map { ($0, line) } }, uniquingKeysWith: { first, _ in first })
+            for (index, group) in groups.enumerated().dropFirst() {
+                if let own, let best = model.voiceLibrary.rank(group.centroid, without: detail.meeting.id).first,
+                   best.personId == own, best.similarity >= threshold { continue }
+                let open = group.segmentIds.compactMap { lines[$0] }.filter { $0.placement != .user }.sorted { $0.start < $1.start }
+                guard open.reduce(0, { $0 + $1.duration }) >= SpeakerVoices.minimumSpeech else { continue }
+                doubts.voices.append(SpeakerDoubts.Voice(number: index + 1, group: group, lines: open))
+            }
         }
-        return others.isEmpty ? [] : [groups[0]] + others
+        // A moved line that sounds like one of those groups is asked about with it.
+        let grouped = Set(doubts.voices.flatMap(\.lines).compactMap(\.id))
+        doubts.moved = detail.segments.filter { $0.speakerKey == speaker.key && $0.placement == .app && !grouped.contains($0.id ?? -1) }
+        return doubts
     }
 
     /// Facts that don't stand under the title: the language and the invitees.
@@ -151,14 +160,13 @@ struct InspectorContent: View {
 
 /// One person in the meeting, as a contact: the picture, the name and how long they spoke. A voice without a name
 /// shows its label in grey. A click opens the menu that names it; what the app isn't sure about (lines it moved,
-/// a voice that sounds like two) waits behind the ⓘ.
+/// a voice that sounds like two) waits behind the ⓘ, which opens the review.
 struct PersonLine: View {
     @Environment(AppModel.self) private var model
     let detail: MeetingDetail
     let speaker: MeetingSpeaker
-    let groups: [SpeakerVoices.Group]
-    let moved: [Segment]
-    @State private var showsDetails = false
+    let doubts: SpeakerDoubts
+    @State private var reviewing = false
 
     var body: some View {
         HStack(spacing: 10) {
@@ -185,9 +193,9 @@ struct PersonLine: View {
             .buttonStyle(.plain)
             .menuIndicator(.hidden)
             .help(speaker.isMe ? "Du (Mikrofon)" : "Klicken, um die Stimme zuzuordnen")
-            if !groups.isEmpty || !moved.isEmpty {
+            if !doubts.isEmpty {
                 Button {
-                    showsDetails = true
+                    reviewing = true
                 } label: {
                     Image(systemName: "info.circle")
                         .font(.system(size: Platform.isMobile ? 17 : 13))
@@ -198,21 +206,13 @@ struct PersonLine: View {
                 .buttonStyle(PlainPressStyle())
                 .help(detailsHelp)
                 .accessibilityLabel(detailsHelp)
-                .popover(isPresented: $showsDetails, arrowEdge: .leading) {
-                    VStack(alignment: .leading, spacing: 14) {
-                        if groups.count > 1 {
-                            SpeakerGroupsView(detail: detail, speaker: speaker, groups: groups)
-                        }
-                        if !moved.isEmpty {
-                            MovedLinesNote(detail: detail, speaker: speaker, lines: moved)
-                        }
-                    }
-                    .padding(16)
-                    .frame(width: 320, alignment: .leading)
-                }
+                .debugFrame("review.\(speaker.key)")
             }
         }
         .frame(minHeight: Platform.isMobile ? 48 : 38)
+        .sheet(isPresented: $reviewing) {
+            VoiceReviewSheet(detail: detail, speaker: speaker, doubts: doubts)
+        }
     }
 
     private var subtitle: String {
@@ -221,9 +221,9 @@ struct PersonLine: View {
     }
 
     private var detailsHelp: String {
-        groups.count > 1
-            ? String(localized: "Klingt nach \(groups.count) Stimmen", comment: "plural: one speaker's lines sound like this many voices")
-            : String(localized: "\(moved.count) Zeilen von der App hierher verschoben", comment: "plural: lines the app moved to this speaker")
+        !doubts.voices.isEmpty
+            ? String(localized: "Klingt nach \(doubts.voices.count + 1) Stimmen", comment: "plural: one speaker's lines sound like this many voices")
+            : String(localized: "\(doubts.moved.count) Zeilen von der App hierher verschoben", comment: "plural: lines the app moved to this speaker")
     }
 }
 
@@ -299,129 +299,5 @@ struct SpeakerMenuItems: View {
         } else {
             model.assign(speaker, toNewPersonNamed: attendee.name, email: attendee.email)
         }
-    }
-}
-
-/// Lines the app moved to this speaker because they sound like them, with the way to keep or undo that.
-struct MovedLinesNote: View {
-    @Environment(AppModel.self) private var model
-    let detail: MeetingDetail
-    let speaker: MeetingSpeaker
-    let lines: [Segment]
-
-    var body: some View {
-        let ids = lines.compactMap(\.id)
-        VStack(alignment: .leading, spacing: 4) {
-            Text(String(localized: "\(lines.count) Zeilen von der App hierher verschoben", comment: "plural: lines the app moved to this speaker"))
-                .font(.small)
-                .foregroundStyle(Theme.textSecondary)
-            Text(origins)
-                .font(.small)
-                .foregroundStyle(Theme.textTertiary)
-                .lineLimit(2)
-            HStack(spacing: 12) {
-                Button(String(localized: "Passt", comment: "keep the lines the app moved to this speaker")) { model.acceptMovedLines(ids) }
-                Button(String(localized: "Zurück", comment: "move the lines back to the speaker they came from")) { model.returnMovedLines(ids, in: detail.meeting.id) }
-                if let first = lines.first {
-                    Button("Anhören") {
-                        Task { await model.player.play(meetingId: detail.meeting.id, from: first.start, until: min(first.end, first.start + 12)) }
-                    }
-                    .disabled(!AudioArchiver.hasAudio(meetingId: detail.meeting.id))
-                }
-            }
-            .buttonStyle(PlainPressStyle())
-            .font(.small.weight(.medium))
-            .foregroundStyle(Theme.accent)
-        }
-    }
-
-    private var origins: String {
-        // A voice the lines left entirely is gone, and with it its label.
-        let from = Set(lines.compactMap(\.movedFromKey)).filter { detail.speaker(for: $0) != nil }.map { detail.displayName(for: $0) }.sorted()
-        let quote = lines.max { $0.duration < $1.duration }.map { Strings.quote(String($0.text.prefix(60))) } ?? ""
-        return from.isEmpty ? quote : String(localized: "Vorher bei \(from.joined(separator: ", ")) · \(quote)", comment: "the speakers the lines were with before, then a quote of the longest line")
-    }
-}
-
-/// A speaker whose lines sound like more than one voice: each group to listen to and name on its own.
-struct SpeakerGroupsView: View {
-    @Environment(AppModel.self) private var model
-    let detail: MeetingDetail
-    let speaker: MeetingSpeaker
-    let groups: [SpeakerVoices.Group]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(speaker.isMe
-                ? String(localized: "Auf deinem Mikrofon klingen \(groups.count) Stimmen", comment: "plural: different voices on the user's microphone")
-                : String(localized: "Klingt nach \(groups.count) Stimmen", comment: "plural: one speaker's lines sound like this many voices"))
-                .font(.small)
-                .foregroundStyle(Theme.warning)
-                .padding(.bottom, 2)
-            ForEach(Array(groups.enumerated()), id: \.element.id) { index, group in
-                SpeakerGroupRow(detail: detail, speaker: speaker, group: group, number: index + 1)
-            }
-        }
-    }
-}
-
-private struct SpeakerGroupRow: View {
-    @Environment(AppModel.self) private var model
-    let detail: MeetingDetail
-    let speaker: MeetingSpeaker
-    let group: SpeakerVoices.Group
-    let number: Int
-
-    /// Whom the group sounds like, leaving out what this meeting taught the app.
-    private var match: (name: String, isMe: Bool, similarity: Float)? {
-        let excluded: Set<String> = speaker.isMe ? [] : Set([model.me?.id].compactMap { $0 })
-        guard let best = model.voiceLibrary.rank(group.centroid, excluding: excluded, without: detail.meeting.id).first,
-              best.similarity >= model.settings.voiceStrictness.thresholds.suggestion,
-              let person = model.person(best.personId) else { return nil }
-        return (person.firstName, person.isMe, best.similarity)
-    }
-
-    var body: some View {
-        HStack(spacing: 8) {
-            PlayDot(meetingId: detail.meeting.id, start: group.example.start, end: min(group.example.end, group.example.start + 12))
-            VStack(alignment: .leading, spacing: 1) {
-                HStack(spacing: 4) {
-                    Text("Stimme \(number)").font(.smallMedium)
-                    Text(TimeFormat.duration(group.speech)).font(.small).foregroundStyle(Theme.textTertiary)
-                }
-                Text(match.map { $0.isMe ? String(localized: "klingt wie dir", comment: "these lines sound like the user") : String(localized: "klingt wie \($0.name)", comment: "these lines sound like this person") } ?? Strings.quote(group.example.text))
-                    .font(.small)
-                    .foregroundStyle(Theme.textTertiary)
-                    .lineLimit(1)
-                    .help(group.example.text)
-            }
-            Spacer(minLength: 4)
-            Menu {
-                Section("Gehört zu") {
-                    PersonChoices(attendees: detail.meeting.attendees) { personId in
-                        model.assignLines(group.segmentIds, in: detail.meeting.id, to: personId)
-                    } newPerson: {
-                        NamePrompt.ask(title: String(localized: "Wer ist das?"), message: String(localized: "Diese Zeilen werden der Person zugeordnet und ihre Stimme gemerkt.")) { name in
-                            model.assignLines(group.segmentIds, in: detail.meeting.id, toNewPersonNamed: name)
-                        }
-                    }
-                }
-                Divider()
-                Button("Als eigene Stimme abtrennen", systemImage: "scissors") { model.separateLines(group.segmentIds, in: detail.meeting.id) }
-                Button("Nicht für die Stimme verwenden", systemImage: "nosign") { model.setLinesIgnored(group.segmentIds, ignored: true) }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(Theme.textSecondary)
-                    .frame(width: 22, height: 20)
-                    .contentShape(Rectangle())
-            }
-            .menuStyle(.button)
-            .buttonStyle(.plain)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .help("Diese Zeilen jemandem zuordnen")
-        }
-        .frame(minHeight: 32)
     }
 }
