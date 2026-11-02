@@ -11,8 +11,10 @@ import TranscriptsKit
 //                          (a whole recording, played from files; with --meeting, more of a meeting recorded before)
 //   transcripts-cli process [--mic <file>] [--system <file>] [--import <file>] [--root <dir>] [--attendees "A, B"] [--title T]
 //   transcripts-cli confirm --root <dir> --meeting <id> --assign "S1=Anna Berger, S2=Thomas Klein"
-//   transcripts-cli join --root <dir> [--meetings <id,id,…>]   (meetings recorded one after another made one, as
-//                          "Zusammenführen" in the app does it, and transcribed again; without --meetings all of them)
+//   transcripts-cli join --root <dir> [--meetings <id,id,…>] [--leave-to-app]   (meetings recorded one after another
+//                          made one, as "Zusammenführen" in the app does it, and transcribed again; without --meetings
+//                          all of them; with --leave-to-app the app transcribes it when it next starts, as it does
+//                          a meeting it was in the middle of: with the user's settings, and summarized if they say so)
 //   transcripts-cli summarize --root <dir> --meeting <id> --provider ollama|anthropic|openai|google [--model M] [--url U]
 //   transcripts-cli maintain --root <dir>     (the one-time repair and voice update, on a copy of the app's folder)
 //   transcripts-cli voices --root <dir>       (everyone's voice groups and each meeting's speakers)
@@ -345,6 +347,10 @@ case "join":
     }
     let parts = try MeetingJoin.join(meetings.map(\.id), database: database, step: "Wartet")
     for part in parts { print(String(format: "Joined %@ from %.1f s", part.meetingId, part.offset)) }
+    if args["leave-to-app"] != nil {
+        print("Left to the app: “\(meetings[0].title)” \(meetings[0].id) waits for its pass")
+        exit(0)
+    }
     await prepare()
     let processor = MeetingProcessor(database: database, engine: engine)
     let steps = StepPrinter()
