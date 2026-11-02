@@ -164,14 +164,36 @@ extension AppModel {
             lines += ["", "## " + String(localized: "Markierungen", comment: "markers set during a recording"), ""] + detail.markers.map { "- \(TimeFormat.clock($0.time)) \($0.text.isEmpty ? String(localized: "Markierung", comment: "a marker set during a recording, without a text") : $0.text)" }
         }
         if !detail.segments.isEmpty {
-            lines += ["", "## " + String(localized: "Transkript"), ""]
-            for segment in detail.segments {
-                let name = segment.speakerKey == MeetingSpeaker.meKey ? myName : detail.textName(for: segment.speakerKey)
-                lines.append("**\(name)** (\(TimeFormat.clock(segment.start))): \(segment.text)")
-                lines.append("")
-            }
+            lines += ["", "## " + String(localized: "Transkript"), "", transcriptMarkdown(for: detail), ""]
         }
         return lines.joined(separator: "\n")
+    }
+
+    /// The transcript alone, a paragraph per turn: "**Anna Berger** (00:00): Dann verschieben wir das Release."
+    /// Consecutive lines of one speaker become one paragraph, as the meeting shows them.
+    public func transcriptMarkdown(for detail: MeetingDetail) -> String {
+        var paragraphs: [String] = []
+        var previous: Segment?
+        for segment in detail.segments {
+            if let last = previous, last.speakerKey == segment.speakerKey, segment.start - last.end < 4, !paragraphs.isEmpty {
+                paragraphs[paragraphs.count - 1] += " " + segment.text
+            } else {
+                let name = segment.speakerKey == MeetingSpeaker.meKey ? myName : detail.textName(for: segment.speakerKey)
+                paragraphs.append("**\(name)** (\(TimeFormat.clock(segment.start))): \(segment.text)")
+            }
+            previous = segment
+        }
+        return paragraphs.joined(separator: "\n\n")
+    }
+
+    public func copyTranscript(_ detail: MeetingDetail) {
+        guard !detail.segments.isEmpty else { return }
+        copyToClipboard(transcriptMarkdown(for: detail), toast: String(localized: "Transkript kopiert", comment: "toast: the whole transcript was copied"))
+    }
+
+    public func copyTranscript(of meetingId: String) {
+        guard let detail = try? database.detail(of: meetingId) else { return }
+        copyTranscript(detail)
     }
 
     /// Puts `text` on the clipboard and says so with `toast` ("Zusammenfassung kopiert").

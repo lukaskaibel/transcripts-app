@@ -59,6 +59,8 @@ All notable changes to this project are recorded here. The format follows
   be merged with, those recorded right before and after it already ticked. Their recordings go one after another into
   the first, with a two-second pause between them, and the meeting is transcribed again as one: the names you gave in
   each part, the markers and the action items stay, and the other meetings are deleted.
+- **Copy the whole transcript.** *Copy* above a meeting's transcript (also ⌥⌘C and *Copy Transcript* in the meeting's
+  menus) puts the transcript on the clipboard as Markdown, one paragraph per speaker turn with the name and the time.
 
 ### Changed
 

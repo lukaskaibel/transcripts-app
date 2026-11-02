@@ -169,7 +169,7 @@ Summaries use Anthropic, OpenAI or Google (Ollama runs on the Mac only).
   Anthropic, OpenAI, Google or a local model in Ollama, automatically after each meeting or on request, plus an
   optional live summary while recording. In the meeting's language or one you choose. API keys stay in the Keychain.
 - **Copies what you need.** The whole summary as Markdown (⇧⌘C), one part of it, the action items as a checklist or a
-  single task, to take into a chat, a ticket or a note.
+  single task, or the whole transcript (⌥⌘C), to take into a chat, a ticket or a note.
 - **Keeps an archive you can search.** Meetings grouped by day, full-text search through every transcript, playback
   from any line, Markdown export, and import of audio or video files (voice memos, Zoom recordings, a meeting recorded
   in a room).
@@ -281,6 +281,7 @@ interface is German. Add `-AppleLanguages "(fr)"` to see it in another language.
 | Return, Space, →, Esc | In *Name Voices*: yes, play the voice again, skip it, stop for now |
 | ⌃⌘I | Show or hide a meeting's details and people |
 | ⇧⌘C | Copy the meeting's summary |
+| ⌥⌘C | Copy the meeting's transcript |
 | ⌘[ | On the iPad: back |
 
 ## Testing

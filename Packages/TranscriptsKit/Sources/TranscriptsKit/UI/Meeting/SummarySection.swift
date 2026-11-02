@@ -293,22 +293,9 @@ struct TasksHeader: View {
                 .font(.ui)
                 .foregroundStyle(Theme.textTertiary)
             Spacer(minLength: 8)
-            Button {
+            CopyButton(help: "Alle Aufgaben als Checkliste kopieren") {
                 model.copyToClipboard(SummaryText.tasks(detail.actionItems), toast: String(localized: "Aufgaben kopiert", comment: "toast"))
-            } label: {
-                HStack(spacing: 5) {
-                    Image(systemName: "doc.on.doc").font(.system(size: 11, weight: .medium))
-                    Text("Kopieren")
-                }
-                .font(.small)
-                .foregroundStyle(Theme.textSecondary)
-                .padding(.horizontal, 9)
-                .frame(height: 26)
-                .hoverFill()
-                .contentShape(Rectangle())
             }
-            .buttonStyle(PlainPressStyle())
-            .help("Alle Aufgaben als Checkliste kopieren")
             .accessibilityIdentifier("summary.tasks.copy")
             .debugFrame("summary.tasks.copy")
         }

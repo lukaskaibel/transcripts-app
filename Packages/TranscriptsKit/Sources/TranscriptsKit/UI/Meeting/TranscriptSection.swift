@@ -77,6 +77,11 @@ struct TranscriptSection: View {
                     }
                     .keyboardShortcut("f", modifiers: .command)
                 }
+                if !detail.segments.isEmpty {
+                    CopyButton(help: "Ganzes Transkript kopieren") { model.copyTranscript(detail) }
+                        .accessibilityIdentifier("transcript.copy")
+                        .debugFrame("transcript.copy")
+                }
             }
             .frame(height: 26)
 

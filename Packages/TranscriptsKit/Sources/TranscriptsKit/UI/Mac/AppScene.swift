@@ -141,6 +141,11 @@ struct AppCommands: Commands {
                 if let id = model.selectedMeetingId { model.copyTasks(of: id) }
             }
             .disabled(model.section != .meetings || model.detail?.actionItems.isEmpty != false)
+            Button("Transkript kopieren") {
+                if let detail = model.detail { model.copyTranscript(detail) }
+            }
+            .keyboardShortcut("c", modifiers: [.command, .option])
+            .disabled(model.section != .meetings || model.detail?.segments.isEmpty != false)
         }
         SidebarCommands()
         CommandMenu("Gehe zu") {

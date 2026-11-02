@@ -31,6 +31,8 @@ struct MeetingMenuItems: View {
             .disabled(row?.hasSummary != true)
         Button("Aufgaben kopieren", systemImage: "checklist") { model.copyTasks(of: meetingId) }
             .disabled(row?.actionItems.isEmpty != false)
+        Button("Transkript kopieren", systemImage: "text.alignleft") { model.copyTranscript(of: meetingId) }
+            .disabled(!ready)
         Button("Als Markdown kopieren", systemImage: "doc.on.doc") {
             if let detail = try? model.database.detail(of: meetingId) {
                 model.copyToClipboard(model.markdown(for: detail), toast: String(localized: "Meeting kopiert", comment: "toast: the whole meeting was copied as Markdown"))
