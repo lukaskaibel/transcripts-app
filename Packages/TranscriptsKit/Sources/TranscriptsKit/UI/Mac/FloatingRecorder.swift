@@ -52,7 +52,13 @@ final class FloatingRecorderController {
             hosting.safeAreaRegions = []
             hosting.frame = NSRect(origin: .zero, size: Self.compact)
             hosting.autoresizingMask = [.width, .height]
-            panel.contentView = hosting
+            // Not the panel's content view itself, but in a plain one: as the content view, SwiftUI still sized the
+            // panel along the animation when the recorder opened or closed under the pointer, a step in every layout
+            // pass of the window, each asking for another, until AppKit ended the app (2026-11-02, seven times in one
+            // meeting). Inside a plain view it is only a view and leaves the window alone.
+            let content = NSView(frame: NSRect(origin: .zero, size: Self.compact))
+            content.addSubview(hosting)
+            panel.contentView = content
             // The demo's recorder has a place of its own: trying the app out doesn't move the real one.
             let frameName = model.isDemo ? Self.frameName + ".demo" : Self.frameName
             let saved = Self.savedFrame(frameName)

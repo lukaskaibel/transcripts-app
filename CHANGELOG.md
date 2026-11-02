@@ -115,9 +115,10 @@ All notable changes to this project are recorded here. The format follows
   told apart; the meeting being recorded opens the recording screen; *Voices without a name* no longer pops up over the
   meeting whose banner already says so; on a phone, the summary's buttons move under the text instead of squeezing it;
   English says *Ready · all on device* on iPhone and iPad too.
-- **The floating recorder no longer crashes the app.** With the pointer over it while it showed a warning, the
-  recorder and SwiftUI resized its panel in turn until macOS ended the app. It also no longer drifts to the left each
-  time the app starts, and trying the demo no longer moves it.
+- **The floating recorder no longer crashes the app.** When it opened or closed under the pointer, the recorder and
+  SwiftUI both resized its panel, SwiftUI step by step along the animation, until macOS ended the app; in one meeting
+  it happened six times. It also no longer drifts to the left each time the app starts, and trying the demo no longer
+  moves it.
 - **No false *No audio from the call* while everyone waits for the meeting to begin.** Once the call's sound came
   through in a recording, the warning stays away for the rest of it; and where it came through before, a silent start
   gets a minute and a half instead of 20 seconds.
