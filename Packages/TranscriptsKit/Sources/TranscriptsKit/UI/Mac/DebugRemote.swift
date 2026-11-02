@@ -138,6 +138,8 @@ final class DebugRemote {
             log("upcoming=\(model.upcoming.map { "\($0.eventId)[\($0.calendarTitle ?? "-")]" }) hidden=\(model.settings.hiddenMeetings.map(\.id)) onlyMine=\(model.settings.onlyMyMeetings) toasts=\(model.toasts.map { "\($0.title) | \($0.message) | \($0.action?.title ?? "-")" })")
         case "toast":
             model.showToast(argument.isEmpty ? "Zusammenfassung kopiert" : argument)
+        case "mute":
+            model.player.muted = true
         case "focus":
             model.focusedSegmentId = Int64(argument)
         case "naming":

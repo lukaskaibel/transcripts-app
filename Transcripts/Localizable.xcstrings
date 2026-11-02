@@ -6336,6 +6336,72 @@
         }
       }
     },
+    "Ab dieser Zeile anhören" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: click a line to play from it",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ab dieser Zeile anhören"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play from this line"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écouter à partir de cette ligne"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escuchar desde esta línea"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascolta da questa riga"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvir a partir desta linha"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beluister vanaf deze regel"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odsłuchaj od tego wiersza"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прослушать с этой строки"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прослухати з цього рядка"
+          }
+        }
+      }
+    },
     "Ab hier abspielen" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7375,6 +7441,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Усе зроблено"
+          }
+        }
+      }
+    },
+    "Alles zugeordnet" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: nothing left in question",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles zugeordnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Sorted"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout est attribué"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo asignado"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutto assegnato"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo atribuído"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles toegewezen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wszystko przypisane"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всё распределено"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Усе розподілено"
           }
         }
       }
@@ -8872,228 +9004,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Importuj plik audio…"
-          }
-        }
-      }
-    },
-    "Auf deinem Mikrofon klingen %lld Stimmen" : {
-      "extractionState" : "manual",
-      "comment" : "plural: different voices on the user's microphone",
-      "localizations" : {
-        "de" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Auf deinem Mikrofon klingt %lld Stimme"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Auf deinem Mikrofon klingen %lld Stimmen"
-                }
-              }
-            }
-          }
-        },
-        "ru" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "В вашем микрофоне слышен %lld голос"
-                }
-              },
-              "few" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "В вашем микрофоне слышны %lld голоса"
-                }
-              },
-              "many" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "В вашем микрофоне слышно %lld голосов"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "В вашем микрофоне слышно %lld голоса"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "En tu micrófono se oye %lld voz"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "En tu micrófono se oyen %lld voces"
-                }
-              }
-            }
-          }
-        },
-        "pt-BR" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Há %lld voz no seu microfone"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Há %lld vozes no seu microfone"
-                }
-              }
-            }
-          }
-        },
-        "it" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Sul tuo microfono si sente %lld voce"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Sul tuo microfono si sentono %lld voci"
-                }
-              }
-            }
-          }
-        },
-        "uk" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "На вашому мікрофоні чути %lld голос"
-                }
-              },
-              "few" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "На вашому мікрофоні чути %lld голоси"
-                }
-              },
-              "many" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "На вашому мікрофоні чути %lld голосів"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "На вашому мікрофоні чути %lld голосу"
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "On entend %lld voix sur votre micro"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "On entend %lld voix sur votre micro"
-                }
-              }
-            }
-          }
-        },
-        "nl" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Op je microfoon klinkt %lld stem"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Op je microfoon klinken %lld stemmen"
-                }
-              }
-            }
-          }
-        },
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld voice on your microphone"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld voices on your microphone"
-                }
-              }
-            }
-          }
-        },
-        "pl" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "W twoim mikrofonie słychać %lld głos"
-                }
-              },
-              "few" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "W twoim mikrofonie słychać %lld głosy"
-                }
-              },
-              "many" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "W twoim mikrofonie słychać %lld głosów"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "W twoim mikrofonie słychać %lld głosu"
-                }
-              }
-            }
           }
         }
       }
@@ -14377,6 +14287,72 @@
         }
       }
     },
+    "Die App hat diese Zeilen hierher verschoben, weil sie nach %@ klingen." : {
+      "extractionState" : "manual",
+      "comment" : "voice review: lines the app moved to this speaker",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App hat diese Zeilen hierher verschoben, weil sie nach %@ klingen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app moved these lines here because they sound like %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app a déplacé ces lignes ici parce qu’elles ressemblent à la voix de %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app movió estas líneas aquí porque suenan como %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app ha spostato qui queste righe perché sembrano di %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app moveu estas linhas para cá porque soam como %@."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De app heeft deze regels hierheen verplaatst omdat ze als %@ klinken."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplikacja przeniosła tu te wiersze, bo brzmią jak %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение перенесло эти строки сюда, потому что они звучат как %@."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Застосунок переніс ці рядки сюди, бо вони звучать як %@."
+          }
+        }
+      }
+    },
     "Die App lernt nicht mehr aus dem, was diese Person gesagt hat; die Zuordnungen in Meetings bleiben." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14438,6 +14414,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aplikacja przestanie się uczyć z wypowiedzi tej osoby; przypisania na spotkaniach pozostaną."
+          }
+        }
+      }
+    },
+    "Die App merkt sich, wer was gesagt hat." : {
+      "extractionState" : "manual",
+      "comment" : "voice review: after everything is answered",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App merkt sich, wer was gesagt hat."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app remembers who said what."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app retient qui a dit quoi."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app recuerda quién dijo qué."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app ricorda chi ha detto cosa."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app lembra quem disse o quê."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De app onthoudt wie wat zei."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplikacja zapamięta, kto co powiedział."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение запомнит, кто что сказал."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Застосунок запам’ятає, хто що сказав."
           }
         }
       }
@@ -15548,6 +15590,138 @@
         }
       }
     },
+    "Die Zeilen %@ geben" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: help for giving the lines to someone",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zeilen %@ geben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Give the lines to %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attribuer les lignes à %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dar las líneas a %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assegna le righe a %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dar as linhas a %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geef de regels aan %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przypisz wiersze: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отдать строки: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Віддати рядки: %@"
+          }
+        }
+      }
+    },
+    "Die Zeilen bleiben bei %@" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: help for keeping the lines where they are",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zeilen bleiben bei %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The lines stay with %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les lignes restent avec %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las líneas se quedan con %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le righe restano a %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As linhas ficam com %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De regels blijven bij %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiersze zostają przy: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Строки остаются у: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рядки залишаються в: %@"
+          }
+        }
+      }
+    },
     "Die Zeilen dieser Gruppe werden in allen Meetings dieser Person zugeordnet." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15609,6 +15783,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wypowiedzi z tej grupy zostaną przypisane tej osobie na wszystkich spotkaniach."
+          }
+        }
+      }
+    },
+    "Die Zeilen nacheinander anhören" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: play button help",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zeilen nacheinander anhören"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play the lines one after another"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écouter les lignes l’une après l’autre"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escuchar las líneas una tras otra"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ascolta le righe una dopo l’altra"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvir as linhas uma após a outra"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beluister de regels na elkaar"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odsłuchaj wiersze jeden po drugim"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прослушать строки одну за другой"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прослухати рядки один за одним"
           }
         }
       }
@@ -16068,67 +16308,134 @@
         }
       }
     },
-    "Diese Zeilen jemandem zuordnen" : {
+    "Diese Zeilen kamen über dein Mikrofon, klingen aber nicht wie du." : {
       "extractionState" : "manual",
+      "comment" : "voice review: lines on the user's microphone that sound like someone else",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diese Zeilen jemandem zuordnen"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Назначить эти реплики кому-то"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Asignar estas intervenciones a alguien"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Atribuir estas linhas a alguém"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Assegna queste righe a qualcuno"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Призначити ці репліки комусь"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Attribuer ces lignes à quelqu’un"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wijs deze regels aan iemand toe"
+            "value" : "Diese Zeilen kamen über dein Mikrofon, klingen aber nicht wie du."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Assign these lines to someone"
+            "value" : "These lines came through your microphone but don’t sound like you."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ces lignes viennent de ton micro, mais ne ressemblent pas à ta voix."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estas líneas llegaron por tu micrófono, pero no suenan como tú."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Queste righe vengono dal tuo microfono, ma non sembrano la tua voce."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estas linhas vieram do seu microfone, mas não soam como você."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze regels kwamen via je microfoon, maar klinken niet als jij."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Przypisz te wypowiedzi komuś"
+            "value" : "Te wiersze nagrał twój mikrofon, ale nie brzmią jak ty."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эти строки пришли с твоего микрофона, но звучат не как ты."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ці рядки прийшли з твого мікрофона, але звучать не як ти."
+          }
+        }
+      }
+    },
+    "Diese Zeilen stehen bei %@, klingen aber anders." : {
+      "extractionState" : "manual",
+      "comment" : "voice review: lines with a speaker that sound unlike them",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Zeilen stehen bei %@, klingen aber anders."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These lines are with %@ but sound different."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ces lignes sont attribuées à %@, mais la voix est différente."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estas líneas están con %@, pero suenan distinto."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Queste righe sono di %@, ma la voce è diversa."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estas linhas estão com %@, mas soam diferente."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deze regels staan bij %@, maar klinken anders."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te wiersze są przypisane do: %@, ale brzmią inaczej."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эти строки у: %@, но звучат иначе."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ці рядки в: %@, але звучать інакше."
           }
         }
       }
@@ -20106,67 +20413,68 @@
         }
       }
     },
-    "Gehört zu" : {
+    "Gehört zu %@" : {
       "extractionState" : "manual",
+      "comment" : "voice review: this line belongs with the speaker it is with",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gehört zu"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Назначить"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pertenece a"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pertence a"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appartiene a"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Призначити"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appartient à"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hoort bij"
+            "value" : "Gehört zu %@"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Belongs To"
+            "value" : "Belongs to %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appartient à %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es de %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appartiene a %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "É de %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoort bij %@"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Należy do"
+            "value" : "Należy do: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Принадлежит: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Належить: %@"
           }
         }
       }
@@ -21612,7 +21920,7 @@
     },
     "Ich" : {
       "extractionState" : "manual",
-      "comment" : "the user's own name when macOS knows none",
+      "comment" : "voice review: button, the lines are the user's",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -23117,7 +23425,7 @@
     },
     "Jemand anderes" : {
       "extractionState" : "manual",
-      "comment" : "naming a voice: it is not the person the app guessed",
+      "comment" : "voice review: menu of everyone else",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -25951,7 +26259,6 @@
     },
     "klingt wie %@" : {
       "extractionState" : "manual",
-      "comment" : "these lines sound like this person",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -26017,7 +26324,6 @@
     },
     "klingt wie dir" : {
       "extractionState" : "manual",
-      "comment" : "these lines sound like the user",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -32894,6 +33200,138 @@
         }
       }
     },
+    "Nur dein Mikrofon, ohne den Anruf" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: only the microphone channel plays",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur dein Mikrofon, ohne den Anruf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only your microphone, without the call"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seulement ton micro, sans l’appel"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo tu micrófono, sin la llamada"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo il tuo microfono, senza la chiamata"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só o seu microfone, sem a chamada"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alleen je microfoon, zonder het gesprek"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tylko twój mikrofon, bez rozmowy"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Только твой микрофон, без звонка"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лише твій мікрофон, без дзвінка"
+          }
+        }
+      }
+    },
+    "Nur der Anruf, ohne dein Mikrofon" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: only the call's channel plays",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur der Anruf, ohne dein Mikrofon"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only the call, without your microphone"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seulement l’appel, sans ton micro"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo la llamada, sin tu micrófono"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo la chiamata, senza il tuo microfono"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só a chamada, sem o seu microfone"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alleen het gesprek, zonder je microfoon"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tylko rozmowa, bez twojego mikrofonu"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Только звонок, без твоего микрофона"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лише дзвінок, без твого мікрофона"
+          }
+        }
+      }
+    },
     "Nur diese Passage" : {
       "extractionState" : "manual",
       "comment" : "menu: give only these lines of the transcript to someone else",
@@ -32956,6 +33394,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Лише цей фрагмент"
+          }
+        }
+      }
+    },
+    "Nur diese Zeile" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: give one line to someone",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur diese Zeile"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only This Line"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seulement cette ligne"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo esta línea"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo questa riga"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só esta linha"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alleen deze regel"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tylko ten wiersz"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Только эта строка"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лише цей рядок"
           }
         }
       }
@@ -33739,72 +34243,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Parakeet działa na Neural Engine tego Maca i rozumie 25 języków europejskich, także gdy się mieszają. Nic z tego nie trafia do internetu."
-          }
-        }
-      }
-    },
-    "Passt" : {
-      "extractionState" : "manual",
-      "comment" : "keep the lines the app moved to this speaker",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Passt"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Оставить"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Correcto"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Certo"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Va bene"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Залишити"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Garder"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klopt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zgadza się"
           }
         }
       }
@@ -36096,6 +36534,138 @@
         }
       }
     },
+    "Sie klingen nach %@." : {
+      "extractionState" : "manual",
+      "comment" : "voice review: the lines sound like this person",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sie klingen nach %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "They sound like %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On dirait la voix de %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suenan como %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sembrano di %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soam como %@."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ze klinken als %@."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brzmią jak %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звучат как %@."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звучать як %@."
+          }
+        }
+      }
+    },
+    "Sie klingen nach dir." : {
+      "extractionState" : "manual",
+      "comment" : "voice review: the lines sound like the user",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sie klingen nach dir."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "They sound like you."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On dirait ta voix."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suenan como tú."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sembrano la tua voce."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soam como você."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ze klinken als jij."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brzmią jak ty."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звучат как ты."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Звучать як ти."
+          }
+        }
+      }
+    },
     "Silber" : {
       "extractionState" : "manual",
       "comment" : "app icon colour",
@@ -36223,6 +36793,138 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pod tym imieniem występujesz w transkrypcjach i podsumowaniach."
+          }
+        }
+      }
+    },
+    "So klingst du" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: play the user's own voice to compare",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So klingst du"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How You Sound"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta voix"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Así suenas tú"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La tua voce"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assim soa você"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zo klink jij"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tak brzmisz ty"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Так звучишь ты"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Так звучиш ти"
+          }
+        }
+      }
+    },
+    "So klingt %@" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: play the speaker's own voice to compare",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So klingt %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How %@ Sounds"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La voix de %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Así suena %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La voce di %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assim soa %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zo klinkt %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tak brzmi %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Так звучит %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Так звучить %@"
           }
         }
       }
@@ -41893,6 +42595,72 @@
         }
       }
     },
+    "Verschoben" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: the lines the app moved to this speaker",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verschoben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moved"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déplacées"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movidas"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spostate"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movidas"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verplaatst"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przeniesione"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перенесённые"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перенесені"
+          }
+        }
+      }
+    },
     "Vom Call kommt nichts an" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -42088,68 +42856,68 @@
         }
       }
     },
-    "Vorher bei %@ · %@" : {
+    "Vorher bei %@." : {
       "extractionState" : "manual",
-      "comment" : "the speakers the lines were with before, then a quote of the longest line",
+      "comment" : "voice review: the speakers the moved lines were with before",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vorher bei %@ · %@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Раньше: %@ · %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Venían de %@ · %@"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Antes com %@ · %@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prima con %@ · %@"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Раніше: %@ · %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avant : %@ · %@"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eerder bij %@ · %@"
+            "value" : "Vorher bei %@."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Previously with %@ · %@"
+            "value" : "Previously with %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avant : %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antes con %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prima: %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antes com %@."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eerder bij %@."
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wcześniej: %@ · %@"
+            "value" : "Wcześniej: %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Раньше у: %@."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Раніше в: %@."
           }
         }
       }
@@ -42998,6 +43766,138 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kto to?"
+          }
+        }
+      }
+    },
+    "Wer sagt diese Zeilen?" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: the question the buttons answer",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wer sagt diese Zeilen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who says these lines?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui dit ces lignes ?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Quién dice estas líneas?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chi dice queste righe?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem diz estas linhas?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie zegt deze regels?"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kto mówi te wiersze?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кто произносит эти строки?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хто каже ці рядки?"
+          }
+        }
+      }
+    },
+    "Wer spricht hier?" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: title",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wer spricht hier?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who’s Speaking?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui parle ici ?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Quién habla aquí?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chi sta parlando?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem está falando?"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie spreekt hier?"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kto tu mówi?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кто здесь говорит?"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хто тут говорить?"
           }
         }
       }
@@ -44433,6 +45333,72 @@
         }
       }
     },
+    "Zeile %lld von %lld" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: which of the lines in question is playing",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeile %lld von %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Line %lld of %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ligne %lld sur %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Línea %lld de %lld"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riga %lld di %lld"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linha %lld de %lld"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regel %lld van %lld"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiersz %lld z %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Строка %lld из %lld"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рядок %lld з %lld"
+          }
+        }
+      }
+    },
     "Ziehen zum Verschieben, Doppelklick öffnet das Live-Fenster" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -45023,6 +45989,72 @@
         }
       }
     },
+    "Zum Vergleich: die längste Zeile der Stimme" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: help for the compare button",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Vergleich: die längste Zeile der Stimme"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To compare: the voice’s longest line"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour comparer : la plus longue ligne de cette voix"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para comparar: la línea más larga de la voz"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per confronto: la riga più lunga della voce"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para comparar: a linha mais longa da voz"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ter vergelijking: de langste regel van de stem"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do porównania: najdłuższy wiersz tego głosu"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для сравнения: самая длинная строка этого голоса"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для порівняння: найдовший рядок цього голосу"
+          }
+        }
+      }
+    },
     "Zuordnung entfernen" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -45155,7 +46187,6 @@
     },
     "Zurück" : {
       "extractionState" : "manual",
-      "comment" : "move the lines back to the speaker they came from",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -45280,6 +46311,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Назад (Esc)"
+          }
+        }
+      }
+    },
+    "Zurück zu %@" : {
+      "extractionState" : "manual",
+      "comment" : "voice review: help for sending moved lines back",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurück zu %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revenir à %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volver a %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Torna a %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar para %@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terug naar %@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Z powrotem do: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вернуть: %@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повернути: %@"
           }
         }
       }

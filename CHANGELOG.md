@@ -62,6 +62,12 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- **Lines the app isn't sure about read like lyrics.** The ⓘ next to a person in the inspector opens *Who's Speaking?*:
+  every line in question, bold and in colour among the grey lines said around it, one tab for each group of lines that
+  sounds like someone else and one for the lines the app moved. Played, the lines come one after another, each cut to
+  where the voice is and from its own side of the call only, so a line of "Um," that ran on for 13 seconds of you
+  talking is now just the "Um,"; the line you hear lights up and stays in view. Who said them is one click on a name
+  below, the person they sound like first, instead of a menu behind three dots; a right-click answers for one line.
 - **A Mac app like Apple's own.** The main window is built like Notebook and the Mac's own apps: the system's sidebar,
   glass buttons in the toolbar with search, and the inspector on the right (⌃⌘I). A meeting reads like a note:
   a large title, the summary with headings and its action items as a checklist, and *Summary* and *Transcript* in the

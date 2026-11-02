@@ -145,6 +145,12 @@ extension AppModel {
 
     // MARK: Lines and voice groups
 
+    /// These lines are where they belong: the app stops asking about them.
+    public func keepLines(_ segmentIds: [Int64]) {
+        try? database.keepLines(segmentIds)
+        refreshVoices()
+    }
+
     /// Gives some lines of a meeting to a person: they become (part of) that person's voice in the
     /// meeting, confirmed. For a group of lines that sounds unlike the rest of its speaker.
     public func assignLines(_ segmentIds: [Int64], in meetingId: String, to personId: String) {

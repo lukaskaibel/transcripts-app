@@ -68,6 +68,16 @@ enum Theme {
         Color(hex: 0x5AB0D8), Color(hex: 0xD98BC4), Color(hex: 0xC792EA),
     ]
     static let meColor = Color(hex: 0xB4B8C0)
+    /// Lines in question while reviewing a voice, one colour for each group of them: dark enough on a white page for
+    /// bold text, bright on a dark one.
+    static let doubtColors: [Color] = [
+        Color(light: 0xC2620A, dark: 0xF2A14A),
+        Color(light: 0x0F8577, dark: 0x4FD1BE),
+        Color(light: 0xC23B7A, dark: 0xF27DB4),
+        Color(light: 0x6E4BD8, dark: 0xB59BFF),
+    ]
+    /// Lines the app moved to a speaker.
+    static let movedColor = Color(light: 0x2C6FD1, dark: 0x6FA8FF)
 
     static func color(for name: String) -> Color {
         let hash = name.lowercased().unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }
