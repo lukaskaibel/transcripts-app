@@ -199,6 +199,30 @@ import Testing
         #expect(markdown.contains("**\(model.myName)** (01:05): Ich übernehme die Interviews."))
     }
 
+    @Test func copiedTranscriptHasAParagraphPerTurn() throws {
+        let (model, database) = try makeModel()
+        try database.save(Meeting(id: "t", title: "Sync", status: .ready))
+        try database.replaceTranscript(meetingId: "t", segments: [
+            Segment(meetingId: "t", speakerKey: "S1", channel: .system, start: 0, end: 4, text: "Dann verschieben wir"),
+            Segment(meetingId: "t", speakerKey: "S1", channel: .system, start: 5, end: 8, text: "das Release."),
+            Segment(meetingId: "t", speakerKey: "me", channel: .microphone, start: 9, end: 12, text: "Einverstanden."),
+            // A long pause starts a new paragraph, as on screen.
+            Segment(meetingId: "t", speakerKey: "me", channel: .microphone, start: 30, end: 33, text: "Noch etwas?"),
+        ], speakers: [
+            MeetingSpeaker(meetingId: "t", key: "S1", label: "Sprecher 1", talkTime: 7),
+            MeetingSpeaker(meetingId: "t", key: "me", label: Strings.meLabel, talkTime: 6, channel: .microphone),
+        ])
+        let detail = try #require(try database.detail(of: "t"))
+
+        #expect(model.transcriptMarkdown(for: detail) == """
+            **Sprecher 1** (00:00): Dann verschieben wir das Release.
+
+            **\(model.myName)** (00:09): Einverstanden.
+
+            **\(model.myName)** (00:30): Noch etwas?
+            """)
+    }
+
     @Test func renamingAndDeletingMeetings() throws {
         let (model, database) = try makeModel()
         let id = "test-\(UUID().uuidString)"

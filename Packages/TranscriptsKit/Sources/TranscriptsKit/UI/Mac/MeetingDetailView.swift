@@ -112,6 +112,7 @@ struct MeetingDetailView: View {
                         model.copyToClipboard(SummaryText.markdown(detail), toast: String(localized: "Zusammenfassung kopiert", comment: "toast"))
                     }
                 }
+                Button("Transkript kopieren", systemImage: "text.alignleft") { model.copyTranscript(detail) }
                 Button("Als Markdown sichern …", systemImage: "square.and.arrow.down") { model.exportMarkdown(detail) }
             } label: {
                 Label("Exportieren", systemImage: "square.and.arrow.up")

@@ -201,6 +201,29 @@ struct IconButton: View {
     }
 }
 
+/// "Kopieren" with its icon, at the right of a header: says what it does, where an icon alone is overlooked.
+struct CopyButton: View {
+    var help: LocalizedStringKey
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: "doc.on.doc").font(.system(size: 11, weight: .medium))
+                Text("Kopieren")
+            }
+            .font(.small)
+            .foregroundStyle(Theme.textSecondary)
+            .padding(.horizontal, 9)
+            .frame(height: 26)
+            .hoverFill()
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainPressStyle())
+        .help(help)
+    }
+}
+
 /// The red recording dot, with a soft ring while it pulses.
 struct RecordingDot: View {
     var size: CGFloat = 8
