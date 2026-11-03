@@ -94,7 +94,6 @@ public final class AppSettings {
         transcriptionModel = TranscriptionModel(rawValue: defaults.string(forKey: Keys.transcriptionModel) ?? "") ?? .ultra
         microphoneUID = defaults.string(forKey: Keys.microphoneUID)
         captureSystemAudio = defaults.object(forKey: Keys.captureSystemAudio) as? Bool ?? true
-        floatingRecorder = defaults.object(forKey: Keys.floatingRecorder) as? Bool ?? true
         openLiveWindow = defaults.object(forKey: Keys.openLiveWindow) as? Bool ?? false
         calendarReminders = defaults.object(forKey: Keys.calendarReminders) as? Bool ?? true
         reminderLead = defaults.object(forKey: Keys.reminderLead) as? Double ?? 60
@@ -136,7 +135,6 @@ public final class AppSettings {
         static let transcriptionModel = "transcriptionModel"
         static let microphoneUID = "microphoneUID"
         static let captureSystemAudio = "captureSystemAudio"
-        static let floatingRecorder = "floatingRecorder"
         static let openLiveWindow = "openLiveWindow"
         static let calendarReminders = "calendarReminders"
         static let reminderLead = "reminderLead"
@@ -175,7 +173,6 @@ public final class AppSettings {
     public var transcriptionModel: TranscriptionModel { didSet { defaults.set(transcriptionModel.rawValue, forKey: Keys.transcriptionModel) } }
     public var microphoneUID: String? { didSet { defaults.set(microphoneUID, forKey: Keys.microphoneUID) } }
     public var captureSystemAudio: Bool { didSet { defaults.set(captureSystemAudio, forKey: Keys.captureSystemAudio) } }
-    public var floatingRecorder: Bool { didSet { defaults.set(floatingRecorder, forKey: Keys.floatingRecorder) } }
     public var openLiveWindow: Bool { didSet { defaults.set(openLiveWindow, forKey: Keys.openLiveWindow) } }
     public var calendarReminders: Bool { didSet { defaults.set(calendarReminders, forKey: Keys.calendarReminders) } }
     /// Seconds before the start a reminder appears.

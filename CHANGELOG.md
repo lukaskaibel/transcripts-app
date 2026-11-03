@@ -64,6 +64,12 @@ All notable changes to this project are recorded here. The format follows
 
 ### Changed
 
+- **The menu bar is the recorder; the floating recorder is gone.** While you record, the menu bar shows the time and a
+  red dot, or a warning sign when no sound comes from the microphone or the call. Its menu shows the meeting, a large
+  timer, the sound coming in and the last words heard, with big buttons to pause, stop and set a marker, and *Fix…*
+  next to a problem with the sound. Without a recording it starts one with one big button, under the meeting that is
+  about to begin. The last meetings show whether they are summarized or still being processed. Settings › Recording no
+  longer has *Show Floating Bar*.
 - **Lines the app isn't sure about read like lyrics.** The ⓘ next to a person in the inspector opens *Who's Speaking?*:
   every line in question, bold and in colour among the grey lines said around it, one tab for each group of lines that
   sounds like someone else and one for the lines the app moved. Played, the lines come one after another, each cut to
@@ -76,9 +82,7 @@ All notable changes to this project are recorded here. The format follows
   toolbar to switch between them. The inspector lists the meeting's details and its people as Contacts would, with how
   long each one spoke, instead of bars and percentages. Buttons are capsules, the command palette floats like
   Spotlight, playback is a bar floating over the page, and the menu bar's menu looks like the system's menus.
-- **Nobody is named while you record.** The floating recorder is a small glass capsule with the time, the sound coming
-  in, pause and stop; with the pointer over it, it shows the last words it heard, and it says when no sound comes from
-  the call. The live window has a large timer, the sound of the last seconds, the transcript in paragraphs (only your
+- **Nobody is named while you record.** The live window has a large timer, the sound of the last seconds, the transcript in paragraphs (only your
   own lines are marked) and pause, stop and a marker floating at the bottom. Who is talking is settled after the
   meeting, from the whole recording, where it is right far more often. On the iPhone the recording screen has the time,
   the sound and the buttons at the bottom, as in Voice Memos.
@@ -121,10 +125,6 @@ All notable changes to this project are recorded here. The format follows
   told apart; the meeting being recorded opens the recording screen; *Voices without a name* no longer pops up over the
   meeting whose banner already says so; on a phone, the summary's buttons move under the text instead of squeezing it;
   English says *Ready · all on device* on iPhone and iPad too.
-- **The floating recorder no longer crashes the app.** When it opened or closed under the pointer, the recorder and
-  SwiftUI both resized its panel, SwiftUI step by step along the animation, until macOS ended the app; in one meeting
-  it happened six times. It also no longer drifts to the left each time the app starts, and trying the demo no longer
-  moves it.
 - **No false *No audio from the call* while everyone waits for the meeting to begin.** Once the call's sound came
   through in a recording, the warning stays away for the rest of it; and where it came through before, a silent start
   gets a minute and a half instead of 20 seconds.

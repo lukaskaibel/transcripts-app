@@ -65,10 +65,8 @@ else
   send "snapwindow settings 06-settings-ai"
   send "live" 2
   send "snapwindow live 07-live"
-  send "floating" 1.5
-  send "snapwindow floating 08-floating"
   send "menubar" 1.5
-  send "snapwindow MenuBar 09-menubar"
+  send "snapwindow MenuBar 08-menubar"
   send "windows"
   send "quit" 0.5
 fi

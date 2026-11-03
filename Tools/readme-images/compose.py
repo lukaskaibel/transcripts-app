@@ -90,12 +90,6 @@ def scaled(img, s):
     return img.resize((round(img.width * s), round(img.height * s)), Image.LANCZOS)
 
 
-def opaque(img, threshold=200):
-    """Only what is drawn solidly: the floating recorder without the room its window leaves for the shadow."""
-    box = img.getchannel("A").point(lambda v: 255 if v >= threshold else 0).getbbox()
-    return img.crop(box) if box else img
-
-
 def phone(img, theme):
     """An iPhone 17 Pro around a simulator screenshot (402 points wide): the screen's rounded corners, a black border,
     a thin titanium band and the Dynamic Island, which the screenshot leaves out."""

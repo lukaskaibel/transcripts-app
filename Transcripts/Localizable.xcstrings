@@ -11358,7 +11358,7 @@
     },
     "Beheben …" : {
       "extractionState" : "manual",
-      "comment" : "floating recorder: opens the privacy settings that block the sound",
+      "comment" : "menu bar: opens the privacy settings that block the sound",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -28283,6 +28283,72 @@
         }
       }
     },
+    "Markierung gesetzt" : {
+      "extractionState" : "manual",
+      "comment" : "menu bar: shown for a moment after the marker button was clicked",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markierung gesetzt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marker Added"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcador añadido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqueur ajouté"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcatore aggiunto"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markering geplaatst"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dodano znacznik"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcador adicionado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Метка поставлена"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позначку поставлено"
+          }
+        }
+      }
+    },
     "Markierung setzen" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -36136,71 +36202,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Чорний"
-          }
-        }
-      }
-    },
-    "Schwebende Leiste anzeigen" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schwebende Leiste anzeigen"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показывать плавающую панель"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar barra flotante"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar barra flutuante"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra barra fluttuante"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показувати плаваючу панель"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher la barre flottante"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toon zwevende balk"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show floating bar"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pokazuj pływający pasek"
           }
         }
       }
@@ -45591,71 +45592,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Рядок %lld з %lld"
-          }
-        }
-      }
-    },
-    "Ziehen zum Verschieben, Doppelklick öffnet das Live-Fenster" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ziehen zum Verschieben, Doppelklick öffnet das Live-Fenster"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перетащите, чтобы переместить; дважды нажмите, чтобы открыть Live-окно"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arrastra para mover; haz doble clic para abrir la ventana en vivo"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arraste para mover; clique duas vezes para abrir a janela ao vivo"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trascina per spostare; doppio clic per aprire la finestra live"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Перетягніть, щоб перемістити; двічі клацніть, щоб відкрити живе вікно"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Faites glisser pour déplacer, double-cliquez pour ouvrir la fenêtre en direct"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sleep om te verplaatsen, dubbelklik opent het livevenster"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drag to move, double-click to open the live window"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Przeciągnij, aby przesunąć; kliknij dwukrotnie, aby otworzyć okno na żywo"
           }
         }
       }

@@ -301,7 +301,6 @@ struct RecordingSettings: View {
             }
             #if os(macOS)
             Section("Während der Aufnahme") {
-                Toggle("Schwebende Leiste anzeigen", isOn: $settings.floatingRecorder)
                 Toggle("Live-Fenster öffnen", isOn: $settings.openLiveWindow)
             }
             #endif

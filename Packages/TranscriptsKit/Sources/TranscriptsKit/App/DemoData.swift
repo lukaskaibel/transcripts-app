@@ -386,8 +386,8 @@ extension AppModel {
 }
 
 extension AppModel {
-    /// A pretend recording for screenshots of the live window and the floating recorder, and for trying the recording
-    /// screen on iPhone and iPad.
+    /// A pretend recording for screenshots of the live window and the menu bar, and for trying the recording screen on
+    /// iPhone and iPad.
     func startDemoRecording() {
         guard isDemo, recording == nil else { return }
         let meeting = Meeting(id: "m-live", title: "Sprint Planning 43", startedAt: Date().addingTimeInterval(-754), status: .recording, source: "Zoom",
@@ -401,9 +401,6 @@ extension AppModel {
     func stopDemoRecording() {
         guard isDemo, let session = recording else { return }
         recording = nil
-        #if os(macOS)
-        floatingRecorder?.hide()
-        #endif
         try? database.deleteMeeting(session.meetingId)
     }
 }
