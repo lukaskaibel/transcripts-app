@@ -98,14 +98,14 @@ around them, played one after another like lyrics, and the names to give them to
 
 ### While you record
 
-A menu bar item and a small glass recorder you can put anywhere, with the time, the sound coming in, pause and stop;
-point at it for the last words it heard. Neither names anyone: who is talking is settled after the meeting, from the
-whole recording. The live window shows the transcript as it is spoken, your own lines marked, a live summary if you
-like, and markers.
+The menu bar shows the time, or a warning when no sound comes in. Its menu has the time, the sound coming in and the
+last words heard, with big buttons to pause, stop and set a marker; nothing floats over your call. Nobody is named
+while you record: who is talking is settled after the meeting, from the whole recording. The live window shows the
+transcript as it is spoken, your own lines marked, a live summary if you like, and markers.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="Design/screenshots/recording-dark.webp">
-  <img alt="The live window with a large timer, the sound of the last seconds and the running transcript with a marker, the menu bar menu during a recording, and the floating recorder" src="Design/screenshots/recording-light.webp">
+  <img alt="The live window with a large timer, the sound of the last seconds and the running transcript with a marker, and the menu bar's menu during a recording with the time, the sound, the last words and pause, stop and marker buttons" src="Design/screenshots/recording-light.webp">
 </picture>
 
 ### In your language
@@ -352,7 +352,7 @@ Packages/TranscriptsKit/      Everything else, as a Swift package
     Sync/                     iCloud sync with CKSyncEngine: change tracking, records, conflicts
     App/                      App model, settings, demo data, the app icon in any colours
     UI/                       SwiftUI views every platform shares: the meeting, people, settings, live transcript
-    UI/Mac/                   The Mac's windows: sidebar, menu bar, floating recorder, command palette
+    UI/Mac/                   The Mac's windows: sidebar, menu bar, command palette
     UI/iOS/                   iPhone and iPad: tabs and the iPad's sidebar, the screens around the shared views
     Support/                  Paths, formatting, the languages the app speaks
     AppIconPasses/            The app icon's grey passes that Settings › App-Icon colours (Tools/AppIcon/make.sh)
@@ -416,8 +416,8 @@ is in the private database of the user's iCloud account, in the zone `Transcript
 
 ## Good to know
 
-- The live window and the floating recorder name nobody; who said what is worked out after the meeting, from the whole
-  recording, and the transcript shows it then.
+- The live window and the menu bar name nobody while you record; who said what is worked out after the meeting, from
+  the whole recording, and the transcript shows it then.
 - Without any known voices, two people who sound very much alike can end up as one voice. Confirming a few voices
   fixes that for later meetings.
 - Local summaries need a model that fits into memory next to everything else. On a 24 GB Mac a 27B model is far too

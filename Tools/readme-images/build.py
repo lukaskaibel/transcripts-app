@@ -8,7 +8,7 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(__file__))
-from compose import backdrop, finish, layout, opaque, place, rounded, scaled, shadow_onto, window
+from compose import backdrop, finish, layout, place, rounded, scaled, shadow_onto, window
 
 raw = sys.argv[1]
 out = "Design/screenshots"
@@ -29,16 +29,14 @@ for theme in ["light", "dark"]:
     webp(place(window(capture(f"people-{theme}")), theme, (130, 110), 1800), f"people-{theme}")
     webp(place(window(capture(f"naming-{theme}")), theme, (130, 110), 1800), f"naming-{theme}")
 
-    # While recording: the live window, with the floating recorder and the menu bar item beside it.
+    # While recording: the live window, with the menu bar's menu beside it.
     live = window(capture(f"live-{theme}"))
-    floating = rounded(opaque(capture(f"floating-{theme}")), 48)
     menubar = rounded(capture(f"menubar-{theme}"), 22)
     live = scaled(live, 0.86)
     gap, px, py = 90, 150, 120
-    width = px + live.width + gap + max(menubar.width, floating.width) + px
-    height = py + max(live.height, menubar.height + gap + floating.height) + py
-    side = px + live.width + gap
-    items = [(live, (px, py)), (menubar, (side, py)), (floating, (side, py + menubar.height + gap))]
+    width = px + live.width + gap + menubar.width + px
+    height = py + max(live.height, menubar.height) + py
+    items = [(live, (px, py)), (menubar, (px + live.width + gap, py))]
     webp(layout(items, (width, height), theme, 1800), f"recording-{theme}")
 
 # One meeting in three languages, as three windows on top of each other.

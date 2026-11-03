@@ -4,7 +4,7 @@
 # Design/social-preview.png, and Tools/readme-images/website.py makes the website's pictures in Website/images.
 #   Tools/readme-images.sh
 # Needs Python 3 with Pillow and NumPy, Screen Recording permission for the terminal and an awake screen: the windows
-# are captured as the screen shows them (ScreenCaptureKit), the floating recorder and the menu are drawn by the app.
+# are captured as the screen shows them (ScreenCaptureKit), the menu bar's menu is drawn by the app.
 set -e
 cd "$(dirname "$0")/.."
 python3 -c "import PIL, numpy" 2>/dev/null || { echo "Needs Pillow and NumPy: pip3 install pillow numpy" >&2; exit 1; }
@@ -36,9 +36,8 @@ scenes() {
 
 echo "English, light and dark…"
 run en US "${(@f)$(scenes light)}" "${(@f)$(scenes dark)}" \
-  "appearance light" "live" "wait 2.5" "capture second live-light" "floating" "wait 1.5" "snapwindow floating floating-light" \
-  "menubar" "wait 1.5" "snapwindow MenuBar menubar-light" \
-  "appearance dark" "wait 1.5" "capture second live-dark" "snapwindow floating floating-dark" "snapwindow MenuBar menubar-dark"
+  "appearance light" "live" "wait 2.5" "capture second live-light" "menubar" "wait 1.5" "snapwindow MenuBar menubar-light" \
+  "appearance dark" "wait 1.5" "capture second live-dark" "snapwindow MenuBar menubar-dark"
 
 for place in de_DE fr_FR uk_UA; do
   language=${place%_*}

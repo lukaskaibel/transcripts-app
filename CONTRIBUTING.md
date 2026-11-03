@@ -31,7 +31,7 @@ Every pull request is reviewed and merged by the maintainer; nothing lands on `m
   `SyncTests` checks that a meeting arrives whole on another device.
 - **One view for every platform.** A view the Mac, the iPhone and the iPad all show lives once, in `UI/` by topic,
   and adapts where it must (`Platform.isMobile`, `#if os(macOS)`), so a change shows everywhere. Only window chrome is
-  per platform: `UI/Mac/` (sidebar, menu bar, floating recorder, command palette) and `UI/iOS/` (tabs, the iPad's
+  per platform: `UI/Mac/` (sidebar, menu bar, command palette) and `UI/iOS/` (tabs, the iPad's
   sidebar, the screens around the shared views). Colours, fonts and button sizes come from `UI/Theme.swift`, which
   sizes them for a pointer on the Mac and for a finger on iPhone and iPad.
 - **Only what the user confirms defines a voice.** Automatic names and moved lines may refine a voice but never start
