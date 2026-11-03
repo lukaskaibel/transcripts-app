@@ -10,14 +10,18 @@ import TranscriptsKit
 //   transcripts-cli record --mic <file> --system <file> [--speed 4] [--root <dir> --meeting <id>]
 //                          (a whole recording, played from files; with --meeting, more of a meeting recorded before)
 //   transcripts-cli process [--mic <file>] [--system <file>] [--import <file>] [--root <dir>] [--attendees "A, B"] [--title T]
+//   transcripts-cli process --root <dir> --meeting <id>   (a meeting of a copy of the app's folder, processed again)
 //   transcripts-cli confirm --root <dir> --meeting <id> --assign "S1=Anna Berger, S2=Thomas Klein"
 //   transcripts-cli join --root <dir> [--meetings <id,id,…>] [--leave-to-app]   (meetings recorded one after another
 //                          made one, as "Zusammenführen" in the app does it, and transcribed again; without --meetings
 //                          all of them; with --leave-to-app the app transcribes it when it next starts, as it does
 //                          a meeting it was in the middle of: with the user's settings, and summarized if they say so)
 //   transcripts-cli summarize --root <dir> --meeting <id> --provider ollama|anthropic|openai|google [--model M] [--url U]
-//   transcripts-cli maintain --root <dir>     (the one-time repair and voice update, on a copy of the app's folder)
+//   transcripts-cli maintain --root <dir>     (the one-time repair and voice update, on a copy of the app's folder:
+//                          call tracks, lines fitted to their speech, voices judged again)
 //   transcripts-cli voices --root <dir>       (everyone's voice groups and each meeting's speakers)
+//   transcripts-cli speech --root <dir> --meeting <id> [--channel system|microphone] [--from s] [--to s]
+//                          (where the voice activity detector hears speech in a meeting's track, next to its lines)
 
 struct Arguments {
     var positional: [String] = []
@@ -228,17 +232,24 @@ case "process":
     AppPaths.overrideRoot = root
     try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
     let database = try AppDatabase.openShared(at: root)
-    let attendees = (args["attendees"] ?? "").split(separator: ",").map { Attendee(name: $0.trimmingCharacters(in: .whitespaces)) }.filter { !$0.name.isEmpty }
-    let isImport = args["import"] != nil
-    let meeting = Meeting(title: args["title"] ?? "Test", status: .processing, origin: isImport ? .importedFile : .recording, attendees: attendees)
-    try database.save(meeting)
-    let folder = AppPaths.folder(for: meeting.id)
-    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-    if let mic = args["mic"] { try FileManager.default.copyItem(at: URL(fileURLWithPath: mic), to: AppPaths.rawFile(for: meeting.id, channel: .microphone)) }
-    if let system = args["system"] { try FileManager.default.copyItem(at: URL(fileURLWithPath: system), to: AppPaths.rawFile(for: meeting.id, channel: .system)) }
-    if let file = args["import"] {
-        let url = URL(fileURLWithPath: file)
-        try FileManager.default.copyItem(at: url, to: AppPaths.importedFile(for: meeting.id, extension: url.pathExtension))
+    let meeting: Meeting
+    if let id = args["meeting"] {
+        // A meeting of a copy of the app's folder, processed again as "Neu verarbeiten" does it.
+        guard let existing = try database.detail(of: id)?.meeting else { fail("no such meeting") }
+        meeting = existing
+    } else {
+        let attendees = (args["attendees"] ?? "").split(separator: ",").map { Attendee(name: $0.trimmingCharacters(in: .whitespaces)) }.filter { !$0.name.isEmpty }
+        let isImport = args["import"] != nil
+        meeting = Meeting(title: args["title"] ?? "Test", status: .processing, origin: isImport ? .importedFile : .recording, attendees: attendees)
+        try database.save(meeting)
+        let folder = AppPaths.folder(for: meeting.id)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        if let mic = args["mic"] { try FileManager.default.copyItem(at: URL(fileURLWithPath: mic), to: AppPaths.rawFile(for: meeting.id, channel: .microphone)) }
+        if let system = args["system"] { try FileManager.default.copyItem(at: URL(fileURLWithPath: system), to: AppPaths.rawFile(for: meeting.id, channel: .system)) }
+        if let file = args["import"] {
+            let url = URL(fileURLWithPath: file)
+            try FileManager.default.copyItem(at: url, to: AppPaths.importedFile(for: meeting.id, extension: url.pathExtension))
+        }
     }
     await prepare()
     let processor = MeetingProcessor(database: database, engine: engine)
@@ -407,8 +418,8 @@ case "summarize":
 
 case "maintain":
     // maintain --root <dir>: what the app does once after this update, on a copy of its folder: repairs call
-    // tracks recorded at the wrong rate (and processes those meetings again), gives older meetings' lines
-    // their voices, and judges every unsettled voice again.
+    // tracks recorded at the wrong rate (and processes those meetings again), fits every meeting's lines to their
+    // speech and takes their voices again from it, and judges every unsettled voice again.
     guard let rootPath = args["root"] else { fail("maintain --root <dir>") }
     AppPaths.overrideRoot = URL(fileURLWithPath: rootPath)
     let database = try AppDatabase.openShared(at: URL(fileURLWithPath: rootPath))
@@ -422,9 +433,11 @@ case "maintain":
             print("  done in \(seconds(since: start))")
         }
     }
-    for meeting in try database.meetingsWithoutLineVoices() where AudioArchiver.hasAudio(meetingId: meeting.id) {
-        try await processor.embedLines(meetingId: meeting.id, model: model)
-        print("Line voices for “\(meeting.title)”")
+    // As after the update that fitted lines to their speech: every meeting once.
+    for row in try database.meetingRows() where row.meeting.status == .ready && AudioArchiver.hasAudio(meetingId: row.meeting.id) {
+        let start = Date()
+        try await processor.fitLines(meetingId: row.meeting.id, model: model)
+        print("Lines fitted to their speech in “\(row.meeting.title)” (\(seconds(since: start)))")
     }
     var library = VoiceLibrary(samples: try database.voiceSamples())
     for _ in 0..<2 {
@@ -436,6 +449,29 @@ case "maintain":
         if renamed == 0, moved == 0 { break }
     }
     printVoices(database)
+
+case "speech":
+    // speech --root <dir> --meeting <id> [--channel system|microphone] [--from s] [--to s]: where the voice activity
+    // detector hears speech in a meeting's track, next to its lines.
+    guard let rootPath = args["root"], let meetingId = args["meeting"] else { fail("speech --root <dir> --meeting <id>") }
+    AppPaths.overrideRoot = URL(fileURLWithPath: rootPath)
+    let database = try AppDatabase.openShared(at: URL(fileURLWithPath: rootPath))
+    let channel = Channel(rawValue: args["channel"] ?? "system") ?? .system
+    guard let url = AppPaths.playbackAudio(for: meetingId, channel: channel) else { fail("no audio") }
+    let samples = try SpeechAudio.load(url)
+    let from = Double(args["from"] ?? "0") ?? 0
+    let to = Double(args["to"] ?? "") ?? SpeechAudio.seconds(samples.count)
+    await prepare()
+    let regions = try await engine.speechRegions(in: samples)
+    print("Speech:")
+    for region in regions where region.upperBound > from && region.lowerBound < to {
+        let slice = samples[SpeechAudio.samples(region.lowerBound)..<min(samples.count, SpeechAudio.samples(region.upperBound))]
+        print(String(format: "  %8.2f – %8.2f  %5.2f s  %6.1f dB", region.lowerBound, region.upperBound, region.upperBound - region.lowerBound, 20 * log10(max(SpeechAudio.rms(slice), 1e-7))))
+    }
+    print("Lines:")
+    for line in (try database.detail(of: meetingId))?.segments ?? [] where line.channel == channel && line.end > from && line.start < to {
+        print(String(format: "  %8.2f – %8.2f  %@  %@", line.start, line.end, line.speakerKey, String(line.text.prefix(60))))
+    }
 
 case "voices":
     // voices --root <dir>: everyone's voice groups, and each meeting's speakers with the groups of their lines.

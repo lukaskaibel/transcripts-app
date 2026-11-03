@@ -31,6 +31,24 @@ import Testing
         #expect(detail.displayName(for: "S1") == "Sprecher 1")
     }
 
+    @Test func fittedLinesEndWhereTheirSpeechEnds() throws {
+        let database = try AppDatabase.inMemory()
+        try makeMeeting(database, lines: [("S1", "Um,"), ("S1", "Ja, das machen wir so."), ("S2", "Gut.")])
+        let lines = try #require(try database.detail(of: "m1")).segments
+        // The last line changed in the meantime: it stays as it is now.
+        try database.writer.write { db in try db.execute(sql: #"UPDATE segment SET "end" = 12 WHERE id = ?"#, arguments: [lines[2].id]) }
+        try database.saveFittedLines([
+            AppDatabase.FittedLine(line: lines[0], end: 1, embedding: nil),
+            AppDatabase.FittedLine(line: lines[1], end: 8.5, embedding: [1, 0]),
+            AppDatabase.FittedLine(line: lines[2], end: 10.5, embedding: [0, 1]),
+        ], meetingId: "m1")
+        let detail = try #require(try database.detail(of: "m1"))
+        #expect(detail.segments.map(\.end) == [1, 8.5, 12])
+        #expect(detail.segments.map { $0.embedding != nil } == [false, true, false])
+        #expect(detail.speaker(for: "S1")?.talkTime == 4.5)
+        #expect(detail.speaker(for: "S1")?.embedding == [Float]([1, 0]).embeddingData)
+    }
+
     @Test func fullTextSearchFindsPrefixesAcrossMeetings() throws {
         let database = try AppDatabase.inMemory()
         try makeMeeting(database, id: "a", title: "Release", lines: [("S1", "Der PDF-Export ist kaputt")])

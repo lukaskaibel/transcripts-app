@@ -288,14 +288,16 @@ extension AppModel {
         }
     }
 
-    /// Once after an update: repairs call tracks recorded at the wrong rate, and gives the lines of older
-    /// meetings voice embeddings of their own, so their voices count line by line.
+    /// Once after an update: repairs call tracks recorded at the wrong rate, fits the lines of older meetings to where
+    /// their speech is (see `LineSpeech`), and gives them voice embeddings of their own from that speech, so their voices
+    /// count line by line.
     func startVoiceMaintenance() {
         guard !isDemo else { return }
         let database = database
         let engine = engine
         let relay = WeakModel(self)
         let checked = settings.callTracksChecked
+        let fitted = settings.linesFittedToSpeech
         let model = settings.transcriptionModel
         Task.detached(priority: .utility) {
             if !checked {
@@ -317,17 +319,21 @@ extension AppModel {
                 }
             }
             let queued: Set<String> = await MainActor.run { relay.model?.queuedMeetings ?? [] }
-            let candidates: [Meeting] = (try? database.meetingsWithoutLineVoices()) ?? []
+            // Every meeting once, when lines were first fitted to their speech; after that the ones without line voices.
+            let candidates: [Meeting] = fitted
+                ? (try? database.meetingsWithoutLineVoices()) ?? []
+                : ((try? database.meetingRows()) ?? []).map(\.meeting).filter { $0.status == .ready }
             let older = candidates.filter { meeting in !queued.contains(meeting.id) && AudioArchiver.hasAudio(meetingId: meeting.id) }
-            guard !older.isEmpty else { return }
             let processor = MeetingProcessor(database: database, engine: engine)
             for meeting in older {
                 do {
-                    try await processor.embedLines(meetingId: meeting.id, model: model)
+                    try await processor.fitLines(meetingId: meeting.id, model: model)
                 } catch {
-                    Log.pipeline.error("Line voices for \(meeting.id) failed: \(error.localizedDescription)")
+                    Log.pipeline.error("Fitting the lines of \(meeting.id) failed: \(error.localizedDescription)")
                 }
             }
+            if !fitted { await MainActor.run { relay.model?.settings.linesFittedToSpeech = true } }
+            guard !older.isEmpty else { return }
             await MainActor.run { relay.model?.refreshVoices() }
         }
     }
