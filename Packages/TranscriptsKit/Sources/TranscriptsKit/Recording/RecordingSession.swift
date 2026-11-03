@@ -120,8 +120,6 @@ public final class RecordingSession {
     public private(set) var partials: [Channel: LiveLine] = [:]
     public private(set) var voices: [String: LiveVoice] = [:]
     public private(set) var markers: [LiveMarker] = []
-    /// The voice that spoke last, for the floating recorder.
-    public private(set) var currentSpeakerKey: String?
     /// True when the call audio has stayed silent although other apps were playing sound.
     public private(set) var systemAudioSeemsBlocked = false
     public private(set) var microphoneProblem: MicrophoneProblem?
@@ -503,7 +501,6 @@ public final class RecordingSession {
                 key = checked(key, voice: voice, text: text)
             }
             if channel == .system { currentSystemKey = key }
-            currentSpeakerKey = key
             if isEcho(channel: channel, text: text, start: start, end: end) || soundsLikeTheCall(channel: channel, voice: voice) { return }
             addVoiceIfNeeded(key, channel: channel, speech: end - start)
             let segment = try? database.appendSegment(Segment(meetingId: meetingId, speakerKey: key, channel: channel, start: start, end: end, text: text))
@@ -777,6 +774,5 @@ extension RecordingSession {
         ]
         partials = [.system: LiveLine(id: "partial-system", speakerKey: "S2", channel: .system, start: 740, end: 740, text: texts[5], isPartial: true)]
         markers = [LiveMarker(id: 1, time: 662, text: texts[6])]
-        currentSpeakerKey = "S2"
     }
 }

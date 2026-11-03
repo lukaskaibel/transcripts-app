@@ -41,6 +41,8 @@ public struct VoiceReview: Equatable, Identifiable, Sendable {
     public var meetingTitle: String
     public var meetingDate: Date
     public var suggestedPerson: Person?
+    /// Whom the voice may be, as `MeetingSpeaker.guesses(among:)` sees it in its meeting.
+    public var guesses: [String]
 
     public var id: String { speaker.id }
 }
@@ -135,12 +137,15 @@ extension AppDatabase {
             let speakers = try rows.map { try MeetingSpeaker(row: $0) }
             let personIds = Set(speakers.compactMap(\.suggestedPersonId))
             let people = Dictionary(uniqueKeysWithValues: try Person.filter(keys: Array(personIds)).fetchAll(db).map { ($0.id, $0) })
+            let named = try MeetingSpeaker.filter(Set(speakers.map(\.meetingId)).contains(Column("meetingId")) && Column("personId") != nil).fetchAll(db)
+            let namedByMeeting = Dictionary(grouping: named, by: \.meetingId)
             return zip(rows, speakers).map { row, speaker in
                 VoiceReview(
                     speaker: speaker,
                     meetingTitle: row["meetingTitle"],
                     meetingDate: row["meetingDate"],
-                    suggestedPerson: speaker.suggestedPersonId.flatMap { people[$0] }
+                    suggestedPerson: speaker.suggestedPersonId.flatMap { people[$0] },
+                    guesses: speaker.guesses(among: namedByMeeting[speaker.meetingId] ?? [])
                 )
             }
         }

@@ -110,9 +110,9 @@ final class DebugRemote {
         case "live":
             model.startDemoRecording()
             model.request(.live)
-        case "floating":
+        case "record":
+            // The demo's recording without the live window, for the menu bar while recording.
             model.startDemoRecording()
-            model.floatingRecorder?.show()
         case "micproblem":
             model.recording?.showMicrophoneProblem(argument == "silent" ? .silent : (argument == "nosignal" ? .noSignal : nil))
         case "stoplive":
@@ -285,6 +285,9 @@ final class DebugRemote {
         let hosting = NSHostingView(rootView: content.environment(model).background(Theme.popover))
         hosting.frame.size = hosting.fittingSize
         let size = NSSize(width: width, height: max(hosting.fittingSize.height, 100))
+        // Shown again, it replaces the one before: `snapwindow` takes the first window with the title.
+        for old in panels where old.title == title { old.close() }
+        panels.removeAll { $0.title == title }
         let panel = NSWindow(contentRect: NSRect(origin: NSPoint(x: 200, y: 200), size: size), styleMask: [.titled], backing: .buffered, defer: false)
         panel.title = title
         panel.contentView = hosting
@@ -301,7 +304,6 @@ final class DebugRemote {
         case "main": window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("main") == true || $0.title == "Transcripts" && $0.styleMask.contains(.titled) && $0.frame.width > 800 }
         case "live": window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("live") == true || $0.title == "Aufnahme" }
         case "settings": window = NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true || $0.identifier?.rawValue.contains("settings") == true || $0.title.contains("Allgemein") || $0.title.contains("KI") || $0.title.contains("Aufnahme") && $0.frame.width < 800 || $0.title.contains("Transkription") || $0.title.contains("Stimmen") }
-        case "floating": window = NSApp.windows.first { $0.identifier == FloatingRecorderController.identifier }
         case "sheet": window = NSApp.windows.first { $0.isSheet && $0.isVisible }
         default: window = NSApp.windows.first { $0.title == name }
         }

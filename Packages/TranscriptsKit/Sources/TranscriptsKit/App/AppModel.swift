@@ -141,9 +141,6 @@ public final class AppModel {
     @ObservationIgnored var summarizeAfterPass: Set<String> = []
     @ObservationIgnored var liveSummaryTask: Task<Void, Never>?
     @ObservationIgnored var calendarTimerTask: Task<Void, Never>?
-    #if os(macOS)
-    @ObservationIgnored var floatingRecorder: FloatingRecorderController?
-    #endif
     @ObservationIgnored var cloudSync: CloudSync?
     @ObservationIgnored var syncObservation: AnyDatabaseCancellable?
     @ObservationIgnored var syncTasks: [Task<Void, Never>] = []
@@ -232,7 +229,6 @@ public final class AppModel {
     public func launch() {
         settings.appIcon.apply()
         #if os(macOS)
-        floatingRecorder = FloatingRecorderController(model: self)
         DebugRemote.startIfRequested(model: self)
         #endif
         refreshPermissions()

@@ -218,9 +218,16 @@ public struct MeetingDetail: Equatable, Sendable {
         return String(localized: "\(Strings.label(speaker.label)) (vielleicht \(guess))")
     }
 
-    /// The people a speaker may be, known to this detail.
+    /// The people a speaker may be, known to this detail (not someone with a voice of their own here already, see
+    /// `MeetingSpeaker.guesses(among:)`).
     public func guesses(for speaker: MeetingSpeaker) -> [Person] {
-        speaker.guesses.compactMap { people[$0] }
+        speaker.guesses(among: speakers).compactMap { people[$0] }
+    }
+
+    /// The lines a speaker's voice sample plays: what to show with it.
+    public func sampleLines(of speaker: MeetingSpeaker) -> [Segment] {
+        guard let start = speaker.sampleStart, let end = speaker.sampleEnd else { return [] }
+        return segments.filter { $0.speakerKey == speaker.key && $0.start < end && $0.end > start }
     }
 
     private func guessText(for speaker: MeetingSpeaker) -> String? {

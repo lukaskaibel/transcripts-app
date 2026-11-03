@@ -149,14 +149,13 @@ extension AppModel {
         ), library: voiceLibrary.isEmpty ? nil : voiceLibrary, sources: file.flatMap { try? FileAudioSource(url: $0) }.map { [.microphone: $0] }, continuing: previous)
     }
 
-    /// What follows the start of a recording: the recorder on screen, the live summary.
+    /// What follows the start of a recording: the live window if wanted, the live summary.
     private func didStart(_ session: RecordingSession) {
         if let message = session.errorMessage {
             showToast(String(localized: "Systemaudio wird nicht aufgenommen"), message, isError: true)
         }
         if engineState != .ready { prepareEngine() }
         #if os(macOS)
-        if settings.floatingRecorder { floatingRecorder?.show() }
         if settings.openLiveWindow { request(.live) }
         #else
         // On iPhone and iPad the recording screen is the place to see it's running, so it always comes up.
@@ -177,9 +176,6 @@ extension AppModel {
         await session.stop()
         recording = nil
         if session.systemAudioHeard { settings.callAudioWorked = true }
-        #if os(macOS)
-        floatingRecorder?.hide()
-        #endif
         liveSummaryTask?.cancel()
         liveSummaryTask = nil
         liveSummary = nil
