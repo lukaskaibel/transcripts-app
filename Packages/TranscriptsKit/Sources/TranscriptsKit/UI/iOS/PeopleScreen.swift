@@ -287,7 +287,7 @@ struct MobileReviewRow: View {
     }
 
     private var guesses: [Person] {
-        review.speaker.guesses.compactMap { model.person($0) }
+        review.guesses.compactMap { model.person($0) }
     }
 
     private func otherMenu(_ title: String) -> some View {

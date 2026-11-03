@@ -246,6 +246,14 @@ public struct MeetingSpeaker: Codable, Hashable, Identifiable, Sendable, Fetchab
         return Array(result.prefix(3))
     }
 
+    /// `guesses`, without people who already have a voice of their own among `speakers` (the meeting's), unless
+    /// the app suggests them: a voice that only sounds a little like them is somebody else (lines in their voice
+    /// join theirs, see `VoiceRecheck.moveStrayLines`).
+    public func guesses(among speakers: [MeetingSpeaker]) -> [String] {
+        let speaking = Set(speakers.compactMap { $0.key == key ? nil : $0.personId })
+        return guesses.filter { $0 == suggestedPersonId || !speaking.contains($0) }
+    }
+
     /// The label in the interface's language ("Speaker 2").
     public var displayLabel: String { Strings.label(label) }
 

@@ -100,6 +100,12 @@ All notable changes to this project are recorded here. The format follows
 
 ### Fixed
 
+- **Naming a voice asks about the right person, with what the voice really says.** The summary's language model
+  could name an unknown voice after someone who already spoke in the meeting, with one of that person's own lines as
+  "proof"; the name it gives now has to be in the sentence it quotes, and such names in meetings from before are
+  judged by the voice again. Someone who already has a voice of their own in a meeting is no longer the app's guess
+  for another voice there that only sounds a little like them. And *Name Voices* shows the line its sample plays, not
+  the voice's longest lines from elsewhere in the meeting.
 - **Short answers no longer sound like a voice of their own.** The speech recognition stretches the last word before
   a pause over the silence after it, so an "Um," could last 13 seconds, and the app took the line's voice over all of
   that. Answers made mostly of silence then sounded alike and like nobody, and a person seemed to have two or three
