@@ -180,4 +180,46 @@ public struct SpeakerIdentifier {
     static func isVoiceReason(_ reason: String?) -> Bool {
         reason?.hasPrefix(voiceReasonPrefix) ?? false
     }
+
+    // MARK: Whether a quote says the name
+
+    /// What a reason quotes: "Julian, was meinst du?" of `Hai: „Julian, was meinst du?“`. Nil for a reason that
+    /// quotes nothing (the voice, the calendar).
+    static func quote(in reason: String?) -> String? {
+        guard let reason, let open = reason.firstIndex(of: "„"), let close = reason.lastIndex(of: "“"), open < close else { return nil }
+        return String(reason[reason.index(after: open)..<close])
+    }
+
+    /// The sentence a language model gave as proof of a name, without the time and speaker it may have copied from
+    /// the transcript with it: "[12:04] Hai: Ich teile gleich meinen Bildschirm." is "Ich teile gleich meinen
+    /// Bildschirm."
+    static func spokenSentence(_ evidence: String) -> String {
+        var text = evidence.trimmingCharacters(in: .whitespacesAndNewlines)
+        if text.hasPrefix("["), let close = text.firstIndex(of: "]") {
+            text = String(text[text.index(after: close)...]).trimmingCharacters(in: .whitespaces)
+        }
+        // "Hai: …", "Sprecher 2 (vielleicht Hai oder Julian): …": a name before a colon, not a sentence of its own.
+        if let colon = text.range(of: ": ") {
+            let speaker = text[..<colon.lowerBound].replacingOccurrences(of: #"\s*\([^)]*\)"#, with: "", options: .regularExpression)
+            if !speaker.isEmpty, speaker.split(separator: " ").count <= 4, !speaker.contains(where: { ",.!?„“\"".contains($0) }) {
+                text = String(text[colon.upperBound...])
+            }
+        }
+        return text.trimmingCharacters(in: .whitespaces)
+    }
+
+    /// Whether `sentence` says `name`, or a part of it, also in a form like "Annas" or "Anno". A sentence that
+    /// reveals someone's name has it in it; a line of theirs that doesn't proves nothing about another voice.
+    static func says(_ sentence: String, name: String) -> Bool {
+        let words = sentence.lowercased().components(separatedBy: CharacterSet.letters.inverted).filter { !$0.isEmpty }
+        // An invitee may be known by their address only: its name part.
+        let name = name.split(separator: "@").first.map(String.init) ?? name
+        let parts = name.lowercased().components(separatedBy: CharacterSet.letters.inverted).filter { $0.count >= 2 }
+        return parts.contains { part in
+            words.contains { word in
+                word == part || (part.count >= 3 && word.count >= part.count - 1 && word.count <= part.count + 2
+                    && word.commonPrefix(with: part).count >= max(3, part.count - 2))
+            }
+        }
+    }
 }

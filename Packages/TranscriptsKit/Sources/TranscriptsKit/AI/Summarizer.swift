@@ -72,7 +72,7 @@ public enum Summarizer {
                     "properties": [
                         "speaker": ["type": "string", "description": "The label exactly as in the transcript."],
                         "name": ["type": "string"],
-                        "evidence": ["type": "string", "description": "The sentence from the transcript that reveals the name."],
+                        "evidence": ["type": "string", "description": "The sentence from the transcript that reveals the name, without its time and speaker. It contains the name: someone calls this speaker by it, or the speaker gives it."],
                     ],
                     "required": ["speaker", "name", "evidence"],
                     "additionalProperties": false,

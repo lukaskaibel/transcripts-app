@@ -163,11 +163,15 @@ extension AppModel {
         try? database.deleteSummary(of: meetingId)
     }
 
-    /// Names the language model found for unknown voices become suggestions.
+    /// Names the language model found for unknown voices become suggestions, when the sentence it gives as proof
+    /// says the name. A line of the person's own ("Hai: Ich teile gleich meinen Bildschirm.") doesn't make another
+    /// voice theirs.
     func applyNameHints(_ hints: [SpeakerNameHint], in detail: MeetingDetail) {
         guard !hints.isEmpty else { return }
         let identifier = SpeakerIdentifier(library: VoiceLibrary(), people: people, attendees: detail.meeting.attendees, thresholds: settings.voiceStrictness.thresholds) { $0 }
         for hint in hints {
+            let sentence = SpeakerIdentifier.spokenSentence(hint.evidence)
+            guard SpeakerIdentifier.says(sentence, name: hint.name) else { continue }
             // The model may quote the whole name the transcript gave ("Sprecher 2 (vielleicht Hai oder Julian)").
             // The transcript shows labels in the interface's language ("Speaker 2"); they are stored as "Sprecher 2".
             let quoted = hint.speakerLabel.lowercased()
@@ -180,7 +184,7 @@ extension AppModel {
             } else {
                 speaker.suggestedName = identifier.attendee(named: hint.name)?.name ?? hint.name
             }
-            speaker.suggestionReason = hint.evidence.isEmpty ? SpeakerIdentifier.conversationReason : "„\(hint.evidence)“"
+            speaker.suggestionReason = "„\(sentence)“"
             try? database.save(speaker)
         }
     }

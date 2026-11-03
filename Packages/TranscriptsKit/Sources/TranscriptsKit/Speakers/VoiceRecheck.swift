@@ -28,7 +28,8 @@ public enum VoiceRecheck {
             let identifier = SpeakerIdentifier(library: library, people: people, attendees: meeting.attendees, thresholds: thresholds) { $0 }
             let invited = Set(meeting.attendees.compactMap { identifier.person(for: $0)?.id })
             let matches = library.rank([Float](embeddingData: data), boosted: invited, excluding: me.map { [$0] } ?? [], excludingMeeting: meeting.id)
-            let updated = rechecked(speaker, matches: matches, thresholds: thresholds)
+            let named = speaker.suggestedPersonId.flatMap { id in people.first { $0.id == id }?.name } ?? speaker.suggestedName
+            let updated = rechecked(speaker, matches: matches, thresholds: thresholds, named: named)
             if updated != speaker { changes.append((speaker, updated)) }
         }
         guard !changes.isEmpty else { return 0 }
@@ -47,11 +48,16 @@ public enum VoiceRecheck {
         }
     }
 
-    /// One voice judged against the current matches.
-    static func rechecked(_ speaker: MeetingSpeaker, matches: [VoiceMatch], thresholds: VoiceThresholds) -> MeetingSpeaker {
+    /// One voice judged against the current matches. `named` is the name a suggestion gives: a suggestion whose quote
+    /// doesn't say it (a language model may take a line of someone's own as proof that another voice is them) is no
+    /// name that was said, and the voice decides.
+    static func rechecked(_ speaker: MeetingSpeaker, matches: [VoiceMatch], thresholds: VoiceThresholds, named: String? = nil) -> MeetingSpeaker {
         let matches = matches.filter { !speaker.rejectedPersonIds.contains($0.personId) }
+        let quoteMissesName = named.map { name in
+            SpeakerIdentifier.quote(in: speaker.suggestionReason).map { !SpeakerIdentifier.says(SpeakerIdentifier.spokenSentence($0), name: name) } ?? false
+        } ?? false
         let votedByVoice = speaker.assignment == .automatic || speaker.assignment == .unknown
-            || (speaker.assignment == .suggested && SpeakerIdentifier.isVoiceReason(speaker.suggestionReason))
+            || (speaker.assignment == .suggested && (SpeakerIdentifier.isVoiceReason(speaker.suggestionReason) || quoteMissesName))
         guard votedByVoice else {
             // A name that was said stays the suggestion; the voice may still add who else it could be.
             guard speaker.assignment == .suggested else { return speaker }

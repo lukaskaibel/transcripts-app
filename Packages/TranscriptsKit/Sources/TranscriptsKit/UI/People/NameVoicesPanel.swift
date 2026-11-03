@@ -424,11 +424,13 @@ struct NameVoicesPanel: View {
         }
     }
 
+    /// What the sample plays is what the panel shows; without a sample, the voice's longest line.
     private func item(for speaker: MeetingSpeaker, in detail: MeetingDetail) -> Item {
-        let quotes = detail.segments.filter { $0.speakerKey == speaker.key && $0.duration >= 2 }
-            .sorted { $0.duration > $1.duration }
-            .prefix(2)
-            .map { String($0.text.prefix(140)) }
+        var lines = detail.sampleLines(of: speaker)
+        if lines.isEmpty {
+            lines = detail.segments.filter { $0.speakerKey == speaker.key }.max { $0.duration < $1.duration }.map { [$0] } ?? []
+        }
+        let quotes = lines.map { String($0.text.prefix(140)) }
         return Item(speaker: speaker, meeting: detail.meeting, quotes: quotes, choices: choices(for: speaker, in: detail))
     }
 
@@ -443,7 +445,7 @@ struct NameVoicesPanel: View {
             guard let value = similarity[personId] else { return nil }
             return value >= 0.72 ? String(localized: "klingt sehr ähnlich", comment: "how much an unknown voice sounds like this person") : (value >= 0.55 ? String(localized: "klingt ähnlich", comment: "how much an unknown voice sounds like this person") : String(localized: "klingt etwas ähnlich", comment: "how much an unknown voice sounds like this person"))
         }
-        for personId in speaker.guesses {
+        for personId in speaker.guesses(among: detail.speakers) {
             guard let person = model.person(personId) ?? detail.people[personId], !listed.contains(person.id) else { continue }
             listed.insert(person.id)
             let reason = personId == speaker.suggestedPersonId && !SpeakerIdentifier.isVoiceReason(speaker.suggestionReason) ? speaker.displayReason : voiceDetail(personId)

@@ -54,6 +54,54 @@ private func line(of base: [Float], alike: Float = 0.85, seed: Int) -> [Float] {
         #expect(kept.suggestedPersonId == "julian")
         #expect(kept.guesses == ["julian", "hai"])
     }
+
+    @Test func someoneWhoAlreadySpeaksInTheMeetingIsNoGuessForAnotherVoice() {
+        let hai = Person(id: "hai", name: "Hai"), julian = Person(id: "julian", name: "Julian")
+        let detail = MeetingDetail(
+            meeting: Meeting(id: "m", title: "M"),
+            segments: [
+                Segment(meetingId: "m", speakerKey: "S1", channel: .system, start: 20, end: 24, text: "Ja, das nehme ich."),
+                Segment(meetingId: "m", speakerKey: "S1", channel: .system, start: 100, end: 106, text: "Okay, gut."),
+            ],
+            speakers: [
+                MeetingSpeaker(meetingId: "m", key: "S1", label: "Sprecher 1", assignment: .unknown, sampleStart: 20, sampleEnd: 24, candidatePersonIds: ["hai", "julian"]),
+                MeetingSpeaker(meetingId: "m", key: "S2", label: "Sprecher 2", personId: "hai", assignment: .automatic),
+                MeetingSpeaker(meetingId: "m", key: "S3", label: "Sprecher 3", assignment: .suggested, suggestedPersonId: "hai", suggestionReason: "Stimme ähnlich wie in einem früheren Meeting"),
+            ],
+            people: ["hai": hai, "julian": julian], summary: nil, actionItems: [], markers: []
+        )
+        // Hai speaks as Speaker 2: Speaker 1, which only sounds a little like Hai, is somebody else.
+        #expect(detail.guesses(for: detail.speakers[0]).map(\.id) == ["julian"])
+        #expect(detail.textName(for: "S1") == "Sprecher 1 (vielleicht Julian)")
+        // A voice that sounds enough like Hai to be suggested may be Hai's second voice.
+        #expect(detail.guesses(for: detail.speakers[2]).map(\.id) == ["hai"])
+        // What the voice sample plays is what is shown with it.
+        #expect(detail.sampleLines(of: detail.speakers[0]).map(\.text) == ["Ja, das nehme ich."])
+    }
+
+    @Test func aQuoteThatDoesNotSayTheNameIsNoNameThatWasSaid() {
+        let matches = [VoiceMatch(personId: "hai", similarity: 0.5, meetings: 4)]
+        // A language model took a line of Hai's own for proof that another voice was Hai.
+        let misread = MeetingSpeaker(meetingId: "m", key: "S1", label: "Sprecher 1", assignment: .suggested, suggestedPersonId: "hai", suggestionReason: "„Hai: Ich teile gleich meinen Bildschirm.“")
+        let judged = VoiceRecheck.rechecked(misread, matches: matches, thresholds: .standard, named: "Hai")
+        #expect(judged.assignment == .unknown)
+        #expect(judged.suggestedPersonId == nil)
+        #expect(judged.suggestionReason == nil)
+        #expect(judged.candidatePersonIds == ["hai"])
+        let said = MeetingSpeaker(meetingId: "m", key: "S1", label: "Sprecher 1", assignment: .suggested, suggestedPersonId: "hai", suggestionReason: "Lukas: „Danke, Hai.“")
+        #expect(VoiceRecheck.rechecked(said, matches: matches, thresholds: .standard, named: "Hai").suggestedPersonId == "hai")
+    }
+
+    @Test func aSentenceSaysANameInAnyForm() {
+        #expect(SpeakerIdentifier.spokenSentence("[12:04] Hai: Ich teile gleich meinen Bildschirm.") == "Ich teile gleich meinen Bildschirm.")
+        #expect(SpeakerIdentifier.spokenSentence("Sprecher 2 (vielleicht Hai oder Julian): Danke, Julian.") == "Danke, Julian.")
+        #expect(SpeakerIdentifier.spokenSentence("Hai, zwei Sachen: erstens das Backup.") == "Hai, zwei Sachen: erstens das Backup.")
+        #expect(SpeakerIdentifier.says("Danke, Hai.", name: "Hai"))
+        #expect(SpeakerIdentifier.says("Anno, co myślisz?", name: "Anna Berger"))
+        #expect(SpeakerIdentifier.says("Grüße an Herrn Weber.", name: "jonas.weber@example.com"))
+        #expect(!SpeakerIdentifier.says("Ich teile gleich meinen Bildschirm.", name: "Hai"))
+        #expect(!SpeakerIdentifier.says("Komm doch mal rüber.", name: "jonas.weber@example.com"))
+    }
 }
 
 @Suite struct StrayLineTests {
@@ -150,6 +198,36 @@ private func line(of base: [Float], alike: Float = 0.85, seed: Int) -> [Float] {
         #expect(model.voicesToName(first: "old").map(\.speaker.meetingId) == ["old", "new"])
         model.ignoreVoice(try #require(try database.detail(of: "old")?.speakers.first))
         #expect(model.voicesToName().map(\.speaker.meetingId) == ["new"])
+    }
+
+    @MainActor @Test func aNameFromTheSummaryNeedsASentenceThatSaysIt() throws {
+        let database = try AppDatabase.inMemory()
+        try database.save(Person(id: "hai", name: "Hai"))
+        try database.save(Person(id: "julian", name: "Julian"))
+        try database.save(Meeting(id: "a", title: "Weekly", status: .ready))
+        try database.replaceTranscript(meetingId: "a", segments: [
+            Segment(meetingId: "a", speakerKey: "S1", channel: .system, start: 0, end: 5, text: "Ja, das nehme ich."),
+            Segment(meetingId: "a", speakerKey: "S2", channel: .system, start: 6, end: 11, text: "Ich teile gleich meinen Bildschirm."),
+            Segment(meetingId: "a", speakerKey: "S3", channel: .system, start: 12, end: 17, text: "Klar, mache ich."),
+        ], speakers: [
+            MeetingSpeaker(meetingId: "a", key: "S1", label: "Sprecher 1", talkTime: 5, candidatePersonIds: ["hai"]),
+            MeetingSpeaker(meetingId: "a", key: "S2", label: "Sprecher 2", personId: "hai", assignment: .automatic, talkTime: 5),
+            MeetingSpeaker(meetingId: "a", key: "S3", label: "Sprecher 3", talkTime: 5),
+        ])
+        let model = AppModel(database: database, settings: AppSettings(defaults: UserDefaults(suiteName: "TranscriptsTests-\(UUID().uuidString)")!), secrets: MemorySecretStore(), isDemo: true)
+        model.applyNameHints([
+            // A line of Hai's own proves nothing about Speaker 1.
+            SpeakerNameHint(speakerLabel: "Sprecher 1 (vielleicht Hai)", name: "Hai", evidence: "Hai: Ich teile gleich meinen Bildschirm."),
+            SpeakerNameHint(speakerLabel: "Sprecher 3", name: "Julian", evidence: "[00:11] Lukas: Julian, machst du das?"),
+        ], in: try #require(try database.detail(of: "a")))
+        let detail = try #require(try database.detail(of: "a"))
+        let first = try #require(detail.speaker(for: "S1"))
+        #expect(first.assignment == .unknown)
+        #expect(detail.speaker(for: "S3")?.suggestedPersonId == "julian")
+        #expect(detail.speaker(for: "S3")?.suggestionReason == "„Julian, machst du das?“")
+        // Hai has a voice in this meeting: Speaker 1 isn't asked about as Hai, here or among all voices to name.
+        #expect(detail.guesses(for: first).isEmpty)
+        #expect(try database.voiceReviews().first { $0.speaker.key == "S1" }?.guesses == [])
     }
 }
 
