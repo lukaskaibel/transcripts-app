@@ -32,11 +32,14 @@ extension AppModel {
 
     // MARK: Joining
 
-    /// Whether a meeting can be joined with others: one this device recorded, finished, whose audio is still here,
-    /// while nothing is being recorded.
+    /// Whether a meeting can be joined with others: finished, its audio still here (what this device recorded, or the
+    /// file it was imported from), while nothing is being recorded.
     public func canJoin(_ meeting: Meeting) -> Bool {
-        recording == nil && !joiningMeetings && meeting.origin == .recording && (meeting.status == .ready || meeting.status == .failed)
-            && AppPaths.existingAudio(for: meeting.id, channel: .microphone) != nil
+        guard recording == nil, !joiningMeetings, meeting.status == .ready || meeting.status == .failed else { return false }
+        switch meeting.origin {
+        case .recording: return AppPaths.existingAudio(for: meeting.id, channel: .microphone) != nil
+        case .importedFile: return AppPaths.existingImport(for: meeting.id) != nil
+        }
     }
 
     /// The meetings of that day a meeting can be joined with, itself among them, in the order they were recorded;
@@ -95,11 +98,11 @@ extension AppModel {
         for url in urls {
             let accessing = url.startAccessingSecurityScopedResource()
             defer { if accessing { url.stopAccessingSecurityScopedResource() } }
-            let created = (try? url.resourceValues(forKeys: [.creationDateKey]))?.creationDate ?? Date()
+            let dates = try? url.resourceValues(forKeys: [.creationDateKey, .contentModificationDateKey])
             let meeting = Meeting(
                 title: url.deletingPathExtension().lastPathComponent,
                 titleIsCustom: false,
-                startedAt: created,
+                startedAt: dates?.creationDate ?? Date(),
                 status: .processing,
                 origin: .importedFile,
                 processingStep: String(localized: "Wird importiert")
@@ -110,10 +113,11 @@ extension AppModel {
                 try FileManager.default.copyItem(at: url, to: target)
                 var meeting = meeting
                 meeting.duration = SpeechAudio.duration(of: target)
+                meeting.startedAt = Self.importedStart(created: dates?.creationDate, modified: dates?.contentModificationDate, duration: meeting.duration)
                 try database.save(meeting)
                 if meeting.duration == 0 {
                     // A video or a format AVAudioFile can't read: pull the audio out first.
-                    Task { await extractAudioAndProcess(meeting.id, from: target) }
+                    Task { await extractAudioAndProcess(meeting.id, from: target, created: dates?.creationDate, modified: dates?.contentModificationDate) }
                 } else {
                     enqueueProcessing(meeting.id)
                 }
@@ -126,7 +130,16 @@ extension AppModel {
         }
     }
 
-    private func extractAudioAndProcess(_ meetingId: String, from source: URL) async {
+    /// When a recording made elsewhere started. A file written while it was recorded (a voice memo) was created then.
+    /// One written all at once afterwards (a video a meeting app saves when the call ends, a file downloaded or sent
+    /// later) was created or last changed only once the recording was over: its length goes back from there.
+    nonisolated static func importedStart(created: Date?, modified: Date?, duration: TimeInterval, now: Date = Date()) -> Date {
+        guard let created else { return (modified ?? now).addingTimeInterval(-duration) }
+        if let modified, modified.timeIntervalSince(created) >= duration / 2 { return created }
+        return min(created, modified ?? created).addingTimeInterval(-duration)
+    }
+
+    private func extractAudioAndProcess(_ meetingId: String, from source: URL, created: Date?, modified: Date?) async {
         let target = AppPaths.importedFile(for: meetingId, extension: "m4a")
         let asset = AVURLAsset(url: source)
         do {
@@ -138,7 +151,10 @@ extension AppModel {
             try FileManager.default.removeItem(at: source)
             try FileManager.default.moveItem(at: temporary, to: target)
             let duration = SpeechAudio.duration(of: target)
-            try database.update(meetingId: meetingId) { $0.duration = duration }
+            try database.update(meetingId: meetingId) { meeting in
+                meeting.duration = duration
+                meeting.startedAt = Self.importedStart(created: created, modified: modified, duration: duration)
+            }
             enqueueProcessing(meetingId)
         } catch {
             try? database.update(meetingId: meetingId) { meeting in

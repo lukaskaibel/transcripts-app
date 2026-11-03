@@ -58,7 +58,10 @@ All notable changes to this project are recorded here. The format follows
 - **Merge a meeting that was recorded in parts.** *Merge…* in a meeting's menus lists the meetings of that day it can
   be merged with, those recorded right before and after it already ticked. Their recordings go one after another into
   the first, with a two-second pause between them, and the meeting is transcribed again as one: the names you gave in
-  each part, the markers and the action items stay, and the other meetings are deleted.
+  each part, the markers and the action items stay, and the other meetings are deleted. Imported recordings can be
+  merged too, with each other and with what the Mac recorded (a call's video a meeting app saved, say): all voices are
+  on one track in such a file, so the merged meeting becomes one track as well, with your microphone and the call mixed,
+  and is transcribed like an imported file.
 - **Copy the whole transcript.** *Copy* above a meeting's transcript (also ⌥⌘C and *Copy Transcript* in the meeting's
   menus) puts the transcript on the clipboard as Markdown, one paragraph per speaker turn with the name and the time.
 
@@ -104,6 +107,13 @@ All notable changes to this project are recorded here. The format follows
 
 ### Fixed
 
+- **A video with a few damaged seconds of sound is transcribed.** Videos a meeting app saved can have a stretch of
+  sound that macOS won't decode (other players skip it), and importing one ended in *Processing failed*. The damaged
+  stretch is now silence of its length, so everything after it stays at its time; only a file of which more than a
+  tenth is damaged still fails.
+- **An imported recording starts when it was recorded.** A file written all at once when the recording ended, as
+  meeting apps save their videos, showed the end as its start, 35 minutes late for a 35-minute call. Its start is now
+  its length before that; a voice memo, written while it was recorded, keeps the time it was created.
 - **Naming a voice asks about the right person, with what the voice really says.** The summary's language model
   could name an unknown voice after someone who already spoke in the meeting, with one of that person's own lines as
   "proof"; the name it gives now has to be in the sentence it quotes, and such names in meetings from before are

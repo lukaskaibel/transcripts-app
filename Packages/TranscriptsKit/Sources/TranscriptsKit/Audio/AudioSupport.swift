@@ -48,16 +48,8 @@ public enum SpeechAudio {
 
     /// Reads any audio file as 16 kHz mono samples, a piece at a time, for files too long to hold at once.
     public static func read(_ url: URL, _ body: ([Float]) throws -> Void) throws {
-        let file = try AVAudioFile(forReading: url)
-        let resampler = try StreamingResampler(from: file.processingFormat)
-        let chunk: AVAudioFrameCount = 65_536
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: chunk) else { return }
-        while file.framePosition < file.length {
-            try file.read(into: buffer, frameCount: chunk)
-            if buffer.frameLength == 0 { break }
-            try body(resampler.convert(buffer))
-        }
-        try body(resampler.flush())
+        let reader = try AudioFileReader(url: url)
+        while let samples = try reader.next() { try body(samples) }
     }
 
     /// Duration of an audio file in seconds, without decoding it.
@@ -120,6 +112,75 @@ public final class StreamingResampler {
         }
         guard error == nil, let data = output.floatChannelData else { return [] }
         return Array(UnsafeBufferPointer(start: data[0], count: Int(output.frameLength)))
+    }
+}
+
+/// Reads an audio file as 16 kHz mono samples, a piece at a time. A damaged stretch (the seconds a video from a meeting
+/// app lost of its sound, which Core Audio won't decode while other players skip them) comes out as silence of its
+/// length, so what follows stays at its time. A file with more damage than `damageLimit` isn't read.
+public final class AudioFileReader {
+    /// How much of a file may be damaged and it still counts as readable, in seconds: a tenth, at least ten seconds.
+    static func damageLimit(of length: TimeInterval) -> TimeInterval { max(10, length / 10) }
+
+    private static let chunk: AVAudioFrameCount = 65_536
+    /// About one compressed packet (1024 frames in AAC): a piece with damage is read again this much at a time, so no
+    /// more than the damage is lost.
+    private static let step: AVAudioFrameCount = 1024
+
+    private let file: AVAudioFile
+    private let resampler: StreamingResampler
+    private let buffer: AVAudioPCMBuffer
+    /// Up to here the file is read a step at a time.
+    private var carefulUntil: AVAudioFramePosition = 0
+    private var finished = false
+    /// Seconds read as silence because they couldn't be decoded.
+    private(set) var damaged: TimeInterval = 0
+
+    public init(url: URL) throws {
+        file = try AVAudioFile(forReading: url)
+        resampler = try StreamingResampler(from: file.processingFormat)
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: Self.chunk) else {
+            throw AudioError.unsupportedFormat(file.processingFormat.description)
+        }
+        self.buffer = buffer
+    }
+
+    /// The next piece; nil after the last.
+    public func next() throws -> [Float]? {
+        guard !finished else { return nil }
+        while file.framePosition < file.length {
+            let position = file.framePosition
+            let count = position < carefulUntil ? Self.step : Self.chunk
+            do {
+                try file.read(into: buffer, frameCount: count)
+                if buffer.frameLength == 0 { break }
+            } catch where count > Self.step {
+                file.framePosition = position
+                carefulUntil = position + AVAudioFramePosition(count)
+                continue
+            } catch {
+                try skipDamage(at: position, error: error)
+            }
+            return resampler.convert(buffer)
+        }
+        finished = true
+        if damaged > 0 {
+            Log.audio.info("\(self.file.url.lastPathComponent) had \(self.damaged, format: .fixed(precision: 1)) s of audio that couldn't be decoded; read as silence")
+        }
+        return resampler.flush()
+    }
+
+    /// The step at `position` can't be decoded: silence instead, and on after it.
+    private func skipDamage(at position: AVAudioFramePosition, error: Error) throws {
+        let rate = file.processingFormat.sampleRate
+        let frames = min(AVAudioFramePosition(Self.step), file.length - position)
+        damaged += Double(frames) / rate
+        guard damaged <= Self.damageLimit(of: Double(file.length) / rate) else { throw error }
+        buffer.frameLength = AVAudioFrameCount(frames)
+        for channel in 0..<Int(file.processingFormat.channelCount) {
+            buffer.floatChannelData?[channel].update(repeating: 0, count: Int(frames))
+        }
+        file.framePosition = position + frames
     }
 }
 
