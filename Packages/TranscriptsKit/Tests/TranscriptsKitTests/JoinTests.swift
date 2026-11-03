@@ -204,8 +204,21 @@ extension AudioArchiverTests {
             try writeTone(AppPaths.audioFile(for: written, channel: .microphone), seconds: 3, encoding: .aac)
             try writeTone(MeetingJoin.joinedFile(for: written, channel: .microphone), seconds: 5, encoding: .pcm)
 
-            MeetingJoin.recover(interrupted: [joined])
+            // The same, joined with an imported file: one track.
+            let oneTrack = "one-track-in-database"
+            try writeTone(AppPaths.importedFile(for: oneTrack, extension: "mp4"), seconds: 3, encoding: .aac)
+            try writeTone(MeetingJoin.joinedImportFile(for: oneTrack), seconds: 8, encoding: .aac)
+            let oneTrackWritten = "one-track-being-written"
+            try writeTone(AppPaths.importedFile(for: oneTrackWritten, extension: "mp4"), seconds: 3, encoding: .aac)
+            try writeTone(MeetingJoin.joinedImportFile(for: oneTrackWritten), seconds: 5, encoding: .aac)
 
+            MeetingJoin.recover(interrupted: [joined, oneTrack])
+
+            #expect(AppPaths.existingImport(for: oneTrack)?.lastPathComponent == "import.m4a")
+            #expect(abs(SpeechAudio.duration(of: AppPaths.importedFile(for: oneTrack, extension: "m4a")) - 8) < 0.1)
+            #expect(!FileManager.default.fileExists(atPath: AppPaths.importedFile(for: oneTrack, extension: "mp4").path))
+            #expect(AppPaths.existingImport(for: oneTrackWritten)?.lastPathComponent == "import.mp4")
+            #expect(!FileManager.default.fileExists(atPath: MeetingJoin.joinedImportFile(for: oneTrackWritten).path))
             #expect(abs(SpeechAudio.duration(of: AppPaths.rawFile(for: joined, channel: .microphone)) - 8) < 0.05)
             #expect(!FileManager.default.fileExists(atPath: AppPaths.audioFile(for: joined, channel: .microphone).path))
             #expect(!FileManager.default.fileExists(atPath: MeetingJoin.joinedFile(for: joined, channel: .microphone).path))
@@ -214,31 +227,79 @@ extension AudioArchiverTests {
         }
     }
 
-    @MainActor @Test func onlyFinishedMeetingsRecordedHereWithTheirAudioCanBeJoined() async throws {
+    @MainActor @Test func onlyFinishedMeetingsWithTheirAudioCanBeJoined() async throws {
         try await withFolder { _ in
             let database = try AppDatabase.inMemory()
             let parts = try threeParts(database)
-            let imported = Meeting(title: "Sprachmemo", startedAt: tenOClock(600), duration: 60, status: .ready, origin: .importedFile)
+            let imported = Meeting(title: "Sprachmemo", startedAt: tenOClock(1800), duration: 60, status: .ready, origin: .importedFile)
             try database.save(imported)
-            try writeTone(AppPaths.audioFile(for: imported.id, channel: .microphone), seconds: 1, encoding: .aac)
+            try writeTone(AppPaths.importedFile(for: imported.id, extension: "m4a"), seconds: 1, encoding: .aac)
+            let gone = Meeting(title: "Ohne Datei", startedAt: tenOClock(2400), duration: 60, status: .ready, origin: .importedFile)
+            try database.save(gone)
             let yesterday = try recordedMeeting(database, "Gestern", at: tenOClock(day: 18), microphone: 1, call: 0, lines: [], speakers: [])
             let later = try recordedMeeting(database, "Am Nachmittag", at: tenOClock(5 * 3600), microphone: 1, call: 0, lines: [], speakers: [])
             let model = AppModel(database: database, settings: AppSettings(defaults: UserDefaults(suiteName: "TranscriptsTests-\(UUID().uuidString)")!), secrets: MemorySecretStore(), isDemo: true)
             model.rows = try database.meetingRows()
 
-            // That day's meetings recorded here, in the order they were recorded; the parts are those close together.
-            #expect(model.joinCandidates(for: parts.second.id).map(\.id) == parts.ids + [later.id])
+            // That day's meetings recorded here or imported, in the order they were recorded; the parts are those
+            // close together.
+            #expect(model.joinCandidates(for: parts.second.id).map(\.id) == parts.ids + [imported.id, later.id])
             #expect(model.likelyParts(of: parts.second.id) == Set(parts.ids))
             #expect(model.likelyParts(of: later.id) == [later.id])
             #expect(model.joinCandidates(for: yesterday.id).isEmpty)
-            #expect(model.joinCandidates(for: imported.id).isEmpty)
+            #expect(model.joinCandidates(for: imported.id).map(\.id) == parts.ids + [imported.id, later.id])
+            #expect(!model.canJoin(gone))
 
             var running = parts.third
             running.status = .recording
             #expect(!model.canJoin(running))
             AudioArchiver.deleteAudio(meetingId: parts.third.id)
             #expect(!model.canJoin(parts.third))
-            #expect(model.joinCandidates(for: parts.first.id).map(\.id) == [parts.first.id, parts.second.id, later.id])
+            #expect(model.joinCandidates(for: parts.first.id).map(\.id) == [parts.first.id, parts.second.id, imported.id, later.id])
+        }
+    }
+
+    /// A recording and a video of the same meeting saved by a meeting app afterwards: one track, every voice on it.
+    @Test func joiningARecordingWithAnImportedFileMakesOneTrack() async throws {
+        try await withFolder { _ in
+            let database = try AppDatabase.inMemory()
+            let anna = try database.person(named: "Anna Berger")
+            let recorded = try recordedMeeting(database, "Weekly Sync", at: tenOClock(), microphone: 4, call: 3.5, lines: [
+                ("S1", .system, 0.5, 2.5, "Hallo, hier ist Anna."),
+            ], speakers: [("S1", anna.id, .confirmed)])
+            try writeTone(AppPaths.cleanedMicrophoneFile(for: recorded.id), seconds: 4, encoding: .aac)
+            var imported = Meeting(title: "Weekly Sync (Video)", startedAt: tenOClock(60), duration: 5, status: .failed, origin: .importedFile)
+            imported.errorMessage = "kaputt"
+            try database.save(imported)
+            try writeTone(AppPaths.importedFile(for: imported.id, extension: "mp4"), seconds: 5, frequency: 330, encoding: .aac)
+
+            try MeetingJoin.join([recorded.id, imported.id], database: database, step: "Wartet")
+
+            // 4 s (the longer channel), a pause of 2, 5 s, as one imported file; the channels and the other folder gone.
+            let id = recorded.id
+            let file = try #require(AppPaths.existingImport(for: id))
+            #expect(file.pathExtension == "m4a")
+            #expect(Channel.allCases.allSatisfy { AppPaths.existingAudio(for: id, channel: $0) == nil })
+            #expect(!FileManager.default.fileExists(atPath: AppPaths.cleanedMicrophoneFile(for: id).path))
+            #expect(!FileManager.default.fileExists(atPath: MeetingJoin.joinedImportFile(for: id).path))
+            #expect(!FileManager.default.fileExists(atPath: AppPaths.folder(for: imported.id).path))
+            let samples = try SpeechAudio.load(file)
+            #expect(abs(SpeechAudio.seconds(samples.count) - 11) < 0.2)
+            func level(_ from: Double, _ to: Double) -> Float {
+                SpeechAudio.rms(samples[SpeechAudio.samples(from)..<min(SpeechAudio.samples(to), samples.count)])
+            }
+            #expect(level(0.5, 3.4) > 0.3, "microphone and call together")
+            #expect(level(3.65, 3.95) > 0.15, "the microphone alone, after the call")
+            #expect(level(4.2, 5.8) < 0.01, "the pause")
+            #expect(level(6.3, 10.7) > 0.15)
+
+            let detail = try #require(try database.detail(of: id))
+            #expect(detail.meeting.origin == .importedFile)
+            #expect(detail.meeting.status == .processing)
+            #expect(detail.meeting.errorMessage == nil)
+            #expect(abs(detail.meeting.duration - 11) < 0.2)
+            #expect(detail.speakers.first { $0.personId == anna.id }?.assignment == .confirmed)
+            #expect(try database.meetingRows().map(\.id) == [id])
         }
     }
 }
@@ -258,6 +319,19 @@ extension AudioArchiverTests {
         #expect(MeetingJoin.parts(of: second, among: all) == ["10:00", "10:13", "10:31"])
         #expect(MeetingJoin.parts(of: first, among: all) == ["10:00", "10:13", "10:31"])
         #expect(MeetingJoin.parts(of: afternoon, among: all) == ["14:00"])
+    }
+
+    /// Where an imported recording lands among the meetings: when it started, from its file's dates.
+    @Test func anImportedRecordingStartsWhenItWasRecorded() {
+        let start = Date(timeIntervalSinceReferenceDate: 800_000_000)
+        let length: TimeInterval = 35 * 60
+        // A voice memo, written while it was recorded.
+        #expect(AppModel.importedStart(created: start, modified: start + length, duration: length) == start)
+        // A video a meeting app saved when the call ended and wrote for two more minutes.
+        #expect(AppModel.importedStart(created: start + length, modified: start + length + 120, duration: length) == start)
+        // Sent from another device: a new file, the recording's own last change.
+        #expect(AppModel.importedStart(created: start + 86_400, modified: start + length, duration: length) == start)
+        #expect(AppModel.importedStart(created: nil, modified: start + length, duration: length) == start)
     }
 
     @Test func meetingsOfDifferentCalendarEventsAreNotParts() {

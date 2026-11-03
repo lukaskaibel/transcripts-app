@@ -59,6 +59,46 @@ private func temporaryFolder() throws -> URL {
         #expect(abs(total - 16_000) < 200)
     }
 
+    /// A compressed file of `seconds` of tone with `fraction` of its audio data overwritten from the middle on, as a
+    /// video from a meeting app can have a stretch that Core Audio won't decode.
+    private func damagedFile(in folder: URL, seconds: Double, fraction: Double) throws -> URL {
+        let url = folder.appendingPathComponent("damaged.m4a")
+        let writer = try AudioFileWriter(url: url, encoding: .aac)
+        try writer.write(tone(seconds: seconds))
+        writer.close()
+        var data = try Data(contentsOf: url)
+        let audio = try #require(data.range(of: Data("mdat".utf8))).upperBound
+        let start = audio + (data.count - audio) / 3
+        for index in start..<min(data.count, start + Int(Double(data.count - audio) * fraction)) { data[index] = 0xFF }
+        try data.write(to: url)
+        return url
+    }
+
+    @Test func aDamagedStretchIsReadAsSilenceOfItsLength() throws {
+        let folder = try temporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = try damagedFile(in: folder, seconds: 20, fraction: 0.02)
+
+        let reader = try AudioFileReader(url: url)
+        var samples: [Float] = []
+        while let piece = try reader.next() { samples += piece }
+
+        // All of it, at its time: the damage is silence, the tone goes on after it.
+        #expect(abs(SpeechAudio.seconds(samples.count) - 20) < 0.1)
+        #expect(reader.damaged > 0.1 && reader.damaged < 2, "\(reader.damaged) s damaged")
+        let seconds = (0..<20).map { SpeechAudio.rms(samples[SpeechAudio.samples(Double($0))..<SpeechAudio.samples(Double($0) + 1)]) }
+        #expect(seconds.filter { $0 > 0.15 }.count >= 17, "\(seconds)")
+        #expect(seconds.contains { $0 < 0.15 }, "the damage is silent")
+        #expect(SpeechAudio.rms(samples[SpeechAudio.samples(18)...]) > 0.15)
+    }
+
+    @Test func aFileMostlyDamagedIsNotRead() throws {
+        let folder = try temporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = try damagedFile(in: folder, seconds: 20, fraction: 0.6)
+        #expect(throws: (any Error).self) { try SpeechAudio.load(url) }
+    }
+
     @Test func aLineIsCutToWhereItsVoiceIs() throws {
         let folder = try temporaryFolder()
         defer { try? FileManager.default.removeItem(at: folder) }

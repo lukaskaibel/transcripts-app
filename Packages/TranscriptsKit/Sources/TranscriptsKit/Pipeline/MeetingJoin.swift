@@ -1,3 +1,4 @@
+import Accelerate
 import Foundation
 import GRDB
 
@@ -51,9 +52,13 @@ public enum MeetingJoin {
     @discardableResult
     public static func join(_ meetingIds: [String], database: AppDatabase, step: String) throws -> [Part] {
         guard let first = meetingIds.first, meetingIds.count > 1 else { return [] }
-        let audio = try writeAudio(of: meetingIds)
+        // An imported file has every voice on one track, the user's among them: the joined meeting is one track too,
+        // transcribed as an imported file is. Kept apart, the voices of the file would count as the user's wherever the
+        // file landed on the microphone's track.
+        let oneTrack = meetingIds.contains { AppPaths.existingImport(for: $0) != nil }
+        let audio = try oneTrack ? writeOneTrack(of: meetingIds) : writeAudio(of: meetingIds)
         do {
-            try database.joinMeetings(audio.parts, duration: audio.duration, step: step)
+            try database.joinMeetings(audio.parts, duration: audio.duration, imported: oneTrack, step: step)
         } catch {
             discardAudio(of: first)
             throw error
@@ -72,6 +77,11 @@ public enum MeetingJoin {
     /// The joined audio, written next to the first meeting's own until it takes its place.
     static func joinedFile(for meetingId: String, channel: Channel) -> URL {
         AppPaths.folder(for: meetingId).appendingPathComponent(channel == .microphone ? "microphone-joined.caf" : "system-joined.caf")
+    }
+
+    /// The joined audio as one track (see `writeOneTrack`), until it takes the place of an imported file.
+    static func joinedImportFile(for meetingId: String) -> URL {
+        AppPaths.folder(for: meetingId).appendingPathComponent("import-joined.m4a")
     }
 
     /// Writes the meetings' audio one after another into recording files in the first one's folder: each channel,
@@ -112,6 +122,63 @@ public enum MeetingJoin {
         }
     }
 
+    /// Writes the meetings' audio one after another as one track, as an imported file has it: an imported file as it
+    /// is, a recording's microphone (without the echo, where there is such a version) and call mixed; the pause between
+    /// two. Compressed, as an imported file is kept. Returns where each meeting starts and the length of all.
+    static func writeOneTrack(of meetingIds: [String]) throws -> (parts: [Part], duration: TimeInterval) {
+        guard let first = meetingIds.first else { return ([], 0) }
+        discardAudio(of: first)
+        let writer = try AudioFileWriter(url: joinedImportFile(for: first), encoding: .aac)
+        // Closed before the file is used.
+        defer { writer.close() }
+        do {
+            var parts: [Part] = []
+            for (index, meetingId) in meetingIds.enumerated() {
+                if index > 0 { try silence(SpeechAudio.samples(Self.pause), into: writer) }
+                parts.append(Part(meetingId: meetingId, offset: SpeechAudio.seconds(writer.samplesWritten)))
+                let files = AppPaths.existingImport(for: meetingId).map { [$0] }
+                    ?? Channel.allCases.compactMap { AppPaths.playbackAudio(for: meetingId, channel: $0) }
+                try mix(files, into: writer)
+            }
+            return (parts, SpeechAudio.seconds(writer.samplesWritten))
+        } catch {
+            writer.close()
+            discardAudio(of: first)
+            throw error
+        }
+    }
+
+    /// Writes the files on top of each other, as long as the longest of them. Reads a piece at a time.
+    static func mix(_ files: [URL], into writer: AudioFileWriter) throws {
+        let readers = try files.map(AudioFileReader.init)
+        var pending = readers.map { _ in [Float]() }
+        var done = readers.map { _ in false }
+        let piece = SpeechAudio.samples(30)
+        while true {
+            for index in readers.indices {
+                while !done[index], pending[index].count < piece {
+                    if let samples = try readers[index].next() { pending[index] += samples } else { done[index] = true }
+                }
+            }
+            // Every file still being read has a piece ready; one that ended adds silence.
+            let count = min(piece, pending.map(\.count).max() ?? 0)
+            guard count > 0 else { return }
+            var mixed = [Float](repeating: 0, count: count)
+            for index in pending.indices {
+                let taken = min(count, pending[index].count)
+                guard taken > 0 else { continue }
+                pending[index].withUnsafeBufferPointer { source in
+                    mixed.withUnsafeMutableBufferPointer { target in
+                        vDSP_vadd(source.baseAddress!, 1, target.baseAddress!, 1, target.baseAddress!, 1, vDSP_Length(taken))
+                    }
+                }
+                pending[index].removeFirst(taken)
+            }
+            if readers.count > 1 { mixed = vDSP.clip(mixed, to: -1...1) }
+            try writer.write(mixed)
+        }
+    }
+
     private static func silence(_ count: Int, into writer: AudioFileWriter) throws {
         let chunk = SpeechAudio.samples(30)
         var left = count
@@ -122,8 +189,17 @@ public enum MeetingJoin {
     }
 
     /// The meetings are joined in the database: the joined audio takes the place of the first one's, as recording
-    /// files, which the pass afterwards compresses. Its microphone without echo covered only its own part.
+    /// files, which the pass afterwards compresses, or as one imported file. Its microphone without echo covered only
+    /// its own part.
     static func useJoinedAudio(of meetingId: String) throws {
+        let oneTrack = joinedImportFile(for: meetingId)
+        if FileManager.default.fileExists(atPath: oneTrack.path) {
+            // The first meeting's own files, recorded or imported, are in the joined one.
+            AudioArchiver.deleteAudio(meetingId: meetingId)
+            if let earlier = AppPaths.existingImport(for: meetingId) { try FileManager.default.removeItem(at: earlier) }
+            try FileManager.default.moveItem(at: oneTrack, to: AppPaths.importedFile(for: meetingId, extension: "m4a"))
+            return
+        }
         for channel in Channel.allCases {
             let joined = joinedFile(for: meetingId, channel: channel)
             guard FileManager.default.fileExists(atPath: joined.path) else { continue }
@@ -140,13 +216,15 @@ public enum MeetingJoin {
         for channel in Channel.allCases {
             try? FileManager.default.removeItem(at: joinedFile(for: meetingId, channel: channel))
         }
+        try? FileManager.default.removeItem(at: joinedImportFile(for: meetingId))
     }
 
     /// At launch, after the app quit in the middle of joining: where the meetings were joined in the database (the
     /// meeting waits for its pass, in `interrupted`), the joined audio is put in place; where they weren't, it goes.
     static func recover(interrupted: Set<String>) {
         let folders = (try? FileManager.default.contentsOfDirectory(atPath: AppPaths.recordings.path)) ?? []
-        for meetingId in folders where Channel.allCases.contains(where: { FileManager.default.fileExists(atPath: joinedFile(for: meetingId, channel: $0).path) }) {
+        let joined: (String) -> [URL] = { meetingId in Channel.allCases.map { joinedFile(for: meetingId, channel: $0) } + [joinedImportFile(for: meetingId)] }
+        for meetingId in folders where joined(meetingId).contains(where: { FileManager.default.fileExists(atPath: $0.path) }) {
             if interrupted.contains(meetingId) {
                 try? useJoinedAudio(of: meetingId)
             } else {
@@ -160,8 +238,9 @@ extension AppDatabase {
     /// Joins the meetings of `parts` in the first: the later ones' lines, voices, markers and tasks move to it, each
     /// moved by where its meeting starts in the joined audio, and the later meetings are deleted. The first is then
     /// all of the meeting, `duration` long, and waits for its pass. Their voices keep their names, under keys of their
-    /// own ("S1" of the second meeting may become "S4"); voices of one person become one.
-    func joinMeetings(_ parts: [MeetingJoin.Part], duration: TimeInterval, step: String) throws {
+    /// own ("S1" of the second meeting may become "S4"); voices of one person become one. With `imported`, the audio is
+    /// one track now, and the meeting is transcribed as an imported file.
+    func joinMeetings(_ parts: [MeetingJoin.Part], duration: TimeInterval, imported: Bool = false, step: String) throws {
         try writer.write { db in
             guard let firstPart = parts.first, var meeting = try Meeting.fetchOne(db, key: firstPart.meetingId) else { throw MeetingJoin.Failure.changed }
             var later: [(offset: TimeInterval, meeting: Meeting)] = []
@@ -169,7 +248,7 @@ extension AppDatabase {
                 guard let other = try Meeting.fetchOne(db, key: part.meetingId) else { throw MeetingJoin.Failure.changed }
                 later.append((part.offset, other))
             }
-            let finished: (Meeting) -> Bool = { $0.origin == .recording && ($0.status == .ready || $0.status == .failed) }
+            let finished: (Meeting) -> Bool = { $0.status == .ready || $0.status == .failed }
             guard finished(meeting), later.allSatisfy({ finished($0.meeting) }) else { throw MeetingJoin.Failure.changed }
 
             var used = Set(try String.fetchAll(db, sql: "SELECT key FROM meetingSpeaker WHERE meetingId = ?", arguments: [meeting.id]))
@@ -235,6 +314,7 @@ extension AppDatabase {
             try Self.joinVoicesOfSamePerson(db, meetingId: meeting.id)
             try Self.refreshSpeakers(db, meetingId: meeting.id)
             meeting.duration = duration
+            if imported { meeting.origin = .importedFile }
             meeting.status = .processing
             meeting.progress = 0
             meeting.processingStep = step
