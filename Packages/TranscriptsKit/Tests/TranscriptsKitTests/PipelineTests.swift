@@ -191,6 +191,80 @@ private func words(_ text: String, start: Double, step: Double = 0.4) -> [TimedW
     }
 }
 
+@Suite struct LineSpeechTests {
+    /// A track of `seconds` with a 440 Hz tone at each of `tones` (from, to, amplitude) and silence elsewhere.
+    private func track(_ seconds: Double, tones: [(Double, Double, Float)]) -> [Float] {
+        var samples = [Float](repeating: 0, count: SpeechAudio.samples(seconds))
+        for (from, to, amplitude) in tones {
+            for index in SpeechAudio.samples(from)..<SpeechAudio.samples(to) {
+                samples[index] = amplitude * sin(2 * .pi * 440 * Float(index) / 16_000)
+            }
+        }
+        return samples
+    }
+
+    @Test func aStretchedLineGetsItsVoiceFromItsSpeechOnly() async throws {
+        // A "Um," is at 2–3 s; the speech model stretched it to 15 s, over silence with a click at 8 s and a laugh
+        // at 9 s. Then someone else answers.
+        let audio = track(17, tones: [(2, 3, 0.3), (8, 8.05, 0.6), (9, 9.4, 0.2), (15, 17, 0.3)])
+        let um = DraftLine(speakerKey: "S1", channel: .system, start: 2, end: 15, words: [TimedWord(text: "Um,", start: 2, end: 15)])
+        let answer = DraftLine(speakerKey: "S2", channel: .system, start: 15, end: 17, words: words("Ja, genau so.", start: 15, step: 0.6))
+        // Where the voice activity detector heard speech: the word, the laugh, the answer.
+        let speech: [Channel: [ClosedRange<Double>]] = [.system: [1.9...3.1, 8.9...9.5, 14.9...17]]
+
+        // The voice made from a stretch of audio is that audio itself, to see what went into it.
+        let fitted = try await MeetingProcessor.fitted([um, answer], audio: [.system: audio], speech: speech) { Array($0) }
+
+        #expect(fitted.embeddings[0] == Array(audio[SpeechAudio.samples(2)..<SpeechAudio.samples(3.1)]))
+        #expect(fitted.embeddings[1] == Array(audio[SpeechAudio.samples(15)..<SpeechAudio.samples(17)]))
+        // The line ends where its speech does, and so does its word.
+        #expect(fitted.lines[0].end == 3.1)
+        #expect(fitted.lines[0].words.last?.end == 3.1)
+        #expect(fitted.lines[1].end == 17)
+    }
+
+    @Test func aLineWithTooLittleSpeechGetsNoVoice() async throws {
+        let audio = track(10, tones: [(2, 2.6, 0.3)])
+        let ja = DraftLine(speakerKey: "S1", channel: .system, start: 2, end: 9, words: [TimedWord(text: "Ja.", start: 2, end: 9)])
+        let fitted = try await MeetingProcessor.fitted([ja], audio: [.system: audio], speech: [.system: [1.9...2.7]]) { Array($0) }
+        #expect(fitted.embeddings.isEmpty)
+        #expect(fitted.lines[0].end == 2.7)
+    }
+
+    @Test func linesStayAsTheyAreWhereNoSpeechIsKnown() async throws {
+        let audio = track(10, tones: [(2, 5, 0.3)])
+        let line = DraftLine(speakerKey: "S1", channel: .system, start: 2, end: 6, words: words("Das ist so.", start: 2))
+        let fitted = try await MeetingProcessor.fitted([line], audio: [.system: audio], speech: [:]) { Array($0) }
+        #expect(fitted.lines == [line])
+        #expect(fitted.embeddings[0]?.count == SpeechAudio.samples(4))
+    }
+
+    @Test func aLineNeverEndsBeforeItsLastWordBegan() {
+        // The detector lost the quiet last word.
+        let line = DraftLine(speakerKey: "S1", channel: .system, start: 0, end: 12, words: words("Das machen wir dann", start: 0, step: 0.5))
+        let fitted = LineSpeech.fitted(line, to: [0...0.9])
+        #expect(fitted.line.end == 1.5 + LineSpeech.shortestWord)
+    }
+
+    @Test func savedLinesEndWithTheirLastLoudSpeech() async throws {
+        // A line saved before lines were fitted has no word times. Its "Um," at 2–3 s, a breath 20 dB quieter at 5 s, a
+        // word as loud as the first at 8 s, then a click 25 dB quieter at 12 s that the detector took for speech.
+        let audio = track(17, tones: [(2, 3, 0.3), (5, 5.5, 0.03), (8, 9, 0.2), (12, 12.4, 0.017)])
+        let saved = DraftLine(speakerKey: "S1", channel: .system, start: 2, end: 15, words: [])
+        let speech: [Channel: [ClosedRange<Double>]] = [.system: [0.5...1.2, 1.9...3.1, 4.9...5.6, 7.9...9.1, 11.9...12.5, 14.9...17]]
+        let fitted = try await MeetingProcessor.fitted([saved], audio: [.system: audio], speech: speech) { Array($0) }
+        #expect(fitted.lines[0].end == 9.1)
+        let heard = [2...3.1, 4.9...5.6, 7.9...9.1].flatMap { audio[SpeechAudio.samples($0.lowerBound)..<SpeechAudio.samples($0.upperBound)] }
+        #expect(fitted.embeddings[0] == heard)
+    }
+
+    @Test func voiceAudioStopsAtTheLimit() {
+        let samples = [Float](repeating: 1, count: SpeechAudio.samples(60))
+        let audio = LineSpeech.audio(samples, parts: [0...15, 20...40], limit: 20)
+        #expect(audio.count == SpeechAudio.samples(20))
+    }
+}
+
 @Suite struct CallDetectorTests {
     @Test @MainActor func callStartsAfterTheDelayAndEndsAfterQuiet() {
         let detector = CallDetector()

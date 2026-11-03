@@ -89,13 +89,17 @@ public final class MeetingProcessor: @unchecked Sendable {
 
         var lines: [DraftLine] = []
         var audioByChannel: [Channel: [Float]] = [:]
+        // Where each channel has speech, to fit the lines to it (see `LineSpeech`).
+        var speechByChannel: [Channel: [ClosedRange<Double>]] = [:]
 
         if !imported.isEmpty {
             audioByChannel[.microphone] = imported
+            speechByChannel[.microphone] = try await speech(imported)
             lines = try await room(imported, channel: .microphone, meStart: 0.1, library: library, people: people, thresholds: options.thresholds, report: report)
         } else {
             report(String(localized: "Sprache wird gesucht"), 0.08)
-            let systemSpeech = try await speechSeconds(system)
+            speechByChannel[.system] = try await speech(system)
+            let systemSpeech = LineSpeech.seconds(speechByChannel[.system] ?? [])
             // Loudness of the microphone before and after the echo came out, and of the call, to tell the
             // user's words from what is left of the echo (see `MicrophoneWords`).
             var echoLevels: (raw: [Float], cleaned: [Float], call: [Float])?
@@ -116,7 +120,8 @@ public final class MeetingProcessor: @unchecked Sendable {
                 // this meeting (recorded further since).
                 try? FileManager.default.removeItem(at: AppPaths.cleanedMicrophoneFile(for: meetingId))
             }
-            let microphoneSpeech = try await speechSeconds(microphone)
+            speechByChannel[.microphone] = try await speech(microphone)
+            let microphoneSpeech = LineSpeech.seconds(speechByChannel[.microphone] ?? [])
             audioByChannel[.microphone] = microphone
             audioByChannel[.system] = system
             if systemSpeech >= 3 {
@@ -155,23 +160,13 @@ public final class MeetingProcessor: @unchecked Sendable {
 
         try Task.checkCancellation()
         report(String(localized: "Stimmen werden erkannt"), 0.8)
-        // A voice embedding for every line long enough to have one: the app learns voices line by line, and
+        // A voice embedding for every line with enough speech to have one: the app learns voices line by line, and
         // a line that sounds like someone else than the rest of its speaker stands out.
-        var lineEmbeddings: [Int: [Float]] = [:]
-        let measured = lines.indices.filter { lines[$0].duration >= 1.0 }
-            .sorted { lines[$0].duration > lines[$1].duration }
-            .prefix(Self.maximumEmbeddedLines)
-        for (count, index) in measured.enumerated() {
-            let line = lines[index]
-            guard let audio = audioByChannel[line.channel] else { continue }
-            if let embedding = try await engine.voiceEmbedding(Self.slice(audio, from: line.start, to: min(line.end, line.start + 20))) {
-                lineEmbeddings[index] = embedding
-            }
-            if count % 20 == 0 {
-                try Task.checkCancellation()
-                report(String(localized: "Stimmen werden erkannt"), 0.8 + 0.1 * Double(count) / Double(max(measured.count, 1)))
-            }
-        }
+        let fitted = try await Self.fitted(lines, audio: audioByChannel, speech: speechByChannel) { fraction in
+            report(String(localized: "Stimmen werden erkannt"), 0.8 + 0.1 * fraction)
+        } voice: { [engine] in try await engine.voiceEmbedding($0) }
+        lines = fitted.lines
+        let lineEmbeddings = fitted.embeddings
         let isRoom = lines.allSatisfy { $0.channel == .microphone }
 
         // Confirmed names from before (live, or an earlier pass over this meeting) stay with the same speech.
@@ -282,15 +277,47 @@ public final class MeetingProcessor: @unchecked Sendable {
         report(String(localized: "Fertig", comment: "processing step: everything is done"), 1)
     }
 
-    /// At most this many lines get a voice embedding, the longest ones.
+    /// At most this many lines get a voice embedding, those with the most speech.
     static let maximumEmbeddedLines = 800
+    /// And a line needs this much speech for one.
+    static let minimumEmbeddedSpeech = 1.0
 
-    /// Gives the lines of a meeting processed before lines had voices of their own their embeddings, from
-    /// the audio that is still there. The transcript stays as it is.
-    public func embedLines(meetingId: String, model: TranscriptionModel) async throws {
+    /// `lines` fitted to the speech of their channel (see `LineSpeech`): each ends where its speech ends, not where the
+    /// speech model stretched its last word to, and those with the most speech get a voice embedding (by index) of that
+    /// speech only. `voice` makes the embedding of a stretch of audio.
+    static func fitted(
+        _ lines: [DraftLine], audio: [Channel: [Float]], speech: [Channel: [ClosedRange<Double>]],
+        progress: ((Double) -> Void)? = nil, voice: (ArraySlice<Float>) async throws -> [Float]?
+    ) async throws -> (lines: [DraftLine], embeddings: [Int: [Float]]) {
+        var lines = lines
+        var parts: [[ClosedRange<Double>]] = []
+        for index in lines.indices {
+            let channel = lines[index].channel
+            let fitted = LineSpeech.fitted(lines[index], to: speech[channel] ?? [], samples: audio[channel])
+            lines[index] = fitted.line
+            parts.append(fitted.parts)
+        }
+        let seconds = parts.map(LineSpeech.seconds)
+        let measured = seconds.indices.filter { seconds[$0] >= minimumEmbeddedSpeech }
+            .sorted { seconds[$0] > seconds[$1] }
+            .prefix(maximumEmbeddedLines)
+        var embeddings: [Int: [Float]] = [:]
+        for (count, index) in measured.enumerated() {
+            guard let samples = audio[lines[index].channel] else { continue }
+            embeddings[index] = try await voice(LineSpeech.audio(samples, parts: parts[index])[...])
+            if count % 20 == 0 {
+                try Task.checkCancellation()
+                progress?(Double(count) / Double(measured.count))
+            }
+        }
+        return (lines, embeddings)
+    }
+
+    /// Fits the lines of a meeting to the audio that is still there, as processing does it now (see `LineSpeech`): each
+    /// line ends where its speech ends, and its voice embedding is taken from that speech only. For meetings processed
+    /// before lines had voices of their own, or before lines were fitted to their speech. The words stay as they are.
+    public func fitLines(meetingId: String, model: TranscriptionModel) async throws {
         guard let detail = try database.detail(of: meetingId) else { return }
-        let lines = detail.segments.filter { $0.embedding == nil && $0.duration >= 1 && $0.id != nil }
-        guard !lines.isEmpty else { return }
         try await engine.prepare(model: model)
         var audio: [Channel: [Float]] = [:]
         if let imported = AppPaths.existingImport(for: meetingId) {
@@ -300,15 +327,17 @@ public final class MeetingProcessor: @unchecked Sendable {
                 if let url = AppPaths.playbackAudio(for: meetingId, channel: channel) { audio[channel] = try SpeechAudio.load(url) }
             }
         }
-        var embeddings: [Int64: [Float]] = [:]
-        for line in lines.sorted(by: { $0.duration > $1.duration }).prefix(Self.maximumEmbeddedLines) {
-            guard let samples = audio[line.channel], let id = line.id else { continue }
-            if let embedding = try await engine.voiceEmbedding(Self.slice(samples, from: line.start, to: min(line.end, line.start + 20))) {
-                embeddings[id] = embedding
-            }
-        }
-        guard !embeddings.isEmpty else { return }
-        try database.saveLineEmbeddings(embeddings, meetingId: meetingId)
+        var speech: [Channel: [ClosedRange<Double>]] = [:]
+        for (channel, samples) in audio { speech[channel] = try await self.speech(samples) }
+        // Lines on a channel whose audio is gone stay as they are. Saved lines have no word times; where they end is
+        // judged by how loud their speech is (see `LineSpeech.quieterThanLine`).
+        let lines = detail.segments.filter { $0.id != nil && audio[$0.channel] != nil }
+        guard !lines.isEmpty else { return }
+        let drafts = lines.map { DraftLine(speakerKey: $0.speakerKey, channel: $0.channel, start: $0.start, end: $0.end, words: []) }
+        let fitted = try await Self.fitted(drafts, audio: audio, speech: speech) { [engine] in try await engine.voiceEmbedding($0) }
+        try database.saveFittedLines(lines.indices.map { index in
+            AppDatabase.FittedLine(line: lines[index], end: fitted.lines[index].end, embedding: fitted.embeddings[index])
+        }, meetingId: meetingId)
     }
 
     /// A recording with everyone on one channel: transcribe, separate the voices, number them.
@@ -342,11 +371,12 @@ public final class MeetingProcessor: @unchecked Sendable {
         return zip(turns, keys).map { turn, key in SpeakerTurn(speaker: key, start: turn.start, end: turn.end) }
     }
 
-    private func speechSeconds(_ audio: [Float]) async throws -> Double {
-        guard audio.count >= SpeechAudio.samples(0.5) else { return 0 }
+    /// Where a track has speech.
+    private func speech(_ audio: [Float]) async throws -> [ClosedRange<Double>] {
+        guard audio.count >= SpeechAudio.samples(0.5) else { return [] }
         // Silence from a tap without permission or an empty call is exactly zero; skip the model then.
-        if SpeechAudio.rms(audio) < 1e-5 { return 0 }
-        return try await engine.speechRegions(in: audio).reduce(0) { $0 + ($1.upperBound - $1.lowerBound) }
+        if SpeechAudio.rms(audio) < 1e-5 { return [] }
+        return try await engine.speechRegions(in: audio)
     }
 
     /// What the user settled about a meeting before it was processed (again): confirmed names and lines

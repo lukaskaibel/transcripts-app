@@ -151,6 +151,7 @@ public final class AppSettings {
         static let hideDockIcon = "hideDockIcon"
         static let models = "summaryModels"
         static let callTracksChecked = "callTracksChecked"
+        static let linesFittedToSpeech = "linesFittedToSpeech"
         static let callAudioWorked = "callAudioWorked"
         static let iCloudSync = "iCloudSync"
         static let iCloudAudio = "iCloudAudio"
@@ -208,6 +209,13 @@ public final class AppSettings {
     @ObservationIgnored public var callTracksChecked: Bool {
         get { defaults.bool(forKey: Keys.callTracksChecked) }
         set { defaults.set(newValue, forKey: Keys.callTracksChecked) }
+    }
+
+    /// The lines of the meetings processed before lines ended where their speech does were fitted to it, and their
+    /// voices taken again from that speech (see `LineSpeech`). Not observed: only the one-time maintenance reads it.
+    @ObservationIgnored public var linesFittedToSpeech: Bool {
+        get { defaults.bool(forKey: Keys.linesFittedToSpeech) }
+        set { defaults.set(newValue, forKey: Keys.linesFittedToSpeech) }
     }
 
     /// The call's sound came through in a recording on this device, so macOS lets the app listen to it (see

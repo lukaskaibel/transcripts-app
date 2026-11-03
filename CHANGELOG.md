@@ -100,6 +100,12 @@ All notable changes to this project are recorded here. The format follows
 
 ### Fixed
 
+- **Short answers no longer sound like a voice of their own.** The speech recognition stretches the last word before
+  a pause over the silence after it, so an "Um," could last 13 seconds, and the app took the line's voice over all of
+  that. Answers made mostly of silence then sounded alike and like nobody, and a person seemed to have two or three
+  voices. A line now ends where its speech ends, and its voice comes from that speech only; the highlight while
+  playing follows the words, and talk time is what was said. Meetings from before are fitted once from their
+  recordings, without transcribing them again; names you confirmed stay as they are.
 - **Each person is in a meeting once.** The voice separation now and then splits one person into two voices, and
   naming both, the app recognising one of them, or merging two people left that person twice among the meeting's
   people. Their voices now become one, in meetings from before too; your lines that came through the call join your

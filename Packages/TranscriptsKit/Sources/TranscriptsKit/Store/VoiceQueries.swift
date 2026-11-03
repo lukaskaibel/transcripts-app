@@ -88,12 +88,28 @@ extension AppDatabase {
 // MARK: - Changing who said what
 
 extension AppDatabase {
-    /// Stores the voice embeddings of lines (for meetings processed before lines had them) and refreshes
-    /// the speakers' own embeddings from them.
-    public func saveLineEmbeddings(_ embeddings: [Int64: [Float]], meetingId: String) throws {
+    /// A saved line fitted to its speech again (see `MeetingProcessor.fitLines`).
+    public struct FittedLine: Sendable {
+        /// The line as it was read.
+        public var line: Segment
+        public var end: Double
+        /// Its voice, from its speech; nil for a line with too little speech for one.
+        public var embedding: [Float]?
+    }
+
+    /// Stores lines fitted to their speech, each only if it still begins and ends where it was read, and refreshes the
+    /// speakers' talk time, samples and voices from them.
+    public func saveFittedLines(_ lines: [FittedLine], meetingId: String) throws {
         try writer.write { db in
-            for (id, embedding) in embeddings {
-                try db.execute(sql: "UPDATE segment SET embedding = ? WHERE id = ?", arguments: [embedding.embeddingData, id])
+            for fitted in lines {
+                guard let id = fitted.line.id else { continue }
+                try db.execute(
+                    sql: """
+                    UPDATE segment SET "end" = ?, embedding = ?
+                    WHERE id = ? AND meetingId = ? AND start = ? AND "end" = ?
+                    """,
+                    arguments: [fitted.end, fitted.embedding?.embeddingData, id, meetingId, fitted.line.start, fitted.line.end]
+                )
             }
             try Self.refreshSpeakers(db, meetingId: meetingId)
         }
